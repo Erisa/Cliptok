@@ -1,0 +1,15 @@
+{
+  "core": {
+    "token": "TOKENGOESHERE",
+    "prefixes": [ "!" ]
+  },
+  "triaModRole": 352519899048050688 ,
+  "modRole": 150878439220576256,
+  "adminRole": 286639672606720000,
+  "logChannel": 584908576980729876,
+  "serverID": 150662382874525696,
+  "redis": {
+    "host": "localhost",
+    "port": 6379
+  }
+}
