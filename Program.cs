@@ -35,7 +35,12 @@ namespace MicrosoftBot
 
             cfgjson = JsonConvert.DeserializeObject<ConfigJson>(json);
 
-            redis = ConnectionMultiplexer.Connect($"{cfgjson.Redis.Host}:{cfgjson.Redis.Port}");
+            string redisHost;
+            if (Environment.GetEnvironmentVariable("REDIS_DOCKER_OVERRIDE")  != null)
+                redisHost = "redis";
+            else
+                redisHost = cfgjson.Redis.Host;
+            redis = ConnectionMultiplexer.Connect($"{redisHost}:{cfgjson.Redis.Port}");
             db = redis.GetDatabase();
             db.KeyDelete("messages");
 

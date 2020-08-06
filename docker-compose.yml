@@ -1,0 +1,21 @@
+version: '2.3'
+services:
+  bot:
+    build: .
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: ./config.json
+        target: /app/config.json
+    environment:
+      # Overrides your configs Redis options for use with Docker Compose
+      #  I don't advise changing this unless you have a strange setup
+      - REDIS_DOCKER_OVERRIDE=true
+  redis:
+    image: 'redis:alpine'
+    restart: always
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data
+    command: --appendonly yes

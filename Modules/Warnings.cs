@@ -33,6 +33,8 @@ namespace MicrosoftBot.Modules
             if (level >= this.TargetLvl)
                 return true;
             else
+                if (!help)
+                    await ctx.RespondAsync($"<:ImageRes_ShieldUAC:679108762627211264> Invalid permissions to use command **{ctx.Command.Name}**!");
                 return false;
         }
     }
@@ -70,7 +72,7 @@ namespace MicrosoftBot.Modules
                 return ServerPermLevel.nothing;
         }
 
-        public async Task<DiscordEmbed> FancyWarnEmbedAsync(UserWarning warning, bool detailed = false, int colour = 0xFEC13D)
+        public async Task<DiscordEmbed> FancyWarnEmbedAsync(UserWarning warning, bool detailed = false, int colour = 0xFEC13D, bool showTime = true)
         {
             DiscordUser targetUser = await Program.discord.GetUserAsync(warning.TargetUserId);
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
@@ -86,13 +88,15 @@ namespace MicrosoftBot.Modules
                 null,
                 targetUser.AvatarUrl
             )
-            .AddField("Warning ID", Pad(warning.WarningId), true)
-            .AddField("Time", detailed ? $"{warning.WarnTimestamp.ToUniversalTime()} UTC" : TimeToPrettyFormat((DateTime.Now - warning.WarnTimestamp)), true);
+            .AddField("Warning ID", Pad(warning.WarningId), true);
             if (detailed)
             {
                 embed.AddField("Responsible moderator", $"<@{warning.ModUserId}>")
                 .AddField("Message link", warning.ContextLink == null ? "N/A" : $"[`Jump to warning`]({warning.ContextLink})");
             }
+            if (showTime)
+                embed.AddField("Time", detailed ? $"{warning.WarnTimestamp.ToUniversalTime()} UTC" : TimeToPrettyFormat((DateTime.Now - warning.WarnTimestamp)), true);
+
             return embed;
         }
 
@@ -235,9 +239,9 @@ namespace MicrosoftBot.Modules
         )
         {
             await ctx.Message.DeleteAsync();
-            DiscordMessage msg = await ctx.RespondAsync($"<:Shell32_Warning:678968913417076736> {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+            DiscordMessage msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
             UserWarning warning = GiveWarning(targetUser, ctx.User, reason, MessageLink(msg));
-            await Program.logChannel.SendMessageAsync($"<:Shell32_Warning:678968913417076736> New warning for {targetUser.Mention}!", false, await FancyWarnEmbedAsync(warning));
+            await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} New warning for {targetUser.Mention}!", false, await FancyWarnEmbedAsync(warning, true, 0xFEC13D, false));
         }
 
         [
@@ -248,9 +252,12 @@ namespace MicrosoftBot.Modules
         ]
         public async Task WarningCmd(
             CommandContext ctx,
-            [Description("The user you want to lookup warnings for. Accepts many formats.")] DiscordUser targetUser
+            [Description("The user you want to lookup warnings for. Accepts many formats.")] DiscordUser targetUser = null
         )
         {
+            if (targetUser == null)
+                targetUser = ctx.User;
+            
             var warningsOutput = Program.db.HashGetAll(targetUser.Id.ToString()).ToDictionary(
                 x => x.Name.ToString(),
                 x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
@@ -321,15 +328,15 @@ namespace MicrosoftBot.Modules
         {
             UserWarning warning = GetWarning(targetUser.Id, warnId);
             if (warning == null)
-                await ctx.RespondAsync("<:ImageRes_Critical:679107080493203466> I couldn't find a warning for that user with that ID! Please check again.");
+                await ctx.RespondAsync("{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else if (GetPermLevel(ctx.Member) < ServerPermLevel.Admin && warning.ModUserId != ctx.User.Id)
-                await ctx.RespondAsync("<:ImageRes_Critical:679107080493203466> You can only delete warnings that were issued by you!");
+                await ctx.RespondAsync("<:ImageRes_ShieldUAC:679108762627211264> You can only delete warnings that were issued by you!");
             else
             {
                 DelWarning(warning);
-                await ctx.RespondAsync($"<:Shell32_RecycleFull:678968912418963458> Successfully deleted warning `{Pad(warnId)}` (Belonging to {targetUser.Mention})");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Deleted} Successfully deleted warning `{Pad(warnId)}` (Belonging to {targetUser.Mention})");
 
-                await Program.logChannel.SendMessageAsync($"<:Shell32_RecycleFull:678968912418963458> Warning deleted:" +
+                await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Warning deleted:" +
                     $"`{Pad(warnId)}` (Belonging to {targetUser.Mention})", false, await FancyWarnEmbedAsync(warning, true, 0xf03916));
             }
         }
@@ -348,7 +355,7 @@ namespace MicrosoftBot.Modules
         {
             UserWarning warning = GetWarning(targetUser.Id, warnId);
             if (warning == null)
-                await ctx.RespondAsync("<:ImageRes_Critical:679107080493203466> I couldn't find a warning for that user with that ID! Please check again.");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else
                 await ctx.RespondAsync(null, false, await FancyWarnEmbedAsync(warning));
         }
@@ -368,7 +375,7 @@ namespace MicrosoftBot.Modules
             UserWarning warning = GetWarning(targetUser.Id, warnId);
 
             if (warning != null)
-                await ctx.RespondAsync("<:ImageRes_Critical:679107080493203466> I couldn't find a warning for that user with that ID! Please check again.");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else
                 await ctx.RespondAsync(null, false, await FancyWarnEmbedAsync(warning, true));
 
@@ -390,9 +397,9 @@ namespace MicrosoftBot.Modules
             var msg = await ctx.RespondAsync("Processing your request...");
             var warning = GetWarning(targetUser.Id, warnId);
             if (warning == null)
-                await msg.ModifyAsync("<:ImageRes_Critical:679107080493203466> I couldn't find a warning for that user with that ID! Please check again.");
+                await msg.ModifyAsync("{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else if (GetPermLevel(ctx.Member) < ServerPermLevel.Admin && warning.ModUserId != ctx.User.Id)
-                await msg.ModifyAsync("<:ImageRes_Critical:679107080493203466> You can only edit warnings that were issued by you!");
+                await msg.ModifyAsync("<:ImageRes_ShieldUAC:679108762627211264> You can only edit warnings that were issued by you!");
             else
             {
                 EditWarning(targetUser, warnId, ctx.User, newReason, MessageLink(msg));

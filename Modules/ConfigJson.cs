@@ -44,6 +44,23 @@ namespace MicrosoftBot
         [JsonProperty("serverID")]
         public ulong ServerID { get; set; }
 
+        [JsonProperty("emoji")]
+        public EmojiJson Emoji {get; set;}
+
+    }
+
+    public class EmojiJson {
+        [JsonProperty("noPermissions")]
+        public string NoPermissions {get; set;}
+
+        [JsonProperty("warning")]
+        public string Warning {get; set;}
+
+        [JsonProperty("error")]
+        public string Error {get; set;}
+
+        [JsonProperty("deleted")]
+        public string Deleted {get; set;}
     }
 
     public class CoreConfig

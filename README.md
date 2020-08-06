@@ -29,6 +29,9 @@ That's it! If you ever need to see the logs, `cd` back into the directory and ru
 If you want to make a backup of the bot's data, that will be inside the `data` folder, though may be owned by root due to Docker limitations. It's up to the user hosting the bot to maintain their own backups (Or lack thereof).  
 The author(s) of the bot accept(s) no responsiblity for lost data due to negligence.
 
+To update the bot in the future, simply `git pull` the repository and then rebuild and restart the containers:
+- `git pull && docker-compose up -d --build`
+
 ### Setup - Standalone
 If you want to run the bot as a standalone application rather than a Docker container, you'll need to install the dependencies manually:
 - .NET Core SDK 3.1, instructions can be found on the [Microsoft website](https://dotnet.microsoft.com/download?initial-os=linux).
