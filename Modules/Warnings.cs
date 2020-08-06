@@ -374,7 +374,7 @@ namespace MicrosoftBot.Modules
         {
             UserWarning warning = GetWarning(targetUser.Id, warnId);
 
-            if (warning != null)
+            if (warning == null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else
                 await ctx.RespondAsync(null, false, await FancyWarnEmbedAsync(warning, true));
