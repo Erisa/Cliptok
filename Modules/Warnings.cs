@@ -100,7 +100,7 @@ namespace MicrosoftBot.Modules
             return embed;
         }
 
-        public static UserWarning GiveWarning(DSharpPlus.Entities.DiscordUser targetUser, DiscordUser modUser, string reason, string contextLink)
+        public static async Task<UserWarning> GiveWarningAsync(DiscordUser targetUser, DiscordUser modUser, string reason, string contextLink)
         {
             ulong warningId = (ulong)Program.db.StringGet("totalWarnings");
             // TODO: fix this hell
@@ -125,6 +125,15 @@ namespace MicrosoftBot.Modules
             };
             Program.db.StringSet("totalWarnings", warningId);
             Program.db.HashSet(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
+            try {
+                DiscordGuild guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
+                DiscordMember member = await guild.GetMemberAsync(targetUser.Id);
+                await member.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} You were warned in **{guild.Name}**, reason: **{reason}**");
+            } catch
+            {
+                // We failed to DM the user, this isn't important to note.
+            }
+
             return warning;
         }
 
@@ -235,12 +244,17 @@ namespace MicrosoftBot.Modules
         public async Task WarnCmd(
             CommandContext ctx,
             [Description("The user you are warning. Accepts many formats.")] DiscordUser targetUser,
-            [RemainingText, Description("The reason for giving this warning.")] string reason = "No reason specified."
+            [RemainingText, Description("The reason for giving this warning.")] string reason = null
         )
         {
             await ctx.Message.DeleteAsync();
+            if (reason == null)
+            {
+                await ctx.Member.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} Reason must be included for the warning command to work.");
+                return;
+            }
             DiscordMessage msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
-            UserWarning warning = GiveWarning(targetUser, ctx.User, reason, MessageLink(msg));
+            UserWarning warning = await GiveWarningAsync(targetUser, ctx.User, reason, MessageLink(msg));
             await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} New warning for {targetUser.Mention}!", false, await FancyWarnEmbedAsync(warning, true, 0xFEC13D, false));
         }
 
