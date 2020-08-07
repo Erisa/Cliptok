@@ -56,6 +56,7 @@ namespace MicrosoftBot
             {
                 Console.WriteLine($"Logged in as {e.Client.CurrentUser.Username}#{e.Client.CurrentUser.Discriminator}");
                 logChannel = await discord.GetChannelAsync(cfgjson.LogChannel);
+                await Mutes.CheckMutesAsync();
             };
 
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
@@ -64,9 +65,16 @@ namespace MicrosoftBot
             }); ;
 
             commands.RegisterCommands<Warnings>();
+            // commands.RegisterCommands<Mutes>();
 
             await discord.ConnectAsync();
-            await Task.Delay(-1);
+
+            while (true)
+            {
+                await Mutes.CheckMutesAsync();
+                await Task.Delay(60000);
+            }
+
         }
     }
 

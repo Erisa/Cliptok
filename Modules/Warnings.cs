@@ -4,6 +4,7 @@ using DSharpPlus.Entities;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -256,6 +257,43 @@ namespace MicrosoftBot.Modules
             DiscordMessage msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
             UserWarning warning = await GiveWarningAsync(targetUser, ctx.User, reason, MessageLink(msg));
             await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} New warning for {targetUser.Mention}!", false, await FancyWarnEmbedAsync(warning, true, 0xFEC13D, false));
+
+            // automute handling
+            var warningsOutput = Program.db.HashGetAll(targetUser.Id.ToString()).ToDictionary(
+                x => x.Name.ToString(),
+                x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
+            );
+
+            // Realistically this wouldn't ever be 0, but we'll set it below.
+            int warnsSinceThreshold = 0;
+            foreach (KeyValuePair<string, UserWarning> entry in warningsOutput)
+            {
+                UserWarning entryWarning = entry.Value;
+                TimeSpan span = DateTime.Now - entryWarning.WarnTimestamp;
+                if (span.Days <= Program.cfgjson.WarningDaysThreshold)
+                    warnsSinceThreshold += 1;
+            }
+
+            int toMuteHours = 0;
+
+            var keys = Program.cfgjson.AutoMuteThresholds.Keys.OrderBy(key => Convert.ToUInt64(key));
+            int chosenKey = 0;
+            foreach (string key in keys)
+            {
+                int keyInt = int.Parse(key);
+                if (keyInt <= warnsSinceThreshold && keyInt > chosenKey)
+                {
+                    toMuteHours = Program.cfgjson.AutoMuteThresholds[key];
+                    chosenKey = keyInt;
+                }
+            }
+
+            if (toMuteHours > 0)
+            {
+                DiscordMember member = await ctx.Guild.GetMemberAsync(targetUser.Id);
+                await Mutes.MuteUserAsync(member, TimeSpan.FromHours(toMuteHours), $"Automute after {warnsSinceThreshold} warnings in the past {Program.cfgjson.WarningDaysThreshold} hours.", ctx.User.Id, ctx.Guild );
+                //Mute(UserID, MuteTime); // obviously just guessing this bit
+            }
         }
 
         [

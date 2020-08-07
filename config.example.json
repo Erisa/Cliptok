@@ -3,11 +3,26 @@
     "token": "TOKENGOESHERE",
     "prefixes": [ "!" ]
   },
-  "trialModRole": 352519899048050688 ,
+  "trialModRole": 352519899048050688,
   "modRole": 150878439220576256,
   "adminRole": 286639672606720000,
+  "mutedRole": 426386061220904960,
   "logChannel": 584908576980729876,
   "serverID": 150662382874525696,
+  "warningDaysThreshold": 30,
+  "autoMuteThresholds": {
+    "2": 6,
+    "4": 12,
+    "6": 24
+  },
+  "emoji": {
+    "noPermissions": "<:ImageRes_ShieldUAC:679108762627211264>",
+    "warning": "<:Shell32_Warning:678968913417076736>",
+    "error": "<:ImageRes_Critical:679107080493203466>",
+    "deleted": "<:Shell32_RecycleFull:678968912418963458>",
+    "information": "<:Shell32_Information:678968748010635305>",
+    "muted": "<:ImageRes_ShieldWarning:679108762048397334>"
+  },
   "redis": {
     "host": "localhost",
     "port": 6379

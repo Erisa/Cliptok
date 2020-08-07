@@ -8,17 +8,37 @@ namespace MicrosoftBot
     {
         [JsonProperty("targetUserId")]
         public ulong TargetUserId { get; set; }
+
         [JsonProperty("modUserId")]
         public ulong ModUserId { get; set; }
+
         [JsonProperty("warningId")]
         public ulong WarningId { get; set; }
+
         [JsonProperty("warnReason")]
         public string WarnReason { get; set; }
+
         [JsonProperty("warnTimestamp")]
         public DateTime WarnTimestamp { get; set; }
+
         [JsonProperty("contextLink")]
         public string ContextLink { get; set; }
+        
+    }
 
+    public class MemberMute
+    {
+        [JsonProperty("memberId")]
+        public ulong MemberId { get; set; }
+
+        [JsonProperty("expireTime")]
+        public DateTime ExpireTime { get; set; }
+
+        [JsonProperty("modId")]
+        public ulong ModId { get; set; }
+
+        [JsonProperty("serverId")]
+        public ulong ServerId { get; set; }
     }
 
     public struct ConfigJson
@@ -47,6 +67,15 @@ namespace MicrosoftBot
         [JsonProperty("emoji")]
         public EmojiJson Emoji {get; set;}
 
+        [JsonProperty("mutedRole")]
+        public ulong MutedRole { get; set; }
+
+        [JsonProperty("warningDaysThreshold")]
+        public int WarningDaysThreshold { get; set; }
+
+        [JsonProperty("autoMuteThresholds")]
+        public Dictionary<string, int> AutoMuteThresholds { get; set; }
+
     }
 
     public class EmojiJson {
@@ -61,6 +90,13 @@ namespace MicrosoftBot
 
         [JsonProperty("deleted")]
         public string Deleted {get; set;}
+
+        [JsonProperty("information")]
+        public string Information { get; set; }
+        
+        [JsonProperty("muted")]
+        public string Muted { get; set; }
+
     }
 
     public class CoreConfig
