@@ -65,7 +65,7 @@ namespace MicrosoftBot
             }); ;
 
             commands.RegisterCommands<Warnings>();
-            // commands.RegisterCommands<Mutes>();
+            commands.RegisterCommands<MuteCmds>();
 
             await discord.ConnectAsync();
 

@@ -1,10 +1,12 @@
 ﻿using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace MicrosoftBot.Modules
 {
@@ -45,6 +47,40 @@ namespace MicrosoftBot.Modules
             return true;
         }
 
+        public static async Task<bool> UnmuteUserAsync(DiscordUser targetUser) 
+        {
+            DiscordGuild guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
+            DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
+
+            // todo: store per-guild
+            DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
+            DiscordMember member = await guild.GetMemberAsync(targetUser.Id);
+            if (member == null)
+            {
+                await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} Attempt to unmute <@{targetUser.Id}> failed!" +
+                    $"Is the user in the server?");
+            }
+            else
+            {
+                // Perhaps we could be catching something specific, but this should do for now.
+                try
+                {
+                    await member.RevokeRoleAsync(mutedRole);
+                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Successfully unmuted <@{targetUser.Id}>!");
+                }
+                catch
+                {
+                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} Attempt to removed Muted role from <@{targetUser.Id}> failed!" +
+                    $"\nIf the role was removed manually, this error can be disregarded safely.");
+                }
+            }
+            // Even if the bot failed to remove the role, it reported that failure to a log channel and thus the mute
+            //  can be safely removed internally.
+            await Program.db.HashDeleteAsync("mutes", targetUser.Id);
+
+            return true;
+        }
+
         public static async System.Threading.Tasks.Task<bool> CheckMutesAsync()
         {
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
@@ -62,43 +98,36 @@ namespace MicrosoftBot.Modules
                 {
                     MemberMute mute = entry.Value;
                     if (DateTime.Now > mute.ExpireTime)
-                    {
-                        DiscordGuild guild = await Program.discord.GetGuildAsync(mute.ServerId);
-
-                        // todo: store per-guild
-                        DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
-                        DiscordMember member = await guild.GetMemberAsync(mute.MemberId);
-                        if (member == null)
-                        {
-                            await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} Attempt to unmute <@{mute.MemberId}> failed!" +
-                                $"Is the user in the server?");
-                        }
-                        else
-                        {
-                            // Perhaps we could be catching something specific, but this should do for now.
-                            try
-                            {
-                                await member.RevokeRoleAsync(mutedRole);
-                                await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Automatically unmuted <@{mute.MemberId}>!");
-                            }
-                            catch
-                            {
-                                await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} Attempt to removed Muted role from <@{mute.MemberId}> failed!" +
-                                $"\nIf the role was removed manually, this error can be disregarded safely.");
-                            }
-                        }
-                        // Even if the bot failed to remove the role, it reported that failure to a log channel and thus the mute
-                        //  can be safely removed internally.
-                        await Program.db.HashDeleteAsync("mutes", entry.Key);
-
-                        success = true;
-                    }
+                        await UnmuteUserAsync(await Program.discord.GetUserAsync(mute.MemberId));
                 }
 #if DEBUG
                 Console.WriteLine($"Checked mutes at {DateTime.Now} with result: {success}");
 #endif
                 return success;
             }
+        }
+    }
+
+    public class MuteCmds : BaseCommandModule
+    {
+        [Command("unmute")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)]
+        public async Task UnmuteCmd(CommandContext ctx, DiscordUser targetUser)
+        {
+            DiscordGuild guild = await Program.discord.GetGuildAsync(ctx.Guild.Id);
+            DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
+
+            // todo: store per-guild
+            DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
+            DiscordMember member = await guild.GetMemberAsync(targetUser.Id);
+
+            if ((await Program.db.HashExistsAsync("mutes", targetUser.Id)) || member.Roles.Contains(mutedRole))
+            {
+                await Mutes.UnmuteUserAsync(targetUser);
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Information} Successfully unmuted **{targetUser.Username}#{targetUser.Discriminator}**");
+            }
+            else
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user isn't muted!");
         }
     }
 }
