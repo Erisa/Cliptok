@@ -52,8 +52,8 @@ Currently the bot will only work with one server. This choice was made because t
 A lot of the configuration (Role IDs, emoji IDs, etc.) are in the `config.json` file and cannot be edited at runtime. This means the bot will have to be relaunched for changes to those settings to take effect. This may be improved in the future, however it is not a high priority.
 
 ## Planned features
-~~- Automatic mutes based on warning thresholds.~~ Done
-~~- Automatic unmutes after specific time.~~ Done
+- ~~Automatic mutes based on warning thresholds.~~ Done
+- ~~Automatic unmutes after specific time.~~ Done
 - Automatic warning based on filters (e.g. swear words).
 - General purpose commands: mute, ban, kick, etc.
 - User selfrole assignment (Windows Insider roles?).
