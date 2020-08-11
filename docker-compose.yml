@@ -2,6 +2,8 @@ version: '2.3'
 services:
   bot:
     build: .
+    depends_on:
+      - redis
     restart: on-failure
     volumes:
       - type: bind
