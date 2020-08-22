@@ -21,7 +21,7 @@ namespace MicrosoftBot.Modules
         }
 
         // Only to be used on naughty users.
-        public static async System.Threading.Tasks.Task<bool> MuteUserAsync(DiscordMember naughtyMember, TimeSpan muteDuration, string reason, ulong moderatorId, DiscordGuild guild)
+        public static async System.Threading.Tasks.Task<bool> MuteUserAsync(DiscordMember naughtyMember, TimeSpan muteDuration, string reason, ulong moderatorId, DiscordGuild guild, DiscordChannel channel = null)
         {
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
             DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
@@ -36,18 +36,31 @@ namespace MicrosoftBot.Modules
 
             await Program.db.HashSetAsync("mutes", naughtyMember.Id, JsonConvert.SerializeObject(newMute));
 
-            try {
+            try
+            {
                 await naughtyMember.GrantRoleAsync(mutedRole);
-            } catch
+            }
+            catch
             {
                 return false;
             }
 
             await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} Successfully muted {naughtyMember.Mention} until `{expireTime}` (In roughly {muteDuration.TotalHours} hours)");
+            try
+            {
+                await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}** for {Warnings.TimeToPrettyFormat(muteDuration)}!");
+            }
+            catch
+            {
+                // A DM failing to send isn't important, but let's put it in chat just so it's somewhere.
+                if (!(channel is null))
+                    await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} was muted for **{Warnings.TimeToPrettyFormat(muteDuration)}**!");
+
+            }
             return true;
         }
 
-        public static async Task<bool> UnmuteUserAsync(DiscordUser targetUser) 
+        public static async Task<bool> UnmuteUserAsync(DiscordUser targetUser)
         {
             DiscordGuild guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);

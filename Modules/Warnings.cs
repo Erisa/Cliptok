@@ -186,10 +186,10 @@ namespace MicrosoftBot.Modules
         public static string TimeToPrettyFormat(TimeSpan span)
         {
 
-            if (span == TimeSpan.Zero) return "0 minutes";
+            if (span == TimeSpan.Zero) return "0 seconds";
 
             if (span.Days > 3649)
-                return "A long time ago";
+                return "A long time";
 
             var sb = new StringBuilder();
             if (span.Days > 365)
@@ -203,13 +203,13 @@ namespace MicrosoftBot.Modules
                 sb.AppendFormat(" ago");
             }
             else if (span.Days > 0)
-                sb.AppendFormat("{0} day{1} ago", span.Days, span.Days > 1 ? "s" : String.Empty);
+                sb.AppendFormat("{0} day{1}", span.Days, span.Days > 1 ? "s" : String.Empty);
             else if (span.Hours > 0)
-                sb.AppendFormat("{0} hour{1} ago", span.Hours, span.Hours > 1 ? "s" : String.Empty);
+                sb.AppendFormat("{0} hour{1}", span.Hours, span.Hours > 1 ? "s" : String.Empty);
             else if (span.Minutes > 0)
-                sb.AppendFormat("{0} minute{1} ago", span.Minutes, span.Minutes > 1 ? "s" : String.Empty);
+                sb.AppendFormat("{0} minute{1}", span.Minutes, span.Minutes > 1 ? "s" : String.Empty);
             else
-                sb.AppendFormat("{0} second{1} ago", span.Seconds, span.Seconds > 1 ? "s" : String.Empty);
+                sb.AppendFormat("{0} second{1}", span.Seconds, span.Seconds > 1 ? "s" : String.Empty);
 
             return sb.ToString();
         }
@@ -291,8 +291,8 @@ namespace MicrosoftBot.Modules
             if (toMuteHours > 0)
             {
                 DiscordMember member = await ctx.Guild.GetMemberAsync(targetUser.Id);
-                await Mutes.MuteUserAsync(member, TimeSpan.FromHours(toMuteHours), $"Automute after {warnsSinceThreshold} warnings in the past {Program.cfgjson.WarningDaysThreshold} hours.", ctx.User.Id, ctx.Guild );
-                //Mute(UserID, MuteTime); // obviously just guessing this bit
+                await Mutes.MuteUserAsync(member, TimeSpan.FromHours(toMuteHours), $"Automute after {warnsSinceThreshold} warnings in the past {Program.cfgjson.WarningDaysThreshold} hours.", ctx.User.Id, ctx.Guild, ctx.Channel );
+
             }
         }
 
@@ -340,7 +340,7 @@ namespace MicrosoftBot.Modules
                     {
                         reason = Truncate(reason, 29) + "…";
                     }
-                    str += $"`{Pad(warning.WarningId)}` **{reason}** • {TimeToPrettyFormat(span)}\n";
+                    str += $"`{Pad(warning.WarningId)}` **{reason}** • {TimeToPrettyFormat(span)} ago\n";
                     count += 1;
                 }
 
