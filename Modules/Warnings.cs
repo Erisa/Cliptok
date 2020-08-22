@@ -455,9 +455,9 @@ namespace MicrosoftBot.Modules
             else
             {
                 EditWarning(targetUser, warnId, ctx.User, newReason, MessageLink(msg));
-                await msg.ModifyAsync($"<:Shell32_OK:678968750300725318> Successfully edited warning `{Pad(warnId)}` (Belonging to {targetUser.Mention})",
+                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Information} Successfully edited warning `{Pad(warnId)}` (Belonging to {targetUser.Mention})",
                     await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId)));
-                await Program.logChannel.SendMessageAsync($"<:Shell32_Information:678968748010635305> Warning edited:" +
+                await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Warning edited:" +
                     $"`{Pad(warnId)}` (Belonging to {targetUser.Mention})", false, await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId), true));
             }
         }
