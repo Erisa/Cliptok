@@ -35,7 +35,7 @@ namespace MicrosoftBot.Modules
                 return true;
             else
                 if (!help)
-                    await ctx.RespondAsync($"<:ImageRes_ShieldUAC:679108762627211264> Invalid permissions to use command **{ctx.Command.Name}**!");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{ctx.Command.Name}**!");
                 return false;
         }
     }
@@ -380,16 +380,16 @@ namespace MicrosoftBot.Modules
         {
             UserWarning warning = GetWarning(targetUser.Id, warnId);
             if (warning == null)
-                await ctx.RespondAsync("{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else if (GetPermLevel(ctx.Member) < ServerPermLevel.Admin && warning.ModUserId != ctx.User.Id)
-                await ctx.RespondAsync("<:ImageRes_ShieldUAC:679108762627211264> You can only delete warnings that were issued by you!");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.NoPermissions} You can only delete warnings that were issued by you!");
             else
             {
                 DelWarning(warning);
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Deleted} Successfully deleted warning `{Pad(warnId)}` (Belonging to {targetUser.Mention})");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Deleted} Successfully deleted warning `{Pad(warnId)}` (belonging to {targetUser.Mention})");
 
                 await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Warning deleted:" +
-                    $"`{Pad(warnId)}` (Belonging to {targetUser.Mention})", false, await FancyWarnEmbedAsync(warning, true, 0xf03916));
+                    $"`{Pad(warnId)}` (belonging to {targetUser.Mention}, deleted by {ctx.Member.Username}#{ctx.Member.Discriminator})", false, await FancyWarnEmbedAsync(warning, true, 0xf03916));
             }
         }
 
@@ -449,16 +449,16 @@ namespace MicrosoftBot.Modules
             var msg = await ctx.RespondAsync("Processing your request...");
             var warning = GetWarning(targetUser.Id, warnId);
             if (warning == null)
-                await msg.ModifyAsync("{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
+                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else if (GetPermLevel(ctx.Member) < ServerPermLevel.Admin && warning.ModUserId != ctx.User.Id)
-                await msg.ModifyAsync("<:ImageRes_ShieldUAC:679108762627211264> You can only edit warnings that were issued by you!");
+                await msg.ModifyAsync($"{Program.cfgjson.Emoji.NoPermissions} You can only edit warnings that were issued by you!");
             else
             {
                 EditWarning(targetUser, warnId, ctx.User, newReason, MessageLink(msg));
-                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Information} Successfully edited warning `{Pad(warnId)}` (Belonging to {targetUser.Mention})",
+                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Information} Successfully edited warning `{Pad(warnId)}` (belonging to {targetUser.Mention})",
                     await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId)));
                 await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Warning edited:" +
-                    $"`{Pad(warnId)}` (Belonging to {targetUser.Mention})", false, await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId), true));
+                    $"`{Pad(warnId)}` (belonging to {targetUser.Mention})", false, await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId), true));
             }
         }
 
