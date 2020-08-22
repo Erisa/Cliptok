@@ -1,4 +1,4 @@
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Newtonsoft.Json;
@@ -386,10 +386,10 @@ namespace MicrosoftBot.Modules
             else
             {
                 DelWarning(warning);
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Deleted} Successfully deleted warning `{Pad(warnId)}` (Belonging to {targetUser.Mention})");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Deleted} Successfully deleted warning `{Pad(warnId)}` (belonging to {targetUser.Mention})");
 
                 await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Warning deleted:" +
-                    $"`{Pad(warnId)}` (Belonging to {targetUser.Mention})", false, await FancyWarnEmbedAsync(warning, true, 0xf03916));
+                    $"`{Pad(warnId)}` (belonging to {targetUser.Mention}, deleted by {ctx.Member.Username}#{ctx.Member.Discriminator})", false, await FancyWarnEmbedAsync(warning, true, 0xf03916));
             }
         }
 
@@ -455,10 +455,10 @@ namespace MicrosoftBot.Modules
             else
             {
                 EditWarning(targetUser, warnId, ctx.User, newReason, MessageLink(msg));
-                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Information} Successfully edited warning `{Pad(warnId)}` (Belonging to {targetUser.Mention})",
+                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Information} Successfully edited warning `{Pad(warnId)}` (belonging to {targetUser.Mention})",
                     await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId)));
                 await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Warning edited:" +
-                    $"`{Pad(warnId)}` (Belonging to {targetUser.Mention})", false, await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId), true));
+                    $"`{Pad(warnId)}` (belonging to {targetUser.Mention})", false, await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId), true));
             }
         }
 
