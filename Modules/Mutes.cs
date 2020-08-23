@@ -67,10 +67,19 @@ namespace MicrosoftBot.Modules
 
             // todo: store per-guild
             DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
-            DiscordMember member = await guild.GetMemberAsync(targetUser.Id);
+            DiscordMember member = null;
+            try
+            { 
+                member = await guild.GetMemberAsync(targetUser.Id); 
+            }
+            catch
+            {
+                // they probably left :(
+            }
+            
             if (member == null)
             {
-                await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} Attempt to unmute <@{targetUser.Id}> failed!" +
+                await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} Attempt to unmute <@{targetUser.Id}> failed!\n" +
                     $"Is the user in the server?");
             }
             else

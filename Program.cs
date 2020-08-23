@@ -52,11 +52,13 @@ namespace MicrosoftBot
                 LogLevel = LogLevel.Debug
             });
 
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             discord.Ready += async e =>
             {
                 Console.WriteLine($"Logged in as {e.Client.CurrentUser.Username}#{e.Client.CurrentUser.Discriminator}");
                 logChannel = await discord.GetChannelAsync(cfgjson.LogChannel);
-                await Mutes.CheckMutesAsync();
+                await Task.Delay(4000);
+                Mutes.CheckMutesAsync();
             };
 
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
@@ -71,8 +73,10 @@ namespace MicrosoftBot
 
             while (true)
             {
-                await Mutes.CheckMutesAsync();
                 await Task.Delay(60000);
+                Mutes.CheckMutesAsync();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                
             }
 
         }
