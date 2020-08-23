@@ -36,7 +36,7 @@ namespace MicrosoftBot.Modules
                 }
                 else
                 {
-                    response += i == roleIds.Length - 1 ? $"and {roleToGrant.Mention}" : $"{roleToGrant.Mention}{(roleIds.Length == 2 ? "," : String.Empty)} ";
+                    response += i == roleIds.Length - 1 ? $"and {roleToGrant.Mention}" : $"{roleToGrant.Mention}{(roleIds.Length != 2 ? "," : String.Empty)} ";
                 }
             }
             
