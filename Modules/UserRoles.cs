@@ -49,7 +49,7 @@ namespace MicrosoftBot.Modules
                     response += i == roleIds.Length - 1 ? $"and {roleToGrant.Mention}" : $"{roleToGrant.Mention}{(roleIds.Length != 2 ? "," : String.Empty)} ";
                 }
             }
-            
+
             await ctx.RespondAsync($"{ctx.User.Mention} has joined the {response} role{(roleIds.Length != 1 ? "s" : String.Empty)}.");
         }
 
@@ -74,29 +74,28 @@ namespace MicrosoftBot.Modules
                 DiscordRole roleToGrant = guild.GetRole((ulong)roleId.GetValue(Program.cfgjson.UserRoles, null));
                 await ctx.Member.RevokeRoleAsync(roleToGrant);
             }
-            
+
             await ctx.Message.DeleteAsync();
         }
-        
+
     }
+    [UserRolesPresent]
     public class UserRoleCmds : BaseCommandModule
     {
         [
             Command("join-insider-dev"),
             Description("Gives you the Windows Insiders (Dev) role"),
-            HomeServer,
-            UserRolesPresent
+            HomeServer
         ]
         public async Task JoinInsiderDevCmd(CommandContext ctx)
         {
             await UserRoles.GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderDev);
         }
-        
+
         [
             Command("join-insider-beta"),
             Description("Gives you the Windows Insiders (Beta) role"),
-            HomeServer,
-            UserRolesPresent
+            HomeServer
         ]
         public async Task JoinInsiderBetaCmd(CommandContext ctx)
         {
@@ -106,8 +105,7 @@ namespace MicrosoftBot.Modules
         [
             Command("join-insider-rp"),
             Description("Gives you the Windows Insiders (Release Preview) role"),
-            HomeServer,
-            UserRolesPresent
+            HomeServer
         ]
         public async Task JoinInsiderRPCmd(CommandContext ctx)
         {
@@ -117,8 +115,7 @@ namespace MicrosoftBot.Modules
         [
             Command("join-patch-tuesday"),
             Description("Gives you the 💻 Patch Tuesday role"),
-            HomeServer,
-            UserRolesPresent
+            HomeServer
         ]
         public async Task JoinPatchTuesday(CommandContext ctx)
         {
@@ -128,8 +125,7 @@ namespace MicrosoftBot.Modules
         [
             Command("keep-me-updated"),
             Description("Gives you all opt-in roles"),
-            HomeServer,
-            UserRolesPresent
+            HomeServer
         ]
         public async Task KeepMeUpdated(CommandContext ctx)
         {
@@ -140,8 +136,7 @@ namespace MicrosoftBot.Modules
             Command("leave-insiders"),
             Description("Removes you from Insider roles"),
             Aliases("leave-insider"),
-            HomeServer,
-            UserRolesPresent
+            HomeServer
         ]
         public async Task LeaveInsiders(CommandContext ctx)
         {
@@ -152,8 +147,7 @@ namespace MicrosoftBot.Modules
         [
             Command("dont-keep-me-updated"),
             Description("Takes away from you all opt-in roles"),
-            HomeServer,
-            UserRolesPresent
+            HomeServer
         ]
         public async Task DontKeepMeUpdated(CommandContext ctx)
         {
