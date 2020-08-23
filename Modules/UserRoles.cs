@@ -7,6 +7,16 @@ using System.Threading.Tasks;
 
 namespace MicrosoftBot.Modules
 {
+    public class UserRolesPresentAttribute : CheckBaseAttribute
+    {
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
+        {
+            return Program.cfgjson.UserRoles != null;
+        }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+    }
+
     public static class UserRoles
     {
         public static async Task GiveUserRoleAsync(CommandContext ctx, ulong role)
@@ -74,7 +84,8 @@ namespace MicrosoftBot.Modules
         [
             Command("join-insider-dev"),
             Description("Gives you the Windows Insiders (Dev) role"),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task JoinInsiderDevCmd(CommandContext ctx)
         {
@@ -84,7 +95,8 @@ namespace MicrosoftBot.Modules
         [
             Command("join-insider-beta"),
             Description("Gives you the Windows Insiders (Beta) role"),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task JoinInsiderBetaCmd(CommandContext ctx)
         {
@@ -94,7 +106,8 @@ namespace MicrosoftBot.Modules
         [
             Command("join-insider-rp"),
             Description("Gives you the Windows Insiders (Release Preview) role"),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task JoinInsiderRPCmd(CommandContext ctx)
         {
@@ -104,7 +117,8 @@ namespace MicrosoftBot.Modules
         [
             Command("join-patch-tuesday"),
             Description("Gives you the 💻 Patch Tuesday role"),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task JoinPatchTuesday(CommandContext ctx)
         {
@@ -114,7 +128,8 @@ namespace MicrosoftBot.Modules
         [
             Command("keep-me-updated"),
             Description("Gives you all opt-in roles"),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task KeepMeUpdated(CommandContext ctx)
         {
@@ -125,7 +140,8 @@ namespace MicrosoftBot.Modules
             Command("leave-insiders"),
             Description("Removes you from Insider roles"),
             Aliases("leave-insider"),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task LeaveInsiders(CommandContext ctx)
         {
@@ -136,7 +152,8 @@ namespace MicrosoftBot.Modules
         [
             Command("dont-keep-me-updated"),
             Description("Takes away from you all opt-in roles"),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task DontKeepMeUpdated(CommandContext ctx)
         {
