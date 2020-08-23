@@ -76,6 +76,9 @@ namespace MicrosoftBot
         [JsonProperty("autoMuteThresholds")]
         public Dictionary<string, int> AutoMuteThresholds { get; set; }
 
+        [JsonProperty("userRoles")]
+        public UserRoleConfig UserRoles { get; private set; }
+
     }
 
     public class EmojiJson
@@ -116,6 +119,21 @@ namespace MicrosoftBot
 
         [JsonProperty("port")]
         public ulong Port { get; private set; }
+    }
+
+    public class UserRoleConfig
+    {
+        [JsonProperty("insiderDev")]
+        public ulong InsiderDev { get; private set; }
+
+        [JsonProperty("insiderBeta")]
+        public ulong InsiderBeta { get; private set; }
+
+        [JsonProperty("insiderRP")]
+        public ulong InsiderRP { get; private set; }
+
+        [JsonProperty("patchTuesday")]
+        public ulong PatchTuesday { get; private set; }
     }
 
 }

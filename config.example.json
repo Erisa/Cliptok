@@ -26,6 +26,12 @@
     "deleted": "<:Shell32_RecycleFull:678968912418963458>",
     "information": "<:Shell32_Information:678968748010635305>",
     "muted": "<:ImageRes_ShieldWarning:679108762048397334>"
+  },
+  "userRoles": {
+    "insiderDev": 434426594271166474,
+    "insiderBeta": 643712828217360394,
+    "insiderRP": 288729239921098752,
+    "patchTuesday": 445773142233710594
   }
 
 }
