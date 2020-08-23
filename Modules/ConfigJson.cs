@@ -23,7 +23,7 @@ namespace MicrosoftBot
 
         [JsonProperty("contextLink")]
         public string ContextLink { get; set; }
-        
+
     }
 
     public class MemberMute
@@ -65,7 +65,7 @@ namespace MicrosoftBot
         public ulong ServerID { get; set; }
 
         [JsonProperty("emoji")]
-        public EmojiJson Emoji {get; set;}
+        public EmojiJson Emoji { get; set; }
 
         [JsonProperty("mutedRole")]
         public ulong MutedRole { get; set; }
@@ -78,22 +78,23 @@ namespace MicrosoftBot
 
     }
 
-    public class EmojiJson {
+    public class EmojiJson
+    {
         [JsonProperty("noPermissions")]
-        public string NoPermissions {get; set;}
+        public string NoPermissions { get; set; }
 
         [JsonProperty("warning")]
-        public string Warning {get; set;}
+        public string Warning { get; set; }
 
         [JsonProperty("error")]
-        public string Error {get; set;}
+        public string Error { get; set; }
 
         [JsonProperty("deleted")]
-        public string Deleted {get; set;}
+        public string Deleted { get; set; }
 
         [JsonProperty("information")]
         public string Information { get; set; }
-        
+
         [JsonProperty("muted")]
         public string Muted { get; set; }
 

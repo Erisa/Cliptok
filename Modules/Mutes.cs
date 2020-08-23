@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MicrosoftBot.Modules
@@ -69,14 +68,14 @@ namespace MicrosoftBot.Modules
             DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
             DiscordMember member = null;
             try
-            { 
-                member = await guild.GetMemberAsync(targetUser.Id); 
+            {
+                member = await guild.GetMemberAsync(targetUser.Id);
             }
             catch
             {
                 // they probably left :(
             }
-            
+
             if (member == null)
             {
                 await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} Attempt to unmute <@{targetUser.Id}> failed!\n" +

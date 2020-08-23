@@ -35,8 +35,8 @@ namespace MicrosoftBot.Modules
                 return true;
             else
                 if (!help)
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{ctx.Command.Name}**!");
-                return false;
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{ctx.Command.Name}**!");
+            return false;
         }
     }
 
@@ -126,11 +126,13 @@ namespace MicrosoftBot.Modules
             };
             Program.db.StringSet("totalWarnings", warningId);
             Program.db.HashSet(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
-            try {
+            try
+            {
                 DiscordGuild guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
                 DiscordMember member = await guild.GetMemberAsync(targetUser.Id);
                 await member.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} You were warned in **{guild.Name}**, reason: **{reason}**");
-            } catch
+            }
+            catch
             {
                 // We failed to DM the user, this isn't important to note.
             }
@@ -291,7 +293,7 @@ namespace MicrosoftBot.Modules
             if (toMuteHours > 0)
             {
                 DiscordMember member = await ctx.Guild.GetMemberAsync(targetUser.Id);
-                await Mutes.MuteUserAsync(member, TimeSpan.FromHours(toMuteHours), $"Automute after {warnsSinceThreshold} warnings in the past {Program.cfgjson.WarningDaysThreshold} hours.", ctx.User.Id, ctx.Guild, ctx.Channel );
+                await Mutes.MuteUserAsync(member, TimeSpan.FromHours(toMuteHours), $"Automute after {warnsSinceThreshold} warnings in the past {Program.cfgjson.WarningDaysThreshold} hours.", ctx.User.Id, ctx.Guild, ctx.Channel);
 
             }
         }
@@ -309,7 +311,7 @@ namespace MicrosoftBot.Modules
         {
             if (targetUser == null)
                 targetUser = ctx.User;
-            
+
             var warningsOutput = Program.db.HashGetAll(targetUser.Id.ToString()).ToDictionary(
                 x => x.Name.ToString(),
                 x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
