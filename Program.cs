@@ -61,6 +61,19 @@ namespace MicrosoftBot
                 Mutes.CheckMutesAsync();
             };
 
+            discord.GuildMemberAdded += async e =>
+            {
+                if (e.Guild.Id != cfgjson.ServerID)
+                    return;
+
+                if (await db.HashExistsAsync("mutes", e.Member.Id))
+                {
+                    // todo: store per-guild
+                    DiscordRole mutedRole = e.Guild.GetRole(cfgjson.MutedRole);
+                    await e.Member.GrantRoleAsync(mutedRole);
+                }
+            };
+
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
                 StringPrefixes = cfgjson.Core.Prefixes
