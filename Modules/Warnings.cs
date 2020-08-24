@@ -27,7 +27,7 @@ namespace MicrosoftBot.Modules
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
         {
-            if (ctx.Guild.Id != Program.cfgjson.ServerID)
+            if (ctx.Channel.IsPrivate || ctx.Guild.Id != Program.cfgjson.ServerID)
                 return false;
 
             var level = Warnings.GetPermLevel(ctx.Member);
@@ -44,7 +44,7 @@ namespace MicrosoftBot.Modules
     {
         public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
         {
-            return ctx.Guild.Id == Program.cfgjson.ServerID;
+            return !ctx.Channel.IsPrivate && ctx.Guild.Id == Program.cfgjson.ServerID;
         }
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously

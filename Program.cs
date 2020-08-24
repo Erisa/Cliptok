@@ -81,6 +81,7 @@ namespace MicrosoftBot
 
             commands.RegisterCommands<Warnings>();
             commands.RegisterCommands<MuteCmds>();
+            commands.RegisterCommands<UserRoleCmds>();
 
             await discord.ConnectAsync();
 
