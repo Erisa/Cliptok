@@ -74,6 +74,15 @@ namespace MicrosoftBot.Modules
                 DiscordRole roleToGrant = guild.GetRole((ulong)roleId.GetValue(Program.cfgjson.UserRoles, null));
                 await ctx.Member.RevokeRoleAsync(roleToGrant);
             }
+
+            try
+            {
+                await ctx.Message.DeleteAsync();
+            }
+            catch
+            {
+                // Not an important exception to note.
+            }
         }
 
     }
@@ -143,7 +152,6 @@ namespace MicrosoftBot.Modules
                 await UserRoles.RemoveUserRoleAsync(ctx, roleId);
             }
 
-            await ctx.Message.DeleteAsync();
             await ctx.Member.SendMessageAsync("Sad to see you go but if you ever want to rejoin Insiders and continue getting notifications type `!join-insider-dev` in <#740272437719072808> channel");
         }
 
@@ -155,7 +163,6 @@ namespace MicrosoftBot.Modules
         public async Task DontKeepMeUpdated(CommandContext ctx)
         {
             await UserRoles.RemoveUserRolesAsync(ctx, x => true);
-            await ctx.Message.DeleteAsync();
         }
     }
 }
