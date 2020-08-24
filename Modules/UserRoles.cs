@@ -53,7 +53,7 @@ namespace MicrosoftBot.Modules
             await ctx.RespondAsync($"{ctx.User.Mention} has joined the {response} role{(roleIds.Length != 1 ? "s" : String.Empty)}.");
         }
 
-        public static async Task RemoveUserRolesAsync(CommandContext ctx, ulong role)
+        public static async Task RemoveUserRoleAsync(CommandContext ctx, ulong role)
         {
             // In case we ever decide to have indivdual commands to remove roles.
             await RemoveUserRolesAsync(ctx, x => (ulong)x.GetValue(Program.cfgjson.UserRoles, null) == role);
@@ -74,8 +74,6 @@ namespace MicrosoftBot.Modules
                 DiscordRole roleToGrant = guild.GetRole((ulong)roleId.GetValue(Program.cfgjson.UserRoles, null));
                 await ctx.Member.RevokeRoleAsync(roleToGrant);
             }
-
-            await ctx.Message.DeleteAsync();
         }
 
     }
@@ -140,7 +138,12 @@ namespace MicrosoftBot.Modules
         ]
         public async Task LeaveInsiders(CommandContext ctx)
         {
-            await UserRoles.RemoveUserRolesAsync(ctx, x => x.Name.Contains("Insider"));
+            foreach (ulong roleId in new ulong[] { Program.cfgjson.UserRoles.InsiderDev, Program.cfgjson.UserRoles.InsiderBeta, Program.cfgjson.UserRoles.InsiderRP })
+            {
+                await UserRoles.RemoveUserRoleAsync(ctx, roleId);
+            }
+
+            await ctx.Message.DeleteAsync();
             await ctx.Member.SendMessageAsync("Sad to see you go but if you ever want to rejoin Insiders and continue getting notifications type `!join-insider-dev` in <#740272437719072808> channel");
         }
 
@@ -152,6 +155,7 @@ namespace MicrosoftBot.Modules
         public async Task DontKeepMeUpdated(CommandContext ctx)
         {
             await UserRoles.RemoveUserRolesAsync(ctx, x => true);
+            await ctx.Message.DeleteAsync();
         }
     }
 }
