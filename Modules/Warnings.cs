@@ -96,7 +96,7 @@ namespace MicrosoftBot.Modules
                 .AddField("Message link", warning.ContextLink == null ? "N/A" : $"[`Jump to warning`]({warning.ContextLink})");
             }
             if (showTime)
-                embed.AddField("Time", detailed ? $"{warning.WarnTimestamp.ToUniversalTime()} UTC" : TimeToPrettyFormat((DateTime.Now - warning.WarnTimestamp)), true);
+                embed.AddField("Time", detailed ? $"{warning.WarnTimestamp.ToUniversalTime()} UTC" : $"{TimeToPrettyFormat((DateTime.Now - warning.WarnTimestamp))} ago", true);
 
             return embed;
         }
