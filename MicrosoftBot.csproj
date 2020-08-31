@@ -9,8 +9,8 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00711" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00711" />
+    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00720" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00720" />
     <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
     <PackageReference Include="System.Linq" Version="4.3.0" />
   </ItemGroup>
