@@ -60,6 +60,25 @@ namespace MicrosoftBot
                 Mutes.CheckMutesAsync();
             };
 
+            discord.MessageCreated += async e =>
+            {
+                if (e.Channel.IsPrivate || e.Guild.Id != cfgjson.ServerID)
+                    return;
+
+                cfgjson.RestrictedWords.ForEach(async delegate (string wordToCheck)
+                {
+                    if (e.Message.Content.ToLower().Contains(wordToCheck))
+                    {
+                        await e.Message.DeleteAsync();
+                        string reason = "Use of restricted word(s)";
+                        DiscordMessage msg = await e.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                        await Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
+                        return;
+                    }
+                });
+                
+            };
+
             discord.GuildMemberAdded += async e =>
             {
                 if (e.Guild.Id != cfgjson.ServerID)

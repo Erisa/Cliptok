@@ -79,6 +79,9 @@ namespace MicrosoftBot
         [JsonProperty("userRoles")]
         public UserRoleConfig UserRoles { get; private set; }
 
+        [JsonProperty("restrictedWords")]
+        public List<String> RestrictedWords { get; private set; }
+
     }
 
     public class EmojiJson
@@ -100,6 +103,9 @@ namespace MicrosoftBot
 
         [JsonProperty("muted")]
         public string Muted { get; set; }
+
+        [JsonProperty("denied")]
+        public string Denied { get; set; }
 
     }
 

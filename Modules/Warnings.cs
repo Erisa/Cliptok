@@ -73,7 +73,7 @@ namespace MicrosoftBot.Modules
                 return ServerPermLevel.nothing;
         }
 
-        public async Task<DiscordEmbed> FancyWarnEmbedAsync(UserWarning warning, bool detailed = false, int colour = 0xFEC13D, bool showTime = true)
+        public static async Task<DiscordEmbed> FancyWarnEmbedAsync(UserWarning warning, bool detailed = false, int colour = 0xFEC13D, bool showTime = true)
         {
             DiscordUser targetUser = await Program.discord.GetUserAsync(warning.TargetUserId);
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
@@ -101,8 +101,9 @@ namespace MicrosoftBot.Modules
             return embed;
         }
 
-        public static async Task<UserWarning> GiveWarningAsync(DiscordUser targetUser, DiscordUser modUser, string reason, string contextLink)
+        public static async Task<UserWarning> GiveWarningAsync(DiscordUser targetUser, DiscordUser modUser, string reason, string contextLink, DiscordChannel channel)
         {
+            DiscordGuild guild = channel.Guild;
             ulong warningId = (ulong)Program.db.StringGet("totalWarnings");
             // TODO: fix this hell
             if (warningId == 0)
@@ -128,7 +129,6 @@ namespace MicrosoftBot.Modules
             Program.db.HashSet(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
             try
             {
-                DiscordGuild guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
                 DiscordMember member = await guild.GetMemberAsync(targetUser.Id);
                 await member.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} You were warned in **{guild.Name}**, reason: **{reason}**");
             }
@@ -136,6 +136,46 @@ namespace MicrosoftBot.Modules
             {
                 // We failed to DM the user, this isn't important to note.
             }
+
+            await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} New warning for {targetUser.Mention}!", false, await FancyWarnEmbedAsync(warning, true, 0xFEC13D, false));
+
+            // automute handling
+            var warningsOutput = Program.db.HashGetAll(targetUser.Id.ToString()).ToDictionary(
+                x => x.Name.ToString(),
+                x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
+            );
+
+            // Realistically this wouldn't ever be 0, but we'll set it below.
+            int warnsSinceThreshold = 0;
+            foreach (KeyValuePair<string, UserWarning> entry in warningsOutput)
+            {
+                UserWarning entryWarning = entry.Value;
+                TimeSpan span = DateTime.Now - entryWarning.WarnTimestamp;
+                if (span.Days <= Program.cfgjson.WarningDaysThreshold)
+                    warnsSinceThreshold += 1;
+            }
+
+            int toMuteHours = 0;
+
+            var keys = Program.cfgjson.AutoMuteThresholds.Keys.OrderBy(key => Convert.ToUInt64(key));
+            int chosenKey = 0;
+            foreach (string key in keys)
+            {
+                int keyInt = int.Parse(key);
+                if (keyInt <= warnsSinceThreshold && keyInt > chosenKey)
+                {
+                    toMuteHours = Program.cfgjson.AutoMuteThresholds[key];
+                    chosenKey = keyInt;
+                }
+            }
+
+            if (toMuteHours > 0)
+            {
+                DiscordMember member = await guild.GetMemberAsync(targetUser.Id);
+                await Mutes.MuteUserAsync(member, TimeSpan.FromHours(toMuteHours), $"Automute after {warnsSinceThreshold} warnings in the past {Program.cfgjson.WarningDaysThreshold} hours.", targetUser.Id, guild, channel);
+
+            }
+
 
             return warning;
         }
@@ -233,7 +273,7 @@ namespace MicrosoftBot.Modules
             }
         }
 
-        public string MessageLink(DiscordMessage msg)
+        public static string MessageLink(DiscordMessage msg)
         {
             return $"https://discord.com/channels/{msg.Channel.Guild.Id}/{msg.Channel.Id}/{msg.Id}";
         }
@@ -257,45 +297,7 @@ namespace MicrosoftBot.Modules
                 return;
             }
             DiscordMessage msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
-            UserWarning warning = await GiveWarningAsync(targetUser, ctx.User, reason, MessageLink(msg));
-            await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} New warning for {targetUser.Mention}!", false, await FancyWarnEmbedAsync(warning, true, 0xFEC13D, false));
-
-            // automute handling
-            var warningsOutput = Program.db.HashGetAll(targetUser.Id.ToString()).ToDictionary(
-                x => x.Name.ToString(),
-                x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
-            );
-
-            // Realistically this wouldn't ever be 0, but we'll set it below.
-            int warnsSinceThreshold = 0;
-            foreach (KeyValuePair<string, UserWarning> entry in warningsOutput)
-            {
-                UserWarning entryWarning = entry.Value;
-                TimeSpan span = DateTime.Now - entryWarning.WarnTimestamp;
-                if (span.Days <= Program.cfgjson.WarningDaysThreshold)
-                    warnsSinceThreshold += 1;
-            }
-
-            int toMuteHours = 0;
-
-            var keys = Program.cfgjson.AutoMuteThresholds.Keys.OrderBy(key => Convert.ToUInt64(key));
-            int chosenKey = 0;
-            foreach (string key in keys)
-            {
-                int keyInt = int.Parse(key);
-                if (keyInt <= warnsSinceThreshold && keyInt > chosenKey)
-                {
-                    toMuteHours = Program.cfgjson.AutoMuteThresholds[key];
-                    chosenKey = keyInt;
-                }
-            }
-
-            if (toMuteHours > 0)
-            {
-                DiscordMember member = await ctx.Guild.GetMemberAsync(targetUser.Id);
-                await Mutes.MuteUserAsync(member, TimeSpan.FromHours(toMuteHours), $"Automute after {warnsSinceThreshold} warnings in the past {Program.cfgjson.WarningDaysThreshold} hours.", ctx.User.Id, ctx.Guild, ctx.Channel);
-
-            }
+            UserWarning warning = await GiveWarningAsync(targetUser, ctx.User, reason, MessageLink(msg), ctx.Channel);
         }
 
         [
