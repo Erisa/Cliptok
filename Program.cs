@@ -67,16 +67,24 @@ namespace MicrosoftBot
 
                 cfgjson.RestrictedWords.ForEach(async delegate (string wordToCheck)
                 {
+                    bool success = false;
                     if (e.Message.Content.ToLower().Contains(wordToCheck))
                     {
-                        await e.Message.DeleteAsync();
+                        try
+                        {
+                            await e.Message.DeleteAsync();
+                        }
+                        catch
+                        {
+                            return;
+                        }
+
                         string reason = "Use of restricted word(s)";
                         DiscordMessage msg = await e.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
                         await Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
-                        return;
                     }
                 });
-                
+
             };
 
             discord.GuildMemberAdded += async e =>

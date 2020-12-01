@@ -173,7 +173,6 @@ namespace MicrosoftBot.Modules
             {
                 DiscordMember member = await guild.GetMemberAsync(targetUser.Id);
                 await Mutes.MuteUserAsync(member, TimeSpan.FromHours(toMuteHours), $"Automute after {warnsSinceThreshold} warnings in the past {Program.cfgjson.WarningDaysThreshold} hours.", targetUser.Id, guild, channel);
-
             }
 
 
