@@ -62,7 +62,11 @@ namespace MicrosoftBot
 
             discord.MessageCreated += async e =>
             {
-                if (e.Channel.IsPrivate || e.Guild.Id != cfgjson.ServerID)
+                if (e.Channel.IsPrivate || e.Guild.Id != cfgjson.ServerID || e.Author.IsBot)
+                    return;
+
+                DiscordMember member = await e.Guild.GetMemberAsync(e.Author.Id);
+                if (Warnings.GetPermLevel(member) >= ServerPermLevel.TrialMod )
                     return;
 
                 cfgjson.RestrictedWords.ForEach(async delegate (string wordToCheck)
@@ -70,9 +74,25 @@ namespace MicrosoftBot
                     bool success = false;
                     if (e.Message.Content.ToLower().Contains(wordToCheck))
                     {
+                        DiscordChannel logChannel = await discord.GetChannelAsync(Program.cfgjson.LogChannel);
                         try
                         {
                             await e.Message.DeleteAsync();
+                            var embed = new DiscordEmbedBuilder()
+                                .WithDescription(e.Message.Content)
+                                .WithColor(new DiscordColor(0xf03916))
+                                .WithTimestamp(e.Message.Timestamp)
+                                .WithFooter(
+                                    $"User ID: {e.Author.Id}",
+                                    null
+                                )
+                                .WithAuthor(
+                                    $"{e.Author.Username}#{e.Author.Discriminator} in #{e.Channel.Name}",
+                                    null,
+                                    e.Author.AvatarUrl
+                                );
+                            await logChannel.SendMessageAsync($"{cfgjson.Emoji.Denied} Deleted infringing message by {e.Author.Mention} in {e.Channel.Mention}:", false, embed);
+
                         }
                         catch
                         {
