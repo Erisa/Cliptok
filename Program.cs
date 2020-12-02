@@ -71,7 +71,6 @@ namespace MicrosoftBot
 
                 cfgjson.RestrictedWords.ForEach(async delegate (string wordToCheck)
                 {
-                    bool success = false;
                     if (e.Message.Content.ToLower().Contains(wordToCheck))
                     {
                         DiscordChannel logChannel = await discord.GetChannelAsync(Program.cfgjson.LogChannel);
