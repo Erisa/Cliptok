@@ -1,6 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using MicrosoftBot.Modules;
 using Newtonsoft.Json;
 using StackExchange.Redis;
@@ -52,15 +53,14 @@ namespace MicrosoftBot
             });
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-            discord.Ready += async e =>
+            async Task OnReady(DiscordClient client, ReadyEventArgs e)
             {
-                Console.WriteLine($"Logged in as {e.Client.CurrentUser.Username}#{e.Client.CurrentUser.Discriminator}");
+                Console.WriteLine($"Logged in as {client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
                 logChannel = await discord.GetChannelAsync(cfgjson.LogChannel);
-                await Task.Delay(4000);
                 Mutes.CheckMutesAsync();
-            };
+            }
 
-            discord.MessageCreated += async e =>
+            async Task MessageCreated(DiscordClient client, MessageCreateEventArgs e)
             {
                 if (e.Channel.IsPrivate || e.Guild.Id != cfgjson.ServerID || e.Author.IsBot)
                     return;
@@ -105,10 +105,9 @@ namespace MicrosoftBot
                         await Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
                     }
                 });
+            }
 
-            };
-
-            discord.GuildMemberAdded += async e =>
+            async Task GuildMemberAdded(DiscordClient client, GuildMemberAddEventArgs e)
             {
                 if (e.Guild.Id != cfgjson.ServerID)
                     return;
@@ -119,7 +118,12 @@ namespace MicrosoftBot
                     DiscordRole mutedRole = e.Guild.GetRole(cfgjson.MutedRole);
                     await e.Member.GrantRoleAsync(mutedRole);
                 }
-            };
+            }
+
+            discord.Ready += OnReady;
+            discord.MessageCreated += MessageCreated;
+            discord.GuildMemberAdded += GuildMemberAdded;
+
 
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
