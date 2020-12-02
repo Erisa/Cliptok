@@ -292,6 +292,19 @@ namespace MicrosoftBot.Modules
             [RemainingText, Description("The reason for giving this warning.")] string reason = null
         )
         {
+            DiscordMember targetMember;
+            try {
+                targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
+                if (targetMember.IsBot || ( targetMember != null && GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && GetPermLevel(targetMember) >= ServerPermLevel.TrialMod))
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots..");
+                    return;
+                }
+            } catch
+            {
+                // do nothing :/
+            }
+
             await ctx.Message.DeleteAsync();
             if (reason == null)
             {

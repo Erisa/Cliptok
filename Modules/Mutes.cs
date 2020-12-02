@@ -183,7 +183,14 @@ namespace MicrosoftBot.Modules
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)]
         public async Task MuteCmd(CommandContext ctx, DiscordMember targetMember, [RemainingText] string timeAndReason = "No reason specificed.")
         {
+            if (targetMember.IsBot ||( Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod))
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
+                return;
+            }
+
             await ctx.Message.DeleteAsync();
+
             TimeSpan muteDuration = default;
             string possibleTime = timeAndReason.Split(' ').First();
             if (possibleTime.Length != 1)
