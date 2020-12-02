@@ -359,7 +359,7 @@ namespace MicrosoftBot.Modules
                     {
                         reason = Truncate(reason, 29) + "…";
                     }
-                    str += $"`{Pad(warning.WarningId)}` **{reason}** • {TimeToPrettyFormat(span)} ago\n";
+                    str += $"`{Pad(warning.WarningId)}` **{reason}** • {TimeToPrettyFormat(span, true)}\n";
                     count += 1;
                 }
 
