@@ -66,8 +66,10 @@ namespace MicrosoftBot
                     return;
 
                 DiscordMember member = await e.Guild.GetMemberAsync(e.Author.Id);
-                if (Warnings.GetPermLevel(member) >= ServerPermLevel.TrialMod )
+                if (Warnings.GetPermLevel(member) >= ServerPermLevel.TrialMod)
+                {
                     return;
+                }
 
                 cfgjson.RestrictedWords.ForEach(async delegate (string wordToCheck)
                 {
