@@ -20,17 +20,26 @@ namespace MicrosoftBot.Modules
         }
 
         // Only to be used on naughty users.
-        public static async System.Threading.Tasks.Task<bool> MuteUserAsync(DiscordMember naughtyMember, TimeSpan muteDuration, string reason, ulong moderatorId, DiscordGuild guild, DiscordChannel channel = null)
+        public static async System.Threading.Tasks.Task<bool> MuteUserAsync(DiscordMember naughtyMember, string reason, ulong moderatorId, DiscordGuild guild, DiscordChannel channel = null, TimeSpan muteDuration = default)
         {
+            bool permaMute = false;
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
             DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
-            DateTime expireTime = DateTime.Now + muteDuration;
+            DateTime? expireTime = DateTime.Now + muteDuration;
+            DiscordMember moderator = await guild.GetMemberAsync(moderatorId);
+
+            if (muteDuration == default)
+            {
+                permaMute = true;
+                expireTime = null;
+            }
+
             MemberMute newMute = new MemberMute()
             {
                 MemberId = naughtyMember.Id,
-                ExpireTime = expireTime,
                 ModId = moderatorId,
-                ServerId = guild.Id
+                ServerId = guild.Id,
+                ExpireTime = expireTime
             };
 
             await Program.db.HashSetAsync("mutes", naughtyMember.Id, JsonConvert.SerializeObject(newMute));
@@ -43,17 +52,27 @@ namespace MicrosoftBot.Modules
             {
                 return false;
             }
-
-            await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} Successfully muted {naughtyMember.Mention} until `{expireTime}` (In roughly {muteDuration.TotalHours} hours)");
+            
             try
             {
-                await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}** for {Warnings.TimeToPrettyFormat(muteDuration)}!");
+                if (permaMute)
+                {
+                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} was successfully muted by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**");
+                    await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}**!\nReason: **{reason}**");
+                }
+                    
+                else
+                {
+                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} has successfully muted {naughtyMember.Mention} for {Warnings.TimeToPrettyFormat(muteDuration, false)} by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**");
+                    await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}** for {Warnings.TimeToPrettyFormat(muteDuration, false)}!\nReason: **{reason}**");
+
+                }
             }
             catch
             {
                 // A DM failing to send isn't important, but let's put it in chat just so it's somewhere.
                 if (!(channel is null))
-                    await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} was muted for **{Warnings.TimeToPrettyFormat(muteDuration)}**!");
+                    await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} was muted for **{Warnings.TimeToPrettyFormat(muteDuration, false)}**!");
 
             }
             return true;
@@ -158,6 +177,77 @@ namespace MicrosoftBot.Modules
                     Console.WriteLine(e.ToString());
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be muted, *and* an error ocurred while attempting to unmute them anyway. Please contact the bot owner, the error has been logged.");
                 }
+        }
+
+        [Command("mute")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)]
+        public async Task MuteCmd(CommandContext ctx, DiscordMember targetMember, [RemainingText] string timeAndReason = "No reason specificed.")
+        {
+            await ctx.Message.DeleteAsync();
+            TimeSpan muteDuration = default;
+            string possibleTime = timeAndReason.Split(' ').First();
+            if (possibleTime.Length != 1)
+            {
+                string reason = timeAndReason;
+                // Everything BUT the last character should be a number.
+                string possibleNum = possibleTime.Remove(possibleTime.Length - 1);
+                if (int.TryParse(possibleNum, out int timeLength))
+                {
+                    char possibleTimePeriod = possibleTime.Last();
+                    switch (possibleTimePeriod)
+                    {
+                        // Seconds
+                        case 's':
+                            muteDuration = TimeSpan.FromSeconds(timeLength);
+                            break;
+
+                        // Minutes
+                        case 'm':
+                            muteDuration = TimeSpan.FromMinutes(timeLength);
+                            break;
+
+                        // Hours
+                        case 'h':
+                            muteDuration = TimeSpan.FromHours(timeLength);
+                            break;
+
+                        // Days
+                        case 'd':
+                            muteDuration = TimeSpan.FromDays(timeLength);
+                            break;
+
+                        // Years
+                        case 'y':
+                            muteDuration = TimeSpan.FromDays(timeLength * 365);
+                            break;
+                        default:
+                            muteDuration = default;
+                            break;
+                    }
+                }
+                else
+                {
+                    muteDuration = default;
+                }
+
+                if (muteDuration != default || possibleNum == "0")
+                {
+                    if (!timeAndReason.Contains(" "))
+                        reason = "No reason specified.";
+                    else
+                    {
+                        reason = timeAndReason.Substring(timeAndReason.IndexOf(' ') + 1, timeAndReason.Length - (timeAndReason.IndexOf(' ') + 1));
+                    }
+                }
+
+                // await ctx.RespondAsync($"debug: {possibleNum}, {possibleTime}, {muteDuration.ToString()}, {reason}");
+                Mutes.MuteUserAsync(targetMember, reason, ctx.User.Id, ctx.Guild, null, muteDuration);
+                reason = reason.Replace("`", "\\`").Replace("*", "\\*");
+                if (muteDuration == default)
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Muted} {targetMember.Mention} has been muted: **{reason}**");
+                else
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Muted} {targetMember.Mention} has been muted for **{Warnings.TimeToPrettyFormat(muteDuration, false)}**: **{reason}**");
+            }
         }
     }
 }

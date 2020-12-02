@@ -32,7 +32,7 @@ namespace MicrosoftBot
         public ulong MemberId { get; set; }
 
         [JsonProperty("expireTime")]
-        public DateTime ExpireTime { get; set; }
+        public DateTime? ExpireTime { get; set; }
 
         [JsonProperty("modId")]
         public ulong ModId { get; set; }

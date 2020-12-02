@@ -172,7 +172,7 @@ namespace MicrosoftBot.Modules
             if (toMuteHours > 0)
             {
                 DiscordMember member = await guild.GetMemberAsync(targetUser.Id);
-                await Mutes.MuteUserAsync(member, TimeSpan.FromHours(toMuteHours), $"Automute after {warnsSinceThreshold} warnings in the past {Program.cfgjson.WarningDaysThreshold} hours.", targetUser.Id, guild, channel);
+                await Mutes.MuteUserAsync(member, $"Automute after {warnsSinceThreshold} warnings in the past {Program.cfgjson.WarningDaysThreshold} days.", modUser.Id, guild, channel, TimeSpan.FromHours(toMuteHours));
             }
 
 
@@ -224,13 +224,13 @@ namespace MicrosoftBot.Modules
             return value.Length <= maxLength ? value : value.Substring(0, maxLength);
         }
 
-        public static string TimeToPrettyFormat(TimeSpan span)
+        public static string TimeToPrettyFormat(TimeSpan span, bool ago = true)
         {
 
             if (span == TimeSpan.Zero) return "0 seconds";
 
             if (span.Days > 3649)
-                return "A long time";
+                return "a long time";
 
             var sb = new StringBuilder();
             if (span.Days > 365)
@@ -241,7 +241,7 @@ namespace MicrosoftBot.Modules
                 int months = remDays / 30;
                 if (months > 0)
                     sb.AppendFormat(", {0} month{1}", months, months > 1 ? "s" : String.Empty);
-                sb.AppendFormat(" ago");
+                // sb.AppendFormat(" ago");
             }
             else if (span.Days > 0)
                 sb.AppendFormat("{0} day{1}", span.Days, span.Days > 1 ? "s" : String.Empty);
@@ -250,9 +250,12 @@ namespace MicrosoftBot.Modules
             else if (span.Minutes > 0)
                 sb.AppendFormat("{0} minute{1}", span.Minutes, span.Minutes > 1 ? "s" : String.Empty);
             else
-                sb.AppendFormat("{0} second{1}", span.Seconds, span.Seconds > 1 ? "s" : String.Empty);
+                sb.AppendFormat("{0} second{1}", span.Seconds, (span.Seconds > 1 || span.Seconds == 0)  ? "s" : String.Empty);
 
-            return sb.ToString();
+            string output = sb.ToString();
+            if (ago)
+                output += " ago";
+            return output;
         }
 
         public static string Pad(ulong id)
