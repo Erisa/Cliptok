@@ -145,10 +145,18 @@ namespace MicrosoftBot.Modules
             if ((await Program.db.HashExistsAsync("mutes", targetUser.Id)) || member.Roles.Contains(mutedRole))
             {
                 await Mutes.UnmuteUserAsync(targetUser);
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Information} Successfully unmuted **{targetUser.Username}#{targetUser.Discriminator}**");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Information} Successfully unmuted **{targetUser.Username}#{targetUser.Discriminator}**.");
             }
             else
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user isn't muted!");
+                try
+                {
+                    await Mutes.UnmuteUserAsync(targetUser);
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} According to Discord that user is not muted, but I tried to unnmute them anyway. Hope it works.");
+                } catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be muted, *and* an error ocurred while attempting to unmute them anyway. Please contact the bot owner, the error has been logged.");
+                }
         }
     }
 }
