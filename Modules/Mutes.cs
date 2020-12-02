@@ -63,7 +63,7 @@ namespace MicrosoftBot.Modules
                     
                 else
                 {
-                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} has successfully muted {naughtyMember.Mention} for {Warnings.TimeToPrettyFormat(muteDuration, false)} by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**");
+                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} was successfully muted for {Warnings.TimeToPrettyFormat(muteDuration, false)} by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**");
                     await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}** for {Warnings.TimeToPrettyFormat(muteDuration, false)}!\nReason: **{reason}**");
 
                 }
