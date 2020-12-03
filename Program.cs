@@ -58,6 +58,7 @@ namespace MicrosoftBot
                 Console.WriteLine($"Logged in as {client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
                 logChannel = await discord.GetChannelAsync(cfgjson.LogChannel);
                 Mutes.CheckMutesAsync();
+                ModCmds.CheckBansAsync();
             }
 
             async Task MessageCreated(DiscordClient client, MessageCreateEventArgs e)
@@ -133,6 +134,7 @@ namespace MicrosoftBot
             commands.RegisterCommands<Warnings>();
             commands.RegisterCommands<MuteCmds>();
             commands.RegisterCommands<UserRoleCmds>();
+            commands.RegisterCommands<ModCmds>();
 
             await discord.ConnectAsync();
 
@@ -140,6 +142,7 @@ namespace MicrosoftBot
             {
                 await Task.Delay(60000);
                 Mutes.CheckMutesAsync();
+                ModCmds.CheckBansAsync();
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
             }

@@ -481,28 +481,5 @@ namespace MicrosoftBot.Modules
             }
         }
 
-        [Group("debug")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
-        class DebugCmds : BaseCommandModule
-        {
-            [Command("mutes")]
-            [Description("Debug the list of mutes.")]
-            public async Task MuteDebug(CommandContext ctx)
-            {
-                string strOut = "```json";
-                var muteList = Program.db.HashGetAll("mutes").ToDictionary();
-                if (muteList == null | muteList.Keys.Count == 0)
-                    await ctx.RespondAsync("No mutes found in database!");
-                else
-                {
-                    foreach (var entry in muteList)
-                    {
-                        strOut += $"\n{entry.Value}";
-                    }
-                }
-                strOut += "```";
-                await ctx.RespondAsync(strOut);
-            }
-        }
     }
 }

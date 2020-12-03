@@ -26,7 +26,7 @@ namespace MicrosoftBot
 
     }
 
-    public class MemberMute
+    public class MemberPunishment
     {
         [JsonProperty("memberId")]
         public ulong MemberId { get; set; }
@@ -106,6 +106,15 @@ namespace MicrosoftBot
 
         [JsonProperty("denied")]
         public string Denied { get; set; }
+
+        [JsonProperty("banned")]
+        public string Banned { get; set; }
+
+        [JsonProperty("unbanned")]
+        public string Unbanned { get; set;  }
+
+        [JsonProperty("ejected")]
+        public string Ejected { get; set; }
 
     }
 

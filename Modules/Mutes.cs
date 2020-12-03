@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace MicrosoftBot.Modules
 {
 
-    public static class Mutes
+    public static class Mutes 
     {
 
         public static TimeSpan RoundToNearest(this TimeSpan a, TimeSpan roundTo)
@@ -34,7 +34,7 @@ namespace MicrosoftBot.Modules
                 expireTime = null;
             }
 
-            MemberMute newMute = new MemberMute()
+            MemberPunishment newMute = new MemberPunishment()
             {
                 MemberId = naughtyMember.Id,
                 ModId = moderatorId,
@@ -124,9 +124,9 @@ namespace MicrosoftBot.Modules
         public static async System.Threading.Tasks.Task<bool> CheckMutesAsync()
         {
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
-            Dictionary<string, MemberMute> muteList = Program.db.HashGetAll("mutes").ToDictionary(
+            Dictionary<string, MemberPunishment> muteList = Program.db.HashGetAll("mutes").ToDictionary(
                 x => x.Name.ToString(),
-                x => JsonConvert.DeserializeObject<MemberMute>(x.Value)
+                x => JsonConvert.DeserializeObject<MemberPunishment>(x.Value)
             );
             if (muteList == null | muteList.Keys.Count == 0)
                 return false;
@@ -134,9 +134,9 @@ namespace MicrosoftBot.Modules
             {
                 // The success value will be changed later if any of the unmutes are successful.
                 bool success = false;
-                foreach (KeyValuePair<string, MemberMute> entry in muteList)
+                foreach (KeyValuePair<string, MemberPunishment> entry in muteList)
                 {
-                    MemberMute mute = entry.Value;
+                    MemberPunishment mute = entry.Value;
                     if (DateTime.Now > mute.ExpireTime)
                         await UnmuteUserAsync(await Program.discord.GetUserAsync(mute.MemberId));
                 }
@@ -154,7 +154,7 @@ namespace MicrosoftBot.Modules
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)]
         public async Task UnmuteCmd(CommandContext ctx, DiscordUser targetUser)
         {
-            DiscordGuild guild = await Program.discord.GetGuildAsync(ctx.Guild.Id);
+            DiscordGuild guild = ctx.Guild;
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
 
             // todo: store per-guild
@@ -201,36 +201,7 @@ namespace MicrosoftBot.Modules
                 if (int.TryParse(possibleNum, out int timeLength))
                 {
                     char possibleTimePeriod = possibleTime.Last();
-                    switch (possibleTimePeriod)
-                    {
-                        // Seconds
-                        case 's':
-                            muteDuration = TimeSpan.FromSeconds(timeLength);
-                            break;
-
-                        // Minutes
-                        case 'm':
-                            muteDuration = TimeSpan.FromMinutes(timeLength);
-                            break;
-
-                        // Hours
-                        case 'h':
-                            muteDuration = TimeSpan.FromHours(timeLength);
-                            break;
-
-                        // Days
-                        case 'd':
-                            muteDuration = TimeSpan.FromDays(timeLength);
-                            break;
-
-                        // Years
-                        case 'y':
-                            muteDuration = TimeSpan.FromDays(timeLength * 365);
-                            break;
-                        default:
-                            muteDuration = default;
-                            break;
-                    }
+                    muteDuration = ModCmds.ParseTime(possibleTimePeriod, timeLength);
                 }
                 else
                 {
