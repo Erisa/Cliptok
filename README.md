@@ -55,7 +55,7 @@ A lot of the configuration (Role IDs, emoji IDs, etc.) are in the `config.json` 
 - ~~Automatic mutes based on warning thresholds.~~ Done
 - ~~Automatic unmutes after specific time.~~ Done
 - ~~Automatic warning based on filters (e.g. swear words).~~ Done.
-- ~~General purpose commands: mute, ban, kick, etc.~~
+- ~~General purpose commands: mute, ban, kick, etc.~~ Done. 
 - ~~User selfrole assignment (Windows Insider roles?).~~ Done
 - ??? (Open an Issue!)
 
