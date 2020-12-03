@@ -429,6 +429,8 @@ namespace MicrosoftBot.Modules
         }
 
         [Group("debug")]
+        [Aliases("troubleshoot", "unbug", "bugn't", "helpsomethinghasgoneverywrong")]
+        [Description("Commands and things for fixing the bot in the unlikely event that it breaks a bit.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
         class DebugCmds : BaseCommandModule
         {
