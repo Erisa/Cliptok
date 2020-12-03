@@ -439,7 +439,10 @@ namespace MicrosoftBot.Modules
                 string strOut = "```json";
                 var muteList = Program.db.HashGetAll("mutes").ToDictionary();
                 if (muteList == null | muteList.Keys.Count == 0)
+                {
                     await ctx.RespondAsync("No mutes found in database!");
+                    return;
+                }
                 else
                 {
                     foreach (var entry in muteList)
@@ -458,7 +461,10 @@ namespace MicrosoftBot.Modules
                 string strOut = "```json";
                 var muteList = Program.db.HashGetAll("bans").ToDictionary();
                 if (muteList == null | muteList.Keys.Count == 0)
-                    await ctx.RespondAsync("No mutes found in database!");
+                {
+                    await ctx.RespondAsync("No bans found in database!");
+                    return;
+                }
                 else
                 {
                     foreach (var entry in muteList)
