@@ -172,6 +172,7 @@ namespace MicrosoftBot.Modules
         }
 
         [Command("ban")]
+        [Aliases("tempban")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequirePermissions(Permissions.BanMembers)]
         public async Task BanCmd(CommandContext ctx, DiscordUser targetMember, [RemainingText] string timeAndReason = "No reason specificed.")
         {
@@ -257,6 +258,7 @@ namespace MicrosoftBot.Modules
         /// I CANNOT find a way to do this as alias so I made it a separate copy of the command.
         /// Sue me, I beg you.
         [Command("bankeep")]
+        [Aliases("bansave")]
         [Description("Like ban except it keeps messages."), HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequirePermissions(Permissions.BanMembers)]
         public async Task BankeepCmd(CommandContext ctx, DiscordUser targetMember, [RemainingText] string timeAndReason = "No reason specificed.")
         {
