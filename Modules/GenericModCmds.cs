@@ -163,6 +163,12 @@ namespace MicrosoftBot.Modules
                 // Days
                 case 'd':
                     return TimeSpan.FromDays(timeLength);
+                // Weeks
+                case 'w':
+                    return TimeSpan.FromDays(timeLength * 7);
+                // Months
+                case 'q':
+                    return TimeSpan.FromDays(timeLength * 28);
                 // Years
                 case 'y':
                     return TimeSpan.FromDays(timeLength * 365);
@@ -174,7 +180,7 @@ namespace MicrosoftBot.Modules
         [Command("ban")]
         [Aliases("tempban")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequirePermissions(Permissions.BanMembers)]
-        public async Task BanCmd(CommandContext ctx, DiscordUser targetMember, [RemainingText] string timeAndReason = "No reason specificed.")
+        public async Task BanCmd(CommandContext ctx, DiscordUser targetMember, [RemainingText] string timeAndReason = "No reason specified.")
         {
             bool appealable = false;
             TimeSpan banDuration = default;
@@ -260,7 +266,7 @@ namespace MicrosoftBot.Modules
         [Command("bankeep")]
         [Aliases("bansave")]
         [Description("Like ban except it keeps messages."), HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequirePermissions(Permissions.BanMembers)]
-        public async Task BankeepCmd(CommandContext ctx, DiscordUser targetMember, [RemainingText] string timeAndReason = "No reason specificed.")
+        public async Task BankeepCmd(CommandContext ctx, DiscordUser targetMember, [RemainingText] string timeAndReason = "No reason specified.")
         {
             bool appealable = false;
             TimeSpan banDuration = default;
