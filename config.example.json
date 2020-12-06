@@ -1,4 +1,4 @@
-{
+﻿{
   "core": {
     "token": "TOKENGOESHERE",
     "prefixes": [ "!" ]
@@ -25,7 +25,23 @@
     "error": "<:ImageRes_Critical:679107080493203466>",
     "deleted": "<:Shell32_RecycleFull:678968912418963458>",
     "information": "<:Shell32_Information:678968748010635305>",
-    "muted": "<:ImageRes_ShieldWarning:679108762048397334>"
+    "muted": "<:ImageRes_ShieldWarning:679108762048397334>",
+    "emoji": {
+      "noPermissions": "<:ImageRes_ShieldUAC:679108762627211264>",
+      "warning": "<:Shell32_Warning:678968913417076736>",
+      "error": "<:ImageRes_Critical:679107080493203466>",
+      "deleted": "<:Shell32_RecycleFull:678968912418963458>",
+      "information": "<:Shell32_Information:678968748010635305>",
+      "muted": "<:ImageRes_ShieldWarning:679108762048397334>",
+      "denied": "🚫",
+      "ejected": "<:ImageRes_Eject:679108125797777452>",
+      "banned": "<:ImageRes_ShieldNotOK:679111973442682903> ",
+      "unbanned": "<:ImageRes_ShieldOK:679111973392089088>"
+    },
+    "restrictedWords": [
+      "boobs"
+    ],
+    "massMentionThreshold": 5
   },
   "userRoles": {
     "insiderDev": 434426594271166474,
