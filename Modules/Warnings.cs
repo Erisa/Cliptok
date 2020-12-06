@@ -295,7 +295,7 @@ namespace MicrosoftBot.Modules
             DiscordMember targetMember;
             try {
                 targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
-                if (targetMember.IsBot || ( targetMember != null && GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && GetPermLevel(targetMember) >= ServerPermLevel.TrialMod))
+                if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
                 {
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots..");
                     return;

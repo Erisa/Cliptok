@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace MicrosoftBot.Modules
 {
 
-    public static class Mutes 
+    public static class Mutes
     {
 
         public static TimeSpan RoundToNearest(this TimeSpan a, TimeSpan roundTo)
@@ -52,7 +52,7 @@ namespace MicrosoftBot.Modules
             {
                 return false;
             }
-            
+
             try
             {
                 if (permaMute)
@@ -60,7 +60,7 @@ namespace MicrosoftBot.Modules
                     await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} was successfully muted by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**");
                     await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}**!\nReason: **{reason}**");
                 }
-                    
+
                 else
                 {
                     await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} was successfully muted for {Warnings.TimeToPrettyFormat(muteDuration, false)} by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**");
@@ -183,7 +183,7 @@ namespace MicrosoftBot.Modules
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)]
         public async Task MuteCmd(CommandContext ctx, DiscordMember targetMember, [RemainingText] string timeAndReason = "No reason specificed.")
         {
-            if (targetMember.IsBot ||( Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod))
+            if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
                 return;
