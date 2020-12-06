@@ -106,6 +106,39 @@ namespace MicrosoftBot
                         DiscordMessage msg = await e.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
                         await Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
                     }
+
+                    if (e.Message.MentionedUsers.Count >= cfgjson.MassMentionThreshold)
+                    {
+                        DiscordChannel logChannel = await discord.GetChannelAsync(Program.cfgjson.LogChannel);
+                        try
+                        {
+                            await e.Message.DeleteAsync();
+                            var embed = new DiscordEmbedBuilder()
+                                .WithDescription(e.Message.Content)
+                                .WithColor(new DiscordColor(0xf03916))
+                                .WithTimestamp(e.Message.Timestamp)
+                                .WithFooter(
+                                    $"User ID: {e.Author.Id}",
+                                    null
+                                )
+                                .WithAuthor(
+                                    $"{e.Author.Username}#{e.Author.Discriminator} in #{e.Channel.Name}",
+                                    null,
+                                    e.Author.AvatarUrl
+                                );
+                            await logChannel.SendMessageAsync($"{cfgjson.Emoji.Denied} Deleted infringing message by {e.Author.Mention} in {e.Channel.Mention}:", false, embed);
+
+                        }
+                        catch
+                        {
+                            return;
+                        }
+
+                        string reason = "Mass mentions";
+                        DiscordMessage msg = await e.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                        await Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
+                    }
+
                 });
             }
 

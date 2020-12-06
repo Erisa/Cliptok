@@ -82,6 +82,9 @@ namespace MicrosoftBot
         [JsonProperty("restrictedWords")]
         public List<String> RestrictedWords { get; private set; }
 
+        [JsonProperty("massMentionThreshold")]
+        public int MassMentionThreshold { get; private set; }
+
     }
 
     public class EmojiJson
