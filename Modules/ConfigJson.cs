@@ -114,7 +114,7 @@ namespace MicrosoftBot
         public string Banned { get; set; }
 
         [JsonProperty("unbanned")]
-        public string Unbanned { get; set;  }
+        public string Unbanned { get; set; }
 
         [JsonProperty("ejected")]
         public string Ejected { get; set; }

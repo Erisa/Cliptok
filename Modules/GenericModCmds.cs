@@ -415,7 +415,7 @@ namespace MicrosoftBot.Modules
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
             try
             {
-              await guild.UnbanMemberAsync(target);
+                await guild.UnbanMemberAsync(target);
             }
             catch (Exception e)
             {
@@ -494,7 +494,8 @@ namespace MicrosoftBot.Modules
 
             [Command("shutdown")]
             [RequireHomeserverPerm(ServerPermLevel.Admin), Description("Panics and shuts the bot down. Check the arguments for usage.")]
-            public async Task Shutdown(CommandContext ctx, [Description("This MUST be set to \"I understand what I am doing\" for the command to work."), RemainingText] string verificationArgument) {
+            public async Task Shutdown(CommandContext ctx, [Description("This MUST be set to \"I understand what I am doing\" for the command to work."), RemainingText] string verificationArgument)
+            {
                 if (verificationArgument == "I understand what I am doing")
                 {
                     await ctx.RespondAsync("WARNING: The bot is now shutting down. This action is permanent.");
@@ -503,7 +504,7 @@ namespace MicrosoftBot.Modules
                 else
                 {
                     await ctx.RespondAsync("Invalid argument. Make sure you know what you are doing.");
-                   
+
                 };
             }
             [Command("refresh")]

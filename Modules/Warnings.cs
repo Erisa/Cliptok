@@ -250,7 +250,7 @@ namespace MicrosoftBot.Modules
             else if (span.Minutes > 0)
                 sb.AppendFormat("{0} minute{1}", span.Minutes, span.Minutes > 1 ? "s" : String.Empty);
             else
-                sb.AppendFormat("{0} second{1}", span.Seconds, (span.Seconds > 1 || span.Seconds == 0)  ? "s" : String.Empty);
+                sb.AppendFormat("{0} second{1}", span.Seconds, (span.Seconds > 1 || span.Seconds == 0) ? "s" : String.Empty);
 
             string output = sb.ToString();
             if (ago)
@@ -293,14 +293,16 @@ namespace MicrosoftBot.Modules
         )
         {
             DiscordMember targetMember;
-            try {
+            try
+            {
                 targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
                 if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
                 {
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots..");
                     return;
                 }
-            } catch
+            }
+            catch
             {
                 // do nothing :/
             }
@@ -400,8 +402,6 @@ namespace MicrosoftBot.Modules
             UserWarning warning = GetWarning(targetUser.Id, warnId);
             if (warning == null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
-            else if (GetPermLevel(ctx.Member) < ServerPermLevel.Admin && warning.ModUserId != ctx.User.Id)
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.NoPermissions} You can only delete warnings that were issued by you!");
             else
             {
                 DelWarning(warning);
@@ -469,8 +469,6 @@ namespace MicrosoftBot.Modules
             var warning = GetWarning(targetUser.Id, warnId);
             if (warning == null)
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
-            else if (GetPermLevel(ctx.Member) < ServerPermLevel.Admin && warning.ModUserId != ctx.User.Id)
-                await msg.ModifyAsync($"{Program.cfgjson.Emoji.NoPermissions} You can only edit warnings that were issued by you!");
             else
             {
                 EditWarning(targetUser, warnId, ctx.User, newReason, MessageLink(msg));
