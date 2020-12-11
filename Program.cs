@@ -142,7 +142,7 @@ namespace MicrosoftBot
                         string inviteExclusion = "microsoft";
                         if (cfgjson.InviteExclusion != null)
                             inviteExclusion = cfgjson.InviteExclusion;
-                            
+
                         string checkedMessage = e.Message.Content.Replace($"discord.gg/{inviteExclusion}", "").Replace($"discord.com/invite/{inviteExclusion}", "");
 
                         if (checkedMessage.Contains("discord.gg/") || checkedMessage.Contains("discord.com/invite/"))

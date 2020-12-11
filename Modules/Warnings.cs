@@ -12,7 +12,8 @@ using System.Threading.Tasks;
 namespace MicrosoftBot.Modules
 {
 
-    public enum ServerPermLevel { 
+    public enum ServerPermLevel
+    {
         nothing = 0,
         Tier1,
         Tier2,
@@ -67,7 +68,7 @@ namespace MicrosoftBot.Modules
         public static DiscordRole GetRole(DiscordGuild guild, ulong roleID)
         {
             return guild.GetRole(roleID);
-        } 
+        }
 
         public static ServerPermLevel GetPermLevel(DiscordMember target)
         {
