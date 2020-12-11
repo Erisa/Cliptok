@@ -106,8 +106,7 @@ namespace MicrosoftBot
                         DiscordMessage msg = await e.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
                         await Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
                     }
-
-                    if (e.Message.MentionedUsers.Count >= cfgjson.MassMentionThreshold)
+                    else if (e.Message.MentionedUsers.Count >= cfgjson.MassMentionThreshold)
                     {
                         DiscordChannel logChannel = await discord.GetChannelAsync(Program.cfgjson.LogChannel);
                         try
@@ -135,8 +134,48 @@ namespace MicrosoftBot
                         }
 
                         string reason = "Mass mentions";
-                        DiscordMessage msg = await e.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                        DiscordMessage msg = await e.Channel.SendMessageAsync($"{cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
                         await Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
+                    }
+                    else if (Warnings.GetPermLevel(member) < ServerPermLevel.Tier1)
+                    {
+                        string inviteExclusion = "microsoft";
+                        if (cfgjson.InviteExclusion != null)
+                            inviteExclusion = cfgjson.InviteExclusion;
+                            
+                        string checkedMessage = e.Message.Content.Replace($"discord.gg/{inviteExclusion}", "").Replace($"discord.com/invite/{inviteExclusion}", "");
+
+                        if (checkedMessage.Contains("discord.gg/") || checkedMessage.Contains("discord.com/invite/"))
+                        {
+                            try
+                            {
+                                await e.Message.DeleteAsync();
+                                var embed = new DiscordEmbedBuilder()
+                                    .WithDescription(e.Message.Content)
+                                    .WithColor(new DiscordColor(0xf03916))
+                                    .WithTimestamp(e.Message.Timestamp)
+                                    .WithFooter(
+                                        $"User ID: {e.Author.Id}",
+                                        null
+                                    )
+                                    .WithAuthor(
+                                        $"{e.Author.Username}#{e.Author.Discriminator} in #{e.Channel.Name}",
+                                        null,
+                                        e.Author.AvatarUrl
+                                    );
+                                await logChannel.SendMessageAsync($"{cfgjson.Emoji.Denied} Deleted infringing message by {e.Author.Mention} in {e.Channel.Mention}:", false, embed);
+
+                            }
+                            catch
+                            {
+                                return;
+                            }
+                            string reason = "Sent an invite";
+                            DiscordMessage msg = await e.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                            await Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
+
+                        }
+
                     }
 
                 });

@@ -12,7 +12,19 @@ using System.Threading.Tasks;
 namespace MicrosoftBot.Modules
 {
 
-    public enum ServerPermLevel { nothing, TrialMod, Mod, Admin, Owner = int.MaxValue }
+    public enum ServerPermLevel { 
+        nothing = 0,
+        Tier1,
+        Tier2,
+        Tier3,
+        Tier4,
+        Tier5,
+        Tier6,
+        TrialMod,
+        Mod,
+        Admin,
+        Owner = int.MaxValue
+    }
 
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class RequireHomeserverPermAttribute : CheckBaseAttribute
@@ -52,23 +64,37 @@ namespace MicrosoftBot.Modules
     public class Warnings : BaseCommandModule
     {
 
+        public static DiscordRole GetRole(DiscordGuild guild, ulong roleID)
+        {
+            return guild.GetRole(roleID);
+        } 
+
         public static ServerPermLevel GetPermLevel(DiscordMember target)
         {
             if (target.Guild.Id != Program.cfgjson.ServerID)
                 return ServerPermLevel.nothing;
 
-            DiscordRole TrialModRole = target.Guild.GetRole(Program.cfgjson.TrialModRole);
-            DiscordRole ModRole = target.Guild.GetRole(Program.cfgjson.ModRole);
-            DiscordRole Adminrole = target.Guild.GetRole(Program.cfgjson.AdminRole);
-
+            // Torch approved of this.
             if (target.IsOwner)
                 return ServerPermLevel.Owner;
-            else if (target.Roles.Contains(Adminrole))
+            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.AdminRole)))
                 return ServerPermLevel.Admin;
-            else if (target.Roles.Contains(ModRole))
+            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.ModRole)))
                 return ServerPermLevel.Mod;
-            else if (target.Roles.Contains(TrialModRole))
+            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TrialModRole)))
                 return ServerPermLevel.TrialMod;
+            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[5])))
+                return ServerPermLevel.Tier6;
+            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[4])))
+                return ServerPermLevel.Tier5;
+            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[3])))
+                return ServerPermLevel.Tier4;
+            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[2])))
+                return ServerPermLevel.Tier3;
+            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[1])))
+                return ServerPermLevel.Tier2;
+            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[0])))
+                return ServerPermLevel.Tier1;
             else
                 return ServerPermLevel.nothing;
         }

@@ -80,11 +80,16 @@ namespace MicrosoftBot
         public UserRoleConfig UserRoles { get; private set; }
 
         [JsonProperty("restrictedWords")]
-        public List<String> RestrictedWords { get; private set; }
+        public List<string> RestrictedWords { get; private set; }
 
         [JsonProperty("massMentionThreshold")]
         public int MassMentionThreshold { get; private set; }
 
+        [JsonProperty("tierRoles")]
+        public List<ulong> TierRoles { get; private set; }
+
+        [JsonProperty("inviteExclusion")]
+        public string InviteExclusion { get; private set; }
     }
 
     public class EmojiJson
