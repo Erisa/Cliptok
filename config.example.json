@@ -46,6 +46,7 @@
     284782848844627968,
     398209263962554368
   ],
-  "inviteExclusion": "microsoft"
+  "inviteExclusion": "microsoft",
+  "inviteTierRequirement": 1
 
 }
