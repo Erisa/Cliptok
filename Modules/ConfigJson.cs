@@ -92,7 +92,7 @@ namespace MicrosoftBot
         public string InviteExclusion { get; private set; }
 
         [JsonProperty("inviteTierRequirement")]
-        public string InviteTierRequirement { get; private set; }
+        public int InviteTierRequirement { get; private set; }
     }
 
     public class EmojiJson

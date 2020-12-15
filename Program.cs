@@ -137,7 +137,7 @@ namespace MicrosoftBot
                         DiscordMessage msg = await e.Channel.SendMessageAsync($"{cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
                         await Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
                     }
-                    else if (Warnings.GetPermLevel(member) < Program.cfgjson.InviteTierRequirement)
+                    else if (Warnings.GetPermLevel(member) < (ServerPermLevel)cfgjson.InviteTierRequirement)
                     {
                         string inviteExclusion = "microsoft";
                         if (cfgjson.InviteExclusion != null)
