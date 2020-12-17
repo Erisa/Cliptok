@@ -80,7 +80,7 @@ namespace MicrosoftBot
                         DiscordChannel logChannel = await discord.GetChannelAsync(Program.cfgjson.LogChannel);
                         try
                         {
-                            await e.Message.DeleteAsync();
+                            e.Message.DeleteAsync();
                             var embed = new DiscordEmbedBuilder()
                                 .WithDescription(e.Message.Content)
                                 .WithColor(new DiscordColor(0xf03916))
@@ -94,8 +94,7 @@ namespace MicrosoftBot
                                     null,
                                     e.Author.AvatarUrl
                                 );
-                            await logChannel.SendMessageAsync($"{cfgjson.Emoji.Denied} Deleted infringing message by {e.Author.Mention} in {e.Channel.Mention}:", false, embed);
-
+                            logChannel.SendMessageAsync($"{cfgjson.Emoji.Denied} Deleted infringing message by {e.Author.Mention} in {e.Channel.Mention}:", false, embed);
                         }
                         catch
                         {
@@ -111,7 +110,7 @@ namespace MicrosoftBot
                         DiscordChannel logChannel = await discord.GetChannelAsync(Program.cfgjson.LogChannel);
                         try
                         {
-                            await e.Message.DeleteAsync();
+                            e.Message.DeleteAsync();
                             var embed = new DiscordEmbedBuilder()
                                 .WithDescription(e.Message.Content)
                                 .WithColor(new DiscordColor(0xf03916))
@@ -125,7 +124,7 @@ namespace MicrosoftBot
                                     null,
                                     e.Author.AvatarUrl
                                 );
-                            await logChannel.SendMessageAsync($"{cfgjson.Emoji.Denied} Deleted infringing message by {e.Author.Mention} in {e.Channel.Mention}:", false, embed);
+                            logChannel.SendMessageAsync($"{cfgjson.Emoji.Denied} Deleted infringing message by {e.Author.Mention} in {e.Channel.Mention}:", false, embed);
 
                         }
                         catch
@@ -149,7 +148,7 @@ namespace MicrosoftBot
                         {
                             try
                             {
-                                await e.Message.DeleteAsync();
+                                e.Message.DeleteAsync();
                                 var embed = new DiscordEmbedBuilder()
                                     .WithDescription(e.Message.Content)
                                     .WithColor(new DiscordColor(0xf03916))
@@ -163,7 +162,7 @@ namespace MicrosoftBot
                                         null,
                                         e.Author.AvatarUrl
                                     );
-                                await logChannel.SendMessageAsync($"{cfgjson.Emoji.Denied} Deleted infringing message by {e.Author.Mention} in {e.Channel.Mention}:", false, embed);
+                                logChannel.SendMessageAsync($"{cfgjson.Emoji.Denied} Deleted infringing message by {e.Author.Mention} in {e.Channel.Mention}:", false, embed);
 
                             }
                             catch

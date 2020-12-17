@@ -316,7 +316,7 @@ namespace MicrosoftBot.Modules
                 if (member == null)
                 {
                     await ctx.Message.DeleteAsync();
-                    await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 7, ctx.Channel, banDuration, appealable);
+                    await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, -1, ctx.Channel, banDuration, appealable);
                 }
                 else
                 {
@@ -325,7 +325,7 @@ namespace MicrosoftBot.Modules
                         if (AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
                         {
                             await ctx.Message.DeleteAsync();
-                            await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 0, ctx.Channel, banDuration, appealable);
+                            await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, -1, ctx.Channel, banDuration, appealable);
                         }
                         else
                         {
