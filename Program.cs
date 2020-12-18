@@ -137,7 +137,7 @@ namespace MicrosoftBot
                 {
                     foreach (string word in wordLists[key])
                     {
-                        if (word != "" && word != "" &&  e.Message.Content.ToLower().Contains(word))
+                        if (word != "" && word != " " &&  e.Message.Content.ToLower().Contains(word))
                         {
                             try
                             {
