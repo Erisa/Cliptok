@@ -23,12 +23,13 @@ namespace MicrosoftBot
         public static IDatabase db;
         public static DiscordChannel logChannel;
         public static List<ulong> processedMessages = new List<ulong>();
+        public static Dictionary<string, string[]> wordLists = new Dictionary<string,string[]>();
 
 
         static void Main(string[] args)
         {
             MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
-        }
+        } 
 
         static async Task MainAsync(string[] _)
         {
@@ -38,6 +39,14 @@ namespace MicrosoftBot
                 json = await sr.ReadToEndAsync();
 
             cfgjson = JsonConvert.DeserializeObject<ConfigJson>(json);
+
+            var keys = cfgjson.WordListList.Keys;
+            foreach (string key in keys)
+            {
+                string reason = cfgjson.WordListList[key];
+                var listOutput = File.ReadAllLines($"Lists/{key}");
+                wordLists[reason] = listOutput;
+            }
 
             string redisHost;
             if (Environment.GetEnvironmentVariable("REDIS_DOCKER_OVERRIDE") != null)
@@ -122,6 +131,48 @@ namespace MicrosoftBot
                     }
 
                 });
+
+                var wordListKeys = wordLists.Keys;
+                foreach (string key in wordListKeys)
+                {
+                    foreach (string word in wordLists[key])
+                    {
+                        if (e.Message.Content.ToLower().Contains(word))
+                        {
+                            try
+                            {
+                                e.Message.DeleteAsync();
+                                DiscordChannel logChannel = await discord.GetChannelAsync(Program.cfgjson.LogChannel);
+                                var embed = new DiscordEmbedBuilder()
+                                    .WithDescription(e.Message.Content)
+                                    .WithColor(new DiscordColor(0xf03916))
+                                    .WithTimestamp(e.Message.Timestamp)
+                                    .WithFooter(
+                                        $"User ID: {e.Author.Id}",
+                                        null
+                                    )
+                                    .WithAuthor(
+                                        $"{e.Author.Username}#{e.Author.Discriminator} in #{e.Channel.Name}",
+                                        null,
+                                        e.Author.AvatarUrl
+                                    );
+                                logChannel.SendMessageAsync($"{cfgjson.Emoji.Denied} Deleted infringing message by {e.Author.Mention} in {e.Channel.Mention}:", false, embed);
+                            }
+                            catch
+                            {
+                                // still warn anyway
+                            }
+
+                            match = true;
+                            string reason = key;
+                            DiscordMessage msg = await e.Channel.SendMessageAsync($"{cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                            Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
+                            return;
+                        }
+                    }
+                    if (match)
+                        return;
+                }
 
                 if (match)
                     return;

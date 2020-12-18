@@ -47,6 +47,11 @@
     398209263962554368
   ],
   "inviteExclusion": "microsoft",
-  "inviteTierRequirement": 2
+  "inviteTierRequirement": 2,
+  "wordLists": {
+    "rudeWords.txt": "Use of restricted word(s)",
+    "everyone.txt": "Attempted to ping everyone/here",
+    "naughtyURLs.txt": "Sent malicious URL(s)"
+  }
 
 }

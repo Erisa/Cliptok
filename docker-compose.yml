@@ -9,6 +9,9 @@ services:
       - type: bind
         source: ./config.json
         target: /app/config.json
+      - type: bind
+        source: ./Lists/rudeWords.txt
+        target: /app/Lists/rudeWords.txt
     environment:
       # Overrides your configs Redis options for use with Docker Compose
       #  I don't advise changing this unless you have a strange setup
