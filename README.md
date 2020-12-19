@@ -1,4 +1,4 @@
-# Microsoft (Discord) Bot
+# Cliptok - A Discord bot for Microsoft Community
 
 ## About
 This bot is a simple(?) Discord moderation bot specifically designed for the [Microsoft Community](https://msft.chat/).  
@@ -52,11 +52,11 @@ Currently the bot will only work with one server. This choice was made because t
 A lot of the configuration (Role IDs, emoji IDs, etc.) are in the `config.json` file and cannot be edited at runtime. This means the bot will have to be relaunched for changes to those settings to take effect. This may be improved in the future, however it is not a high priority.
 
 ## Planned features
-- ~~Automatic mutes based on warning thresholds.~~ Done
-- ~~Automatic unmutes after specific time.~~ Done
+- ~~Automatic mutes based on warning thresholds.~~ Done.
+- ~~Automatic unmutes after specific time.~~ Done.
 - ~~Automatic warning based on filters (e.g. swear words).~~ Done.
 - ~~General purpose commands: mute, ban, kick, etc.~~ Done. 
-- ~~User selfrole assignment (Windows Insider roles?).~~ Done
+- ~~User selfrole assignment (Windows Insider roles?).~~ Done.
 - ??? (Open an Issue!)
 
 ## Credits
@@ -65,6 +65,6 @@ A lot of the configuration (Role IDs, emoji IDs, etc.) are in the `config.json` 
 - [Erisa](https://github.com/Erisa)
 
 ### Special thanks
-- [TorchGM](https://github.com/TorchGM) for testing and providing design feedback.
+- [TorchGM](https://github.com/TorchGM) for testing and providing design feedback. Seriously, thank you Torch.
 - The developers of [DSharpPlus](https://github.com/DSharpPlus/DSharpPlus), without their library none of this would  be possible.
 - The excellent Moderation team over at [Microsoft Community](https://msft.chat/), and all of its wonderful members.
