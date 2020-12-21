@@ -95,8 +95,19 @@ namespace MicrosoftBot
         public int InviteTierRequirement { get; private set; }
 
         [JsonProperty("wordLists")]
-        public Dictionary<string, string> WordListList { get; private set; }
+        public Dictionary<string, WordListJson> WordListList { get; private set; }
 
+    }
+
+    public class WordListJson
+    {
+        [JsonProperty("wholeWord")]
+        public bool WholeWord { get; private set; }
+
+        [JsonProperty("reason")]
+        public string Reason { get; private set; }
+
+        public string[] Words { get; set; }
     }
 
     public class EmojiJson

@@ -8,6 +8,7 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,13 +24,80 @@ namespace MicrosoftBot
         public static IDatabase db;
         public static DiscordChannel logChannel;
         public static List<ulong> processedMessages = new List<ulong>();
-        public static Dictionary<string, string[]> wordLists = new Dictionary<string,string[]>();
+        public static Dictionary<string, string[]> wordLists = new Dictionary<string, string[]>();
 
+        static bool CheckForNaughtyWords(string input, WordListJson naughtyWordList)
+        {
+            string[] naughtyWords = naughtyWordList.Words;
+            if (naughtyWordList.WholeWord)
+            { 
+                input = input.Replace("\'", " ")
+                    .Replace("-", " ")
+                    .Replace("_", " ")
+                    .Replace(".", " ")
+                    .Replace(":", " ")
+                    .Replace("/", " ")
+                    .Replace(",", " ");
+
+                char[] tempArray = input.ToCharArray();
+
+                tempArray = Array.FindAll(tempArray, c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c));
+                input = new string(tempArray);
+
+                string[] arrayOfWords = input.Split(' ');
+
+                for (int i = 0; i < arrayOfWords.Length; i++)
+                {
+                    bool isNaughty = false;
+                    foreach (string naughty in naughtyWords)
+                    {
+                        string distinctString = new string(arrayOfWords[i].Replace(naughty, "#").Distinct().ToArray());
+                        if (distinctString.Length <= 3 && arrayOfWords[i].Contains(naughty))
+                        {
+                            if (distinctString.Length == 1)
+                            {
+                                isNaughty = true;
+
+                            }
+                            else if (distinctString.Length == 2 && (naughty.EndsWith(distinctString[1].ToString()) || naughty.StartsWith(distinctString[0].ToString())))
+                            {
+                                isNaughty = true;
+                            }
+                            else if (distinctString.Length == 3 && naughty.EndsWith(distinctString[1].ToString()) && naughty.StartsWith(distinctString[0].ToString()))
+                            {
+                                isNaughty = true;
+                            }
+                        }
+                        if (arrayOfWords[i] == "")
+                        {
+                            isNaughty = false;
+                        }
+                    }
+                    if (isNaughty)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            else
+            {
+                foreach (string word in naughtyWords)
+                {
+                    if (input.Contains(word))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+        }
 
         static void Main(string[] args)
         {
             MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
-        } 
+        }
 
         static async Task MainAsync(string[] _)
         {
@@ -43,9 +111,8 @@ namespace MicrosoftBot
             var keys = cfgjson.WordListList.Keys;
             foreach (string key in keys)
             {
-                string reason = cfgjson.WordListList[key];
                 var listOutput = File.ReadAllLines($"Lists/{key}");
-                wordLists[reason] = listOutput;
+                cfgjson.WordListList[key].Words = listOutput;
             }
 
             string redisHost;
@@ -82,7 +149,8 @@ namespace MicrosoftBot
                 if (processedMessages.Contains(e.Message.Id))
                 {
                     return;
-                } else
+                }
+                else
                 {
                     processedMessages.Add(e.Message.Id);
                 }
@@ -95,9 +163,11 @@ namespace MicrosoftBot
 
 
                 bool match = false;
-                cfgjson.RestrictedWords.ForEach(async delegate (string wordToCheck)
+
+                var wordListKeys = cfgjson.WordListList.Keys;
+                foreach (string key in wordListKeys)
                 {
-                    if (e.Message.Content.ToLower().Contains(wordToCheck))
+                    if (CheckForNaughtyWords(e.Message.Content, cfgjson.WordListList[key]))
                     {
                         try
                         {
@@ -124,51 +194,10 @@ namespace MicrosoftBot
                         }
 
                         match = true;
-                        string reason = "Use of restricted word(s)";
-                        DiscordMessage msg = await e.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
-                        await Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
+                        string reason = cfgjson.WordListList[key].Reason;
+                        DiscordMessage msg = await e.Channel.SendMessageAsync($"{cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                        Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
                         return;
-                    }
-
-                });
-
-                var wordListKeys = wordLists.Keys;
-                foreach (string key in wordListKeys)
-                {
-                    foreach (string word in wordLists[key])
-                    {
-                        if (word != "" && word != " " &&  e.Message.Content.ToLower().Contains(word))
-                        {
-                            try
-                            {
-                                e.Message.DeleteAsync();
-                                DiscordChannel logChannel = await discord.GetChannelAsync(Program.cfgjson.LogChannel);
-                                var embed = new DiscordEmbedBuilder()
-                                    .WithDescription(e.Message.Content)
-                                    .WithColor(new DiscordColor(0xf03916))
-                                    .WithTimestamp(e.Message.Timestamp)
-                                    .WithFooter(
-                                        $"User ID: {e.Author.Id}",
-                                        null
-                                    )
-                                    .WithAuthor(
-                                        $"{e.Author.Username}#{e.Author.Discriminator} in #{e.Channel.Name}",
-                                        null,
-                                        e.Author.AvatarUrl
-                                    );
-                                logChannel.SendMessageAsync($"{cfgjson.Emoji.Denied} Deleted infringing message by {e.Author.Mention} in {e.Channel.Mention}:", false, embed);
-                            }
-                            catch
-                            {
-                                // still warn anyway
-                            }
-
-                            match = true;
-                            string reason = key;
-                            DiscordMessage msg = await e.Channel.SendMessageAsync($"{cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
-                            Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
-                            return;
-                        }
                     }
                     if (match)
                         return;
