@@ -313,7 +313,7 @@ namespace MicrosoftBot.Modules
             Aliases("wam", "warm"),
             HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)
         ]
-        public async Task WarnCmd(
+        public async Task AnonWarnCmd(
             CommandContext ctx,
             [Description("The user you are warning. Accepts many formats.")] DiscordUser targetUser,
             [RemainingText, Description("The reason for giving this warning.")] string reason = null
