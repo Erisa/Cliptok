@@ -352,8 +352,8 @@ namespace MicrosoftBot.Modules
         ]
         public async Task WarnCmd(
             CommandContext ctx,
-            [Description("The user you are warning. Accepts many formats.")] DiscordUser targetUser,
             [Description("The channel you wish for the warning message to appear in.")] DiscordChannel targetChannel,
+            [Description("The user you are warning. Accepts many formats.")] DiscordUser targetUser,
             [RemainingText, Description("The reason for giving this warning.")] string reason = null
         )
         {
@@ -379,6 +379,7 @@ namespace MicrosoftBot.Modules
                 return;
             }
             DiscordMessage msg = await targetChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", false, null);
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned in {targetChannel.Mention}: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
             UserWarning warning = await GiveWarningAsync(targetUser, ctx.User, reason, MessageLink(msg), ctx.Channel);
         }
 
