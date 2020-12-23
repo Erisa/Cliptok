@@ -325,7 +325,7 @@ namespace MicrosoftBot.Modules
                 targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
                 if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
                 {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots..");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
                     return;
                 }
             }
@@ -341,6 +341,44 @@ namespace MicrosoftBot.Modules
                 return;
             }
             DiscordMessage msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+            UserWarning warning = await GiveWarningAsync(targetUser, ctx.User, reason, MessageLink(msg), ctx.Channel);
+        }
+        
+        [
+            Command("anonwarn"),
+            Description("Issues a formal warning to a user from a private channel."),
+            Aliases("anonwam", "anonwarm"),
+            HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)
+        ]
+        public async Task WarnCmd(
+            CommandContext ctx,
+            [Description("The user you are warning. Accepts many formats.")] DiscordUser targetUser,
+            [Description("The channel you wish for the warning message to appear in.")] DiscordChannel targetChannel,
+            [RemainingText, Description("The reason for giving this warning.")] string reason = null
+        )
+        {
+            DiscordMember targetMember;
+            try
+            {
+                targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
+                if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
+                    return;
+                }
+            }
+            catch
+            {
+                // do nothing :/
+            }
+
+            await ctx.Message.DeleteAsync();
+            if (reason == null)
+            {
+                await ctx.Member.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} Reason must be included for the warning command to work.");
+                return;
+            }
+            DiscordMessage msg = await targetChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", false, null);
             UserWarning warning = await GiveWarningAsync(targetUser, ctx.User, reason, MessageLink(msg), ctx.Channel);
         }
 
