@@ -49,9 +49,17 @@
   "inviteExclusion": "microsoft",
   "inviteTierRequirement": 2,
   "wordLists": {
-    "rudeWords.txt": "Use of restricted word(s)",
-    "everyone.txt": "Attempted to ping everyone/here",
-    "naughtyURLs.txt": "Sent malicious URL(s)"
-  }
+    "rudeWords.txt": {
+      "wholeWord": true,
+      "reason": "Use of restricted word(s)"
+    },
+    "everyone.txt": {
+      "wholeWord": false,
+      "reason": "Attempted to ping everyone/here"
+    },
+    "naughtyURLs.txt": {
+      "wholeWord": false,
+      "reason": "Sent malicious URL(s)"
+    }
 
-}
+  }
