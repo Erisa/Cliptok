@@ -30,7 +30,7 @@ namespace MicrosoftBot
         {
             string[] naughtyWords = naughtyWordList.Words;
             if (naughtyWordList.WholeWord)
-            { 
+            {
                 input = input.Replace("\'", " ")
                     .Replace("-", " ")
                     .Replace("_", " ")

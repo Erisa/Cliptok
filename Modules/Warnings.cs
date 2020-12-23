@@ -343,7 +343,7 @@ namespace MicrosoftBot.Modules
             DiscordMessage msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
             UserWarning warning = await GiveWarningAsync(targetUser, ctx.User, reason, MessageLink(msg), ctx.Channel);
         }
-        
+
         [
             Command("anonwarn"),
             Description("Issues a formal warning to a user from a private channel."),
