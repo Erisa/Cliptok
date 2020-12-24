@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace MicrosoftBot
@@ -163,7 +164,8 @@ namespace MicrosoftBot
 
 
                 bool match = false;
-
+                
+                // Matching word list
                 var wordListKeys = cfgjson.WordListList.Keys;
                 foreach (string key in wordListKeys)
                 {
@@ -206,6 +208,7 @@ namespace MicrosoftBot
                 if (match)
                     return;
 
+                // Mass emoji
                 if (e.Message.MentionedUsers.Count >= cfgjson.MassMentionThreshold)
                 {
                     DiscordChannel logChannel = await discord.GetChannelAsync(Program.cfgjson.LogChannel);
@@ -238,7 +241,9 @@ namespace MicrosoftBot
                     await Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
                     return;
                 }
-                else if (Warnings.GetPermLevel(member) < (ServerPermLevel)cfgjson.InviteTierRequirement)
+
+                // Unapproved invites
+                if (Warnings.GetPermLevel(member) < (ServerPermLevel)cfgjson.InviteTierRequirement)
                 {
                     string inviteExclusion = "microsoft";
                     if (cfgjson.InviteExclusion != null)
@@ -277,6 +282,38 @@ namespace MicrosoftBot
                         return;
                     }
 
+                }
+
+                // Mass emoji
+                if (!cfgjson.UnrestrictedEmojiChannels.Contains(e.Message.ChannelId) && e.Message.Content.Length >= cfgjson.MassEmojiThreshold)
+                {
+                    char[] tempArray = e.Message.Content.Replace("🏻", "").Replace("🏼", "").Replace("🏽", "").Replace("🏾", "").Replace("", "🏿").ToCharArray();
+                    int pos = 0;
+                    foreach (char c in tempArray)
+                    {
+                        
+                        if (c == '™' || c == '®' || c == '©')
+                        {
+                            tempArray[pos] = ' ';
+                        }
+                        if (c == '\u200d')
+                        {
+                            tempArray[pos] = ' ';
+                            tempArray[pos+1] = ' ';
+                        }
+                        ++pos;
+                    }
+                    string input = new string(tempArray);
+
+                    if (Regex.Matches(input, @"
+                    /((\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]))|(<a{0,1}:[a-zA-Z0-9_.]{2,32}:[0-9]+>)/gm
+                    ").Count > cfgjson.MassEmojiThreshold)
+                    {
+                        string reason = "Mass emoji";
+                        DiscordMessage msg = await e.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                        await Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
+                        return;
+                    }
                 }
             }
 
