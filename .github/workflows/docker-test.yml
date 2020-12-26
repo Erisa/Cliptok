@@ -30,6 +30,6 @@ jobs:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
-          push: true
+          push: false
           tags: |
             ghcr.io/erisa/cliptok:latest
