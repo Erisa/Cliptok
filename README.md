@@ -14,10 +14,10 @@ If you're using the bot elsewhere, you will need to edit the configuration file 
 ## Usage
 There are two methods of launching this bot. Through [Docker](https://www.docker.com/) or as a standalone application.
 
-If you are not familiar with deploying .NET (Core) and Redis applications, it is recommended to use the Docker method as dependencies are automatically handled for you without polluting your main system, and the setup can be handled with a few simple commands.-
+If you are not familiar with deploying .NET (Core) and Redis applications, it is recommended to use the Docker method as dependencies are automatically handled for you without polluting your main system, and the setup can be handled with a few simple commands.
 
 ### Setup - Docker
-First you'll want to install Docker. On a Debian or Ubuntu-based Linux distribution this should be as simple as `sudo apt-get install docker docker-compose`.
+First you'll want to install Docker. On a Debian or Ubuntu-based Linux distribution this should be as simple as `sudo apt-get install docker.io docker-compose`.
 
 Then:
 1. Clone this repository and `cd` into the directory.
