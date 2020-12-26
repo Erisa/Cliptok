@@ -24,4 +24,10 @@
     </Content>
       </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Lists\rudeWords.txt" />
+  </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties config_1json__JsonSchema="https://json.schemastore.org/datalogic-scan2deploy-ce" /></VisualStudio></ProjectExtensions>
+
 </Project>

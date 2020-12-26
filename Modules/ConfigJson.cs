@@ -85,7 +85,7 @@ namespace MicrosoftBot
         [JsonProperty("massMentionThreshold")]
         public int MassMentionThreshold { get; private set; }
 
-        [JsonProperty("massMentionThreshold")]
+        [JsonProperty("massEmojiThreshold")]
         public int MassEmojiThreshold { get; private set; }
 
         [JsonProperty("tierRoles")]

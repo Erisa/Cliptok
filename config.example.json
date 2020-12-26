@@ -61,5 +61,8 @@
       "wholeWord": false,
       "reason": "Sent malicious URL(s)"
     }
+  },
+  "massEmojiThreshold": 5,
+  "massMentionThreshold": 5
+}
 
-  }

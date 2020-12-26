@@ -26,6 +26,8 @@ namespace MicrosoftBot
         public static DiscordChannel logChannel;
         public static List<ulong> processedMessages = new List<ulong>();
         public static Dictionary<string, string[]> wordLists = new Dictionary<string, string[]>();
+        readonly static Regex emoji_rx = new Regex("((\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]))|(<a{0,1}:[a-zA-Z0-9_.]{2,32}:[0-9]+>)");
+
 
         static bool CheckForNaughtyWords(string input, WordListJson naughtyWordList)
         {
@@ -287,7 +289,7 @@ namespace MicrosoftBot
                 // Mass emoji
                 if (!cfgjson.UnrestrictedEmojiChannels.Contains(e.Message.ChannelId) && e.Message.Content.Length >= cfgjson.MassEmojiThreshold)
                 {
-                    char[] tempArray = e.Message.Content.Replace("🏻", "").Replace("🏼", "").Replace("🏽", "").Replace("🏾", "").Replace("", "🏿").ToCharArray();
+                    char[] tempArray = e.Message.Content.Replace("🏻", "").Replace("🏼", "").Replace("🏽", "").Replace("🏾", "").Replace("🏿", "").ToCharArray();
                     int pos = 0;
                     foreach (char c in tempArray)
                     {
@@ -305,10 +307,10 @@ namespace MicrosoftBot
                     }
                     string input = new string(tempArray);
 
-                    if (Regex.Matches(input, @"
-                    /((\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]))|(<a{0,1}:[a-zA-Z0-9_.]{2,32}:[0-9]+>)/gm
-                    ").Count > cfgjson.MassEmojiThreshold)
+                    var matches = emoji_rx.Matches(input);
+                    if (matches.Count > cfgjson.MassEmojiThreshold)
                     {
+                        e.Message.DeleteAsync();
                         string reason = "Mass emoji";
                         DiscordMessage msg = await e.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
                         await Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
