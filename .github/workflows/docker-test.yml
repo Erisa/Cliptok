@@ -2,11 +2,16 @@ name: docker-push
 
 on:
   push:
-    branches:
-     - master
+    branches:    
+      - '**'        # matches every branch
+      - '!master'   # excludes master
+
+  pull_request:
+    branches:    
+      - '**'        # matches every branch
 
 jobs:
-  multi-platform-push:
+  multi-platform-test:
     runs-on: ubuntu-latest
     steps:
       -
@@ -19,20 +24,12 @@ jobs:
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       -
-        name: Login to Registry
-        uses: docker/login-action@v1 
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GHCR_PAT }}
-      -
         name: Build and push
         uses: docker/build-push-action@v2
         with:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
-          push: true
+          push: false
           tags: |
             ghcr.io/erisa/cliptok:latest
-

@@ -85,6 +85,9 @@ namespace MicrosoftBot
         [JsonProperty("massMentionThreshold")]
         public int MassMentionThreshold { get; private set; }
 
+        [JsonProperty("massEmojiThreshold")]
+        public int MassEmojiThreshold { get; private set; }
+
         [JsonProperty("tierRoles")]
         public List<ulong> TierRoles { get; private set; }
 
@@ -93,6 +96,9 @@ namespace MicrosoftBot
 
         [JsonProperty("inviteTierRequirement")]
         public int InviteTierRequirement { get; private set; }
+
+        [JsonProperty("unrestrictedEmojiChannels")]
+        public List<ulong> UnrestrictedEmojiChannels { get; private set; }
 
         [JsonProperty("wordLists")]
         public Dictionary<string, WordListJson> WordListList { get; private set; }
