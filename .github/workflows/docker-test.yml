@@ -11,7 +11,7 @@ on:
       - '**'        # matches every branch
 
 jobs:
-  multi-platform-push:
+  multi-platform-test:
     runs-on: ubuntu-latest
     steps:
       -
