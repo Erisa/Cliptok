@@ -26,7 +26,7 @@ namespace MicrosoftBot
         public static DiscordChannel logChannel;
         public static List<ulong> processedMessages = new List<ulong>();
         public static Dictionary<string, string[]> wordLists = new Dictionary<string, string[]>();
-        readonly static Regex emoji_rx = new Regex("((\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]))|(<a{0,1}:[a-zA-Z0-9_.]{2,32}:[0-9]+>)");
+        readonly static Regex emoji_rx = new Regex("((\u00a9|\u00ae|[\u2000-\u2fff]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]))|(<a{0,1}:[a-zA-Z0-9_.]{2,32}:[0-9]+>)");
 
 
         static bool CheckForNaughtyWords(string input, WordListJson naughtyWordList)
