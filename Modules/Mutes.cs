@@ -170,7 +170,7 @@ namespace MicrosoftBot.Modules
                 try
                 {
                     await Mutes.UnmuteUserAsync(targetUser);
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} According to Discord that user is not muted, but I tried to unnmute them anyway. Hope it works.");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} According to Discord that user is not muted, but I tried to unmute them anyway. Hope it works.");
                 }
                 catch (Exception e)
                 {
