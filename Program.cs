@@ -171,7 +171,7 @@ namespace MicrosoftBot
                 var wordListKeys = cfgjson.WordListList.Keys;
                 foreach (string key in wordListKeys)
                 {
-                    if (CheckForNaughtyWords(e.Message.Content, cfgjson.WordListList[key]))
+                    if (CheckForNaughtyWords(e.Message.Content.ToLower(), cfgjson.WordListList[key]))
                     {
                         try
                         {
