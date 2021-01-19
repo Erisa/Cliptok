@@ -3,23 +3,26 @@
     "token": "TOKENGOESHERE",
     "prefixes": [ "!" ]
   },
+  "redis": {
+    "host": "localhost",
+    "port": 6379
+  },
+  "serverID": 150662382874525696,
   "trialModRole": 352519899048050688,
   "modRole": 150878439220576256,
   "adminRole": 286639672606720000,
   "mutedRole": 426386061220904960,
   "logChannel": 584908576980729876,
-  "serverID": 150662382874525696,
-  "redis": {
-    "host": "localhost",
-    "port": 6379
-  },
   "warningDaysThreshold": 30,
+  "inviteExclusion": "microsoft",
+  "inviteTierRequirement": 2,
+  "massEmojiThreshold": 5,
+  "massMentionThreshold": 5,
   "autoMuteThresholds": {
     "2": 6,
     "4": 12,
     "6": 24
   },
-
   "emoji": {
     "noPermissions": "<:ImageRes_ShieldUAC:679108762627211264>",
     "warning": "<:Shell32_Warning:678968913417076736>",
@@ -47,8 +50,6 @@
     284782848844627968,
     398209263962554368
   ],
-  "inviteExclusion": "microsoft",
-  "inviteTierRequirement": 2,
   "wordLists": {
     "rudeWords.txt": {
       "wholeWord": true,
@@ -63,6 +64,9 @@
       "reason": "Sent malicious URL(s)"
     }
   },
-  "massEmojiThreshold": 5,
-  "massMentionThreshold": 5
+  "unrestrictedEmojiChannels": [
+    150909911952392193,
+    740272437719072808,
+    240528256292356096
+  ]
 }
