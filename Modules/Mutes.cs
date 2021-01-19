@@ -219,7 +219,7 @@ namespace MicrosoftBot.Modules
                 }
 
                 // await ctx.RespondAsync($"debug: {possibleNum}, {possibleTime}, {muteDuration.ToString()}, {reason}");
-                Mutes.MuteUserAsync(targetMember, reason, ctx.User.Id, ctx.Guild, null, muteDuration);
+                _ = Mutes.MuteUserAsync(targetMember, reason, ctx.User.Id, ctx.Guild, null, muteDuration);
                 reason = reason.Replace("`", "\\`").Replace("*", "\\*");
                 if (muteDuration == default)
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Muted} {targetMember.Mention} has been muted: **{reason}**");

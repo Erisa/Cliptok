@@ -410,6 +410,52 @@ namespace MicrosoftBot.Modules
             }
         }
 
+        [Command("dehoist")]
+        [Description("Adds an invisible character to someones nickname that drops them to the bottom of the member list. Accepts multiple members.")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)]
+        public async Task Dehoist(CommandContext ctx, [Description("List of server members to dehoist")] params DiscordMember[] discordMembers)
+        {
+            if (discordMembers.Length == 0)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} You need to tell me who to dehoist!");
+                return;
+            }
+
+            var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
+            int failedCount = 0;
+
+            foreach (DiscordMember discordMember in discordMembers)
+            {
+                var origName = discordMember.DisplayName;
+                if (origName[0] == '\u17b5')
+                {
+                    failedCount++;
+                }
+                else
+                {
+
+                    if (origName.Length == 32)
+                    {
+                        origName = origName.Substring(origName.Length - 1);
+                    }
+                    var newName = $"\u17b5{origName}";
+                    try
+                    {
+                        await discordMember.ModifyAsync(a =>
+                        {
+                            a.Nickname = newName;
+                        });
+                    }
+                    catch
+                    {
+                        failedCount++;
+                    }
+                }
+
+            }
+            await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {discordMembers.Count() - failedCount} of {discordMembers.Count()} member(s)! (Check Audit Log for details)");
+        }
+
         public async static Task<bool> UnbanUserAsync(DiscordGuild guild, DiscordUser target)
         {
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);

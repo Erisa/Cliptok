@@ -30,7 +30,8 @@
     "denied": "🚫",
     "ejected": "<:ImageRes_Eject:679108125797777452>",
     "banned": "<:ImageRes_ShieldNotOK:679111973442682903> ",
-    "unbanned": "<:ImageRes_ShieldOK:679111973392089088>"
+    "unbanned": "<:ImageRes_ShieldOK:679111973392089088>",
+    "success": "<:WindowsSuccess:791475318326165554>"
   },
   "userRoles": {
     "insiderDev": 434426594271166474,
@@ -65,4 +66,3 @@
   "massEmojiThreshold": 5,
   "massMentionThreshold": 5
 }
-

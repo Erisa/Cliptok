@@ -148,6 +148,12 @@ namespace MicrosoftBot
         [JsonProperty("ejected")]
         public string Ejected { get; set; }
 
+        [JsonProperty("loading")]
+        public string Loading { get; set; }
+
+        [JsonProperty("success")]
+        public string Success { get; set; }
+
     }
 
     public class CoreConfig
