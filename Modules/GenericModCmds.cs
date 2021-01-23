@@ -348,6 +348,7 @@ namespace MicrosoftBot.Modules
         }
 
         [Command("kick")]
+        [Aliases("yeet", "shoo", "goaway")]
         [Description("Kick a user. If you can. Do it, I dare you.")]
         [RequirePermissions(Permissions.KickMembers), HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
         public async Task Kick(CommandContext ctx, DiscordUser target, [RemainingText] string reason = "No reason specified.")
