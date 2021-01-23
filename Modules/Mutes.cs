@@ -181,7 +181,7 @@ namespace MicrosoftBot.Modules
 
         [Command("mute")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)]
-        public async Task MuteCmd(CommandContext ctx, DiscordMember targetMember, [RemainingText] string timeAndReason = "No reason specificed.")
+        public async Task MuteCmd(CommandContext ctx, DiscordMember targetMember, [RemainingText] string timeAndReason = "No reason specified.")
         {
             if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
             {
