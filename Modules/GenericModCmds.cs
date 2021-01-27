@@ -437,7 +437,7 @@ namespace MicrosoftBot.Modules
 
                     if (origName.Length == 32)
                     {
-                        origName = origName.Substring(origName.Length - 1);
+                        origName = origName.Substring(0, origName.Length - 1);
                     }
                     var newName = $"\u17b5{origName}";
                     try
