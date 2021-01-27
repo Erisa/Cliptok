@@ -3,7 +3,7 @@ name: docker-push
 on:
   push:
     branches:
-     - master
+     - main
 
 jobs:
   multi-platform-push:
