@@ -359,6 +359,13 @@ namespace MicrosoftBot
             }
 
         }
+
+        public static dynamic ConfigValue(object input)
+        {
+            return input;
+        }
+
+        // var a = ConfigValue(cfgjson.Emoji.Banned);
     }
 
 
