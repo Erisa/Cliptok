@@ -46,9 +46,6 @@ namespace MicrosoftBot
         [JsonProperty("core")]
         public CoreConfig Core { get; private set; }
 
-        [JsonProperty("settings")]
-        public SettingConfig Settings { get; private set; }
-
         [JsonProperty("redis")]
         public RedisConfig Redis { get; private set; }
 
@@ -166,27 +163,6 @@ namespace MicrosoftBot
 
         [JsonProperty("prefixes")]
         public List<string> Prefixes { get; private set; }
-    }
-
-    public class SettingConfig
-    {
-        [JsonProperty("trialModRole")]
-        public ulong TrialModRole { get; private set; }
-
-        [JsonProperty("modRole")]
-        public ulong ModRole { get; private set; }
-
-        [JsonProperty("adminRole")]
-        public ulong AdminRole { get; private set; }
-
-        [JsonProperty("logChannel")]
-        public ulong LogChannel { get; set; }
-
-        [JsonProperty("serverID")]
-        public ulong ServerID { get; set; }
-
-
-
     }
 
     public class RedisConfig

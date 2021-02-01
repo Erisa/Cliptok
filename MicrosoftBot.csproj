@@ -6,7 +6,6 @@
     <RestoreAdditionalProjectSources>
       https://nuget.emzi0767.com/api/v3/index.json
   </RestoreAdditionalProjectSources>
-    <AssemblyName>MicrosoftBot</AssemblyName>
   </PropertyGroup>
   
   <ItemGroup>
