@@ -2,7 +2,7 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using MicrosoftBot.Modules;
+using Cliptok.Modules;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
@@ -13,7 +13,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace MicrosoftBot
+namespace Cliptok
 {
     class Program : BaseCommandModule
     {

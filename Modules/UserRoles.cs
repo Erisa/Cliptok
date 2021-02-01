@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MicrosoftBot.Modules
+namespace Cliptok.Modules
 {
     public class UserRolesPresentAttribute : CheckBaseAttribute
     {

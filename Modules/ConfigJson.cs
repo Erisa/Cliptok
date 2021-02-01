@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MicrosoftBot
+namespace Cliptok
 {
     public class UserWarning
     {
