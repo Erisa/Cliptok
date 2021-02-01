@@ -480,6 +480,19 @@ namespace MicrosoftBot.Modules
             await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Ejected} <@{target.Id}> was kicked by `{moderator.Username}#{moderator.Discriminator}` (`{moderator.Id}`).\nReason: **{reason}**");
         }
 
+        [Group("config")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
+        class ConfigCmds : BaseCommandModule
+        {
+            [GroupCommand()]
+            [Aliases("dump", "show")]
+            public async Task ConfigShow(CommandContext ctx)
+            {
+                await ctx.RespondAsync("test");
+            }
+            
+        }
+
         [Group("debug")]
         [Aliases("troubleshoot", "unbug", "bugn't", "helpsomethinghasgoneverywrong")]
         [Description("Commands and things for fixing the bot in the unlikely event that it breaks a bit.")]
