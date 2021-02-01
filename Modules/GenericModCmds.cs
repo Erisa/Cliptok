@@ -177,6 +177,81 @@ namespace Cliptok.Modules
             }
         }
 
+        [Command("lockdown")]
+        [Aliases("lock")]
+        [Description("Locks the current channel, preventing any new messages.")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequireBotPermissions(Permissions.ManageChannels)]
+        public async Task LockdownCommand(CommandContext ctx, [RemainingText] string reason = "")
+        {
+            var currentChannel = ctx.Channel;
+            if (!Program.cfgjson.LockdownEnabledChannels.Contains(currentChannel.Id))
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Denied} You can't lock or unlock this channel!\nIf this is in error, add its ID (`{currentChannel.Id}`) to the lockdown whitelist.");
+                return;
+            }
+
+            await ctx.Message.DeleteAsync();
+
+            await currentChannel.AddOverwriteAsync(ctx.Guild.CurrentMember, Permissions.SendMessages, Permissions.None, "Failsafe 1 for Lockdown");
+            await currentChannel.AddOverwriteAsync(ctx.Guild.GetRole(Program.cfgjson.ModRole), Permissions.SendMessages, Permissions.None, "Failsafe 2 for Lockdown");
+            await currentChannel.AddOverwriteAsync(ctx.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, "Lockdown command");
+
+            if (reason == "")
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Locked} This channel has been locked by a Moderator.");
+            else
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Locked} This channel has been locked: **{reason}**");
+        }
+
+        [Command("unlock")]
+        [Description("Unlocks a previously locked channel.")]
+        [Aliases("unlockdown"), HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
+        public async Task UnlockCommand(CommandContext ctx, [RemainingText] string reason = "")
+        {
+            var currentChannel = ctx.Channel;
+            if (!Program.cfgjson.LockdownEnabledChannels.Contains(currentChannel.Id))
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Denied} You can't lock or unlock this channel!\nIf this is in error, add its ID (`{currentChannel.Id}`) to the lockdown whitelist.");
+                return;
+            }
+
+            bool success = false;
+            var permissions = currentChannel.PermissionOverwrites.ToArray();
+            foreach (var permission in permissions)
+            {
+                if (permission.Type == DSharpPlus.OverwriteType.Role)
+                {
+                    var role = await permission.GetRoleAsync();
+                    if (
+                        (role == ctx.Guild.EveryoneRole
+                        && permission.Denied == Permissions.SendMessages)
+                        ||
+                        (role == ctx.Guild.GetRole(Program.cfgjson.ModRole)
+                        && permission.Allowed == Permissions.SendMessages
+                        )
+                        )
+                    {
+                        success = true;
+                        await permission.DeleteAsync();
+                    }
+                }
+                else
+                {
+                    var member = await permission.GetMemberAsync();
+                    if ( (member == ctx.Member || member == ctx.Guild.CurrentMember)  && permission.Allowed == Permissions.SendMessages)
+                    {
+                        success = true;
+                        await permission.DeleteAsync();
+                    }
+
+                }
+            }
+
+            if (success)
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} This channel has been unlocked!");
+            else
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This channel is not locked.");
+        }
+
         [Command("ban")]
         [Aliases("tempban")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequirePermissions(Permissions.BanMembers)]
@@ -187,6 +262,7 @@ namespace Cliptok.Modules
             string possibleTime = timeAndReason.Split(' ').First();
             if (possibleTime.Length != 1)
             {
+                // 
                 string reason = timeAndReason;
                 // Everything BUT the last character should be a number.
                 string possibleNum = possibleTime.Remove(possibleTime.Length - 1);

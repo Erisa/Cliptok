@@ -103,6 +103,9 @@ namespace Cliptok
         [JsonProperty("wordLists")]
         public Dictionary<string, WordListJson> WordListList { get; private set; }
 
+        [JsonProperty("lockdownEnabledChannels")]
+        public List<ulong> LockdownEnabledChannels { get; private set; }
+
     }
 
     public class WordListJson
@@ -153,6 +156,9 @@ namespace Cliptok
 
         [JsonProperty("success")]
         public string Success { get; set; }
+
+        [JsonProperty("locked")]
+        public string Locked { get; set; }
 
     }
 
