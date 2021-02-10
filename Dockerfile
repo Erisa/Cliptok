@@ -2,6 +2,9 @@ FROM --platform=${BUILDPLATFORM} \
     mcr.microsoft.com/dotnet/sdk:5.0.103 AS build-env
 WORKDIR /app
 
+# We need Git for Cliptok builds now.
+RUN apt-get update; apt-get install git
+
 # Copy csproj and restore as distinct layers
 COPY *.csproj ./
 RUN dotnet restore

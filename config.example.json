@@ -34,7 +34,9 @@
     "ejected": "<:ImageRes_Eject:679108125797777452>",
     "banned": "<:ImageRes_ShieldNotOK:679111973442682903> ",
     "unbanned": "<:ImageRes_ShieldOK:679111973392089088>",
-    "success": "<:WindowsSuccess:791475318326165554>"
+    "success": "<:WindowsSuccess:791475318326165554>",
+    "locked": "",
+    "connected": "<:WindowsRDP:809144455671054358>"
   },
   "userRoles": {
     "insiderDev": 434426594271166474,
@@ -70,6 +72,6 @@
     240528256292356096
   ],
   "lockdownEnabledChannels": [
-    790564208982622237
+
   ]
 }

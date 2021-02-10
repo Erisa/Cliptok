@@ -98,7 +98,7 @@ namespace Cliptok
         }
 
         static void Main(string[] args)
-        {
+         {
             MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
@@ -142,6 +142,36 @@ namespace Cliptok
                 logChannel = await discord.GetChannelAsync(cfgjson.LogChannel);
                 Mutes.CheckMutesAsync();
                 ModCmds.CheckBansAsync();
+
+                string commitHash = "unknown";
+                string commitMessage = "unknown";
+                string commitTime = "unknown";
+                if (File.Exists("CommitHash.txt"))
+                {
+                    using var sr = new StreamReader("CommitHash.txt");
+                    commitHash = sr.ReadToEnd();
+                }
+
+                if (File.Exists("CommitMessage.txt"))
+                {
+                    using var sr = new StreamReader("CommitMessage.txt");
+                    commitMessage = sr.ReadToEnd();
+                }
+
+                if (File.Exists("CommitTime.txt"))
+                {
+                    using var sr = new StreamReader("CommitTime.txt");
+                    commitTime = sr.ReadToEnd();
+                }
+
+                var cliptokChannel = await client.GetChannelAsync(cfgjson.HomeChannel);
+                cliptokChannel.SendMessageAsync($"{cfgjson.Emoji.Connected} Cliptok connected successfully!\n\n" +
+                    $"**Version**: `{commitHash}`\n" +
+                    $"**Version timestamp**: `{commitTime}`\n\n" +
+                    $"Most recent commit message:\n" +
+                    $"```\n" +
+                    $"{commitMessage}\n" +
+                    $"```");
             }
 
             async Task MessageCreated(DiscordClient client, MessageCreateEventArgs e)
@@ -160,9 +190,9 @@ namespace Cliptok
 
                 DiscordMember member = await e.Guild.GetMemberAsync(e.Author.Id);
                 if (Warnings.GetPermLevel(member) >= ServerPermLevel.TrialMod)
-                {
+                { 
                     return;
-                }
+                } 
 
 
                 bool match = false;

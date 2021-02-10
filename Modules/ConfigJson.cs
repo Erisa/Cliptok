@@ -64,6 +64,9 @@ namespace Cliptok
         [JsonProperty("serverID")]
         public ulong ServerID { get; set; }
 
+        [JsonProperty("homeChannel")]
+        public ulong HomeChannel { get; set; }
+
         [JsonProperty("emoji")]
         public EmojiJson Emoji { get; set; }
 
@@ -159,6 +162,9 @@ namespace Cliptok
 
         [JsonProperty("locked")]
         public string Locked { get; set; }
+
+        [JsonProperty("connected")]
+        public string Connected { get; set; }
 
     }
 
