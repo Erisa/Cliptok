@@ -181,12 +181,30 @@ namespace Cliptok.Modules
 
         [Command("mute")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)]
-        public async Task MuteCmd(CommandContext ctx, DiscordMember targetMember, [RemainingText] string timeAndReason = "No reason specified.")
+        public async Task MuteCmd(CommandContext ctx, DiscordUser targetUser, [RemainingText] string timeAndReason = "No reason specified.")
         {
-            if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
+            DiscordMember targetMember;
+            try
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
+                targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
+            }
+            catch (DSharpPlus.Exceptions.NotFoundException)
+            {
+                // TODO: Rework mutes to allow this
+                await ctx.Message.DeleteAsync();
+                var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} The user you're trying to mute is not in the server!");
+                await Task.Delay(3000);
+                await msg.DeleteAsync();
                 return;
+            }
+
+            if (targetMember == null)
+            {
+                if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
+                    return;
+                }
             }
 
             await ctx.Message.DeleteAsync();
