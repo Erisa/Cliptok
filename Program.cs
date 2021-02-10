@@ -190,7 +190,7 @@ namespace Cliptok
                                     null,
                                     e.Author.AvatarUrl
                                 );
-                            logChannel.SendMessageAsync($"{cfgjson.Emoji.Denied} Deleted infringing message by {e.Author.Mention} in {e.Channel.Mention}:", false, embed);
+                            logChannel.SendMessageAsync($"{cfgjson.Emoji.Denied} Deleted infringing message by {e.Author.Mention} in {e.Channel.Mention}:", embed);
                         }
                         catch
                         {
@@ -230,7 +230,7 @@ namespace Cliptok
                                 null,
                                 e.Author.AvatarUrl
                             );
-                        logChannel.SendMessageAsync($"{cfgjson.Emoji.Denied} Deleted infringing message by {e.Author.Mention} in {e.Channel.Mention}:", false, embed);
+                        logChannel.SendMessageAsync($"{cfgjson.Emoji.Denied} Deleted infringing message by {e.Author.Mention} in {e.Channel.Mention}:", embed);
 
                     }
                     catch
@@ -271,7 +271,7 @@ namespace Cliptok
                                     null,
                                     e.Author.AvatarUrl
                                 );
-                            logChannel.SendMessageAsync($"{cfgjson.Emoji.Denied} Deleted infringing message by {e.Author.Mention} in {e.Channel.Mention}:", false, embed);
+                            logChannel.SendMessageAsync($"{cfgjson.Emoji.Denied} Deleted infringing message by {e.Author.Mention} in {e.Channel.Mention}:", embed);
 
                         }
                         catch
