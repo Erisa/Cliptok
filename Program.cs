@@ -98,7 +98,7 @@ namespace Cliptok
         }
 
         static void Main(string[] args)
-         {
+        {
             MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
@@ -190,13 +190,13 @@ namespace Cliptok
 
                 DiscordMember member = await e.Guild.GetMemberAsync(e.Author.Id);
                 if (Warnings.GetPermLevel(member) >= ServerPermLevel.TrialMod)
-                { 
+                {
                     return;
-                } 
+                }
 
 
                 bool match = false;
-                
+
                 // Matching word list
                 var wordListKeys = cfgjson.WordListList.Keys;
                 foreach (string key in wordListKeys)
@@ -240,7 +240,7 @@ namespace Cliptok
                 if (match)
                     return;
 
-                // Mass emoji
+                // Mass mentions
                 if (e.Message.MentionedUsers.Count >= cfgjson.MassMentionThreshold)
                 {
                     DiscordChannel logChannel = await discord.GetChannelAsync(Program.cfgjson.LogChannel);
@@ -323,7 +323,7 @@ namespace Cliptok
                     int pos = 0;
                     foreach (char c in tempArray)
                     {
-                        
+
                         if (c == '™' || c == '®' || c == '©')
                         {
                             tempArray[pos] = ' ';
@@ -331,7 +331,7 @@ namespace Cliptok
                         if (c == '\u200d')
                         {
                             tempArray[pos] = ' ';
-                            tempArray[pos+1] = ' ';
+                            tempArray[pos + 1] = ' ';
                         }
                         ++pos;
                     }
@@ -341,8 +341,23 @@ namespace Cliptok
                     if (matches.Count > cfgjson.MassEmojiThreshold)
                     {
                         e.Message.DeleteAsync();
+
+                        if (Warnings.GetPermLevel(member) == ServerPermLevel.nothing && !db.HashExists("emojiPardoned", e.Message.Author.Id.ToString()))
+                        {
+                            await db.HashSetAsync("emojiPardoned", member.Id.ToString(), false);
+                            await e.Channel.SendMessageAsync($"{cfgjson.Emoji.Information} {e.Author.Mention}, if you want to play around with lots of emoji, please use <#{cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.");
+                            return;
+                        }
+
                         string reason = "Mass emoji";
-                        DiscordMessage msg = await e.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                        string output = $"{Program.cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**";
+                        if (!db.HashExists("emojiPardoned", e.Author.Id.ToString()) || db.HashGet("emojiPardoned", e.Message.Author.Id.ToString()) == false)
+                        {
+                            output += $"\nIf you want to play around with lots of emoji, please use <#{cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.";
+                            await db.HashSetAsync("emojiPardoned", member.Id.ToString(), true);
+                        }
+
+                        DiscordMessage msg = await e.Channel.SendMessageAsync(output);
                         await Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
                         return;
                     }
