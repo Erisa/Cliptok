@@ -21,6 +21,10 @@ namespace Cliptok.Modules
         Tier4,
         Tier5,
         Tier6,
+        Tier7,
+        Tier8,
+        TierS,
+        TierX,
         TrialMod,
         Mod,
         Admin,
@@ -84,6 +88,14 @@ namespace Cliptok.Modules
                 return ServerPermLevel.Mod;
             else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TrialModRole)))
                 return ServerPermLevel.TrialMod;
+            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[9])))
+                return ServerPermLevel.TierX;
+            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[8])))
+                return ServerPermLevel.TierS;
+            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[7])))
+                return ServerPermLevel.Tier8;
+            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[6])))
+                return ServerPermLevel.Tier7;
             else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[5])))
                 return ServerPermLevel.Tier6;
             else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[4])))
