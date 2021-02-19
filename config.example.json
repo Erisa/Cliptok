@@ -1,49 +1,25 @@
-﻿{
+{
   "core": {
-    "token": "TOKENGOESHERE",
-    "prefixes": [ "!" ]
+    "token": "YOURBOTTOKENGOESHERE",
+    "prefixes": [
+      "!"
+    ]
   },
-  "redis": {
-    "host": "localhost",
-    "port": 6379
-  },
-  "serverID": 150662382874525696,
   "trialModRole": 352519899048050688,
   "modRole": 150878439220576256,
   "adminRole": 286639672606720000,
   "mutedRole": 426386061220904960,
   "logChannel": 584908576980729876,
+  "serverID": 150662382874525696,
+  "homeChannel": 793285213823172628,
   "warningDaysThreshold": 30,
-  "inviteExclusion": "microsoft",
-  "inviteTierRequirement": 2,
-  "massEmojiThreshold": 5,
-  "massMentionThreshold": 5,
   "autoMuteThresholds": {
     "2": 6,
     "4": 12,
     "6": 24
   },
-  "emoji": {
-    "noPermissions": "<:ImageRes_ShieldUAC:679108762627211264>",
-    "warning": "<:Shell32_Warning:678968913417076736>",
-    "error": "<:ImageRes_Critical:679107080493203466>",
-    "deleted": "<:Shell32_RecycleFull:678968912418963458>",
-    "information": "<:Shell32_Information:678968748010635305>",
-    "muted": "<:ImageRes_ShieldWarning:679108762048397334>",
-    "denied": "🚫",
-    "ejected": "<:ImageRes_Eject:679108125797777452>",
-    "banned": "<:ImageRes_ShieldNotOK:679111973442682903> ",
-    "unbanned": "<:ImageRes_ShieldOK:679111973392089088>",
-    "success": "<:WindowsSuccess:791475318326165554>",
-    "locked": "",
-    "connected": "<:WindowsRDP:809144455671054358>"
-  },
-  "userRoles": {
-    "insiderDev": 434426594271166474,
-    "insiderBeta": 643712828217360394,
-    "insiderRP": 288729239921098752,
-    "patchTuesday": 445773142233710594
-  },
+  "massMentionThreshold": 5,
+  "inviteTierRequirement": 2,
   "tierRoles": [
     191569917542268928,
     200719503435235329,
@@ -56,6 +32,27 @@
     812031849517285406,
     812031871834783814
   ],
+
+  "emoji": {
+    "noPermissions": "<:WindowsShieldUAC:746728630561931305>",
+    "warning": "<:WindowsWarning:746728630096232529>",
+    "error": "<:WindowsCritical:746728630138306611>",
+    "deleted": "<:WindowsRecycleBin:746728630054289509>",
+    "information": "<:WindowsInformation:746728629135867914>",
+    "muted": "<:WindowsShieldWarning:746728628393607181>",
+    "denied": "<:WindowsDenied:783148340954136576>",
+    "banned": "<:WindowsShieldNotOK:783833289403531335>",
+    "unbanned": "<:WindowsShieldOK:783833289252143166>",
+    "ejected": "<:WindowsEject:783833074315689994>",
+    "success": "<:WindowsSuccess:791475219218300969>",
+    "loading": "<a:WindowsBusy:791473878026289192>",
+    "connected": "<:WindowsRDP:809144455671054358>",
+    "locked": "<:WindowsLock:805623420166864956>"
+  },
+  "redis": {
+    "host": "localhost",
+    "port": 6379
+  },
   "wordLists": {
     "rudeWords.txt": {
       "wholeWord": true,
@@ -70,12 +67,36 @@
       "reason": "Sent malicious URL(s)"
     }
   },
+  "massEmojiThreshold": 8,
   "unrestrictedEmojiChannels": [
     150909911952392193,
     740272437719072808,
     240528256292356096
   ],
   "lockdownEnabledChannels": [
-
+    150662382874525696,
+    187649467611086849,
+    150909911952392193,
+    740272437719072808,
+    150909451270881280,
+    616842528712425472,
+    603629077361983518,
+    574650177034387467,
+    470642923483168768,
+    470642923483168768,
+    338055831838916609,
+    280002642602622986,
+    786719370990321735,
+    408371098653163521,
+    173743310878277634,
+    341168934386401281,
+    438383036422422529,
+    198170523954446336,
+    522353051353350144,
+    217391455478480896,
+    407431028022575116,
+    428472487941111809,
+    667438432615792653
   ]
+
 }
