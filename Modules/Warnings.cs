@@ -373,7 +373,7 @@ namespace Cliptok.Modules
             try
             {
                 targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
-                if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
+                if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
                 {
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
                     return;
@@ -469,7 +469,7 @@ namespace Cliptok.Modules
             Description("Delete a warning that was issued by mistake or later became invalid.\n" +
             "You can only delete warnings issued by you, unless you are an Admin/Lead Moderator."),
             Aliases("delwarm", "delwam"),
-            HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)
+            HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)
         ]
         public async Task DelwarnCmd(
             CommandContext ctx,
@@ -480,8 +480,10 @@ namespace Cliptok.Modules
             UserWarning warning = GetWarning(targetUser.Id, warnId);
             if (warning == null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
-            else
+            else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && warning.ModUserId != ctx.User.Id)
             {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you!");
+            } else {
                 DelWarning(warning);
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Deleted} Successfully deleted warning `{Pad(warnId)}` (belonging to {targetUser.Mention})");
 
@@ -535,7 +537,7 @@ namespace Cliptok.Modules
             Description("Edit the reason of an existing warning. Can only be used on warnings issued by you, unless you are an Admin/Lead Moderator.\n" +
                 "The Moderator who is editing the reason will become responsible for the case."),
             HomeServer,
-            RequireHomeserverPerm(ServerPermLevel.Mod)
+            RequireHomeserverPerm(ServerPermLevel.TrialMod)
         ]
         public async Task EditwarnCmd(
             CommandContext ctx,
@@ -547,7 +549,10 @@ namespace Cliptok.Modules
             var warning = GetWarning(targetUser.Id, warnId);
             if (warning == null)
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
-            else
+            else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && warning.ModUserId != ctx.User.Id)
+            {
+                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you!");
+            } else
             {
                 EditWarning(targetUser, warnId, ctx.User, newReason, MessageLink(msg));
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Information} Successfully edited warning `{Pad(warnId)}` (belonging to {targetUser.Mention})",
