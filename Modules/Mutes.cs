@@ -151,8 +151,9 @@ namespace Cliptok.Modules
     public class MuteCmds : BaseCommandModule
     {
         [Command("unmute")]
+        [Description("Unmutes a previously muted user, typically ahead of the standard expiration time. See also: mute")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)]
-        public async Task UnmuteCmd(CommandContext ctx, DiscordUser targetUser)
+        public async Task UnmuteCmd(CommandContext ctx, [Description("The user you're trying to unmute.")] DiscordUser targetUser)
         {
             DiscordGuild guild = ctx.Guild;
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
@@ -180,8 +181,12 @@ namespace Cliptok.Modules
         }
 
         [Command("mute")]
+        [Description("Mutes a user, preventing them from sending messages until they're unmuted. See also: unmute")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)]
-        public async Task MuteCmd(CommandContext ctx, DiscordUser targetUser, [RemainingText] string timeAndReason = "No reason specified.")
+        public async Task MuteCmd(
+            CommandContext ctx, [Description("The user you're trying to mute")] DiscordUser targetUser,
+            [RemainingText, Description("Combined argument for the time and reason for the mute. For example '1h rule 7' or 'rule 10'")] string timeAndReason = "No reason specified."
+        )
         {
             DiscordMember targetMember;
             try

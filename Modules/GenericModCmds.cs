@@ -179,7 +179,7 @@ namespace Cliptok.Modules
 
         [Command("lockdown")]
         [Aliases("lock")]
-        [Description("Locks the current channel, preventing any new messages.")]
+        [Description("Locks the current channel, preventing any new messages. See also: unlock")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequireBotPermissions(Permissions.ManageChannels)]
         public async Task LockdownCommand(CommandContext ctx, [RemainingText] string reason = "")
         {
@@ -203,8 +203,8 @@ namespace Cliptok.Modules
         }
 
         [Command("unlock")]
-        [Description("Unlocks a previously locked channel.")]
-        [Aliases("unlockdown"), HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
+        [Description("Unlocks a previously locked channel. See also: lockdown")]
+        [Aliases("unlockdown"), HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequireBotPermissions(Permissions.ManageChannels)]
         public async Task UnlockCommand(CommandContext ctx, [RemainingText] string reason = "")
         {
             var currentChannel = ctx.Channel;
@@ -254,6 +254,7 @@ namespace Cliptok.Modules
 
         [Command("ban")]
         [Aliases("tempban")]
+        [Description("Bans a user that you have permssion to ban, deleting all their messages in the process. See also: bankeep.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequirePermissions(Permissions.BanMembers)]
         public async Task BanCmd(CommandContext ctx, DiscordUser targetMember, [RemainingText] string timeAndReason = "No reason specified.")
         {
@@ -341,7 +342,7 @@ namespace Cliptok.Modules
         /// Sue me, I beg you.
         [Command("bankeep")]
         [Aliases("bansave")]
-        [Description("Like ban except it keeps messages."), HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequirePermissions(Permissions.BanMembers)]
+        [Description("Bans a user but keeps their messages around."), HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequirePermissions(Permissions.BanMembers)]
         public async Task BankeepCmd(CommandContext ctx, DiscordUser targetMember, [RemainingText] string timeAndReason = "No reason specified.")
         {
             bool appealable = false;
@@ -425,7 +426,7 @@ namespace Cliptok.Modules
 
         [Command("kick")]
         [Aliases("yeet", "shoo", "goaway")]
-        [Description("Kick a user. If you can. Do it, I dare you.")]
+        [Description("Kicks a user, removing them from the server until they rejoin. Generally not very useful.")]
         [RequirePermissions(Permissions.KickMembers), HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
         public async Task Kick(CommandContext ctx, DiscordUser target, [RemainingText] string reason = "No reason specified.")
         {
