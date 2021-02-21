@@ -97,8 +97,7 @@ namespace Cliptok.Modules
 
             if (member == null)
             {
-                await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} Attempt to unmute <@{targetUser.Id}> failed!\n" +
-                    $"Is the user in the server?");
+                await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Attempt to remove Muted role from <@{targetUser.Id}> failed because the user could not be found.\nThis is expected if the user was banned or left.");
             }
             else
             {
@@ -110,7 +109,7 @@ namespace Cliptok.Modules
                 }
                 catch
                 {
-                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} Attempt to removed Muted role from <@{targetUser.Id}> failed!" +
+                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} Attempt to removed Muted role from <@{targetUser.Id}> failed because of a Discord API error!" +
                     $"\nIf the role was removed manually, this error can be disregarded safely.");
                 }
             }
