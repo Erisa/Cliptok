@@ -281,7 +281,7 @@ namespace Cliptok
                     if (cfgjson.InviteExclusion != null)
                         inviteExclusion = cfgjson.InviteExclusion;
 
-                    string checkedMessage = e.Message.Content.Replace($"discord.gg/{inviteExclusion}", "").Replace($"discord.com/invite/{inviteExclusion}", "");
+                    string checkedMessage = e.Message.Content.Replace($"discord.gg/{inviteExclusion}", "").Replace($"discord.com/invite/{inviteExclusion}", "").Replace('\\', '/');
 
                     if (checkedMessage.Contains("discord.gg/") || checkedMessage.Contains("discord.com/invite/"))
                     {
