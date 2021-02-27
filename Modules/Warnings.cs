@@ -483,7 +483,9 @@ namespace Cliptok.Modules
             else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && warning.ModUserId != ctx.User.Id)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you!");
-            } else {
+            }
+            else
+            {
                 DelWarning(warning);
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Deleted} Successfully deleted warning `{Pad(warnId)}` (belonging to {targetUser.Mention})");
 
@@ -552,7 +554,8 @@ namespace Cliptok.Modules
             else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && warning.ModUserId != ctx.User.Id)
             {
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you!");
-            } else
+            }
+            else
             {
                 EditWarning(targetUser, warnId, ctx.User, newReason, MessageLink(msg));
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Information} Successfully edited warning `{Pad(warnId)}` (belonging to {targetUser.Mention})",

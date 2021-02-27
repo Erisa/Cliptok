@@ -237,7 +237,7 @@ namespace Cliptok.Modules
                 else
                 {
                     var member = await permission.GetMemberAsync();
-                    if ( (member == ctx.Member || member == ctx.Guild.CurrentMember)  && permission.Allowed == Permissions.SendMessages)
+                    if ((member == ctx.Member || member == ctx.Guild.CurrentMember) && permission.Allowed == Permissions.SendMessages)
                     {
                         success = true;
                         await permission.DeleteAsync();

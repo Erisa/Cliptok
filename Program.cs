@@ -1,8 +1,8 @@
-﻿using DSharpPlus;
+﻿using Cliptok.Modules;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Cliptok.Modules;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
