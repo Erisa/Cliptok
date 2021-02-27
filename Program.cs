@@ -143,9 +143,9 @@ namespace Cliptok
                 Mutes.CheckMutesAsync();
                 ModCmds.CheckBansAsync();
 
-                string commitHash = "unknown";
-                string commitMessage = "unknown";
-                string commitTime = "unknown";
+                string commitHash = "aaaaaaa";
+                string commitMessage = "N/A";
+                string commitTime = "0000-00-00 00:00:00 +0000";
                 if (File.Exists("CommitHash.txt"))
                 {
                     using var sr = new StreamReader("CommitHash.txt");
@@ -243,7 +243,7 @@ namespace Cliptok
                 // Mass mentions
                 if (e.Message.MentionedUsers.Count >= cfgjson.MassMentionThreshold)
                 {
-                    DiscordChannel logChannel = await discord.GetChannelAsync(Program.cfgjson.LogChannel);
+                    DiscordChannel logChannel = await discord.GetChannelAsync(cfgjson.LogChannel);
                     try
                     {
                         e.Message.DeleteAsync();
@@ -277,7 +277,7 @@ namespace Cliptok
                 // Unapproved invites
                 if (Warnings.GetPermLevel(member) < (ServerPermLevel)cfgjson.InviteTierRequirement)
                 {
-                    string inviteExclusion = "microsoft";
+                    string inviteExclusion = cfgjson.InviteExclusion;
                     if (cfgjson.InviteExclusion != null)
                         inviteExclusion = cfgjson.InviteExclusion;
 

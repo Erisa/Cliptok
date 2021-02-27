@@ -13,6 +13,7 @@
   "serverID": 150662382874525696,
   "homeChannel": 793285213823172628,
   "warningDaysThreshold": 30,
+  "inviteExclusion":  "microsoft",
   "autoMuteThresholds": {
     "2": 6,
     "4": 12,
