@@ -148,7 +148,7 @@ namespace Cliptok
 
                 if (targetMessage.Author.Id == e.User.Id)
                 {
-                    await e.Message.DeleteReactionAsync(e.Emoji, e.User);
+                    await targetMessage.DeleteReactionAsync(e.Emoji, e.User);
                     handled = true;
                 }
 
