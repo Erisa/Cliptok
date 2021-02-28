@@ -109,6 +109,15 @@ namespace Cliptok
         [JsonProperty("lockdownEnabledChannels")]
         public List<ulong> LockdownEnabledChannels { get; private set; }
 
+        [JsonProperty("heartosoftId")]
+        public ulong HeartosoftId { get; private set; }
+
+        [JsonProperty("noHeartosoftId")]
+        public ulong NoHeartosoftId { get; private set; }
+
+        [JsonProperty("restrictedHeartosoftPhrases")]
+        public List<string> RestrictedHeartosoftPhrases { get; private set; }
+
     }
 
     public class WordListJson

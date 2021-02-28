@@ -13,7 +13,7 @@
   "serverID": 150662382874525696,
   "homeChannel": 793285213823172628,
   "warningDaysThreshold": 30,
-  "inviteExclusion":  "microsoft",
+  "inviteExclusion": "microsoft",
   "autoMuteThresholds": {
     "2": 6,
     "4": 12,
@@ -100,6 +100,14 @@
     667438432615792653,
     812191602440798259,
     812191259539669043
+  ],
+  "heartosoftId": 413429915187281940,
+  "antiHeartosoftId": 642508756189446165,
+  "restrictedHeartosoftPhrases": [
+    "heartosoft",
+    "starboard",
+    "413429915187281940",
+    "544153359712649251"
   ]
 
 }
