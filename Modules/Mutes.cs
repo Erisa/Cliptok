@@ -20,7 +20,7 @@ namespace Cliptok.Modules
         }
 
         // Only to be used on naughty users.
-        public static async System.Threading.Tasks.Task<bool> MuteUserAsync(DiscordMember naughtyMember, string reason, ulong moderatorId, DiscordGuild guild, DiscordChannel channel = null, TimeSpan muteDuration = default)
+        public static async System.Threading.Tasks.Task<bool> MuteUserAsync(DiscordMember naughtyMember, string reason, ulong moderatorId, DiscordGuild guild, DiscordChannel channel = null, TimeSpan muteDuration = default, bool alwaysRespond = false)
         {
             bool permaMute = false;
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
@@ -65,15 +65,28 @@ namespace Cliptok.Modules
                 {
                     await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} was successfully muted for {Warnings.TimeToPrettyFormat(muteDuration, false)} by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**");
                     await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}** for {Warnings.TimeToPrettyFormat(muteDuration, false)}!\nReason: **{reason}**");
-
                 }
             }
             catch
             {
                 // A DM failing to send isn't important, but let's put it in chat just so it's somewhere.
                 if (!(channel is null))
-                    await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} was automatically muted for **{Warnings.TimeToPrettyFormat(muteDuration, false)}**!");
+                {
+                    if (muteDuration == default)
+                        await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} has been muted: **{reason}**");
+                    else
+                        await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} has been muted for **{Warnings.TimeToPrettyFormat(muteDuration, false)}**: **{reason}**");
+                    return true;
+                }
+            }
 
+            if (!(channel is null) && alwaysRespond)
+            {
+                reason = reason.Replace("`", "\\`").Replace("*", "\\*");
+                if (muteDuration == default)
+                    await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} has been muted: **{reason}**");
+                else
+                    await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} has been muted for **{Warnings.TimeToPrettyFormat(muteDuration, false)}**: **{reason}**");
             }
             return true;
         }
@@ -238,12 +251,7 @@ namespace Cliptok.Modules
                 }
 
                 // await ctx.RespondAsync($"debug: {possibleNum}, {possibleTime}, {muteDuration.ToString()}, {reason}");
-                _ = Mutes.MuteUserAsync(targetMember, reason, ctx.User.Id, ctx.Guild, null, muteDuration);
-                reason = reason.Replace("`", "\\`").Replace("*", "\\*");
-                if (muteDuration == default)
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Muted} {targetMember.Mention} has been muted: **{reason}**");
-                else
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Muted} {targetMember.Mention} has been muted for **{Warnings.TimeToPrettyFormat(muteDuration, false)}**: **{reason}**");
+                _ = Mutes.MuteUserAsync(targetMember, reason, ctx.User.Id, ctx.Guild, ctx.Channel, muteDuration, true);
             }
         }
     }
