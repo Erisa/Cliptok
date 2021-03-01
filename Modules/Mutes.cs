@@ -72,7 +72,7 @@ namespace Cliptok.Modules
             {
                 // A DM failing to send isn't important, but let's put it in chat just so it's somewhere.
                 if (!(channel is null))
-                    await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} was automuted for **{Warnings.TimeToPrettyFormat(muteDuration, false)}**!");
+                    await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} was automatically muted for **{Warnings.TimeToPrettyFormat(muteDuration, false)}**!");
 
             }
             return true;
