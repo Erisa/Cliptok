@@ -69,7 +69,7 @@
       "reason": "Sent malicious URL(s)"
     }
   },
-  "massEmojiThreshold": 8,
+  "massEmojiThreshold": 6,
   "unrestrictedEmojiChannels": [
     150909911952392193,
     740272437719072808,
