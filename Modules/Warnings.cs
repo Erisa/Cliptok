@@ -211,7 +211,7 @@ namespace Cliptok.Modules
             if (toMuteHours > 0)
             {
                 DiscordMember member = await guild.GetMemberAsync(targetUser.Id);
-                await Mutes.MuteUserAsync(member, $"Automute after {warnsSinceThreshold} warnings in the past {Program.cfgjson.WarningDaysThreshold} days.", modUser.Id, guild, channel, TimeSpan.FromHours(toMuteHours));
+                await Mutes.MuteUserAsync(member, $"Automatic mute after {warnsSinceThreshold} warnings in the past {Program.cfgjson.WarningDaysThreshold} days.", modUser.Id, guild, channel, TimeSpan.FromHours(toMuteHours));
             }
 
 
