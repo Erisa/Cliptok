@@ -1,4 +1,5 @@
-config.json
+.env
+config.dev.json
 Lists/rudeWords.txt
 
 # Created by https://www.toptal.com/developers/gitignore/api/dotnetcore,windows,linux,redis,visualstudio,visualstudiocode

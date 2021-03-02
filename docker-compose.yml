@@ -4,6 +4,8 @@ services:
     image: ghcr.io/erisa/cliptok
     depends_on:
       - redis
+    env_file:
+      - .env
     restart: on-failure
     volumes:
       - type: bind
