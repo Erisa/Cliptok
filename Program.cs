@@ -414,7 +414,7 @@ namespace Cliptok
                 {
                     // todo: store per-guild
                     DiscordRole mutedRole = e.Guild.GetRole(cfgjson.MutedRole);
-                    await e.Member.GrantRoleAsync(mutedRole);
+                    await e.Member.GrantRoleAsync(mutedRole, "Reapplying mute: possible mute evasion.");
                 }
             }
 

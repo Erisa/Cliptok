@@ -46,7 +46,7 @@ namespace Cliptok.Modules
 
             try
             {
-                await naughtyMember.GrantRoleAsync(mutedRole);
+                await naughtyMember.GrantRoleAsync(mutedRole, $"[Mute by {moderator.Username}#{moderator.Discriminator}]: {reason}");
             }
             catch
             {
