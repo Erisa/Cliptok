@@ -558,6 +558,22 @@ namespace Cliptok.Modules
             await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Ejected} <@{target.Id}> was kicked by `{moderator.Username}#{moderator.Discriminator}` (`{moderator.Id}`).\nReason: **{reason}**");
         }
 
+        [Command("tellraw")]
+        [HomeServer,RequireHomeserverPerm(ServerPermLevel.Mod)]
+        public async Task TellRaw(CommandContext ctx, DiscordChannel discordChannel, [RemainingText] string output)
+        {
+            try
+            {
+                await discordChannel.SendMessageAsync(output);
+            } catch
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Your dumb message didn't want to send. Congrats, I'm proud of you.");
+                return;
+            }
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} I sent your stupid message to {discordChannel.Mention}.");
+
+        }
+
         [Group("debug")]
         [Aliases("troubleshoot", "unbug", "bugn't", "helpsomethinghasgoneverywrong")]
         [Description("Commands and things for fixing the bot in the unlikely event that it breaks a bit.")]

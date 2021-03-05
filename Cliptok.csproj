@@ -19,7 +19,7 @@
 		<None Update="config.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-    <None Update="config.dev.json.a">
+    <None Update="config.dev.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
 		<Content Include="Lists/**">
