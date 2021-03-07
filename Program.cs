@@ -270,7 +270,7 @@ namespace Cliptok
 
                         match = true;
                         string reason = cfgjson.WordListList[key].Reason;
-                        DiscordMessage msg = await e.Channel.SendMessageAsync($"{cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                        DiscordMessage msg = await e.Channel.SendMessageAsync($"{cfgjson.Emoji.Denied} {e.Message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
                         Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
                         return;
                     }
@@ -310,7 +310,7 @@ namespace Cliptok
                     }
 
                     string reason = "Mass mentions";
-                    DiscordMessage msg = await e.Channel.SendMessageAsync($"{cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                    DiscordMessage msg = await e.Channel.SendMessageAsync($"{cfgjson.Emoji.Denied} {e.Message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
                     await Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
                     return;
                 }
@@ -350,7 +350,7 @@ namespace Cliptok
                             // still warn anyway
                         }
                         string reason = "Sent an invite";
-                        DiscordMessage msg = await e.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                        DiscordMessage msg = await e.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {e.Message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
                         await Warnings.GiveWarningAsync(e.Message.Author, discord.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), e.Channel);
                         return;
                     }
@@ -391,7 +391,7 @@ namespace Cliptok
                         }
 
                         string reason = "Mass emoji";
-                        string output = $"{Program.cfgjson.Emoji.Denied} {e.Message.Author.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**";
+                        string output = $"{Program.cfgjson.Emoji.Denied} {e.Message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**";
                         if (!db.HashExists("emojiPardoned", e.Author.Id.ToString()) || db.HashGet("emojiPardoned", e.Message.Author.Id.ToString()) == false)
                         {
                             output += $"\nIf you want to play around with lots of emoji, please use <#{cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.";
