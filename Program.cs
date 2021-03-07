@@ -282,7 +282,7 @@ namespace Cliptok
                     return;
 
                 // Mass mentions
-                if (e.Message.MentionedUsers.Count >= cfgjson.MassMentionThreshold)
+                if (e.Message.MentionedUsers.Count >= cfgjson.MassMentionThreshold && Warnings.GetPermLevel(member) < ServerPermLevel.Tier3)
                 {
                     DiscordChannel logChannel = await discord.GetChannelAsync(cfgjson.LogChannel);
                     try
