@@ -646,13 +646,14 @@ namespace Cliptok.Modules
                     await ctx.RespondAsync("Invalid argument. Make sure you know what you are doing.");
 
                 };
+
             }
             [Command("refresh")]
             public async Task Refresh(CommandContext ctx)
             {
                 var msg = await ctx.RespondAsync("Checking for pending unmutes and unbans...");
                 bool bans = await CheckBansAsync();
-                bool mutes = await Mutes.CheckMutesAsync();
+                bool mutes = await Mutes.CheckMutesAsync(true);
                 await msg.ModifyAsync($"Unban check result: `{bans.ToString()}`\nUnmute check result: `{mutes.ToString()}`");
             }
         }

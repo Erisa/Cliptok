@@ -133,7 +133,7 @@ namespace Cliptok.Modules
             return true;
         }
 
-        public static async System.Threading.Tasks.Task<bool> CheckMutesAsync()
+        public static async System.Threading.Tasks.Task<bool> CheckMutesAsync(bool includeRemutes = false)
         {
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
             Dictionary<string, MemberPunishment> muteList = Program.db.HashGetAll("mutes").ToDictionary(
@@ -151,6 +151,23 @@ namespace Cliptok.Modules
                     MemberPunishment mute = entry.Value;
                     if (DateTime.Now > mute.ExpireTime)
                         await UnmuteUserAsync(await Program.discord.GetUserAsync(mute.MemberId));
+                    else if (includeRemutes)
+                    {
+                        try
+                        {
+                            var guild = await Program.discord.GetGuildAsync(mute.ServerId);
+                            var member = await guild.GetMemberAsync(mute.MemberId);
+                            if (member != null)
+                            {
+                                var muteRole = guild.GetRole(Program.cfgjson.MutedRole);
+                                await member.GrantRoleAsync(muteRole);
+                            }
+                        } catch
+                        {
+                            // nothing
+                        }
+                        
+                    }
                 }
 #if DEBUG
                 Console.WriteLine($"Checked mutes at {DateTime.Now} with result: {success}");
