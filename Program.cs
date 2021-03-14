@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -208,7 +209,7 @@ namespace Cliptok
                 var cliptokChannel = await client.GetChannelAsync(cfgjson.HomeChannel);
                 cliptokChannel.SendMessageAsync($"{cfgjson.Emoji.Connected} Cliptok connected successfully!\n\n" +
                     $"**Version**: `{commitHash}`\n" +
-                    $"**Version timestamp**: `{commitTime}`\n\n" +
+                    $"**Version timestamp**: `{commitTime}`\n**Framework**: `{RuntimeInformation.FrameworkDescription}`\n**Platform**: `{RuntimeInformation.OSDescription}`\n\n" +
                     $"Most recent commit message:\n" +
                     $"```\n" +
                     $"{commitMessage}\n" +
