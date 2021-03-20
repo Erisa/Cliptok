@@ -184,6 +184,7 @@ namespace Cliptok
                 logChannel = await discord.GetChannelAsync(cfgjson.LogChannel);
                 Mutes.CheckMutesAsync();
                 ModCmds.CheckBansAsync();
+                ModCmds.CheckRemindersAsync();
 
                 string commitHash = "aaaaaaa";
                 string commitMessage = "N/A";
@@ -438,9 +439,10 @@ namespace Cliptok
 
             while (true)
             {
-                await Task.Delay(60000);
+                await Task.Delay(10000);
                 Mutes.CheckMutesAsync();
                 ModCmds.CheckBansAsync();
+                ModCmds.CheckRemindersAsync();
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
             }

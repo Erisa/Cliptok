@@ -20,7 +20,7 @@ namespace Cliptok.Modules
         }
 
         // Only to be used on naughty users.
-        public static async System.Threading.Tasks.Task<bool> MuteUserAsync(DiscordMember naughtyMember, string reason, ulong moderatorId, DiscordGuild guild, DiscordChannel channel = null, TimeSpan muteDuration = default, bool alwaysRespond = false)
+        public static async Task<bool> MuteUserAsync(DiscordMember naughtyMember, string reason, ulong moderatorId, DiscordGuild guild, DiscordChannel channel = null, TimeSpan muteDuration = default, bool alwaysRespond = false)
         {
             bool permaMute = false;
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
@@ -133,7 +133,7 @@ namespace Cliptok.Modules
             return true;
         }
 
-        public static async System.Threading.Tasks.Task<bool> CheckMutesAsync(bool includeRemutes = false)
+        public static async Task<bool> CheckMutesAsync(bool includeRemutes = false)
         {
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
             Dictionary<string, MemberPunishment> muteList = Program.db.HashGetAll("mutes").ToDictionary(
