@@ -687,6 +687,24 @@ namespace Cliptok.Modules
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
         class DebugCmds : BaseCommandModule
         {
+            [Command("gif")]
+            [Description("Debug GIF properties.")]
+            public async Task GifDebug(CommandContext ctx, string gifToCheck)
+            {
+                SeizureDetection.ImageInfo Gif = SeizureDetection.GetGifProperties(gifToCheck);
+                string strOut = "**GIF information**\n";
+                strOut += $"----------\nFrame count: **{Gif.FrameCount}**\n";
+                strOut += $"Unique frame count: **{Gif.UniqueFrameCount}**\n";
+                strOut += $"Average frame difference: **{Math.Round(Gif.AverageFrameDifference, 2)}**\n";
+                strOut += $"Average frame contrast: **{Math.Round(Gif.AverageContrast, 2)}**\n";
+                strOut += $"Length: **{Gif.Length}ms**\n";
+                strOut += $"Frame duration: **{Math.Round(Gif.Duration, 2)}ms**\n";
+                strOut += $"Framerate: **{Math.Round(Gif.FrameRate, 2)}fps**\n";
+                strOut += $"Seizure-inducing: **{Gif.IsSeizureInducing}**\n";
+                strOut += "----------";
+                await ctx.RespondAsync(strOut);
+            }
+
             [Command("mutes")]
             [Description("Debug the list of mutes.")]
             public async Task MuteDebug(CommandContext ctx)

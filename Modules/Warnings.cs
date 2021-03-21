@@ -34,6 +34,7 @@ namespace Cliptok.Modules
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class RequireHomeserverPermAttribute : CheckBaseAttribute
     {
+        
         public ServerPermLevel TargetLvl { get; set; }
 
         public RequireHomeserverPermAttribute(ServerPermLevel targetlvl)
