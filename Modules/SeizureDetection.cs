@@ -56,9 +56,12 @@ namespace Cliptok.Modules
                         {
                             Gif.IsSeizureInducing = false;
                         }
-                        else if (unsafeGifValues[Gif.UniqueFrameCount] > Gif.Duration)
+                        else if (Gif.UniqueFrameCount <= unsafeGifValues.Count)
                         {
-                            Gif.IsSeizureInducing = true;
+                            if (unsafeGifValues[Gif.UniqueFrameCount] > Gif.Duration)
+                            {
+                                Gif.IsSeizureInducing = true;
+                            }
                         }
                         else if (penaltyAverageFrameDifference < Gif.AverageFrameDifference && unsafeGifValues[Gif.UniqueFrameCount] > (double)Gif.Duration * 1.5)
                         {
