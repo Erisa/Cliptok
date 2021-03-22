@@ -36,40 +36,49 @@ namespace Cliptok.Modules
             // The actual check for whether or not the GIF might trigger a seizure
             try
             {
-                if (Gif.AverageFrameDifference < harmlessAverageFrameDifference) // Checks to see if its too low to possibly be harmful
+                if (Gif.AverageFrameDifference > maxAverageFrameDifference && Gif.AverageContrast < 2)
                 {
                     Gif.IsSeizureInducing = false;
                 }
-                else if (Gif.AverageFrameDifference > maxAverageFrameDifference && Gif.FrameCount <= (2 * unsafeGifValues.Count)) // Checks to see if its high enough to be potentially risky
-                {
-                    Gif.IsSeizureInducing = true;
-                }
                 else
                 {
-                    if (safeAverageFrameDifference > Gif.AverageFrameDifference && unsafeGifValues[Gif.UniqueFrameCount] > (Gif.Duration + (Gif.Duration / 2)))
+                    if (Gif.AverageFrameDifference < harmlessAverageFrameDifference) // Checks to see if its too low to possibly be harmful
                     {
                         Gif.IsSeizureInducing = false;
                     }
-                    else if (unsafeGifValues[Gif.UniqueFrameCount] > Gif.Duration)
-                    {
-                        Gif.IsSeizureInducing = true;
-                    }
-                    else if (penaltyAverageFrameDifference < Gif.AverageFrameDifference && unsafeGifValues[Gif.UniqueFrameCount] > (double)Gif.Duration * 1.5)
+                    else if (Gif.AverageFrameDifference > maxAverageFrameDifference && Gif.FrameCount <= (2 * unsafeGifValues.Count)) // Checks to see if its high enough to be potentially risky
                     {
                         Gif.IsSeizureInducing = true;
                     }
                     else
                     {
-                        Gif.IsSeizureInducing = false;
+                        if (safeAverageFrameDifference > Gif.AverageFrameDifference && unsafeGifValues[Gif.UniqueFrameCount] > (Gif.Duration + (Gif.Duration / 2)))
+                        {
+                            Gif.IsSeizureInducing = false;
+                        }
+                        else if (unsafeGifValues[Gif.UniqueFrameCount] > Gif.Duration)
+                        {
+                            Gif.IsSeizureInducing = true;
+                        }
+                        else if (penaltyAverageFrameDifference < Gif.AverageFrameDifference && unsafeGifValues[Gif.UniqueFrameCount] > (double)Gif.Duration * 1.5)
+                        {
+                            Gif.IsSeizureInducing = true;
+                        }
+                        else
+                        {
+                            Gif.IsSeizureInducing = false;
+                        }
                     }
                 }
+                
             }
             catch (ArgumentOutOfRangeException)
             {
                 Gif.IsSeizureInducing = false;
             }
 
-            Console.WriteLine($"----------\nFrame count: {Gif.FrameCount}");
+            Console.WriteLine($"----------\nGIF: {input}");
+            Console.WriteLine($"Frame count: {Gif.FrameCount}");
             Console.WriteLine($"Unique frame count: {Gif.UniqueFrameCount}");
             Console.WriteLine($"Average frame difference: {Math.Round(Gif.AverageFrameDifference, 2)}");
             Console.WriteLine($"Average frame contrast: {Math.Round(Gif.AverageContrast, 2)}");
