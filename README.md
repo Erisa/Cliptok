@@ -1,8 +1,8 @@
 # Cliptok - A Discord bot for Microsoft Community
 
 ## About
-This bot is a simple(?) Discord moderation bot specifically designed for the [Microsoft Community](https://msft.chat/).  
-The bot can likely be used outside of that server (Provided the config file is edited), however that is not its main goal and you are on your own if you attempt that. (Good luck though, I hope it works out!)
+This bot is a simple (?) Discord moderation bot specifically designed for the [Microsoft Community](https://msft.chat/).  
+The bot can likely be used outside of that server (Provided the config file is edited), however that is not its main goal and you are on your own if you attempt that (Good luck though, I hope it works out!).
 
 ## Configuration
 If you're using the bot on the Microsoft Community Discord server, the configuration should be fairly simple since the default configuration values are mostly filled in for you.  
@@ -68,3 +68,7 @@ A lot of the configuration (Role IDs, emoji IDs, etc.) are in the `config.json` 
 - [TorchGM](https://github.com/TorchGM) for testing and providing design feedback. Seriously, thank you Torch.
 - The developers of [DSharpPlus](https://github.com/DSharpPlus/DSharpPlus), without their library none of this would  be possible.
 - The excellent Moderation team over at [Microsoft Community](https://msft.chat/), and all of its wonderful members.
+
+
+## License
+Licensed under the MIT License, see the [LICENSE.md file](https://github.com/Erisa/Cliptok/blob/main/LICENSE)
