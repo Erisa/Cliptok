@@ -35,20 +35,20 @@
   ],
 
   "emoji": {
-    "noPermissions": "<:WindowsShieldUAC:746728630561931305>",
-    "warning": "<:WindowsWarning:746728630096232529>",
-    "error": "<:WindowsCritical:746728630138306611>",
-    "deleted": "<:WindowsRecycleBin:746728630054289509>",
-    "information": "<:WindowsInformation:746728629135867914>",
-    "muted": "<:WindowsShieldWarning:746728628393607181>",
-    "denied": "<:WindowsDenied:783148340954136576>",
-    "banned": "<:WindowsShieldNotOK:783833289403531335>",
-    "unbanned": "<:WindowsShieldOK:783833289252143166>",
-    "ejected": "<:WindowsEject:783833074315689994>",
-    "success": "<:WindowsSuccess:791475219218300969>",
+    "noPermissions": "<:WindowsShieldUAC:824380489409626126>",
+    "warning": "<:WindowsWarning:824380489313943593>",
+    "error": "<:WindowsCritical:824380490051747840>",
+    "deleted": "<:WindowsRecycleBin:824380487920910348>",
+    "information": "<:WindowsInformation:824380490206281753>",
+    "muted": "<:WindowsShieldWarning:824380489271738401>",
+    "denied": "<:WindowsDenied:824380486918078494>",
+    "banned": "<:WindowsShieldNotOK:824380489623928852>",
+    "unbanned": "<:WindowsShieldOK:824380489845571624>",
+    "ejected": "<:WindowsEject:824380486934986792>",
+    "success": "<:WindowsSuccess:824380489712140359>",
     "loading": "<a:WindowsBusy:791473878026289192>",
     "connected": "<:WindowsRDP:809144455671054358>",
-    "locked": "<:WindowsLock:805623420166864956>"
+    "locked": "<:WindowsLock:824380487463075860>"
   },
   "redis": {
     "host": "localhost",
