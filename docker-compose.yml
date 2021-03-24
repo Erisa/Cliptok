@@ -9,9 +9,6 @@ services:
     restart: on-failure
     volumes:
       - type: bind
-        source: ./config.json
-        target: /app/config.json
-      - type: bind
         source: ./Lists/rudeWords.txt
         target: /app/Lists/rudeWords.txt
     environment:
