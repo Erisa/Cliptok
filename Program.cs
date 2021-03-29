@@ -384,6 +384,21 @@ namespace Cliptok
                     if (matches.Count > cfgjson.MassEmojiThreshold)
                     {
                         e.Message.DeleteAsync();
+                        DiscordChannel logChannel = await discord.GetChannelAsync(Program.cfgjson.LogChannel);
+                        var embed = new DiscordEmbedBuilder()
+                            .WithDescription(e.Message.Content)
+                            .WithColor(new DiscordColor(0xf03916))
+                            .WithTimestamp(e.Message.Timestamp)
+                            .WithFooter(
+                                $"User ID: {e.Author.Id}",
+                                null
+                            )
+                            .WithAuthor(
+                                $"{e.Author.Username}#{e.Author.Discriminator} in #{e.Channel.Name}",
+                                null,
+                                e.Author.AvatarUrl
+                            );
+                        logChannel.SendMessageAsync($"{cfgjson.Emoji.Denied} Deleted infringing message by {e.Author.Mention} in {e.Channel.Mention}:", embed);
 
                         if (Warnings.GetPermLevel(member) == ServerPermLevel.nothing && !db.HashExists("emojiPardoned", e.Message.Author.Id.ToString()))
                         {
