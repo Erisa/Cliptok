@@ -14,7 +14,9 @@ namespace Cliptok.Modules
 
     public class ModCmds : BaseCommandModule
     {
-        public static async Task<bool> BanFromServerAsync(ulong targetUserId, string reason, ulong moderatorId, DiscordGuild guild, int deleteDays = 7, DiscordChannel channel = null, TimeSpan banDuration = default, bool appealable = false)
+        private const char dehoistCharacter = '\u17b5';
+
+    public static async Task<bool> BanFromServerAsync(ulong targetUserId, string reason, ulong moderatorId, DiscordGuild guild, int deleteDays = 7, DiscordChannel channel = null, TimeSpan banDuration = default, bool appealable = false)
         {
             DiscordUser naughtyUser = await Program.discord.GetUserAsync(targetUserId);
             bool permaBan = false;
@@ -256,14 +258,15 @@ namespace Cliptok.Modules
         [Aliases("tempban")]
         [Description("Bans a user that you have permssion to ban, deleting all their messages in the process. See also: bankeep.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequirePermissions(Permissions.BanMembers)]
-        public async Task BanCmd(CommandContext ctx, DiscordUser targetMember, [RemainingText] string timeAndReason = "No reason specified.")
+        public async Task BanCmd(CommandContext ctx,
+            [Description("The user you wish to ban. Accepts many formats")] DiscordUser targetMember,
+            [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling'")] string timeAndReason = "No reason specified.")
         {
             bool appealable = false;
             TimeSpan banDuration = default;
             string possibleTime = timeAndReason.Split(' ').First();
             if (possibleTime.Length != 1)
             {
-                // 
                 string reason = timeAndReason;
                 // Everything BUT the last character should be a number.
                 string possibleNum = possibleTime.Remove(possibleTime.Length - 1);
@@ -498,6 +501,27 @@ namespace Cliptok.Modules
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} You need to tell me who to dehoist!");
                 return;
             }
+            else if (discordMembers.Length == 1)
+            {
+                if (discordMembers[0].DisplayName[0] == dehoistCharacter)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {discordMembers[0].Mention} is already dehoisted!");
+                    return;
+                }
+                try
+                {
+                    await discordMembers[0].ModifyAsync(a =>
+                    {
+                        a.Nickname = DehoistName(discordMembers[0].DisplayName);
+                    });
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {discordMembers[0].Mention}!");
+                }
+                catch
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Failed to dehoist {discordMembers[0].Mention}!");
+                }
+                return;
+            }
 
             var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
             int failedCount = 0;
@@ -511,17 +535,11 @@ namespace Cliptok.Modules
                 }
                 else
                 {
-
-                    if (origName.Length == 32)
-                    {
-                        origName = origName.Substring(0, origName.Length - 1);
-                    }
-                    var newName = $"\u17b5{origName}";
                     try
                     {
                         await discordMember.ModifyAsync(a =>
                         {
-                            a.Nickname = newName;
+                            a.Nickname = DehoistName(origName);
                         });
                     }
                     catch
@@ -532,6 +550,15 @@ namespace Cliptok.Modules
 
             }
             await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {discordMembers.Count() - failedCount} of {discordMembers.Count()} member(s)! (Check Audit Log for details)");
+        }
+
+        public static string DehoistName(string origName)
+        {
+            if (origName.Length == 32)
+            {
+                origName = origName[0..^1];
+            }
+            return dehoistCharacter + origName;
         }
 
         public async static Task<bool> UnbanUserAsync(DiscordGuild guild, DiscordUser target)
@@ -565,7 +592,8 @@ namespace Cliptok.Modules
             try
             {
                 await discordChannel.SendMessageAsync(output);
-            } catch
+            }
+            catch
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Your dumb message didn't want to send. Congrats, I'm proud of you.");
                 return;
@@ -586,7 +614,7 @@ namespace Cliptok.Modules
             public string MessageLink { get; set; }
 
             [JsonProperty("reminderText")]
-            public string ReminderText{ get; set; }
+            public string ReminderText { get; set; }
 
             [JsonProperty("reminderTime")]
             public DateTime ReminderTime { get; set; }
@@ -605,7 +633,8 @@ namespace Cliptok.Modules
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time can't be in the past!");
                 return;
-            } else if (t < (DateTime.Now + TimeSpan.FromSeconds(59)))
+            }
+            else if (t < (DateTime.Now + TimeSpan.FromSeconds(59)))
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time must be at least a minute in the future!");
                 return;
@@ -622,13 +651,13 @@ namespace Cliptok.Modules
             };
 
             await Program.db.ListRightPushAsync("reminders", JsonConvert.SerializeObject(reminderObject));
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} I'll try my best to remind you about that at: `{t}` (In roughly **{Warnings.TimeToPrettyFormat(t.Subtract(ctx.Message.Timestamp.DateTime),false)}**)");
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} I'll try my best to remind you about that at: `{t}` (In roughly **{Warnings.TimeToPrettyFormat(t.Subtract(ctx.Message.Timestamp.DateTime), false)}**)");
         }
 
         public static async Task<bool> CheckRemindersAsync(bool includeRemutes = false)
         {
             bool success = false;
-            foreach  (var reminder in Program.db.ListRange("reminders", 0, -1))
+            foreach (var reminder in Program.db.ListRange("reminders", 0, -1))
             {
                 var guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
                 var reminderObject = JsonConvert.DeserializeObject<Reminder>(reminder);
@@ -639,16 +668,19 @@ namespace Cliptok.Modules
                     try
                     {
                         channel = await Program.discord.GetChannelAsync(reminderObject.ChannelID);
-                    } catch
-                    {  
+                    }
+                    catch
+                    {
                         // channel likely doesnt exist
                     }
-                    if (channel == null) {
+                    if (channel == null)
+                    {
                         var member = await guild.GetMemberAsync(reminderObject.UserID);
                         if (Warnings.GetPermLevel(member) >= ServerPermLevel.TrialMod)
                         {
                             channel = await Program.discord.GetChannelAsync(Program.cfgjson.HomeChannel);
-                        } else
+                        }
+                        else
                         {
                             channel = await Program.discord.GetChannelAsync(240528256292356096);
                         }
@@ -666,7 +698,7 @@ namespace Cliptok.Modules
                     )
                     .WithTimestamp(reminderObject.OriginalTime)
                     .WithAuthor(
-                        $"Reminder from {Warnings.TimeToPrettyFormat(DateTime.Now.Subtract(reminderObject.OriginalTime),true)}",
+                        $"Reminder from {Warnings.TimeToPrettyFormat(DateTime.Now.Subtract(reminderObject.OriginalTime), true)}",
                         null,
                         user.AvatarUrl
                     )
@@ -676,7 +708,7 @@ namespace Cliptok.Modules
                 }
 
             }
-                return success;
+            return success;
         }
 
 
