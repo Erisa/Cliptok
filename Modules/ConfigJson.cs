@@ -118,6 +118,9 @@ namespace Cliptok
         [JsonProperty("restrictedHeartosoftPhrases")]
         public List<string> RestrictedHeartosoftPhrases { get; private set; }
 
+        [JsonProperty("autoDehoistCharacters")]
+        public List<char> AutoDehoistCharacters { get; private set; }
+
     }
 
     public class WordListJson

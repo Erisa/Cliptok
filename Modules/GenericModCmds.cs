@@ -14,7 +14,7 @@ namespace Cliptok.Modules
 
     public class ModCmds : BaseCommandModule
     {
-        private const char dehoistCharacter = '\u17b5';
+        public const char dehoistCharacter = '\u17b5';
 
     public static async Task<bool> BanFromServerAsync(ulong targetUserId, string reason, ulong moderatorId, DiscordGuild guild, int deleteDays = 7, DiscordChannel channel = null, TimeSpan banDuration = default, bool appealable = false)
         {
@@ -551,6 +551,25 @@ namespace Cliptok.Modules
             }
             await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {discordMembers.Count() - failedCount} of {discordMembers.Count()} member(s)! (Check Audit Log for details)");
         }
+
+        [Command("massdehoist")]
+        [Description("Dehoist everyone on the server who has a bad name. WARNING: This is a computationally expensive operation.")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
+        public async Task MassDehoist(CommandContext ctx)
+        {
+            var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it. This will take a while.");
+            var discordMembers = await ctx.Guild.GetAllMembersAsync();
+            int failedCount = 0;
+
+            foreach (DiscordMember discordMember in discordMembers)
+            {
+                bool success = await Program.CheckAndDehoistMemberAsync(discordMember);
+                if (!success)
+                    failedCount++;
+            }
+            await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {discordMembers.Count() - failedCount} of {discordMembers.Count()} member(s)! (Check Audit Log for details)");
+        }
+
 
         public static string DehoistName(string origName)
         {

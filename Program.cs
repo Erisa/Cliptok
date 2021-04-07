@@ -97,6 +97,31 @@ namespace Cliptok
 
         }
 
+
+        public static async Task<bool> CheckAndDehoistMemberAsync(DiscordMember targetMember)
+        {
+            if (
+                targetMember.DisplayName[0] == ModCmds.dehoistCharacter ||
+                !(cfgjson.AutoDehoistCharacters.Contains(targetMember.DisplayName[0]))
+                )
+            {
+                return false;
+            }
+
+            try
+            {
+                await targetMember.ModifyAsync(a =>
+                {
+                    a.Nickname = ModCmds.DehoistName(targetMember.DisplayName);
+                });
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         static void Main(string[] args)
         {
             MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
@@ -435,10 +460,25 @@ namespace Cliptok
                 }
             }
 
+            async Task GuildMemberUpdated(DiscordClient client, GuildMemberUpdateEventArgs e)
+            {
+                await CheckAndDehoistMemberAsync(e.Member);
+            }
+
+            async Task UserUpdated(DiscordClient client, UserUpdateEventArgs e)
+            {
+                var guild = await client.GetGuildAsync(cfgjson.ServerID);
+                var member = await guild.GetMemberAsync(e.UserAfter.Id);
+
+                await CheckAndDehoistMemberAsync(member);
+            }
+
             discord.Ready += OnReady;
             discord.MessageCreated += MessageCreated;
             discord.GuildMemberAdded += GuildMemberAdded;
             discord.MessageReactionAdded += OnReaction;
+            discord.GuildMemberUpdated += GuildMemberUpdated;
+            discord.UserUpdated += UserUpdated;
 
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
