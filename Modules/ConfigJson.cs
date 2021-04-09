@@ -121,6 +121,9 @@ namespace Cliptok
         [JsonProperty("autoDehoistCharacters")]
         public List<char> AutoDehoistCharacters { get; private set; }
 
+        [JsonProperty("investigationsChannel")]
+        public ulong InvestigationsChannelId { get; private set; }
+
     }
 
     public class WordListJson
