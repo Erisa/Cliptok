@@ -330,6 +330,7 @@ namespace Cliptok
                     if (checkedMessage.Contains("discord.gg/") || checkedMessage.Contains("discord.com/invite/"))
                     {
                         string reason = "Sent an invite";
+                        e.Message.DeleteAsync();
                         try
                         {
                             SendInfringingMessaageAsync(logChannel, e.Message, reason, null);
