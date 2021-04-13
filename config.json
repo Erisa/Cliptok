@@ -13,7 +13,10 @@
   "homeChannel": 793285213823172628,
   "investigationsChannel": 745276933767430255,
   "warningDaysThreshold": 30,
-  "inviteExclusion": "microsoft",
+  "inviteExclusion": {
+    "microsoft",
+    "xbox",
+  },
   "autoMuteThresholds": {
     "2": 6,
     "4": 12,
