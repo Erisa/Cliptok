@@ -95,7 +95,7 @@ namespace Cliptok
         public List<ulong> TierRoles { get; private set; }
 
         [JsonProperty("inviteExclusion")]
-        public string InviteExclusion { get; private set; }
+        public List<string> InviteExclusion { get; private set; }
 
         [JsonProperty("inviteTierRequirement")]
         public int InviteTierRequirement { get; private set; }
