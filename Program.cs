@@ -321,15 +321,16 @@ namespace Cliptok
                 // Unapproved invites
                 if (Warnings.GetPermLevel(member) < (ServerPermLevel)cfgjson.InviteTierRequirement)
                 {
-                    string inviteExclusion = cfgjson.InviteExclusion;
-                    if (cfgjson.InviteExclusion != null)
-                        inviteExclusion = cfgjson.InviteExclusion;
 
-                    string checkedMessage = e.Message.Content.Replace($"discord.gg/{inviteExclusion}", "").Replace($"discord.com/invite/{inviteExclusion}", "").Replace('\\', '/');
+                    string checkedMessage = e.Message.Content.Replace('\\', '/');
+                    foreach (string exclusion in cfgjson.InviteExclusion)
+                    {
+                        checkedMessage = checkedMessage.Replace("discord.gg/" + exclusion, "").Replace("discord.com/invite/" + exclusion, "");
+                    }
 
                     if (checkedMessage.Contains("discord.gg/") || checkedMessage.Contains("discord.com/invite/"))
                     {
-                        string reason = "Sent an invite";
+                        string reason = "Sent an unapproved invite";
                         e.Message.DeleteAsync();
                         try
                         {
