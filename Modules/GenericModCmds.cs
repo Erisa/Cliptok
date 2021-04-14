@@ -188,7 +188,7 @@ namespace Cliptok.Modules
             var currentChannel = ctx.Channel;
             if (!Program.cfgjson.LockdownEnabledChannels.Contains(currentChannel.Id))
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Denied} You can't lock or unlock this channel!\nIf this is in error, add its ID (`{currentChannel.Id}`) to the lockdown whitelist.");
+                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} You can't lock or unlock this channel!\nIf this is in error, add its ID (`{currentChannel.Id}`) to the lockdown whitelist.");
                 return;
             }
 
@@ -199,9 +199,9 @@ namespace Cliptok.Modules
             await currentChannel.AddOverwriteAsync(ctx.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, "Lockdown command");
 
             if (reason == "")
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Locked} This channel has been locked by a Moderator.");
+                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Locked} This channel has been locked by a Moderator.");
             else
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Locked} This channel has been locked: **{reason}**");
+                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Locked} This channel has been locked: **{reason}**");
         }
 
         [Command("unlock")]
@@ -212,7 +212,7 @@ namespace Cliptok.Modules
             var currentChannel = ctx.Channel;
             if (!Program.cfgjson.LockdownEnabledChannels.Contains(currentChannel.Id))
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Denied} You can't lock or unlock this channel!\nIf this is in error, add its ID (`{currentChannel.Id}`) to the lockdown whitelist.");
+                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} You can't lock or unlock this channel!\nIf this is in error, add its ID (`{currentChannel.Id}`) to the lockdown whitelist.");
                 return;
             }
 
@@ -290,7 +290,7 @@ namespace Cliptok.Modules
                     }
                 }
 
-                // await ctx.RespondAsync($"debug: {possibleNum}, {possibleTime}, {banDuration.ToString()}, {reason}");
+                // await ctx.Channel.SendMessageAsync($"debug: {possibleNum}, {possibleTime}, {banDuration.ToString()}, {reason}");
                 if (reason.Length > 6 && reason.Substring(0, 7) == "appeal ")
                 {
                     appealable = true;
@@ -323,21 +323,21 @@ namespace Cliptok.Modules
                         }
                         else
                         {
-                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, I don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
+                            await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, I don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
                             return;
                         }
                     }
                     else
                     {
-                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, you don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
+                        await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, you don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
                         return;
                     }
                 }
                 reason = reason.Replace("`", "\\`").Replace("*", "\\*");
                 if (banDuration == default)
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned: **{reason}**");
+                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned: **{reason}**");
                 else
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{Warnings.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
+                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{Warnings.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
             }
         }
 
@@ -376,7 +376,7 @@ namespace Cliptok.Modules
                     }
                 }
 
-                // await ctx.RespondAsync($"debug: {possibleNum}, {possibleTime}, {banDuration.ToString()}, {reason}");
+                // await ctx.Channel.SendMessageAsync($"debug: {possibleNum}, {possibleTime}, {banDuration.ToString()}, {reason}");
                 if (reason.Length > 6 && reason.Substring(0, 7) == "appeal ")
                 {
                     appealable = true;
@@ -409,21 +409,21 @@ namespace Cliptok.Modules
                         }
                         else
                         {
-                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, I don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
+                            await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, I don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
                             return;
                         }
                     }
                     else
                     {
-                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, you don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
+                        await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, you don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
                         return;
                     }
                 }
                 reason = reason.Replace("`", "\\`").Replace("*", "\\*");
                 if (banDuration == default)
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned: **{reason}**");
+                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned: **{reason}**");
                 else
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{Warnings.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
+                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{Warnings.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
             }
         }
 
@@ -442,7 +442,7 @@ namespace Cliptok.Modules
             }
             catch
             {
-                await ctx.RespondAsync($"{ctx.User.Mention}, that user doesn't appear to be in the server.");
+                await ctx.Channel.SendMessageAsync($"{ctx.User.Mention}, that user doesn't appear to be in the server.");
                 return;
             }
 
@@ -452,18 +452,18 @@ namespace Cliptok.Modules
                 {
                     await ctx.Message.DeleteAsync();
                     await KickAndLogAsync(member, reason, ctx.Member);
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Ejected} {target.Mention} has been kicked: **{reason}**");
+                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Ejected} {target.Mention} has been kicked: **{reason}**");
                     return;
                 }
                 else
                 {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I don't have permission to kick **{target.Username}#{target.Discriminator}**!");
+                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} I don't have permission to kick **{target.Username}#{target.Discriminator}**!");
                     return;
                 }
             }
             else
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} You aren't allowed to kick **{target.Username}#{target.Discriminator}**!");
+                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} You aren't allowed to kick **{target.Username}#{target.Discriminator}**!");
                 return;
             }
         }
@@ -614,10 +614,10 @@ namespace Cliptok.Modules
             }
             catch
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Your dumb message didn't want to send. Congrats, I'm proud of you.");
+                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} Your dumb message didn't want to send. Congrats, I'm proud of you.");
                 return;
             }
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} I sent your stupid message to {discordChannel.Mention}.");
+            await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Success} I sent your stupid message to {discordChannel.Mention}.");
 
         }
 
@@ -650,12 +650,12 @@ namespace Cliptok.Modules
             DateTime t = HumanDateParser.HumanDateParser.Parse(timetoParse);
             if (t <= DateTime.Now)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time can't be in the past!");
+                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} Time can't be in the past!");
                 return;
             }
             else if (t < (DateTime.Now + TimeSpan.FromSeconds(59)))
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time must be at least a minute in the future!");
+                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} Time must be at least a minute in the future!");
                 return;
             }
 
@@ -670,7 +670,7 @@ namespace Cliptok.Modules
             };
 
             await Program.db.ListRightPushAsync("reminders", JsonConvert.SerializeObject(reminderObject));
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} I'll try my best to remind you about that at: `{t}` (In roughly **{Warnings.TimeToPrettyFormat(t.Subtract(ctx.Message.Timestamp.DateTime), false)}**)");
+            await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Success} I'll try my best to remind you about that at: `{t}` (In roughly **{Warnings.TimeToPrettyFormat(t.Subtract(ctx.Message.Timestamp.DateTime), false)}**)");
         }
 
         public static async Task<bool> CheckRemindersAsync(bool includeRemutes = false)
@@ -746,7 +746,7 @@ namespace Cliptok.Modules
                 var muteList = Program.db.HashGetAll("mutes").ToDictionary();
                 if (muteList == null | muteList.Keys.Count == 0)
                 {
-                    await ctx.RespondAsync("No mutes found in database!");
+                    await ctx.Channel.SendMessageAsync("No mutes found in database!");
                     return;
                 }
                 else
@@ -757,7 +757,7 @@ namespace Cliptok.Modules
                     }
                 }
                 strOut += "```";
-                await ctx.RespondAsync(strOut);
+                await ctx.Channel.SendMessageAsync(strOut);
             }
 
             [Command("bans")]
@@ -768,7 +768,7 @@ namespace Cliptok.Modules
                 var muteList = Program.db.HashGetAll("bans").ToDictionary();
                 if (muteList == null | muteList.Keys.Count == 0)
                 {
-                    await ctx.RespondAsync("No bans found in database!");
+                    await ctx.Channel.SendMessageAsync("No bans found in database!");
                     return;
                 }
                 else

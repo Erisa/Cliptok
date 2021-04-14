@@ -50,7 +50,7 @@ namespace Cliptok.Modules
                 }
             }
 
-            await ctx.RespondAsync($"{ctx.User.Mention} has joined the {response} role{(roleIds.Length != 1 ? "s" : String.Empty)}.");
+            await ctx.Channel.SendMessageAsync($"{ctx.User.Mention} has joined the {response} role{(roleIds.Length != 1 ? "s" : String.Empty)}.");
         }
 
         public static async Task RemoveUserRoleAsync(CommandContext ctx, ulong role)

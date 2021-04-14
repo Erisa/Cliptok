@@ -226,7 +226,7 @@ namespace Cliptok.Modules
             {
                 // TODO: Rework mutes to allow this
                 await ctx.Message.DeleteAsync();
-                var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} The user you're trying to mute is not in the server!");
+                var msg = await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} The user you're trying to mute is not in the server!");
                 await Task.Delay(3000);
                 await msg.DeleteAsync();
                 return;
@@ -234,7 +234,7 @@ namespace Cliptok.Modules
 
             if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
+                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
                 return;
             }
 
@@ -267,7 +267,7 @@ namespace Cliptok.Modules
                     }
                 }
 
-                // await ctx.RespondAsync($"debug: {possibleNum}, {possibleTime}, {muteDuration.ToString()}, {reason}");
+                // await ctx.Channel.SendMessageAsync($"debug: {possibleNum}, {possibleTime}, {muteDuration.ToString()}, {reason}");
                 _ = Mutes.MuteUserAsync(targetMember, reason, ctx.User.Id, ctx.Guild, ctx.Channel, muteDuration, true);
             }
         }
