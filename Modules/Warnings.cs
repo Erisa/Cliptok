@@ -346,13 +346,22 @@ namespace Cliptok.Modules
                 // do nothing :/
             }
 
+            var reply = ctx.Message.ReferencedMessage;
+
             await ctx.Message.DeleteAsync();
             if (reason == null)
             {
                 await ctx.Member.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} Reason must be included for the warning command to work.");
                 return;
             }
-            DiscordMessage msg = await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+
+            var messageBuild = new DiscordMessageBuilder()
+                .WithContent($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+
+            if (reply != null)
+                messageBuild.WithReply(reply.Id, true, false);
+
+            var msg = await ctx.Channel.SendMessageAsync(messageBuild);
             UserWarning warning = await GiveWarningAsync(targetUser, ctx.User, reason, MessageLink(msg), ctx.Channel);
         }
 
@@ -564,6 +573,8 @@ namespace Cliptok.Modules
                     $"`{Pad(warnId)}` (belonging to {targetUser.Mention})", await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId), true));
             }
         }
+
+
 
     }
 }
