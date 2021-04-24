@@ -11,6 +11,9 @@ services:
       - type: bind
         source: ./Lists/rudeWords.txt
         target: /app/Lists/rudeWords.txt
+      - type: bind
+        source: ./Lists/usernames.txt
+        target: /app/Lists/usernames.txt
     environment:
       # Overrides your configs Redis options for use with Docker Compose
       #  I don't advise changing this unless you have a strange setup
