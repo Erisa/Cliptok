@@ -112,6 +112,11 @@ namespace Cliptok.Modules
                 return ServerPermLevel.nothing;
         }
 
+        internal static string MessageLink(Task<DiscordMessage> msg)
+        {
+            throw new NotImplementedException();
+        }
+
         public static async Task<DiscordEmbed> FancyWarnEmbedAsync(UserWarning warning, bool detailed = false, int colour = 0xFEC13D, bool showTime = true)
         {
             DiscordUser targetUser = await Program.discord.GetUserAsync(warning.TargetUserId);

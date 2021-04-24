@@ -9,6 +9,7 @@
 		<PackageReference Include="Abyssal.HumanDateParser" Version="2.0.0-20191113.1" />
 		<PackageReference Include="DSharpPlus" Version="4.0.0" />
 		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0" />
+		<PackageReference Include="IDoEverything.DSharpPlus.SlashCommands" Version="1.1.1" />
 		<PackageReference Include="StackExchange.Redis" Version="2.2.4" />
 		<PackageReference Include="System.Linq" Version="4.3.0" />
 	</ItemGroup>
@@ -23,6 +24,10 @@
 		<Content Include="Lists/**">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Lists\usernames.txt" />
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition=" '$(OS)' != 'Windows_NT' ">
