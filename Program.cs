@@ -455,6 +455,25 @@ namespace Cliptok
 
             async Task GuildMemberUpdated(DiscordClient client, GuildMemberUpdateEventArgs e)
             {
+                var muteRole = e.Guild.GetRole(cfgjson.MutedRole);
+                var userMute = await db.HashGetAsync("mutes", e.Member.Id);
+
+                if (e.Member.Roles.Contains(muteRole) && userMute.IsNull)
+                {
+                    MemberPunishment newMute = new MemberPunishment()
+                    {
+                        MemberId = e.Member.Id,
+                        ModId = discord.CurrentUser.Id,
+                        ServerId = e.Guild.Id,
+                        ExpireTime = null
+                    };
+
+                    await db.HashSetAsync("mutes", e.Member.Id, JsonConvert.SerializeObject(newMute));
+                }
+
+                if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole))
+                    await Mutes.UnmuteUserAsync(e.Member);
+
                 await CheckAndDehoistMemberAsync(e.Member);
                 await UsernameCheckAsync(e.Member);
             }
