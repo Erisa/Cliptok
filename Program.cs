@@ -468,14 +468,14 @@ namespace Cliptok
                         ExpireTime = null
                     };
 
-                    await db.HashSetAsync("mutes", e.Member.Id, JsonConvert.SerializeObject(newMute));
+                    db.HashSetAsync("mutes", e.Member.Id, JsonConvert.SerializeObject(newMute));
                 }
 
                 if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole))
-                    await Mutes.UnmuteUserAsync(e.Member);
+                    Mutes.UnmuteUserAsync(e.Member);
 
-                await CheckAndDehoistMemberAsync(e.Member);
-                await UsernameCheckAsync(e.Member);
+                CheckAndDehoistMemberAsync(e.Member);
+                UsernameCheckAsync(e.Member);
             }
 
             async Task UserUpdated(DiscordClient client, UserUpdateEventArgs e)
