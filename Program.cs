@@ -472,7 +472,7 @@ namespace Cliptok
                 }
 
                 if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole))
-                    Mutes.UnmuteUserAsync(e.Member);
+                    db.HashDeleteAsync("mutes", e.Member.Id);
 
                 CheckAndDehoistMemberAsync(e.Member);
                 UsernameCheckAsync(e.Member);
