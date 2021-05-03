@@ -1,15 +1,17 @@
 # Cliptok - A Discord bot for Microsoft Community
 
 ## About
-This bot is a simple(?) Discord moderation bot specifically designed for the [Microsoft Community](https://msft.chat/).  
-The bot can likely be used outside of that server (Provided the config file is edited), however that is not its main goal and you are on your own if you attempt that. (Good luck though, I hope it works out!)
+This bot is a Discord moderation bot specifically designed for the [Microsoft Community](https://msft.chat/).  
+
+The bot has not been designed for use outside of that server. A lot is assumed about the environment and you **will** encounter problems along the way.
+The reason is that modularity is not its main goal and you are on your own if you attempt that. (Good luck though, I hope it works out!)
 
 ## Configuration
 If you're using the bot on the Microsoft Community Discord server, the configuration should be fairly simple since the default configuration values are mostly filled in for you.  
 
 Simply copy `config.example.json` to `config.json` and edit in the token for your Discord bot. If you require a different prefix, that can be done in the same file.
 
-If you're using the bot elsewhere, you will need to edit the configuration file more thoroughly, including all of the role IDs and the server ID.
+If you're using the bot elsewhere, you will need to edit the configuration file more thoroughly, including all of the role IDs and the server ID. It probably still won't work, you'll have to debug errors yourself.
 
 ## Usage
 There are two methods of launching this bot. Through [Docker](https://www.docker.com/) or as a standalone application.
