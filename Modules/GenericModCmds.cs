@@ -67,14 +67,24 @@ namespace Cliptok.Modules
 
             try
             {
+                string logOut;
                 await guild.BanMemberAsync(targetUserId, deleteDays, reason);
                 if (permaBan)
                 {
-                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was permanently banned by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**");
+                    logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was permanently banned by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**";
                 }
                 else
                 {
-                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was banned for {Warnings.TimeToPrettyFormat(banDuration, false)} by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**");
+                    logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was banned for {Warnings.TimeToPrettyFormat(banDuration, false)} by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**";
+                }
+                await logChannel.SendMessageAsync(logOut);
+                foreach (KeyValuePair<ulong, DiscordChannel> potentialChannelPair in guild.Channels)
+                {
+                    var potentialChannel = potentialChannelPair.Value;
+                    if (potentialChannel.Type == ChannelType.Text && potentialChannel.Topic.EndsWith($"User ID: {targetUserId}")) {
+                        await potentialChannel.SendMessageAsync(logOut);
+                        break;
+                    }
                 }
 
             }
