@@ -161,36 +161,6 @@ namespace Cliptok.Modules
             return target.IsOwner ? int.MaxValue : (target.Roles.Count() == 0 ? 0 : target.Roles.Max(x => x.Position));
         }
 
-        public static TimeSpan ParseTime(char possibleTimePeriod, int timeLength)
-        {
-            switch (possibleTimePeriod)
-            {
-                // Seconds
-                case 's':
-                    return TimeSpan.FromSeconds(timeLength);
-                // Minutes
-                case 'm':
-                    return TimeSpan.FromMinutes(timeLength);
-                // Hours
-                case 'h':
-                    return TimeSpan.FromHours(timeLength);
-                // Days
-                case 'd':
-                    return TimeSpan.FromDays(timeLength);
-                // Weeks
-                case 'w':
-                    return TimeSpan.FromDays(timeLength * 7);
-                // Months
-                case 'q':
-                    return TimeSpan.FromDays(timeLength * 28);
-                // Years
-                case 'y':
-                    return TimeSpan.FromDays(timeLength * 365);
-                default:
-                    return default;
-            }
-        }
-
         [Command("lockdown")]
         [Aliases("lock")]
         [Description("Locks the current channel, preventing any new messages. See also: unlock")]
@@ -275,41 +245,30 @@ namespace Cliptok.Modules
             [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling'")] string timeAndReason = "No reason specified.")
         {
             bool appealable = false;
+            bool timeParsed = false;
 
             TimeSpan banDuration = default;
             string possibleTime = timeAndReason.Split(' ').First();
             try
             {
-                banDuration = HumanDateParser.HumanDateParser.Parse(possibleTime) - DateTime.Now;
+                banDuration = HumanDateParser.HumanDateParser.Parse(possibleTime).Subtract(ctx.Message.Timestamp.DateTime);
+                timeParsed = true;
             } catch
             {
                 // keep default
             }
 
             string reason = timeAndReason;
-            // Everything BUT the last character should be a number.
-            string possibleNum = possibleTime.Remove(possibleTime.Length - 1);
-            if (int.TryParse(possibleNum, out int timeLength))
+
+            if (timeParsed)
             {
-                char possibleTimePeriod = possibleTime.Last();
-                banDuration = ParseTime(possibleTimePeriod, timeLength);
-            }
-            else
-            {
-                banDuration = default;
+                int i = reason.IndexOf(" ") + 1;
+                reason = reason.Substring(i);
             }
 
-            if (banDuration != default || possibleNum == "0")
-            {
-                if (!timeAndReason.Contains(" "))
-                    reason = "No reason specified.";
-                else
-                {
-                    
-                }
-            }
+            if (timeParsed && possibleTime == reason)
+                reason = "No reason specified.";
 
-            // await ctx.Channel.SendMessageAsync($"debug: {possibleNum}, {possibleTime}, {banDuration.ToString()}, {reason}");
             if (reason.Length > 6 && reason.Substring(0, 7) == "appeal ")
             {
                 appealable = true;
@@ -367,41 +326,38 @@ namespace Cliptok.Modules
         public async Task BankeepCmd(CommandContext ctx, DiscordUser targetMember, [RemainingText] string timeAndReason = "No reason specified.")
         {
             bool appealable = false;
+            bool timeParsed = false;
+
             TimeSpan banDuration = default;
             string possibleTime = timeAndReason.Split(' ').First();
-            if (possibleTime.Length != 1)
+            try
             {
-                string reason = timeAndReason;
-                // Everything BUT the last character should be a number.
-                string possibleNum = possibleTime.Remove(possibleTime.Length - 1);
-                if (int.TryParse(possibleNum, out int timeLength))
-                {
-                    char possibleTimePeriod = possibleTime.Last();
-                    banDuration = ParseTime(possibleTimePeriod, timeLength);
-                }
-                else
-                {
-                    banDuration = default;
-                }
+                banDuration = HumanDateParser.HumanDateParser.Parse(possibleTime).Subtract(ctx.Message.Timestamp.DateTime);
+                timeParsed = true;
+            }
+            catch
+            {
+                // keep default
+            }
 
-                if (banDuration != default || possibleNum == "0")
-                {
-                    if (!timeAndReason.Contains(" "))
-                        reason = "No reason specified.";
-                    else
-                    {
-                        reason = timeAndReason.Substring(timeAndReason.IndexOf(' ') + 1, timeAndReason.Length - (timeAndReason.IndexOf(' ') + 1));
-                    }
-                }
+            string reason = timeAndReason;
 
-                // await ctx.Channel.SendMessageAsync($"debug: {possibleNum}, {possibleTime}, {banDuration.ToString()}, {reason}");
-                if (reason.Length > 6 && reason.Substring(0, 7) == "appeal ")
-                {
-                    appealable = true;
-                    reason = reason[7..^0];
-                }
+            if (timeParsed)
+            {
+                int i = reason.IndexOf(" ") + 1;
+                reason = reason.Substring(i);
+            }
 
-                DiscordMember member;
+            if (timeParsed && possibleTime == reason)
+                reason = "No reason specified.";
+
+            if (reason.Length > 6 && reason.Substring(0, 7) == "appeal ")
+            {
+                appealable = true;
+                reason = reason[7..^0];
+            }
+
+            DiscordMember member;
                 try
                 {
                     member = await ctx.Guild.GetMemberAsync(targetMember.Id);
@@ -442,7 +398,6 @@ namespace Cliptok.Modules
                     await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned: **{reason}**");
                 else
                     await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{Warnings.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
-            }
         }
 
         [Command("kick")]
