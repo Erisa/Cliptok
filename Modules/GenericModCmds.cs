@@ -78,6 +78,8 @@ namespace Cliptok.Modules
                     logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was banned for {Warnings.TimeToPrettyFormat(banDuration, false)} by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**";
                 }
                 await logChannel.SendMessageAsync(logOut);
+
+                logOut += $"\nChannel: {channel.Mention}";
                 foreach (KeyValuePair<ulong, DiscordChannel> potentialChannelPair in guild.Channels)
                 {
                     var potentialChannel = potentialChannelPair.Value;
@@ -273,82 +275,88 @@ namespace Cliptok.Modules
             [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling'")] string timeAndReason = "No reason specified.")
         {
             bool appealable = false;
+
             TimeSpan banDuration = default;
             string possibleTime = timeAndReason.Split(' ').First();
-            if (possibleTime.Length != 1)
+            try
             {
-                string reason = timeAndReason;
-                // Everything BUT the last character should be a number.
-                string possibleNum = possibleTime.Remove(possibleTime.Length - 1);
-                if (int.TryParse(possibleNum, out int timeLength))
-                {
-                    char possibleTimePeriod = possibleTime.Last();
-                    banDuration = ParseTime(possibleTimePeriod, timeLength);
-                }
+                banDuration = HumanDateParser.HumanDateParser.Parse(possibleTime) - DateTime.Now;
+            } catch
+            {
+                // keep default
+            }
+
+            string reason = timeAndReason;
+            // Everything BUT the last character should be a number.
+            string possibleNum = possibleTime.Remove(possibleTime.Length - 1);
+            if (int.TryParse(possibleNum, out int timeLength))
+            {
+                char possibleTimePeriod = possibleTime.Last();
+                banDuration = ParseTime(possibleTimePeriod, timeLength);
+            }
+            else
+            {
+                banDuration = default;
+            }
+
+            if (banDuration != default || possibleNum == "0")
+            {
+                if (!timeAndReason.Contains(" "))
+                    reason = "No reason specified.";
                 else
                 {
-                    banDuration = default;
+                    
                 }
+            }
 
-                if (banDuration != default || possibleNum == "0")
+            // await ctx.Channel.SendMessageAsync($"debug: {possibleNum}, {possibleTime}, {banDuration.ToString()}, {reason}");
+            if (reason.Length > 6 && reason.Substring(0, 7) == "appeal ")
+            {
+                appealable = true;
+                reason = reason[7..^0];
+            }
+
+            DiscordMember member;
+            try
+            {
+                member = await ctx.Guild.GetMemberAsync(targetMember.Id);
+            }
+            catch
+            {
+                member = null;
+            }
+
+            if (member == null)
+            {
+                await ctx.Message.DeleteAsync();
+                await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 7, ctx.Channel, banDuration, appealable);
+            }
+            else
+            {
+                if (AllowedToMod(ctx.Member, member))
                 {
-                    if (!timeAndReason.Contains(" "))
-                        reason = "No reason specified.";
-                    else
+                    if (AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
                     {
-                        reason = timeAndReason.Substring(timeAndReason.IndexOf(' ') + 1, timeAndReason.Length - (timeAndReason.IndexOf(' ') + 1));
-                    }
-                }
-
-                // await ctx.Channel.SendMessageAsync($"debug: {possibleNum}, {possibleTime}, {banDuration.ToString()}, {reason}");
-                if (reason.Length > 6 && reason.Substring(0, 7) == "appeal ")
-                {
-                    appealable = true;
-                    reason = reason[7..^0];
-                }
-
-                DiscordMember member;
-                try
-                {
-                    member = await ctx.Guild.GetMemberAsync(targetMember.Id);
-                }
-                catch
-                {
-                    member = null;
-                }
-
-                if (member == null)
-                {
-                    await ctx.Message.DeleteAsync();
-                    await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 7, ctx.Channel, banDuration, appealable);
-                }
-                else
-                {
-                    if (AllowedToMod(ctx.Member, member))
-                    {
-                        if (AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
-                        {
-                            await ctx.Message.DeleteAsync();
-                            await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 7, ctx.Channel, banDuration, appealable);
-                        }
-                        else
-                        {
-                            await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, I don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
-                            return;
-                        }
+                        await ctx.Message.DeleteAsync();
+                        await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 7, ctx.Channel, banDuration, appealable);
                     }
                     else
                     {
-                        await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, you don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
+                        await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, I don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
                         return;
                     }
                 }
-                reason = reason.Replace("`", "\\`").Replace("*", "\\*");
-                if (banDuration == default)
-                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned: **{reason}**");
                 else
-                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{Warnings.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
+                {
+                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, you don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
+                    return;
+                }
             }
+            reason = reason.Replace("`", "\\`").Replace("*", "\\*");
+            if (banDuration == default)
+                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned: **{reason}**");
+            else
+                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{Warnings.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
         }
 
         /// I CANNOT find a way to do this as alias so I made it a separate copy of the command.
