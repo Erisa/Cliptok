@@ -6,7 +6,7 @@ on:
      - main
 
 jobs:
-  multi-platform-push:
+  cliptok-build-publish:
     runs-on: ubuntu-latest
     steps:
       -
@@ -39,7 +39,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           tags: |
             ghcr.io/erisa/cliptok:latest
