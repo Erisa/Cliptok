@@ -48,7 +48,7 @@ namespace Cliptok.Modules
                 {
                     if (appealable)
                     {
-                        await targetMember.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}**!\nReason: **{reason}**\nYou can appeal the ban here: <https://msft.chat/member/#ban-appeal-process>");
+                        await targetMember.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}**!\nReason: **{reason}**\nYou can appeal the ban here: <{Program.cfgjson.AppealLink}>");
                     }
                     else
                     {

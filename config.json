@@ -12,6 +12,7 @@
   "serverID": 150662382874525696,
   "homeChannel": 793285213823172628,
   "investigationsChannel": 745276933767430255,
+  "appealLink": "https://msft.chat/member/#ban-appeal-process",
   "warningDaysThreshold": 30,
   "inviteExclusion": [
     "microsoft",
