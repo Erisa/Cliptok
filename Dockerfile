@@ -1,5 +1,5 @@
 FROM --platform=${BUILDPLATFORM} \
-    mcr.microsoft.com/dotnet/sdk:5.0.202 AS build-env
+    mcr.microsoft.com/dotnet/sdk:5.0.203 AS build-env
 WORKDIR /app
 
 # We need Git for Cliptok builds now.
@@ -14,7 +14,7 @@ COPY . ./
 RUN dotnet build -c Release -o out
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/runtime:5.0.5-alpine3.13
+FROM mcr.microsoft.com/dotnet/runtime:5.0.6-alpine3.13
 WORKDIR /app
 COPY --from=build-env /app/out .
 ENTRYPOINT ["dotnet", "Cliptok.dll"]
