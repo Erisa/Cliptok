@@ -118,6 +118,20 @@ namespace Cliptok.Modules
                 try
                 {
                     await member.RevokeRoleAsync(mutedRole);
+                    foreach (var role in member.Roles)
+                    {
+                        if (role.Name == "Muted")
+                        {
+                            try
+                            {
+                                await member.RevokeRoleAsync(role);
+                            }
+                            catch
+                            {
+                                // ignore, continue to next role
+                            }
+                        }
+                    }
                     await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Successfully unmuted <@{targetUser.Id}>!");
                 }
                 catch
