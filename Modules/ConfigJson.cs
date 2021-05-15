@@ -135,6 +135,9 @@ namespace Cliptok
 
         [JsonProperty("supportLogChannel")]
         public ulong SupportLogChannel { get; private set; }
+
+        [JsonProperty("supportRatelimitMinutes")]
+        public int SupportRatelimitMinutes { get; private set; }
     }
 
     public class WordListJson

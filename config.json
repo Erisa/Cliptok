@@ -15,6 +15,7 @@
   "techSupportChannel": 150909451270881280,
   "supportLogChannel": 843181924687806484,
   "communityTechSupportRoleID": 787033266225938472,
+  "supportRatelimitMinutes": 15,
   "appealLink": "https://msft.chat/member/#ban-appeal-process",
   "warningDaysThreshold": 30,
   "inviteExclusion": [
