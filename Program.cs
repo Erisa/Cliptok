@@ -403,6 +403,39 @@ namespace Cliptok
                         await SendInfringingMessaageAsync(badMsgLog, e.Message, reason, warning.ContextLink);
                         return;
                     }
+
+                    if (e.Message.Channel.Id == cfgjson.TechSupportChannel && e.Message.Content.Contains($"<@&{cfgjson.CommunityTechSupportRoleID}>")) {
+                        DiscordChannel supportLogChannel = await client.GetChannelAsync(cfgjson.SupportLogChannel);
+                        var embed = new DiscordEmbedBuilder()
+                            .WithTimestamp(DateTime.Now)
+                            .WithAuthor(e.Author.Username + '#' + e.Author.Discriminator, null, $"https://cdn.discordapp.com/avatars/{e.Author.Id}/{e.Author.AvatarHash}.png?size=128");
+                       
+                        var lastMsgs = await e.Channel.GetMessagesBeforeAsync(e.Message.Id, 50);
+                        var msgMatch = lastMsgs.FirstOrDefault(m => m.Author.Id == e.Author.Id);
+
+                        if (msgMatch != null)
+                        {
+                            embed.AddField("Previous message", Warnings.Truncate(msgMatch.Content, 1020, true));
+                            if (msgMatch.Attachments.Count != 0)
+                            {
+                                embed.WithImageUrl(msgMatch.Attachments[0].Url);
+                            }
+                                
+                        }
+
+                        embed.AddField("Current message", Warnings.Truncate(e.Message.Content, 1020) + " …");
+                        if (e.Message.Attachments.Count != 0)
+                        {
+                            if (embed.ImageUrl == null)
+                                embed.WithImageUrl(e.Message.Attachments[0].Url);
+                            else
+                                embed.ImageUrl = e.Message.Attachments[0].Url;
+                        }
+
+                        embed.AddField("Message Link", $"[`Jump to message`](https://discord.com/channels/{e.Guild.Id}/{e.Channel.Id}/{e.Message.Id})");
+                        var logOut = await supportLogChannel.SendMessageAsync(null, embed);
+                        logOut.CreateReactionAsync(DiscordEmoji.FromName(client, ":WindowsAcknowledge:", true));
+                    }
                 }
             }
 

@@ -262,10 +262,14 @@ namespace Cliptok.Modules
         }
 
         // https://stackoverflow.com/a/2776689
-        public static string Truncate(string value, int maxLength)
+        public static string Truncate(string value, int maxLength, bool elipsis = false)
         {
             if (string.IsNullOrEmpty(value)) return value;
-            return value.Length <= maxLength ? value : value.Substring(0, maxLength);
+            var strOut = value.Length <= maxLength ? value : value.Substring(0, maxLength);
+            if (elipsis && value.Length > maxLength)
+                return strOut + '…';
+            else
+                return strOut;
         }
 
         public static string TimeToPrettyFormat(TimeSpan span, bool ago = true)

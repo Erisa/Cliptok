@@ -127,6 +127,14 @@ namespace Cliptok
         [JsonProperty("appealLink")]
         public string AppealLink { get; private set; }
 
+        [JsonProperty("communityTechSupportRoleID")]
+        public ulong CommunityTechSupportRoleID { get; private set; }
+
+        [JsonProperty("techSupportChannel")]
+        public ulong TechSupportChannel { get; private set; }
+
+        [JsonProperty("supportLogChannel")]
+        public ulong SupportLogChannel { get; private set; }
     }
 
     public class WordListJson
