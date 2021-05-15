@@ -434,7 +434,7 @@ namespace Cliptok
                             }
                         }
 
-                        embed.AddField("Current message", Warnings.Truncate(e.Message.Content, 1020) + " …");
+                        embed.AddField("Current message", Warnings.Truncate(e.Message.Content, 1020));
                         if (e.Message.Attachments.Count != 0)
                         {
                             if (embed.ImageUrl == null)
