@@ -195,6 +195,18 @@ namespace Cliptok
         [JsonProperty("connected")]
         public string Connected { get; set; }
 
+        [JsonProperty("help")]
+        public string Help { get; set; }
+
+        [JsonProperty("shieldHelp")]
+        public string ShielHelp { get; set; }
+
+        [JsonProperty("shieldMicrosoft")]
+        public string ShieldMicrosoft { get; set; }
+
+        [JsonProperty("user")]
+        public string User { get; set; }
+
     }
 
     public class CoreConfig
