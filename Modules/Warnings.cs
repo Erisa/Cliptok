@@ -53,7 +53,7 @@ namespace Cliptok.Modules
                 return true;
             else
                 if (!help)
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{ctx.Command.Name}**!");
+                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{ctx.Command.Name}**!");
             return false;
         }
     }
@@ -111,6 +111,11 @@ namespace Cliptok.Modules
                 return ServerPermLevel.Tier1;
             else
                 return ServerPermLevel.nothing;
+        }
+
+        internal static string MessageLink(Task<DiscordMessage> msg)
+        {
+            throw new NotImplementedException();
         }
 
         public static async Task<DiscordEmbed> FancyWarnEmbedAsync(UserWarning warning, bool detailed = false, int colour = 0xFEC13D, bool showTime = true)
@@ -258,10 +263,14 @@ namespace Cliptok.Modules
         }
 
         // https://stackoverflow.com/a/2776689
-        public static string Truncate(string value, int maxLength)
+        public static string Truncate(string value, int maxLength, bool elipsis = false)
         {
             if (string.IsNullOrEmpty(value)) return value;
-            return value.Length <= maxLength ? value : value.Substring(0, maxLength);
+            var strOut = value.Length <= maxLength ? value : value.Substring(0, maxLength);
+            if (elipsis && value.Length > maxLength)
+                return strOut + '…';
+            else
+                return strOut;
         }
 
         public static string TimeToPrettyFormat(TimeSpan span, bool ago = true)
@@ -326,7 +335,7 @@ namespace Cliptok.Modules
             Aliases("wam", "warm"),
             HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)
         ]
-        public async Task AnonWarnCmd(
+        public async Task WarnCmd(
             CommandContext ctx,
             [Description("The user you are warning. Accepts many formats.")] DiscordUser targetUser,
             [RemainingText, Description("The reason for giving this warning.")] string reason = null
@@ -338,7 +347,7 @@ namespace Cliptok.Modules
                 targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
                 if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
                 {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
+                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
                     return;
                 }
             }
@@ -347,13 +356,22 @@ namespace Cliptok.Modules
                 // do nothing :/
             }
 
+            var reply = ctx.Message.ReferencedMessage;
+
             await ctx.Message.DeleteAsync();
             if (reason == null)
             {
                 await ctx.Member.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} Reason must be included for the warning command to work.");
                 return;
             }
-            DiscordMessage msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+
+            var messageBuild = new DiscordMessageBuilder()
+                .WithContent($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+
+            if (reply != null)
+                messageBuild.WithReply(reply.Id, true, false);
+
+            var msg = await ctx.Channel.SendMessageAsync(messageBuild);
             UserWarning warning = await GiveWarningAsync(targetUser, ctx.User, reason, MessageLink(msg), ctx.Channel);
         }
 
@@ -363,7 +381,7 @@ namespace Cliptok.Modules
             Aliases("anonwam", "anonwarm"),
             HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)
         ]
-        public async Task WarnCmd(
+        public async Task AnonWarnCmd(
             CommandContext ctx,
             [Description("The channel you wish for the warning message to appear in.")] DiscordChannel targetChannel,
             [Description("The user you are warning. Accepts many formats.")] DiscordUser targetUser,
@@ -376,7 +394,7 @@ namespace Cliptok.Modules
                 targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
                 if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
                 {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
+                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
                     return;
                 }
             }
@@ -392,7 +410,7 @@ namespace Cliptok.Modules
                 return;
             }
             DiscordMessage msg = await targetChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", null);
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned in {targetChannel.Mention}: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+            await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned in {targetChannel.Mention}: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
             UserWarning warning = await GiveWarningAsync(targetUser, ctx.User, reason, MessageLink(msg), ctx.Channel);
         }
 
@@ -565,6 +583,8 @@ namespace Cliptok.Modules
                     $"`{Pad(warnId)}` (belonging to {targetUser.Mention})", await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId), true));
             }
         }
+
+
 
     }
 }

@@ -118,6 +118,20 @@ namespace Cliptok.Modules
                 try
                 {
                     await member.RevokeRoleAsync(mutedRole);
+                    foreach (var role in member.Roles)
+                    {
+                        if (role.Name == "Muted")
+                        {
+                            try
+                            {
+                                await member.RevokeRoleAsync(role);
+                            }
+                            catch
+                            {
+                                // ignore, continue to next role
+                            }
+                        }
+                    }
                     await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Successfully unmuted <@{targetUser.Id}>!");
                 }
                 catch
@@ -226,7 +240,7 @@ namespace Cliptok.Modules
             {
                 // TODO: Rework mutes to allow this
                 await ctx.Message.DeleteAsync();
-                var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} The user you're trying to mute is not in the server!");
+                var msg = await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} The user you're trying to mute is not in the server!");
                 await Task.Delay(3000);
                 await msg.DeleteAsync();
                 return;
@@ -234,42 +248,38 @@ namespace Cliptok.Modules
 
             if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
+                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
                 return;
             }
 
             await ctx.Message.DeleteAsync();
+            bool timeParsed = false;
 
             TimeSpan muteDuration = default;
             string possibleTime = timeAndReason.Split(' ').First();
-            if (possibleTime.Length != 1)
+            string reason = timeAndReason;
+
+            try
             {
-                string reason = timeAndReason;
-                // Everything BUT the last character should be a number.
-                string possibleNum = possibleTime.Remove(possibleTime.Length - 1);
-                if (int.TryParse(possibleNum, out int timeLength))
-                {
-                    char possibleTimePeriod = possibleTime.Last();
-                    muteDuration = ModCmds.ParseTime(possibleTimePeriod, timeLength);
-                }
-                else
-                {
-                    muteDuration = default;
-                }
-
-                if (muteDuration != default || possibleNum == "0")
-                {
-                    if (!timeAndReason.Contains(" "))
-                        reason = "No reason specified.";
-                    else
-                    {
-                        reason = timeAndReason.Substring(timeAndReason.IndexOf(' ') + 1, timeAndReason.Length - (timeAndReason.IndexOf(' ') + 1));
-                    }
-                }
-
-                // await ctx.RespondAsync($"debug: {possibleNum}, {possibleTime}, {muteDuration.ToString()}, {reason}");
-                _ = Mutes.MuteUserAsync(targetMember, reason, ctx.User.Id, ctx.Guild, ctx.Channel, muteDuration, true);
+                muteDuration = HumanDateParser.HumanDateParser.Parse(possibleTime).Subtract(ctx.Message.Timestamp.DateTime);
+                timeParsed = true;
             }
+            catch
+            {
+                // keep default
+            }
+
+
+            if (timeParsed)
+            {
+                int i = reason.IndexOf(" ") + 1;
+                reason = reason.Substring(i);
+            }
+
+            if (timeParsed && possibleTime == reason)
+                reason = "No reason specified.";
+
+            _ = Mutes.MuteUserAsync(targetMember, reason, ctx.User.Id, ctx.Guild, ctx.Channel, muteDuration, true);
         }
     }
 }

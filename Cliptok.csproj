@@ -3,15 +3,13 @@
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net5.0</TargetFramework>
-		<RestoreAdditionalProjectSources>
-			https://nuget.emzi0767.com/api/v3/index.json
-		</RestoreAdditionalProjectSources>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Abyssal.HumanDateParser" Version="2.0.0-20191113.1" />
-		<PackageReference Include="DSharpPlus" Version="4.0.0-rc2" />
-		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-rc2" />
+		<PackageReference Include="DSharpPlus" Version="4.0.1" />
+		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.1" />
+		<PackageReference Include="IDoEverything.DSharpPlus.SlashCommands" Version="1.1.1" />
 		<PackageReference Include="StackExchange.Redis" Version="2.2.4" />
 		<PackageReference Include="System.Drawing.Common" Version="5.0.2" />
 		<PackageReference Include="System.Linq" Version="4.3.0" />
@@ -27,6 +25,10 @@
 		<Content Include="Lists/**">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Lists\usernames.txt" />
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition=" '$(OS)' != 'Windows_NT' ">

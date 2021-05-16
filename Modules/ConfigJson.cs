@@ -95,7 +95,7 @@ namespace Cliptok
         public List<ulong> TierRoles { get; private set; }
 
         [JsonProperty("inviteExclusion")]
-        public string InviteExclusion { get; private set; }
+        public List<string> InviteExclusion { get; private set; }
 
         [JsonProperty("inviteTierRequirement")]
         public int InviteTierRequirement { get; private set; }
@@ -117,6 +117,28 @@ namespace Cliptok
 
         [JsonProperty("restrictedHeartosoftPhrases")]
         public List<string> RestrictedHeartosoftPhrases { get; private set; }
+
+        [JsonProperty("autoDehoistCharacters")]
+        public List<char> AutoDehoistCharacters { get; private set; }
+
+        [JsonProperty("investigationsChannel")]
+        public ulong InvestigationsChannelId { get; private set; }
+
+        [JsonProperty("appealLink")]
+        public string AppealLink { get; private set; }
+
+        [JsonProperty("communityTechSupportRoleID")]
+        public ulong CommunityTechSupportRoleID { get; private set; }
+
+        [JsonProperty("techSupportChannel")]
+        public ulong TechSupportChannel { get; private set; }
+
+        [JsonProperty("supportLogChannel")]
+        public ulong SupportLogChannel { get; private set; }
+
+        [JsonProperty("supportRatelimitMinutes")]
+        public int SupportRatelimitMinutes { get; private set; }
+
 
         [JsonProperty("seizureDetection")]
         public SeizureDetectionConfig SeizureDetection { get; private set; }
