@@ -445,7 +445,7 @@ namespace Cliptok
 
                         embed.AddField("Message Link", $"[`Jump to message`](https://discord.com/channels/{e.Guild.Id}/{e.Channel.Id}/{e.Message.Id})");
                         var logOut = await supportLogChannel.SendMessageAsync(null, embed);
-                        logOut.CreateReactionAsync(DiscordEmoji.FromName(client, ":WindowsAcknowledge:", true));
+                        logOut.CreateReactionAsync(DiscordEmoji.FromName(client, ":CliptokAcknowledge:", true));
                     }
                 }
             }
