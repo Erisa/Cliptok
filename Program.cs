@@ -272,6 +272,11 @@ namespace Cliptok
                     return;
                 }
 
+                if (e.Message.MentionedUsers.Count > cfgjson.MassMentionBanThreshold)
+                {
+                    var _ = e.Message.DeleteAsync();
+                    await e.Guild.BanMemberAsync(e.Author.Id, 7, $"Mentioned more thann {cfgjson.MassMentionBanThreshold} users in one message.");
+                }
 
                 bool match = false;
 

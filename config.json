@@ -28,6 +28,7 @@
     "6": 24
   },
   "massMentionThreshold": 5,
+  "massMentionBanThreshold": 20,
   "inviteTierRequirement": 2,
   "tierRoles": [
     191569917542268928,
@@ -79,7 +80,8 @@
     "naughtyURLs.txt": {
       "wholeWord": false,
       "reason": "Sent malicious URL(s)"
-    }
+    },
+    ""
   },
   "massEmojiThreshold": 6,
   "unrestrictedEmojiChannels": [

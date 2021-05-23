@@ -138,6 +138,9 @@ namespace Cliptok
 
         [JsonProperty("supportRatelimitMinutes")]
         public int SupportRatelimitMinutes { get; private set; }
+
+        [JsonProperty("massMentionBanThreshold")]
+        public int MassMentionBanThreshold { get; private set; }
     }
 
     public class WordListJson
