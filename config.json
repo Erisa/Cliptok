@@ -60,7 +60,7 @@
     "help": "<:CliptokHelp:843586173742219294>",
     "shieldHelp": "<:CliptokShieldHelp:843586173204693032>",
     "shieldMicrosoft": "<:CliptokShieldMS:843586173129850930>",
-    "user": "<:CliptokShieldMS:843586173129850930>"
+    "user": "<:CliptokUser:843586173334847488>"
   },
   "redis": {
     "host": "localhost",
