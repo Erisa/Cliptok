@@ -83,7 +83,7 @@
     },
     "autoban.txt": {
       "wholeWord": false,
-      "reason": "[AUTOMATIC] Suspected to be following the patterns of known raiders."
+      "reason": "[Automatic] Suspected to be following the patterns of known raiders."
     }
   },
   "massEmojiThreshold": 6,

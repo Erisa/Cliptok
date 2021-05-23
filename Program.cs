@@ -297,10 +297,11 @@ namespace Cliptok
                             // still warn anyway
                         }
 
-                        if (key == "autoban.txt")
+                        if (key == "autoban.txt" && Warnings.GetPermLevel(member) < ServerPermLevel.Tier4)
                         {
                             var _ = e.Message.DeleteAsync();
                             await ModCmds.BanFromServerAsync(e.Author.Id, reason, discord.CurrentUser.Id, e.Guild, 0, e.Channel, default, true);
+                            return;
                         }
 
                         match = true;
