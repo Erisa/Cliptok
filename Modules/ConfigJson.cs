@@ -199,13 +199,16 @@ namespace Cliptok
         public string Help { get; set; }
 
         [JsonProperty("shieldHelp")]
-        public string ShielHelp { get; set; }
+        public string ShieldHelp { get; set; }
 
         [JsonProperty("shieldMicrosoft")]
         public string ShieldMicrosoft { get; set; }
 
         [JsonProperty("user")]
         public string User { get; set; }
+
+        [JsonProperty("unlock")]
+        public string Unlock { get; set; }
 
     }
 

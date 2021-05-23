@@ -14,6 +14,7 @@ namespace Cliptok.Modules
 {
     public class SlashCommands : SlashCommandModule
     {
+
         [SlashCommand("warn", "Formally warn a user, usually for breaking the server rules.")]
         public async Task TestCommand(InteractionContext ctx,
              [Option("user", "The user to warn.")] DiscordUser user,
