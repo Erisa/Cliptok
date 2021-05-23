@@ -297,6 +297,12 @@ namespace Cliptok
                             // still warn anyway
                         }
 
+                        if (key == "autoban.txt")
+                        {
+                            var _ = e.Message.DeleteAsync();
+                            await ModCmds.BanFromServerAsync(e.Author.Id, reason, discord.CurrentUser.Id, e.Guild, 0, e.Channel, default, true);
+                        }
+
                         match = true;
                         
                         DiscordMessage msg = await e.Channel.SendMessageAsync($"{cfgjson.Emoji.Denied} {e.Message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");

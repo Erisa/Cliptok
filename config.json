@@ -81,6 +81,10 @@
       "wholeWord": false,
       "reason": "Sent malicious URL(s)"
     },
+    "autoban.txt": {
+      "wholeWord": false,
+      "reason": "[AUTOMATIC] Suspected to be following the patterns of known raiders."
+    }
   },
   "massEmojiThreshold": 6,
   "unrestrictedEmojiChannels": [
@@ -152,5 +156,4 @@
     "_",
     "`"
   ]
-
 }
