@@ -81,7 +81,6 @@
       "wholeWord": false,
       "reason": "Sent malicious URL(s)"
     },
-    ""
   },
   "massEmojiThreshold": 6,
   "unrestrictedEmojiChannels": [
