@@ -254,6 +254,9 @@ namespace Cliptok.Modules
             if (success)
             {
                 await discordChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Unlock} This channel has been unlocked!");
+            } else
+            {
+                await discordChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} This channel is not locked.");
             }
             return success;
         }
@@ -301,7 +304,7 @@ namespace Cliptok.Modules
 
             success = await UnlockChannel(currentChannel, ctx.Member);
 
-            if (success)
+            if (!success)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} This channel has been unlocked!");
             else
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This channel is not locked.");

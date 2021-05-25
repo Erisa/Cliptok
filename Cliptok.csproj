@@ -27,6 +27,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Lists\autoban.txt" />
 	  <None Remove="Lists\usernames.txt" />
 	</ItemGroup>
 
