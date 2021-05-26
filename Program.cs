@@ -243,7 +243,7 @@ namespace Cliptok
                 }
 
                 var cliptokChannel = await client.GetChannelAsync(cfgjson.HomeChannel);
-                cliptokChannel.SendMessageAsync($"{cfgjson.Emoji.Connected} Cliptok connected successfully!\n\n" +
+                cliptokChannel.SendMessageAsync($"{cfgjson.Emoji.Connected} {discord.CurrentUser.Username} connected successfully!\n\n" +
                     $"**Version**: `{commitHash}`\n" +
                     $"**Version timestamp**: `{commitTime}`\n**Framework**: `{RuntimeInformation.FrameworkDescription}`\n**Platform**: `{RuntimeInformation.OSDescription}`\n\n" +
                     $"Most recent commit message:\n" +
