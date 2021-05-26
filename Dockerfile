@@ -1,5 +1,5 @@
 FROM --platform=${BUILDPLATFORM} \
-    mcr.microsoft.com/dotnet/sdk:5.0.203 AS build-env
+    mcr.microsoft.com/dotnet/sdk:5.0.300 AS build-env
 WORKDIR /app
 
 # We need Git for Cliptok builds now.
