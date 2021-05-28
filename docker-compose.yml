@@ -17,6 +17,10 @@ services:
       - type: bind
         source: ./Lists/autoban.txt
         target: /app/Lists/autoban.txt
+      # Uncomment the below lines to use your own config file.
+      #- type: bind
+      #  source: ./config.json
+      #  target: /app/config.json
     environment:
       # Overrides your configs Redis options for use with Docker Compose
       #  I don't advise changing this unless you have a strange setup
