@@ -59,25 +59,25 @@ namespace Cliptok
         public ulong AdminRole { get; private set; }
 
         [JsonProperty("logChannel")]
-        public ulong LogChannel { get; set; }
+        public ulong LogChannel { get; private set; }
 
         [JsonProperty("serverID")]
-        public ulong ServerID { get; set; }
+        public ulong ServerID { get; private set; }
 
         [JsonProperty("homeChannel")]
-        public ulong HomeChannel { get; set; }
+        public ulong HomeChannel { get; private set; }
 
         [JsonProperty("emoji")]
-        public EmojiJson Emoji { get; set; }
+        public EmojiJson Emoji { get; private set; }
 
         [JsonProperty("mutedRole")]
-        public ulong MutedRole { get; set; }
+        public ulong MutedRole { get; private set; }
 
         [JsonProperty("warningDaysThreshold")]
-        public int WarningDaysThreshold { get; set; }
+        public int WarningDaysThreshold { get; private set; }
 
         [JsonProperty("autoMuteThresholds")]
-        public Dictionary<string, int> AutoMuteThresholds { get; set; }
+        public Dictionary<string, int> AutoMuteThresholds { get; private set; }
 
         [JsonProperty("userRoles")]
         public UserRoleConfig UserRoles { get; private set; }
@@ -144,6 +144,9 @@ namespace Cliptok
 
         [JsonProperty("secondaryAutoDehoistCharacters")]
         public List<char> SecondaryAutoDehoistCharacters { get; private set; }
+
+        [JsonProperty("modmailUserId")]
+        public ulong ModmailUserId { get; private set; }
     }
 
     public class WordListJson
