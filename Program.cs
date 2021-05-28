@@ -268,7 +268,7 @@ namespace Cliptok
 
             async Task MessageCreated(DiscordClient client, MessageCreateEventArgs e)
             {
-                if (e.Author.Id == cfgjson.ModmailUserId && e.Message.Content == "@here") //  && e.Message.Embeds[0].Footer.Text.Contains("User ID:")
+                if (e.Author.Id == cfgjson.ModmailUserId && e.Message.Content == "@here" && e.Message.Embeds[0].Footer.Text.Contains("User ID:")) 
                 {
                     var idString = modmaiL_rx.Match(e.Channel.Topic).Groups[1].Captures[0].Value;
                     DiscordMember modmailMember = default;
