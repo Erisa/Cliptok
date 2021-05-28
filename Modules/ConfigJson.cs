@@ -141,6 +141,9 @@ namespace Cliptok
 
         [JsonProperty("massMentionBanThreshold")]
         public int MassMentionBanThreshold { get; private set; }
+
+        [JsonProperty("secondaryAutoDehoistCharacters")]
+        public List<char> SecondaryAutoDehoistCharacters { get; private set; }
     }
 
     public class WordListJson

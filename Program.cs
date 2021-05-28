@@ -106,7 +106,8 @@ namespace Cliptok
         {
             if (
                 targetMember.DisplayName[0] == ModCmds.dehoistCharacter ||
-                !(cfgjson.AutoDehoistCharacters.Contains(targetMember.DisplayName[0]))
+                !(cfgjson.AutoDehoistCharacters.Contains(targetMember.DisplayName[0])) &&
+                !cfgjson.SecondaryAutoDehoistCharacters.Contains(targetMember.Nickname[0])
                 )
             {
                 return false;
@@ -549,8 +550,8 @@ namespace Cliptok
                 var guild = await client.GetGuildAsync(cfgjson.ServerID);
                 var member = await guild.GetMemberAsync(e.UserAfter.Id);
 
-                await CheckAndDehoistMemberAsync(member);
-                await UsernameCheckAsync(member);
+                CheckAndDehoistMemberAsync(member);
+                UsernameCheckAsync(member);
             }
 
             discord.Ready += OnReady;

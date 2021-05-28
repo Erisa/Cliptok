@@ -583,7 +583,5 @@ namespace Cliptok.Modules
             }
         }
 
-
-
     }
 }
