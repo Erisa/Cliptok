@@ -221,25 +221,35 @@ namespace Cliptok
                 ModCmds.CheckBansAsync();
                 ModCmds.CheckRemindersAsync();
 
-                string commitHash = "aaaaaaa";
-                string commitMessage = "N/A";
-                string commitTime = "0000-00-00 00:00:00 +0000";
+                string commitHash;
+                string commitMessage;
+                string commitTime;
+
                 if (File.Exists("CommitHash.txt"))
                 {
                     using var sr = new StreamReader("CommitHash.txt");
                     commitHash = sr.ReadToEnd();
+                } else
+                {
+                    commitHash = "dev";
                 }
 
                 if (File.Exists("CommitMessage.txt"))
                 {
                     using var sr = new StreamReader("CommitMessage.txt");
                     commitMessage = sr.ReadToEnd();
+                } else
+                {
+                    commitMessage = "N/A (Bot was built for Windows)";
                 }
 
                 if (File.Exists("CommitTime.txt"))
                 {
                     using var sr = new StreamReader("CommitTime.txt");
                     commitTime = sr.ReadToEnd();
+                } else
+                {
+                    commitTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss zzz");
                 }
 
                 var cliptokChannel = await client.GetChannelAsync(cfgjson.HomeChannel);
