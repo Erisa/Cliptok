@@ -20,13 +20,24 @@ namespace Cliptok.Modules
         }
 
         // Only to be used on naughty users.
-        public static async Task<bool> MuteUserAsync(DiscordMember naughtyMember, string reason, ulong moderatorId, DiscordGuild guild, DiscordChannel channel = null, TimeSpan muteDuration = default, bool alwaysRespond = false)
+        public static async Task<bool> MuteUserAsync(DiscordUser naughtyUser, string reason, ulong moderatorId, DiscordGuild guild, DiscordChannel channel = null, TimeSpan muteDuration = default, bool alwaysRespond = false)
         {
             bool permaMute = false;
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
             DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
             DateTime? expireTime = DateTime.Now + muteDuration;
             DiscordMember moderator = await guild.GetMemberAsync(moderatorId);
+
+            DiscordMember naughtyMember = default;
+            try
+            {
+                naughtyMember = await guild.GetMemberAsync(naughtyUser.Id);
+            }
+            catch (DSharpPlus.Exceptions.NotFoundException)
+            {
+                // nothing
+            }
+            
 
             if (muteDuration == default)
             {
@@ -36,35 +47,39 @@ namespace Cliptok.Modules
 
             MemberPunishment newMute = new MemberPunishment()
             {
-                MemberId = naughtyMember.Id,
+                MemberId = naughtyUser.Id,
                 ModId = moderatorId,
                 ServerId = guild.Id,
                 ExpireTime = expireTime
             };
 
-            await Program.db.HashSetAsync("mutes", naughtyMember.Id, JsonConvert.SerializeObject(newMute));
+            await Program.db.HashSetAsync("mutes", naughtyUser.Id, JsonConvert.SerializeObject(newMute));
 
-            try
-            {
-                await naughtyMember.GrantRoleAsync(mutedRole, $"[Mute by {moderator.Username}#{moderator.Discriminator}]: {reason}");
-            }
-            catch
-            {
-                return false;
+            if (naughtyMember != default) {
+                try
+                {
+                    await naughtyMember.GrantRoleAsync(mutedRole, $"[Mute by {moderator.Username}#{moderator.Discriminator}]: {reason}");
+                }
+                catch
+                {
+                    return false;
+                }
             }
 
             try
             {
                 if (permaMute)
                 {
-                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} was successfully muted by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**");
-                    await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}**!\nReason: **{reason}**");
+                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**");
+                    if (naughtyMember != default)
+                        await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}**!\nReason: **{reason}**");
                 }
 
                 else
                 {
-                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} was successfully muted for {Warnings.TimeToPrettyFormat(muteDuration, false)} by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**");
-                    await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}** for {Warnings.TimeToPrettyFormat(muteDuration, false)}!\nReason: **{reason}**");
+                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted for {Warnings.TimeToPrettyFormat(muteDuration, false)} by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**");
+                    if (naughtyMember != default)
+                        await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}** for {Warnings.TimeToPrettyFormat(muteDuration, false)}!\nReason: **{reason}**");
                 }
             }
             catch
@@ -73,9 +88,9 @@ namespace Cliptok.Modules
                 if (!(channel is null))
                 {
                     if (muteDuration == default)
-                        await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} has been muted: **{reason}**");
+                        await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} has been muted: **{reason}**");
                     else
-                        await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} has been muted for **{Warnings.TimeToPrettyFormat(muteDuration, false)}**: **{reason}**");
+                        await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} has been muted for **{Warnings.TimeToPrettyFormat(muteDuration, false)}**: **{reason}**");
                     return true;
                 }
             }
@@ -84,9 +99,9 @@ namespace Cliptok.Modules
             {
                 reason = reason.Replace("`", "\\`").Replace("*", "\\*");
                 if (muteDuration == default)
-                    await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} has been muted: **{reason}**");
+                    await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} has been muted: **{reason}**");
                 else
-                    await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyMember.Mention} has been muted for **{Warnings.TimeToPrettyFormat(muteDuration, false)}**: **{reason}**");
+                    await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} has been muted for **{Warnings.TimeToPrettyFormat(muteDuration, false)}**: **{reason}**");
             }
             return true;
         }
@@ -98,17 +113,17 @@ namespace Cliptok.Modules
 
             // todo: store per-guild
             DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
-            DiscordMember member = null;
+            DiscordMember member = default;
             try
             {
                 member = await guild.GetMemberAsync(targetUser.Id);
             }
-            catch
+            catch (DSharpPlus.Exceptions.NotFoundException)
             {
                 // they probably left :(
             }
 
-            if (member == null)
+            if (member == default)
             {
                 await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Attempt to remove Muted role from <@{targetUser.Id}> failed because the user could not be found.\nThis is expected if the user was banned or left.");
             }
@@ -203,9 +218,17 @@ namespace Cliptok.Modules
 
             // todo: store per-guild
             DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
-            DiscordMember member = await guild.GetMemberAsync(targetUser.Id);
 
-            if ((await Program.db.HashExistsAsync("mutes", targetUser.Id)) || member.Roles.Contains(mutedRole))
+            DiscordMember member = default;
+            try
+            {
+                member = await guild.GetMemberAsync(targetUser.Id);
+            } catch (DSharpPlus.Exceptions.NotFoundException)
+            {
+                // nothing
+            }
+
+            if ((await Program.db.HashExistsAsync("mutes", targetUser.Id)) || (member != default && member.Roles.Contains(mutedRole) ))
             {
                 await Mutes.UnmuteUserAsync(targetUser);
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Information} Successfully unmuted **{targetUser.Username}#{targetUser.Discriminator}**.");
@@ -231,22 +254,17 @@ namespace Cliptok.Modules
             [RemainingText, Description("Combined argument for the time and reason for the mute. For example '1h rule 7' or 'rule 10'")] string timeAndReason = "No reason specified."
         )
         {
-            DiscordMember targetMember;
+            DiscordMember targetMember = default;
             try
             {
                 targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
             }
             catch (DSharpPlus.Exceptions.NotFoundException)
             {
-                // TODO: Rework mutes to allow this
-                await ctx.Message.DeleteAsync();
-                var msg = await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} The user you're trying to mute is not in the server!");
-                await Task.Delay(3000);
-                await msg.DeleteAsync();
-                return;
+                // nothing
             }
 
-            if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
+            if (targetMember != default &&  Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
             {
                 await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
                 return;
@@ -279,7 +297,7 @@ namespace Cliptok.Modules
             if (timeParsed && possibleTime == reason)
                 reason = "No reason specified.";
 
-            _ = Mutes.MuteUserAsync(targetMember, reason, ctx.User.Id, ctx.Guild, ctx.Channel, muteDuration, true);
+            _ = Mutes.MuteUserAsync(targetUser, reason, ctx.User.Id, ctx.Guild, ctx.Channel, muteDuration, true);
         }
     }
 }
