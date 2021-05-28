@@ -20,7 +20,9 @@
   "warningDaysThreshold": 30,
   "inviteExclusion": [
     "microsoft",
-    "xbox"
+    "xbox",
+    "FjJfTZdtXg",
+    "cMxFErsEDB"
   ],
   "autoMuteThresholds": {
     "2": 6,
