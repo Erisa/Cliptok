@@ -67,7 +67,7 @@ namespace Cliptok.Modules
             await ctx.EditResponseAsync(webhookOut);
         }
 
-        [SlashCommand("ban", "EXPERIMENTAL: Bans a user from the server, either permanently or temporarily. May contain bugs.")]
+        [SlashCommand("ban", "Bans a user from the server, either permanently or temporarily.")]
         public async Task BanSlashCommand(InteractionContext ctx,
                 [Option("user", "The user to ban")] DiscordUser user,
                 [Option("reason", "The reason the user is being banned")] string reason,
