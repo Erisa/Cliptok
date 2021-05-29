@@ -106,12 +106,14 @@ namespace Cliptok
         public static async Task<bool> CheckAndDehoistMemberAsync(DiscordMember targetMember)
         {
             
-            if ( // sorry Erisa :c
-                targetMember.DisplayName[0] != ModCmds.dehoistCharacter && (cfgjson.AutoDehoistCharacters.Contains(targetMember.DisplayName[0]) || (targetMember.Nickname != null && cfgjson.SecondaryAutoDehoistCharacters.Contains(targetMember.Nickname[0])))
-                )
-            {
-                
-            } else
+            if (
+                !(
+                    targetMember.DisplayName[0] != ModCmds.dehoistCharacter
+                    && (
+                        cfgjson.AutoDehoistCharacters.Contains(targetMember.DisplayName[0]) 
+                        || (targetMember.Nickname != null && cfgjson.SecondaryAutoDehoistCharacters.Contains(targetMember.Nickname[0]))
+                        )
+                ))
             {
                 return false;
             }
