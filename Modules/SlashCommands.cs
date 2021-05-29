@@ -177,5 +177,15 @@ namespace Cliptok.Modules
             await ctx.EditResponseAsync(webhookOut);
         }
 
+
+        [SlashCommand("warnings", "Fetch the warnings for a user.")]
+        public async Task WarningsSlashCommand(InteractionContext ctx,
+                [Option("user", "The user to find the warnings for.")] DiscordUser user
+        )
+        {
+            var eout = new DiscordInteractionResponseBuilder().AsEphemeral(false).AddEmbed(Warnings.GenerateWarningsEmbed(user));
+            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, eout);
+        }
+
     }
 }
