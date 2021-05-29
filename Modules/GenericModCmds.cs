@@ -7,6 +7,7 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Cliptok.Modules
@@ -610,6 +611,61 @@ namespace Cliptok.Modules
                     failedCount++;
             }
             await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {discordMembers.Count() - failedCount} of {discordMembers.Count()} member(s)! (Check Audit Log for details)");
+        }
+
+        [Command("massundehoist")]
+        [Description("Remove the dehoist for users attached via a txt file.")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
+        public async Task MassUndhoist(CommandContext ctx)
+        {
+            int failedCount = 0;
+
+            if (ctx.Message.Attachments.Count == 0)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Please upload an attachment as well.");
+            } else
+            {
+                string strList;
+                using (WebClient client = new WebClient())
+                {
+                    strList = client.DownloadString(ctx.Message.Attachments[0].Url);
+                }
+
+                var list = strList.Split(' ');
+
+                var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it. This will take a while.");
+
+                foreach (string strID in list)
+                {
+                    ulong id = Convert.ToUInt64(strID);
+                    DiscordMember member = default;
+                    try
+                    {
+                        member = await ctx.Guild.GetMemberAsync(id);
+                    } catch (DSharpPlus.Exceptions.NotFoundException)
+                    {
+                        failedCount++;
+                        continue;
+                    }
+
+                    if(member.Nickname != null && member.Nickname[0] == dehoistCharacter)
+                    {
+                        var newNickname = member.Nickname.Substring(1);
+                        await member.ModifyAsync(a =>
+                        {
+                            a.Nickname = newNickname;
+                        }
+                        );
+                    }
+                    else
+                    {
+                        failedCount++;
+                    }
+                }
+
+                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully undehoisted {list.Count() - failedCount} of {list.Count()} member(s)! (Check Audit Log for details)");
+
+            }
         }
 
 
