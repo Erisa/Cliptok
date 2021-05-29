@@ -428,6 +428,11 @@ namespace Cliptok.Modules
             if (targetUser == null)
                 targetUser = ctx.User;
 
+            await ctx.RespondAsync(null, GenerateWarningsEmbed(targetUser));
+        }
+
+        public static DiscordEmbed GenerateWarningsEmbed(DiscordUser targetUser)
+        {
             var warningsOutput = Program.db.HashGetAll(targetUser.Id.ToString()).ToDictionary(
                 x => x.Name.ToString(),
                 x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
@@ -464,7 +469,7 @@ namespace Cliptok.Modules
 
             }
 
-            var embed = new DiscordEmbedBuilder()
+            return new DiscordEmbedBuilder()
                 .WithDescription(str)
                 .WithColor(new DiscordColor(0xFEC13D))
                 .WithTimestamp(DateTime.Now)
@@ -479,8 +484,6 @@ namespace Cliptok.Modules
                 )
                 .AddField("Last 30 days", recentCount.ToString(), true)
                 .AddField("Total", keys.Count().ToString(), true);
-
-            await ctx.RespondAsync(null, embed);
         }
 
         [
@@ -583,8 +586,6 @@ namespace Cliptok.Modules
                     $"`{Pad(warnId)}` (belonging to {targetUser.Mention})", await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId), true));
             }
         }
-
-
 
     }
 }

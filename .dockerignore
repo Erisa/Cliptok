@@ -1,3 +1,5 @@
 config.dev.json
 .env
 Lists/rudeWords.txt
+Lists/autoban.txt
+

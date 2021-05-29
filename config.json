@@ -15,12 +15,15 @@
   "techSupportChannel": 150909451270881280,
   "supportLogChannel": 843181924687806484,
   "communityTechSupportRoleID": 787033266225938472,
+  "modmailUserId": 459322015044730903,
   "supportRatelimitMinutes": 15,
   "appealLink": "https://msft.chat/member/#ban-appeal-process",
   "warningDaysThreshold": 30,
   "inviteExclusion": [
     "microsoft",
-    "xbox"
+    "xbox",
+    "FjJfTZdtXg",
+    "cMxFErsEDB"
   ],
   "autoMuteThresholds": {
     "2": 6,
@@ -28,6 +31,7 @@
     "6": 24
   },
   "massMentionThreshold": 5,
+  "massMentionBanThreshold": 20,
   "inviteTierRequirement": 2,
   "tierRoles": [
     191569917542268928,
@@ -43,20 +47,25 @@
   ],
 
   "emoji": {
-    "noPermissions": "<:WindowsShieldUAC:824380489409626126>",
-    "warning": "<:WindowsWarning:824380489313943593>",
-    "error": "<:WindowsCritical:824380490051747840>",
-    "deleted": "<:WindowsRecycleBin:824380487920910348>",
-    "information": "<:WindowsInformation:824380490206281753>",
-    "muted": "<:WindowsShieldWarning:824380489271738401>",
-    "denied": "<:WindowsDenied:824380486918078494>",
-    "banned": "<:WindowsShieldNotOK:824380489623928852>",
-    "unbanned": "<:WindowsShieldOK:824380489845571624>",
-    "ejected": "<:WindowsEject:824380486934986792>",
-    "success": "<:WindowsSuccess:824380489712140359>",
-    "loading": "<a:WindowsBusy:791473878026289192>",
-    "connected": "<:WindowsRDP:809144455671054358>",
-    "locked": "<:WindowsLock:824380487463075860>"
+    "noPermissions": "<:CliptokShieldUAC:843582723885105202>",
+    "warning": "<:CliptokWarning:843582724069392405>",
+    "error": "<:CliptokCritical:843582724652793896>",
+    "deleted": "<:CliptokRecycleBin:843582723251634197>",
+    "information": "<:CliptokInformation:843582724769054740>",
+    "muted": "<:CliptokShieldWarning:843582724064149544>",
+    "denied": "<:CliptokDenied:843582722940993556>",
+    "banned": "<:CliptokShieldNotOK:843582723532914708>",
+    "unbanned": "<:CliptokShieldOK:843582723641835540>",
+    "ejected": "<:CliptokEject:843582723003514930>",
+    "success": "<:CliptokSuccess:843582724744806420>",
+    "loading": "<a:CliptokBusy:791471510757179422>",
+    "connected": "<:CliptokRDP:843583776843104257>",
+    "locked": "<:CliptokLock:843582722940993559>",
+    "help": "<:CliptokHelp:843586173742219294>",
+    "shieldHelp": "<:CliptokShieldHelp:843586173204693032>",
+    "shieldMicrosoft": "<:CliptokShieldMS:843586173129850930>",
+    "user": "<:CliptokUser:843586173334847488>",
+    "unlock": "<:CliptokUnlock:846045637686591498>"
   },
   "redis": {
     "host": "localhost",
@@ -74,6 +83,10 @@
     "naughtyURLs.txt": {
       "wholeWord": false,
       "reason": "Sent malicious URL(s)"
+    },
+    "autoban.txt": {
+      "wholeWord": false,
+      "reason": "[Automatic] Suspected to be following the patterns of known raiders."
     }
   },
   "massEmojiThreshold": 6,
@@ -145,6 +158,17 @@
     "^",
     "_",
     "`"
+  ],
+  "secondaryAutoDehoistCharacters": [
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9"
   ]
-
 }

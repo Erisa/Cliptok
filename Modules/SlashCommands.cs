@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus.SlashCommands.Attributes;
 using DSharpPlus;
 using HumanDateParser;
 
@@ -15,6 +14,7 @@ namespace Cliptok.Modules
 {
     public class SlashCommands : SlashCommandModule
     {
+
         [SlashCommand("warn", "Formally warn a user, usually for breaking the server rules.")]
         public async Task TestCommand(InteractionContext ctx,
              [Option("user", "The user to warn.")] DiscordUser user,
@@ -67,7 +67,7 @@ namespace Cliptok.Modules
             await ctx.EditResponseAsync(webhookOut);
         }
 
-        [SlashCommand("ban", "EXPERIMENTAL: Bans a user from the server, either permanently or temporarily. May contain bugs.")]
+        [SlashCommand("ban", "Bans a user from the server, either permanently or temporarily.")]
         public async Task BanSlashCommand(InteractionContext ctx,
                 [Option("user", "The user to ban")] DiscordUser user,
                 [Option("reason", "The reason the user is being banned")] string reason,
@@ -175,6 +175,16 @@ namespace Cliptok.Modules
 
             webhookOut.Content = $"{Program.cfgjson.Emoji.Success} User was successfully bonked.";
             await ctx.EditResponseAsync(webhookOut);
+        }
+
+
+        [SlashCommand("warnings", "Fetch the warnings for a user.")]
+        public async Task WarningsSlashCommand(InteractionContext ctx,
+                [Option("user", "The user to find the warnings for.")] DiscordUser user
+        )
+        {
+            var eout = new DiscordInteractionResponseBuilder().AsEphemeral(false).AddEmbed(Warnings.GenerateWarningsEmbed(user));
+            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, eout);
         }
 
     }
