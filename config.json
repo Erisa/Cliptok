@@ -87,6 +87,10 @@
     "autoban.txt": {
       "wholeWord": false,
       "reason": "[Automatic] Suspected to be following the patterns of known raiders."
+    },
+    "scams.txt": {
+      "wholeWord": false,
+      "reason": "Attempted scam message"
     }
   },
   "massEmojiThreshold": 6,
