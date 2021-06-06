@@ -1,7 +1,6 @@
 version: '2.3'
 services:
   bot:
-    build: .
     image: ghcr.io/erisa/cliptok
     depends_on:
       - redis
