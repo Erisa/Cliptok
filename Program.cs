@@ -499,10 +499,18 @@ namespace Cliptok
 
             async Task UsernameCheckAsync(DiscordMember member)
             {
-                if (badUsernames.Contains(member.Username))
+                foreach (var username in badUsernames)
                 {
-                    var guild = await discord.GetGuildAsync(cfgjson.ServerID);
-                    await ModCmds.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot accounts. Please appeal if you are a human.", discord.CurrentUser.Id, guild, 7, null, default, true);
+                    // emergency failsafe, for newlines and other mistaken entries
+                    if (username.Length < 4)
+                        continue;
+
+                    if (member.Username.Contains(username))
+                    {
+                        var guild = await discord.GetGuildAsync(cfgjson.ServerID);
+                        await ModCmds.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot accounts. Please appeal if you are a human.", discord.CurrentUser.Id, guild, 7, null, default, true);
+                        break;
+                    }
                 }
             }
 
