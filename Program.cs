@@ -33,6 +33,7 @@ namespace Cliptok
         readonly static Regex emoji_rx = new Regex("((\u203c|\u2049|\u2139|[\u2194-\u2199]|[\u21a9-\u21aa]|[\u231a-\u231b]|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\u24c2|[\u25aa–\u25ab]|\u25b6|\u25c0|[\u25fb–\u25fe]|[\u2600–\u2604]|\u260E|\u2611|[\u2614–\u2615]|\u2618|\u261D|\u2620|[\u2622–\u2623]|\u2626|\u262A|[\u262E–\u262F]|[\u2638–\u263A]|\u2640|\u2642|[\u2648–\u2653]|[\u265F–\u2660]|\u2663|[\u2665–\u2666]|\u2668|\u267B|[\u267E–\u267F]|[\u2692–\u2697]|\u2699|[\u269B–\u269C]|[\u26A0–\u26A1]|\u26A7|[\u26AA–\u26AB]|[\u26B0–\u26B1]|[\u26BD–\u26BE]|[\u26C4–\u26C5]|\u26C8|[\u26CE–\u26CF]|\u26D1|[\u26D3–\u26D4]|[\u26E9–\u26EA]|[\u26F0–\u26F5]|[\u26F7–\u26FA]|\u26FD|\u2702|\u2705|[\u2708–\u270D]|\u270F|\u2712|\u2714|\u2716|\u271D|\u2721|\u2728|[\u2733–\u2734]|\u2744|\u2747|\u274C|\u274E|[\u2753–\u2755]|\u2757|[\u2763–\u2764]|[\u2795–\u2797]|\u27A1|\u27B0|\u27BF|[\u2934–\u2935]|[\u2B05–\u2B07]|[\u2B1B–\u2B1C]|\u2B50|\u2B55|\u3030|\u303D|\u3297|\u3299|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]))|(<a{0,1}:[a-zA-Z0-9_.]{2,32}:[0-9]+>)");
         readonly static Regex modmaiL_rx = new Regex("User ID: ([0-9]+)");
         public static Dictionary<ulong, DateTime> supportRatelimit = new Dictionary<ulong, DateTime>();
+        public static List<ulong> autoBannedUsersCache = new List<ulong>();
 
         static bool CheckForNaughtyWords(string input, WordListJson naughtyWordList)
         {
@@ -266,10 +267,12 @@ namespace Cliptok
                     $"```\n" +
                     $"{commitMessage}\n" +
                     $"```");
+
             }
 
             async Task MessageCreated(DiscordClient client, MessageCreateEventArgs e)
-            {
+            { 
+
                 if (e.Author.Id == cfgjson.ModmailUserId && e.Message.Content == "@here" && e.Message.Embeds[0].Footer.Text.Contains("User ID:")) 
                 {
                     var idString = modmaiL_rx.Match(e.Channel.Topic).Groups[1].Captures[0].Value;
@@ -505,10 +508,22 @@ namespace Cliptok
                     if (username.Length < 4)
                         continue;
 
-                    if (member.Username.Contains(username))
+                    if (member.Username.ToLower().Contains(username.ToLower()))
                     {
+                        if (autoBannedUsersCache.Contains(member.Id))
+                            break;
+                        autoBannedUsersCache.Append(member.Id);
                         var guild = await discord.GetGuildAsync(cfgjson.ServerID);
                         await ModCmds.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot accounts. Please appeal if you are a human.", discord.CurrentUser.Id, guild, 7, null, default, true);
+                        var embed = new DiscordEmbedBuilder()
+                            .WithTimestamp(DateTime.Now)
+                            .WithFooter($"User ID: {member.Id}", null)
+                            .WithAuthor($"{member.Username}#{member.Discriminator}", null, member.AvatarUrl)
+                            .AddField("Infringing name", member.Username)
+                            .AddField("Matching pattern", username)
+                            .WithColor(new DiscordColor(0xf03916));
+                        var investigations = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
+                        await investigations.SendMessageAsync($"{cfgjson.Emoji.Banned} {member.Mention} was banned for matching blocked username patterns.", embed);
                         break;
                     }
                 }
@@ -547,9 +562,7 @@ namespace Cliptok
                     DiscordRole mutedRole = e.Guild.GetRole(cfgjson.MutedRole);
                     await e.Member.GrantRoleAsync(mutedRole, "Reapplying mute: possible mute evasion.");
                 }
-                await CheckAndDehoistMemberAsync(e.Member);
-
-                await UsernameCheckAsync(e.Member);
+                CheckAndDehoistMemberAsync(e.Member);;
             }
 
             async Task GuildMemberUpdated(DiscordClient client, GuildMemberUpdateEventArgs e)
