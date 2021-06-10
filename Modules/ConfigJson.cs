@@ -119,7 +119,7 @@ namespace Cliptok
         public List<string> RestrictedHeartosoftPhrases { get; private set; }
 
         [JsonProperty("autoDehoistCharacters")]
-        public List<char> AutoDehoistCharacters { get; private set; }
+        public string AutoDehoistCharacters { get; private set; }
 
         [JsonProperty("investigationsChannel")]
         public ulong InvestigationsChannelId { get; private set; }
@@ -143,7 +143,7 @@ namespace Cliptok
         public int MassMentionBanThreshold { get; private set; }
 
         [JsonProperty("secondaryAutoDehoistCharacters")]
-        public List<char> SecondaryAutoDehoistCharacters { get; private set; }
+        public string SecondaryAutoDehoistCharacters { get; private set; }
 
         [JsonProperty("modmailUserId")]
         public ulong ModmailUserId { get; private set; }
