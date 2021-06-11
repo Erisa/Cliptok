@@ -85,7 +85,7 @@ namespace Cliptok.Modules
                 foreach (KeyValuePair<ulong, DiscordChannel> potentialChannelPair in guild.Channels)
                 {
                     var potentialChannel = potentialChannelPair.Value;
-                    if (potentialChannel.Type == ChannelType.Text && potentialChannel.Topic.EndsWith($"User ID: {targetUserId}")) {
+                    if (potentialChannel.Type == ChannelType.Text && potentialChannel.Topic != null && potentialChannel.Topic.EndsWith($"User ID: {targetUserId}")) {
                         await potentialChannel.SendMessageAsync(logOut);
                         break;
                     }
