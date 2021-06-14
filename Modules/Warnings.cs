@@ -160,7 +160,7 @@ namespace Cliptok.Modules
                 warningId += 1;
             }
 
-            UserWarning warning = new UserWarning()
+            UserWarning warning = new()
             {
                 TargetUserId = targetUser.Id,
                 ModUserId = modUser.Id,
@@ -229,7 +229,7 @@ namespace Cliptok.Modules
             if (Program.db.HashExists(targetUser.Id.ToString(), warnId))
             {
                 UserWarning oldWarn = GetWarning(targetUser.Id, warnId);
-                UserWarning warning = new UserWarning()
+                UserWarning warning = new()
                 {
                     TargetUserId = targetUser.Id,
                     ModUserId = modUser.Id,
@@ -371,7 +371,7 @@ namespace Cliptok.Modules
                 messageBuild.WithReply(reply.Id, true, false);
 
             var msg = await ctx.Channel.SendMessageAsync(messageBuild);
-            UserWarning warning = await GiveWarningAsync(targetUser, ctx.User, reason, MessageLink(msg), ctx.Channel);
+            _ = await GiveWarningAsync(targetUser, ctx.User, reason, MessageLink(msg), ctx.Channel);
         }
 
         [
@@ -410,7 +410,7 @@ namespace Cliptok.Modules
             }
             DiscordMessage msg = await targetChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", null);
             await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned in {targetChannel.Mention}: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
-            UserWarning warning = await GiveWarningAsync(targetUser, ctx.User, reason, MessageLink(msg), ctx.Channel);
+            _ = await GiveWarningAsync(targetUser, ctx.User, reason, MessageLink(msg), ctx.Channel);
         }
 
         [

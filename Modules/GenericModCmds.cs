@@ -20,10 +20,8 @@ namespace Cliptok.Modules
 
         public static async Task<bool> BanFromServerAsync(ulong targetUserId, string reason, ulong moderatorId, DiscordGuild guild, int deleteDays = 7, DiscordChannel channel = null, TimeSpan banDuration = default, bool appealable = false)
         {
-            DiscordUser naughtyUser = await Program.discord.GetUserAsync(targetUserId);
             bool permaBan = false;
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
-            DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
             DateTime? expireTime = DateTime.Now + banDuration;
             DiscordMember moderator = await guild.GetMemberAsync(moderatorId);
 
@@ -33,7 +31,7 @@ namespace Cliptok.Modules
                 expireTime = null;
             }
 
-            MemberPunishment newBan = new MemberPunishment()
+            MemberPunishment newBan = new()
             {
                 MemberId = targetUserId,
                 ModId = moderatorId,
@@ -161,7 +159,7 @@ namespace Cliptok.Modules
 
         public static int GetHier(DiscordMember target)
         {
-            return target.IsOwner ? int.MaxValue : (target.Roles.Count() == 0 ? 0 : target.Roles.Max(x => x.Position));
+            return target.IsOwner ? int.MaxValue : (!target.Roles.Any() ? 0 : target.Roles.Max(x => x.Position));
         }
 
         [Command("lockdown")]
@@ -228,7 +226,7 @@ namespace Cliptok.Modules
             var permissions = discordChannel.PermissionOverwrites.ToArray();
             foreach (var permission in permissions)
             {
-                if (permission.Type == DSharpPlus.OverwriteType.Role)
+                if (permission.Type == OverwriteType.Role)
                 {
                     var role = await permission.GetRoleAsync();
                     if (
@@ -284,7 +282,6 @@ namespace Cliptok.Modules
                 return;
             }
 
-            bool success = false;
             if (reason == "all")
             {
                 ongoingLockdown = true;
@@ -293,7 +290,6 @@ namespace Cliptok.Modules
                 {
                     try
                     {
-                        success = false;
                         currentChannel = await ctx.Client.GetChannelAsync(chanID);
                         await UnlockChannel(currentChannel, ctx.Member);
                     }
@@ -306,8 +302,7 @@ namespace Cliptok.Modules
                 ongoingLockdown = false;
                 return;
             }
-
-            success = await UnlockChannel(currentChannel, ctx.Member);
+            await UnlockChannel(currentChannel, ctx.Member);
         }
 
         [Command("ban")]
@@ -338,7 +333,7 @@ namespace Cliptok.Modules
             if (timeParsed)
             {
                 int i = reason.IndexOf(" ") + 1;
-                reason = reason.Substring(i);
+                reason = reason[i..];
             }
 
             if (timeParsed && possibleTime == reason)
@@ -420,7 +415,7 @@ namespace Cliptok.Modules
             if (timeParsed)
             {
                 int i = reason.IndexOf(" ") + 1;
-                reason = reason.Substring(i);
+                reason = reason[i..];
             }
 
             if (timeParsed && possibleTime == reason)
@@ -520,8 +515,6 @@ namespace Cliptok.Modules
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequirePermissions(Permissions.BanMembers)]
         public async Task UnmuteCmd(CommandContext ctx, DiscordUser targetUser)
         {
-            DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
-
             if ((await Program.db.HashExistsAsync("bans", targetUser.Id)))
             {
                 await UnbanUserAsync(ctx.Guild, targetUser);
@@ -597,7 +590,7 @@ namespace Cliptok.Modules
                 }
 
             }
-            await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {discordMembers.Count() - failedCount} of {discordMembers.Count()} member(s)! (Check Audit Log for details)");
+            _ = await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {discordMembers.Length - failedCount} of {discordMembers.Length} member(s)! (Check Audit Log for details)");
         }
 
         [Command("massdehoist")]
@@ -615,7 +608,7 @@ namespace Cliptok.Modules
                 if (!success)
                     failedCount++;
             }
-            await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {discordMembers.Count() - failedCount} of {discordMembers.Count()} member(s)! (Check Audit Log for details)");
+            await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {discordMembers.Count - failedCount} of {discordMembers.Count} member(s)! (Check Audit Log for details)");
         }
 
         [Command("massundehoist")]
@@ -632,7 +625,7 @@ namespace Cliptok.Modules
             else
             {
                 string strList;
-                using (WebClient client = new WebClient())
+                using (WebClient client = new())
                 {
                     strList = client.DownloadString(ctx.Message.Attachments[0].Url);
                 }
@@ -657,7 +650,7 @@ namespace Cliptok.Modules
 
                     if (member.Nickname != null && member.Nickname[0] == dehoistCharacter)
                     {
-                        var newNickname = member.Nickname.Substring(1);
+                        var newNickname = member.Nickname[1..];
                         await member.ModifyAsync(a =>
                         {
                             a.Nickname = newNickname;
@@ -670,7 +663,7 @@ namespace Cliptok.Modules
                     }
                 }
 
-                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully undehoisted {list.Count() - failedCount} of {list.Count()} member(s)! (Check Audit Log for details)");
+                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully undehoisted {list.Length - failedCount} of {list.Length} member(s)! (Check Audit Log for details)");
 
             }
         }
@@ -778,7 +771,7 @@ namespace Cliptok.Modules
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} I'll try my best to remind you about that at: `{t}` (In roughly **{Warnings.TimeToPrettyFormat(t.Subtract(ctx.Message.Timestamp.DateTime), false)}**)");
         }
 
-        public static async Task<bool> CheckRemindersAsync(bool includeRemutes = false)
+        public static async Task<bool> CheckRemindersAsync()
         {
             bool success = false;
             foreach (var reminder in Program.db.ListRange("reminders", 0, -1))
@@ -918,7 +911,7 @@ namespace Cliptok.Modules
                 bool bans = await CheckBansAsync();
                 bool mutes = await Mutes.CheckMutesAsync(true);
                 bool reminders = await ModCmds.CheckRemindersAsync();
-                await msg.ModifyAsync($"Unban check result: `{bans.ToString()}`\nUnmute check result: `{mutes.ToString()}`\nReminders check result: `{reminders}`");
+                await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nReminders check result: `{reminders}`");
             }
         }
 

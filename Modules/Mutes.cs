@@ -45,7 +45,7 @@ namespace Cliptok.Modules
                 expireTime = null;
             }
 
-            MemberPunishment newMute = new MemberPunishment()
+            MemberPunishment newMute = new()
             {
                 MemberId = naughtyUser.Id,
                 ModId = moderatorId,
@@ -216,7 +216,6 @@ namespace Cliptok.Modules
         public async Task UnmuteCmd(CommandContext ctx, [Description("The user you're trying to unmute.")] DiscordUser targetUser)
         {
             DiscordGuild guild = ctx.Guild;
-            DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
 
             // todo: store per-guild
             DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
@@ -294,7 +293,7 @@ namespace Cliptok.Modules
             if (timeParsed)
             {
                 int i = reason.IndexOf(" ") + 1;
-                reason = reason.Substring(i);
+                reason = reason[i..];
             }
 
             if (timeParsed && possibleTime == reason)

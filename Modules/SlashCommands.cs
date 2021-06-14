@@ -55,7 +55,6 @@ namespace Cliptok.Modules
                 .WithContent($"{Program.cfgjson.Emoji.Warning} {user.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
 
             var msg = await channel.SendMessageAsync(messageBuild);
-            UserWarning warning = await Warnings.GiveWarningAsync(user, ctx.User, reason, Warnings.MessageLink(msg), channel);
 
             webhookOut = new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Success} User was warned successfully in {channel.Mention}\n[Jump to warning]({Warnings.MessageLink(msg)})");
             await ctx.EditResponseAsync(webhookOut);
@@ -76,10 +75,7 @@ namespace Cliptok.Modules
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, eout);
 
             // Edits need a webhook rather than interaction..?
-            DiscordWebhookBuilder webhookOut = new DiscordWebhookBuilder();
-
-            TimeSpan banDuration = default;
-
+            DiscordWebhookBuilder webhookOut = new();
             int messageDeleteDays = 7;
             if (keepMessages)
                 messageDeleteDays = 0;
@@ -108,6 +104,8 @@ namespace Cliptok.Modules
                 // do nothing :/
             }
 
+
+            TimeSpan banDuration;
             if (time == null)
                 banDuration = default;
             else
