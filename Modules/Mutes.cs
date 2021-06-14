@@ -37,7 +37,7 @@ namespace Cliptok.Modules
             {
                 // nothing
             }
-            
+
 
             if (muteDuration == default)
             {
@@ -55,7 +55,8 @@ namespace Cliptok.Modules
 
             await Program.db.HashSetAsync("mutes", naughtyUser.Id, JsonConvert.SerializeObject(newMute));
 
-            if (naughtyMember != default) {
+            if (naughtyMember != default)
+            {
                 try
                 {
                     await naughtyMember.GrantRoleAsync(mutedRole, $"[Mute by {moderator.Username}#{moderator.Discriminator}]: {reason}");
@@ -191,11 +192,12 @@ namespace Cliptok.Modules
                                 var muteRole = guild.GetRole(Program.cfgjson.MutedRole);
                                 await member.GrantRoleAsync(muteRole);
                             }
-                        } catch
+                        }
+                        catch
                         {
                             // nothing
                         }
-                        
+
                     }
                 }
 #if DEBUG
@@ -223,12 +225,13 @@ namespace Cliptok.Modules
             try
             {
                 member = await guild.GetMemberAsync(targetUser.Id);
-            } catch (DSharpPlus.Exceptions.NotFoundException)
+            }
+            catch (DSharpPlus.Exceptions.NotFoundException)
             {
                 // nothing
             }
 
-            if ((await Program.db.HashExistsAsync("mutes", targetUser.Id)) || (member != default && member.Roles.Contains(mutedRole) ))
+            if ((await Program.db.HashExistsAsync("mutes", targetUser.Id)) || (member != default && member.Roles.Contains(mutedRole)))
             {
                 await Mutes.UnmuteUserAsync(targetUser);
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Information} Successfully unmuted **{targetUser.Username}#{targetUser.Discriminator}**.");
@@ -264,7 +267,7 @@ namespace Cliptok.Modules
                 // nothing
             }
 
-            if (targetMember != default &&  Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
+            if (targetMember != default && Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
             {
                 await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
                 return;

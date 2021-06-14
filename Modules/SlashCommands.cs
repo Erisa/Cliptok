@@ -1,14 +1,8 @@
-﻿using DSharpPlus.SlashCommands;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
+﻿using DSharpPlus;
 using DSharpPlus.Entities;
-using Newtonsoft.Json;
+using DSharpPlus.SlashCommands;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus;
-using HumanDateParser;
 
 namespace Cliptok.Modules
 {
@@ -73,8 +67,8 @@ namespace Cliptok.Modules
                 [Option("reason", "The reason the user is being banned")] string reason,
                 [Option("time", "The length of time the user is banned for")] string time = null,
                 [Option("appeal_link", "Whether to show the user an appeal URL in the DM")] bool appealable = false,
-                [Option("keep_messages", "Whether to keep the users messages when banning")] bool keepMessages = false                
-                //[Option("silent", "Whether to not send any DM communication about the ban at all")] bool silent = false
+                [Option("keep_messages", "Whether to keep the users messages when banning")] bool keepMessages = false
+        //[Option("silent", "Whether to not send any DM communication about the ban at all")] bool silent = false
         )
         {
             // Initial response to avoid the 3 second timeout, will edit later.

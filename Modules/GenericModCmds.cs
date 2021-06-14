@@ -18,7 +18,7 @@ namespace Cliptok.Modules
         public const char dehoistCharacter = '\u17b5';
         public bool ongoingLockdown = false;
 
-    public static async Task<bool> BanFromServerAsync(ulong targetUserId, string reason, ulong moderatorId, DiscordGuild guild, int deleteDays = 7, DiscordChannel channel = null, TimeSpan banDuration = default, bool appealable = false)
+        public static async Task<bool> BanFromServerAsync(ulong targetUserId, string reason, ulong moderatorId, DiscordGuild guild, int deleteDays = 7, DiscordChannel channel = null, TimeSpan banDuration = default, bool appealable = false)
         {
             DiscordUser naughtyUser = await Program.discord.GetUserAsync(targetUserId);
             bool permaBan = false;
@@ -85,7 +85,8 @@ namespace Cliptok.Modules
                 foreach (KeyValuePair<ulong, DiscordChannel> potentialChannelPair in guild.Channels)
                 {
                     var potentialChannel = potentialChannelPair.Value;
-                    if (potentialChannel.Type == ChannelType.Text && potentialChannel.Topic != null && potentialChannel.Topic.EndsWith($"User ID: {targetUserId}")) {
+                    if (potentialChannel.Type == ChannelType.Text && potentialChannel.Topic != null && potentialChannel.Topic.EndsWith($"User ID: {targetUserId}"))
+                    {
                         await potentialChannel.SendMessageAsync(logOut);
                         break;
                     }
@@ -186,7 +187,7 @@ namespace Cliptok.Modules
             {
                 ongoingLockdown = true;
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it, please hold...");
-                foreach(var chanID in Program.cfgjson.LockdownEnabledChannels)
+                foreach (var chanID in Program.cfgjson.LockdownEnabledChannels)
                 {
                     try
                     {
@@ -195,7 +196,8 @@ namespace Cliptok.Modules
                         await channel.AddOverwriteAsync(ctx.Guild.GetRole(Program.cfgjson.ModRole), Permissions.SendMessages, Permissions.None, "Failsafe 2 for Lockdown");
                         await channel.AddOverwriteAsync(ctx.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, "Lockdown command");
                         await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Locked} This channel has been locked by a Moderator.");
-                    } catch
+                    }
+                    catch
                     {
 
                     }
@@ -217,7 +219,8 @@ namespace Cliptok.Modules
                 await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Locked} This channel has been locked by a Moderator.");
             else
                 await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Locked} This channel has been locked: **{reason}**");
-        ;}
+            ;
+        }
 
         public async Task<bool> UnlockChannel(DiscordChannel discordChannel, DiscordMember discordMember)
         {
@@ -255,7 +258,8 @@ namespace Cliptok.Modules
             if (success)
             {
                 await discordChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Unlock} This channel has been unlocked!");
-            } else
+            }
+            else
             {
                 await discordChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} This channel is not locked.");
             }
@@ -323,7 +327,8 @@ namespace Cliptok.Modules
             {
                 banDuration = HumanDateParser.HumanDateParser.Parse(possibleTime).Subtract(ctx.Message.Timestamp.DateTime);
                 timeParsed = true;
-            } catch
+            }
+            catch
             {
                 // keep default
             }
@@ -428,46 +433,46 @@ namespace Cliptok.Modules
             }
 
             DiscordMember member;
-                try
-                {
-                    member = await ctx.Guild.GetMemberAsync(targetMember.Id);
-                }
-                catch
-                {
-                    member = null;
-                }
+            try
+            {
+                member = await ctx.Guild.GetMemberAsync(targetMember.Id);
+            }
+            catch
+            {
+                member = null;
+            }
 
-                if (member == null)
+            if (member == null)
+            {
+                await ctx.Message.DeleteAsync();
+                await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 0, ctx.Channel, banDuration, appealable);
+            }
+            else
+            {
+                if (AllowedToMod(ctx.Member, member))
                 {
-                    await ctx.Message.DeleteAsync();
-                    await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 0, ctx.Channel, banDuration, appealable);
-                }
-                else
-                {
-                    if (AllowedToMod(ctx.Member, member))
+                    if (AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
                     {
-                        if (AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
-                        {
-                            await ctx.Message.DeleteAsync();
-                            await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 0, ctx.Channel, banDuration, appealable);
-                        }
-                        else
-                        {
-                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
-                            return;
-                        }
+                        await ctx.Message.DeleteAsync();
+                        await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 0, ctx.Channel, banDuration, appealable);
                     }
                     else
                     {
-                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} You don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
+                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
                         return;
                     }
                 }
-                reason = reason.Replace("`", "\\`").Replace("*", "\\*");
-                if (banDuration == default)
-                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned: **{reason}**");
                 else
-                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{Warnings.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} You don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
+                    return;
+                }
+            }
+            reason = reason.Replace("`", "\\`").Replace("*", "\\*");
+            if (banDuration == default)
+                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned: **{reason}**");
+            else
+                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{Warnings.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
         }
 
         [Command("kick")]
@@ -623,7 +628,8 @@ namespace Cliptok.Modules
             if (ctx.Message.Attachments.Count == 0)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Please upload an attachment as well.");
-            } else
+            }
+            else
             {
                 string strList;
                 using (WebClient client = new WebClient())
@@ -642,13 +648,14 @@ namespace Cliptok.Modules
                     try
                     {
                         member = await ctx.Guild.GetMemberAsync(id);
-                    } catch (DSharpPlus.Exceptions.NotFoundException)
+                    }
+                    catch (DSharpPlus.Exceptions.NotFoundException)
                     {
                         failedCount++;
                         continue;
                     }
 
-                    if(member.Nickname != null && member.Nickname[0] == dehoistCharacter)
+                    if (member.Nickname != null && member.Nickname[0] == dehoistCharacter)
                     {
                         var newNickname = member.Nickname.Substring(1);
                         await member.ModifyAsync(a =>

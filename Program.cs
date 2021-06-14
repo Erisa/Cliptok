@@ -12,7 +12,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Cliptok
@@ -34,12 +33,12 @@ namespace Cliptok
 
         public static async Task<bool> CheckAndDehoistMemberAsync(DiscordMember targetMember)
         {
-            
+
             if (
                 !(
                     targetMember.DisplayName[0] != ModCmds.dehoistCharacter
                     && (
-                        cfgjson.AutoDehoistCharacters.Contains(targetMember.DisplayName[0]) 
+                        cfgjson.AutoDehoistCharacters.Contains(targetMember.DisplayName[0])
                         || (targetMember.Nickname != null && cfgjson.SecondaryAutoDehoistCharacters.Contains(targetMember.Nickname[0]))
                         )
                 ))
@@ -164,7 +163,8 @@ namespace Cliptok
                 {
                     using var sr = new StreamReader("CommitHash.txt");
                     commitHash = sr.ReadToEnd();
-                } else
+                }
+                else
                 {
                     commitHash = "dev";
                 }
@@ -173,7 +173,8 @@ namespace Cliptok
                 {
                     using var sr = new StreamReader("CommitMessage.txt");
                     commitMessage = sr.ReadToEnd();
-                } else
+                }
+                else
                 {
                     commitMessage = "N/A (Bot was built for Windows)";
                 }
@@ -182,7 +183,8 @@ namespace Cliptok
                 {
                     using var sr = new StreamReader("CommitTime.txt");
                     commitTime = sr.ReadToEnd();
-                } else
+                }
+                else
                 {
                     commitTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss zzz");
                 }
@@ -239,7 +241,7 @@ namespace Cliptok
                     DiscordRole mutedRole = e.Guild.GetRole(cfgjson.MutedRole);
                     await e.Member.GrantRoleAsync(mutedRole, "Reapplying mute: possible mute evasion.");
                 }
-                CheckAndDehoistMemberAsync(e.Member);;
+                CheckAndDehoistMemberAsync(e.Member); ;
             }
 
             async Task GuildMemberUpdated(DiscordClient client, GuildMemberUpdateEventArgs e)
