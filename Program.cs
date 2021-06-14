@@ -35,6 +35,7 @@ namespace Cliptok
         readonly static Regex id_rx = new Regex("([0-9]{1,32}>)");
         readonly static Regex modmaiL_rx = new Regex("User ID: ([0-9]+)");
         public static Dictionary<ulong, DateTime> supportRatelimit = new Dictionary<ulong, DateTime>();
+        public static List<ulong> autoBannedUsersCache = new List<ulong>();
 
         static bool CheckForNaughtyWords(string input, WordListJson naughtyWordList)
         {
@@ -268,10 +269,12 @@ namespace Cliptok
                     $"```\n" +
                     $"{commitMessage}\n" +
                     $"```");
+
             }
 
             async Task MessageCreated(DiscordClient client, MessageCreateEventArgs e)
-            {
+            { 
+
                 if (e.Author.Id == cfgjson.ModmailUserId && e.Message.Content == "@here" && e.Message.Embeds[0].Footer.Text.Contains("User ID:")) 
                 {
                     var idString = modmaiL_rx.Match(e.Channel.Topic).Groups[1].Captures[0].Value;
@@ -543,10 +546,30 @@ namespace Cliptok
 
             async Task UsernameCheckAsync(DiscordMember member)
             {
-                if (badUsernames.Contains(member.Username))
+                foreach (var username in badUsernames)
                 {
-                    var guild = await discord.GetGuildAsync(cfgjson.ServerID);
-                    await ModCmds.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot accounts. Please appeal if you are a human.", discord.CurrentUser.Id, guild, 7, null, default, true);
+                    // emergency failsafe, for newlines and other mistaken entries
+                    if (username.Length < 4)
+                        continue;
+
+                    if (member.Username.ToLower().Contains(username.ToLower()))
+                    {
+                        if (autoBannedUsersCache.Contains(member.Id))
+                            break;
+                        autoBannedUsersCache.Append(member.Id);
+                        var guild = await discord.GetGuildAsync(cfgjson.ServerID);
+                        await ModCmds.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot accounts. Please appeal if you are a human.", discord.CurrentUser.Id, guild, 7, null, default, true);
+                        var embed = new DiscordEmbedBuilder()
+                            .WithTimestamp(DateTime.Now)
+                            .WithFooter($"User ID: {member.Id}", null)
+                            .WithAuthor($"{member.Username}#{member.Discriminator}", null, member.AvatarUrl)
+                            .AddField("Infringing name", member.Username)
+                            .AddField("Matching pattern", username)
+                            .WithColor(new DiscordColor(0xf03916));
+                        var investigations = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
+                        await investigations.SendMessageAsync($"{cfgjson.Emoji.Banned} {member.Mention} was banned for matching blocked username patterns.", embed);
+                        break;
+                    }
                 }
             }
 
@@ -583,9 +606,7 @@ namespace Cliptok
                     DiscordRole mutedRole = e.Guild.GetRole(cfgjson.MutedRole);
                     await e.Member.GrantRoleAsync(mutedRole, "Reapplying mute: possible mute evasion.");
                 }
-                await CheckAndDehoistMemberAsync(e.Member);
-
-                await UsernameCheckAsync(e.Member);
+                CheckAndDehoistMemberAsync(e.Member);;
             }
 
             async Task GuildMemberUpdated(DiscordClient client, GuildMemberUpdateEventArgs e)

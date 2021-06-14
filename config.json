@@ -23,7 +23,12 @@
     "microsoft",
     "xbox",
     "FjJfTZdtXg",
-    "cMxFErsEDB"
+    "cMxFErsEDB",
+    "apple",
+    "google",
+    "iphone",
+    "directx",
+    "winadmins"
   ],
   "autoMuteThresholds": {
     "2": 6,
@@ -87,6 +92,10 @@
     "autoban.txt": {
       "wholeWord": false,
       "reason": "[Automatic] Suspected to be following the patterns of known raiders."
+    },
+    "scams.txt": {
+      "wholeWord": false,
+      "reason": "Attempted scam message"
     }
   },
   "massEmojiThreshold": 6,
@@ -130,45 +139,6 @@
     "413429915187281940",
     "544153359712649251"
   ],
-  "autoDehoistCharacters": [
-    "!",
-    "\"",
-    "#",
-    "$",
-    "%",
-    "^",
-    "&",
-    "'",
-    "(",
-    ")",
-    "*",
-    "+",
-    ",",
-    "-",
-    ".",
-    "/",
-    ":",
-    ";",
-    "<",
-    ">",
-    "?",
-    "@",
-    "[",
-    "\\",
-    "^",
-    "_",
-    "`"
-  ],
-  "secondaryAutoDehoistCharacters": [
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9"
-  ]
+  "autoDehoistCharacters": " !\"#$%&'()*+,-./:;<=>?@[\\]^_`'",
+  "secondaryAutoDehoistCharacters": "0123456789"
 }

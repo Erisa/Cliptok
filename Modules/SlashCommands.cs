@@ -180,10 +180,14 @@ namespace Cliptok.Modules
 
         [SlashCommand("warnings", "Fetch the warnings for a user.")]
         public async Task WarningsSlashCommand(InteractionContext ctx,
-                [Option("user", "The user to find the warnings for.")] DiscordUser user
+                [Option("user", "The user to find the warnings for.")] DiscordUser user,
+                [Option("private", "Whether to show the warnings to you privately.")] bool privateWarnings = false
         )
         {
-            var eout = new DiscordInteractionResponseBuilder().AsEphemeral(false).AddEmbed(Warnings.GenerateWarningsEmbed(user));
+            var eout = new DiscordInteractionResponseBuilder().AddEmbed(Warnings.GenerateWarningsEmbed(user));
+            if (privateWarnings)
+                eout.AsEphemeral(true);
+
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, eout);
         }
 
