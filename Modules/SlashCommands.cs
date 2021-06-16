@@ -56,6 +56,7 @@ namespace Cliptok.Modules
 
             var msg = await channel.SendMessageAsync(messageBuild);
 
+            _ = await Warnings.GiveWarningAsync(user, ctx.User, reason, Warnings.MessageLink(msg), ctx.Channel);
             webhookOut = new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Success} User was warned successfully in {channel.Mention}\n[Jump to warning]({Warnings.MessageLink(msg)})");
             await ctx.EditResponseAsync(webhookOut);
         }
