@@ -105,11 +105,12 @@ namespace Cliptok.Modules
             await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} Deleted infringing message by {infringingMessage.Author.Mention} in {infringingMessage.Channel.Mention}:", embed);
         }
 
-        public static async Task MessageHandlerAsync(DiscordClient client, DiscordMessage message)
+        public static async Task MessageHandlerAsync(DiscordClient client, DiscordMessage message, bool isAnEdit = false)
         {
 
-            if (message.Author.Id == Program.cfgjson.ModmailUserId && message.Content == "@here" && message.Embeds[0].Footer.Text.Contains("User ID:"))
+            if (!isAnEdit && message.Author.Id == Program.cfgjson.ModmailUserId && message.Content == "@here")// && message.Embeds[0].Footer.Text.Contains("User ID:"))
             {
+                Console.Write($"Processing modmail message {message.Id} in {message.Channel} with {isAnEdit}");
                 var idString = modmaiL_rx.Match(message.Channel.Topic).Groups[1].Captures[0].Value;
                 DiscordMember modmailMember = default;
                 try

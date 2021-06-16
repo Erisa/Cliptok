@@ -285,7 +285,7 @@ namespace Cliptok
 
             async Task MessageUpdated(DiscordClient client, MessageUpdateEventArgs e)
             {
-                await MessageEvent.MessageHandlerAsync(client, e.Message);
+                await MessageEvent.MessageHandlerAsync(client, e.Message, true);
             }
 
             discord.Ready += OnReady;
