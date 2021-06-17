@@ -48,8 +48,9 @@ If you want to run the bot as a standalone application rather than a Docker cont
 Once you have everything installed:
 1. Clone this repository and `cd` into the directory.
 2. Set the `CLIPTOK_TOKEN` environment variable to your bots token.
-3. Compile the bot for production: `dotnet build -c Release`.
-4. Run the bot: `dotnet run -c Release`
+3. If you're not deploying for Microsoft Community, edit the `config.json` to fit your needs.
+4. Compile the bot for production: `dotnet build -c Release`.
+5. Run the bot: `dotnet run -c Release`
 
 If you go with this method you will have to fork the bot to the background yourself, through the use of a process manager like `pm2` or a systemd service.
 
