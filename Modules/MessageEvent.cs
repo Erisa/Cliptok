@@ -215,7 +215,11 @@ namespace Cliptok.Modules
                     checkedMessage = checkedMessage.Replace("discord.gg/" + exclusion, "").Replace("discord.com/invite/" + exclusion, "");
                 }
 
-                if (checkedMessage.Contains("discord.gg/") || checkedMessage.Contains("discord.com/invite/"))
+                if (checkedMessage.Contains("discord.gg/") ||
+                    checkedMessage.Contains("discord.com/invite/") ||
+                    checkedMessage.Contains("dsc.gg/") ||
+                    checkedMessage.Contains("invite.gg/")
+                   )
                 {
                     string reason = "Sent an unapproved invite";
                     _ = message.DeleteAsync();
