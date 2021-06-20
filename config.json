@@ -77,26 +77,26 @@
     "port": 6379
   },
   "wordLists": {
-    "rudeWords.txt": {
-      "wholeWord": true,
-      "reason": "Use of restricted word(s)"
-    },
-    "everyone.txt": {
+    "scams.txt": {
       "wholeWord": false,
-      "reason": "Attempted to ping everyone/here"
+      "reason": "Attempted scam message"
     },
     "naughtyURLs.txt": {
       "wholeWord": false,
       "reason": "Sent malicious URL(s)"
     },
+    "rudeWords.txt": {
+      "wholeWord": true,
+      "reason": "Use of restricted word(s)"
+    },
     "autoban.txt": {
       "wholeWord": false,
       "reason": "[Automatic] Suspected to be following the patterns of known raiders."
     },
-    "scams.txt": {
+    "everyone.txt": {
       "wholeWord": false,
-      "reason": "Attempted scam message"
-    }
+      "reason": "Attempted to ping everyone/here"
+    },
   },
   "massEmojiThreshold": 6,
   "unrestrictedEmojiChannels": [
