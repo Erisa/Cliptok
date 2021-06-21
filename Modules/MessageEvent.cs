@@ -271,7 +271,8 @@ namespace Cliptok.Modules
                     if (Warnings.GetPermLevel(member) == ServerPermLevel.nothing && !Program.db.HashExists("emojiPardoned", message.Author.Id.ToString()))
                     {
                         await Program.db.HashSetAsync("emojiPardoned", member.Id.ToString(), false);
-                        await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, if you want to play around with lots of emoji, please use <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.");
+                        var msgOut = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, if you want to play around with lots of emoji, please use <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.");
+                        await SendInfringingMessaageAsync(Program.badMsgLog, message, reason, Warnings.MessageLink(msgOut));
                         return;
                     }
 
