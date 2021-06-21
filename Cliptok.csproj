@@ -10,8 +10,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="Abyssal.HumanDateParser" Version="2.0.0-20191113.1" />
-		<PackageReference Include="DSharpPlus" Version="4.1.0-nightly-00885" />
-		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.1.0-nightly-00885" />
+		<PackageReference Include="DSharpPlus" Version="4.1.0-nightly-00888" />
+		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.1.0-nightly-00888" />
 		<PackageReference Include="IDoEverything.DSharpPlus.SlashCommands" Version="1.4.1" />
 		<PackageReference Include="StackExchange.Redis" Version="2.2.4" />
 		<PackageReference Include="System.Linq" Version="4.3.0" />

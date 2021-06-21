@@ -167,7 +167,7 @@ namespace Cliptok.Modules
                     if (key == "autoban.txt" && Warnings.GetPermLevel(member) < ServerPermLevel.Tier4)
                     {
                         _ = message.DeleteAsync();
-                        await ModCmds.BanFromServerAsync(message.Author.Id, reason, client.CurrentUser.Id, message.Channel.Guild, 0, message.Channel, default, true);
+                        await Bans.BanFromServerAsync(message.Author.Id, reason, client.CurrentUser.Id, message.Channel.Guild, 0, message.Channel, default, true);
                         return;
                     }
 

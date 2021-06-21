@@ -215,7 +215,7 @@ namespace Cliptok
                             break;
                         IEnumerable<ulong> enumerable = autoBannedUsersCache.Append(member.Id);
                         var guild = await discord.GetGuildAsync(cfgjson.ServerID);
-                        await ModCmds.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot accounts. Please appeal if you are a human.", discord.CurrentUser.Id, guild, 7, null, default, true);
+                        await Bans.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot accounts. Please appeal if you are a human.", discord.CurrentUser.Id, guild, 7, null, default, true);
                         var embed = new DiscordEmbedBuilder()
                             .WithTimestamp(DateTime.Now)
                             .WithFooter($"User ID: {member.Id}", null)
@@ -305,6 +305,8 @@ namespace Cliptok
             commands.RegisterCommands<MuteCmds>();
             commands.RegisterCommands<UserRoleCmds>();
             commands.RegisterCommands<ModCmds>();
+            commands.RegisterCommands<Lockdown>();
+            commands.RegisterCommands<Bans>();
 
             await discord.ConnectAsync();
 
