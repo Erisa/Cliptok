@@ -117,15 +117,18 @@ namespace Cliptok.Modules
             throw new NotImplementedException();
         }
 
-        public static async Task<DiscordEmbed> FancyWarnEmbedAsync(UserWarning warning, bool detailed = false, int colour = 0xFEC13D, bool showTime = true)
+        public static async Task<DiscordEmbed> FancyWarnEmbedAsync(UserWarning warning, bool detailed = false, int colour = 0xFEC13D, bool showTime = true, ulong userID = default)
         {
-            DiscordUser targetUser = await Program.discord.GetUserAsync(warning.TargetUserId);
+            if (userID == default)
+                userID = warning.TargetUserId;
+
+            DiscordUser targetUser = await Program.discord.GetUserAsync(userID);
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
             .WithDescription($"**Reason**\n{warning.WarnReason}")
             .WithColor(new DiscordColor(colour))
             .WithTimestamp(DateTime.Now)
             .WithFooter(
-                $"User ID: {warning.TargetUserId}",
+                $"User ID: {userID}",
                 null
             )
             .WithAuthor(
@@ -181,7 +184,7 @@ namespace Cliptok.Modules
                 // We failed to DM the user, this isn't important to note.
             }
 
-            await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} New warning for {targetUser.Mention}!", await FancyWarnEmbedAsync(warning, true, 0xFEC13D, false));
+            await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} New warning for {targetUser.Mention}!", await FancyWarnEmbedAsync(warning, true, 0xFEC13D, false, targetUser.Id));
 
             // automute handling
             var warningsOutput = Program.db.HashGetAll(targetUser.Id.ToString()).ToDictionary(
@@ -248,11 +251,14 @@ namespace Cliptok.Modules
             }
         }
 
-        public static bool DelWarning(UserWarning warning)
+        public static bool DelWarning(UserWarning warning, ulong userID = default)
         {
-            if (Program.db.HashExists(warning.TargetUserId.ToString(), warning.WarningId))
+            if (userID == default)
+                userID = warning.TargetUserId;
+
+            if (Program.db.HashExists(userID.ToString(), warning.WarningId))
             {
-                Program.db.HashDelete(warning.TargetUserId.ToString(), warning.WarningId);
+                Program.db.HashDelete(userID.ToString(), warning.WarningId);
                 return true;
             }
             else
@@ -507,11 +513,18 @@ namespace Cliptok.Modules
             }
             else
             {
-                DelWarning(warning);
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Deleted} Successfully deleted warning `{Pad(warnId)}` (belonging to {targetUser.Mention})");
+                bool success = DelWarning(warning, targetUser.Id);
+                if (success)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Deleted} Successfully deleted warning `{Pad(warnId)}` (belonging to {targetUser.Mention})");
 
-                await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Warning deleted:" +
-                    $"`{Pad(warnId)}` (belonging to {targetUser.Mention}, deleted by {ctx.Member.Username}#{ctx.Member.Discriminator})", await FancyWarnEmbedAsync(warning, true, 0xf03916));
+                    await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Warning deleted:" +
+                        $"`{Pad(warnId)}` (belonging to {targetUser.Mention}, deleted by {ctx.Member.Username}#{ctx.Member.Discriminator})", await FancyWarnEmbedAsync(warning, true, 0xf03916, true, targetUser.Id));
+                }
+                else
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Failed to delete warning `{Pad(warnId)}` from {targetUser.Mention}!\nPlease contact the bot author.");
+                }
             }
         }
 
@@ -531,7 +544,7 @@ namespace Cliptok.Modules
             if (warning == null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else
-                await ctx.RespondAsync(null, await FancyWarnEmbedAsync(warning));
+                await ctx.RespondAsync(null, await FancyWarnEmbedAsync(warning, userID: targetUser.Id));
         }
 
         [
@@ -551,7 +564,7 @@ namespace Cliptok.Modules
             if (warning == null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else
-                await ctx.RespondAsync(null, await FancyWarnEmbedAsync(warning, true));
+                await ctx.RespondAsync(null, await FancyWarnEmbedAsync(warning, true, userID: targetUser.Id));
 
         }
 
@@ -580,9 +593,9 @@ namespace Cliptok.Modules
             {
                 EditWarning(targetUser, warnId, ctx.User, newReason, MessageLink(msg));
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Information} Successfully edited warning `{Pad(warnId)}` (belonging to {targetUser.Mention})",
-                    await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId)));
+                    await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId), userID: targetUser.Id));
                 await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Warning edited:" +
-                    $"`{Pad(warnId)}` (belonging to {targetUser.Mention})", await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId), true));
+                    $"`{Pad(warnId)}` (belonging to {targetUser.Mention})", await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId), true, userID: targetUser.Id));
             }
         }
 
