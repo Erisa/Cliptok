@@ -251,9 +251,19 @@ namespace Cliptok.Modules
         /// <param name="reason">Reason to give for the report.</param>
         /// <param name="createReport">Delegate called to create the specific report.</param>
         /// <returns></returns>
-        private async Task<ReportObject> GenericManageReport(CommandContext ctx, string reportType, ulong ID, string reason, Func<ReportInfo> createReport)
+        private async Task<ReportObject> GenericManageReport(CommandContext ctx, DiscordGuild guild, string reportType, ulong ID, string reason, Func<ReportInfo> createReport)
         {
             ulong reportID = await reportDatabase.GetOrSetReportFromContentID(ID, reportType);
+
+            DiscordMember member;
+            try
+            {
+                member = await GetContextMember(ctx, guild);
+            }
+            catch(Exception)
+            {
+                throw new ReportCommandError("You must be a member of the server you want to report the content in.");
+            }
 
             ReportObject report = await GetReviewedReportObject(reportID);
             if (report != null)
@@ -267,7 +277,7 @@ namespace Cliptok.Modules
                 {
                     // start over with a new report
                     reportID = await reportDatabase.RecreateNewReportFromContentID(ID, reportType);
-                    report = new ReportObject(reportID, ctx.Guild, createReport(), reason);
+                    report = new ReportObject(reportID, guild, createReport(), reason);
                 }
             }
             else
@@ -277,9 +287,9 @@ namespace Cliptok.Modules
                 if (report == null)
                 {
                     // create a brand new report
-                    report = new ReportObject(reportID, ctx.Guild, createReport(), reason);
+                    report = new ReportObject(reportID, guild, createReport(), reason);
                 }
-                else if (report.Signalers.Exists(x => x == ctx.Member))
+                else if (report.Signalers.Exists(x => x == member))
                 {
                     // already reported
                     throw new ReportCommandError(GenerateAlreadyReportObject(report));
@@ -287,7 +297,7 @@ namespace Cliptok.Modules
             }
 
             // add the user to the report
-            report.Signalers.Add(ctx.Member);
+            report.Signalers.Add(member);
 
             if (report.ReportHandle == null)
             {
@@ -304,13 +314,13 @@ namespace Cliptok.Modules
             _ = SetReportObjectPending(report);
 
             // notify the user about the report
-            await ctx.Member.SendMessageAsync(GenerateReportObject(report));
+            await member.SendMessageAsync(GenerateReportObject(report));
 
             return report;
         }
 
         [Command("report")]
-        [Description("Reports a message to the moderation team."), HomeServer]
+        [Description("Reports a message to the moderation team.")]
         public async Task ReportCommand(
             CommandContext ctx,
             [Description("The message to report. Use *Copy link* to get the message link. *Copy ID* works as long as the command in executed in the same channel as the message to be reported.")] DiscordMessage message,
@@ -318,7 +328,7 @@ namespace Cliptok.Modules
         )
         {
             // delete the callee message to avoid others from judging the signalman
-            _ = ctx.Message.DeleteAsync();
+            DeleteMessageContext(ctx);
 
             if (message.Channel.Guild.Id != pendingReportsChannel.Guild.Id)
             {
@@ -329,7 +339,7 @@ namespace Cliptok.Modules
             try
             {
                 await CheckReport(ctx, message.Author);
-                await GenericManageReport(ctx, "message", message.Id, reason, () => new MessageReportInfo(message));
+                await GenericManageReport(ctx, message.Channel.Guild, "message", message.Id, reason, () => new MessageReportInfo(message));
             }
             catch(ReportCommandError e)
             {
@@ -338,31 +348,37 @@ namespace Cliptok.Modules
             }
         }
 
+        /// <summary>
+        /// This command cannot be user in DMs, it must be used in the server that the target user is in.
+        /// </summary>
         [Command("report_u")]
         [Description("Reports user to the moderation team. Make sure to give a valid reason. For example if the user is sending scams, spamming DMs, you can use this command."), HomeServer]
         public async Task ReportUserCommand(
             CommandContext ctx,
-            [Description("The user to report (must be present in the server).")] DiscordUser user,
+            [Description("The user to report (must be present in the server).")] DiscordMember member,
             [Description("The reason for the user report."), RemainingText] string reason = ""
         )
         {
-            _ = ctx.Message.DeleteAsync();
+            DeleteMessageContext(ctx);
 
+            // Actually it's not really needed if the first command parameter is a discord member
+            /*
             try
             {
                 // make sure that the user to report is in the same server as the context user
-                await ctx.Guild.GetMemberAsync(user.Id);
+                await ctx.Guild.GetMemberAsync(member.Id);
             }
             catch(Exception)
             {
-                _ = ctx.Member.SendMessageAsync("The specified user is not present in the server you want to report on.");
+                _ = ctx.Member.SendMessageAsync("The specified user is not present in the server you want to report in.");
                 return;
             }
+            */
 
             try
             {
-                await CheckReport(ctx, user);
-                await GenericManageReport(ctx, "user", user.Id, reason, () => new UserReportInfo(user));
+                await CheckReport(ctx, member);
+                await GenericManageReport(ctx, ctx.Guild, "user", member.Id, reason, () => new UserReportInfo(member));
             }
             catch (ReportCommandError e)
             {
@@ -379,7 +395,7 @@ namespace Cliptok.Modules
             [Description("New reason to specify.")] string newReason = ""
             )
         {
-            _ = ctx.Message.DeleteAsync();
+            DeleteMessageContext(ctx);
 
             ReportObject report = await GetPendingReportObject(reportID);
             if (report == null)
@@ -422,18 +438,61 @@ namespace Cliptok.Modules
         [Description("Get your report stats.")]
         private async Task GetMyReports(CommandContext ctx)
         {
-            _ = ctx.Message.DeleteAsync();
+            DeleteMessageContext(ctx);
 
             ulong numValidated = await reportDatabase.GetUserReportCount(ctx.User.Id, ReportStatus.Validated);
             ulong numRejected = await reportDatabase.GetUserReportCount(ctx.User.Id, ReportStatus.Rejected);
             ulong numTotal = numValidated + numRejected;
 
+            foreach (DiscordGuild guild in ctx.Client.Guilds.Values)
+            {
+                DiscordMember member;
+                try
+                {
+                    member = await GetContextMember(ctx, guild);
 
-            _ = ctx.Member.SendMessageAsync(
-                    $"Validated reports: {numValidated}\n"
-                    + $"Rejected reports: {numRejected}"
-                    + $"Total reports: {numTotal}\n"
-                );
+                    _ = member.SendMessageAsync(
+                            $"Reports in {guild.Name}:\n"
+                            + $"- Validated reports: {numValidated}\n"
+                            + $"- Rejected reports: {numRejected}\n"
+                            + $"- Total reports: {numTotal}\n"
+                        );
+                }
+                catch (Exception)
+                {
+                }
+            }
+        }
+
+        /// <summary>
+        /// Return the member from context (or the guild).
+        /// </summary>
+        /// <param name="ctx">Context.</param>
+        /// <param name="guild">Guild to use if the context member is null.</param>
+        /// <returns></returns>
+        private async Task<DiscordMember> GetContextMember(CommandContext ctx, DiscordGuild guild)
+        {
+            DiscordMember member = ctx.Member;
+            if (ctx.Member == null)
+            {
+                // can be null if the user DMed the bot
+                // only allow members in the same guild
+                member = await guild.GetMemberAsync(ctx.User.Id);
+            }
+
+            return member;
+        }
+
+        /// <summary>
+        /// Delete the discord message in the context.
+        /// </summary>
+        /// <param name="ctx">Command context.</param>
+        private void DeleteMessageContext(CommandContext ctx)
+        {
+            if (!ctx.Message.Channel.IsPrivate)
+            {
+                _ = ctx.Message.DeleteAsync();
+            }
         }
 
         /// <summary>
