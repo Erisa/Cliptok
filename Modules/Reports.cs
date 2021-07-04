@@ -177,22 +177,23 @@ namespace Cliptok.Modules
             Program.discord.MessageDeleted += OnMessageDeleted;
 
             // gather all pending reports
-            HashEntry[] entries = Program.db.HashGetAll("reports_pending");
-            foreach(HashEntry entry in entries)
+            await reportDatabase.ForEachPendingReports(HandleReportCallback);
+        }
+
+        public async Task HandleReportCallback(string jsonData)
+        {
+            ReportObject report = await DeserializeReportObject(jsonData);
+            if (report.ReportHandle != null)
             {
-                ReportObject report = await DeserializeReportObject(entry.Value);
-                if (report.ReportHandle != null)
-                {
-                    // handle the report immediately
-                    HandleReaction(Program.discord, report);
-                }
-                else
-                {
-                    // it looks like the generated report message was deleted
-                    // so create a new one
-                    await CreateReportMessageWithInteraction(report, pendingReportsChannel);
-                    _ = SetReportObjectPending(report);
-                }
+                // handle the report immediately
+                HandleReaction(Program.discord, report);
+            }
+            else
+            {
+                // it looks like the generated report message was deleted
+                // so create a new one
+                await CreateReportMessageWithInteraction(report, pendingReportsChannel);
+                _ = SetReportObjectPending(report);
             }
         }
 
@@ -252,7 +253,7 @@ namespace Cliptok.Modules
         /// <returns></returns>
         private async Task<ReportObject> GenericManageReport(CommandContext ctx, string reportType, ulong ID, string reason, Func<ReportInfo> createReport)
         {
-            ulong reportID = reportDatabase.GetOrSetReportFromContentID(ID, reportType);
+            ulong reportID = await reportDatabase.GetOrSetReportFromContentID(ID, reportType);
 
             ReportObject report = await GetReviewedReportObject(reportID);
             if (report != null)
@@ -265,7 +266,7 @@ namespace Cliptok.Modules
                 else
                 {
                     // start over with a new report
-                    reportID = reportDatabase.RecreateNewReportFromContentID(ID, reportType);
+                    reportID = await reportDatabase.RecreateNewReportFromContentID(ID, reportType);
                     report = new ReportObject(reportID, ctx.Guild, createReport(), reason);
                 }
             }
@@ -442,7 +443,7 @@ namespace Cliptok.Modules
         /// <returns>Report object.</returns>
         private async Task<ReportObject> GetPendingReportObject(ulong reportID)
         {
-            string jsonReport = reportDatabase.GetPendingReport(reportID);
+            string jsonReport = await reportDatabase.GetPendingReport(reportID);
             // sanity check
             if (jsonReport != RedisValue.Null)
             {
@@ -459,7 +460,7 @@ namespace Cliptok.Modules
         /// <returns>Report object.</returns>
         private async Task<ReportObject> GetReviewedReportObject(ulong reportID)
         {
-            string jsonReport = reportDatabase.GetReviewedReport(reportID);
+            string jsonReport = await reportDatabase.GetReviewedReport(reportID);
             if (jsonReport != null)
             {
                 // report has already been reviewed but return it

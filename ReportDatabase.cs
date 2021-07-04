@@ -16,15 +16,15 @@ namespace Cliptok
         /// <param name="genericID">Content ID.</param>
         /// <param name="key">Report key (the report type actually).</param>
         /// <returns></returns>
-        public ulong GetOrSetReportFromContentID(ulong genericID, string key)
+        public async Task<ulong> GetOrSetReportFromContentID(ulong genericID, string key)
         {
-            RedisValue reportVal = GetReportFromContentID(genericID, key);
+            RedisValue reportVal = await GetReportFromContentID(genericID, key);
             if (reportVal != RedisValue.Null)
             {
                 return (ulong)reportVal;
             }
 
-            return CreateNewReportFromContentID(genericID, key);
+            return await CreateNewReportFromContentID(genericID, key);
         }
 
         /// <summary>
@@ -33,10 +33,10 @@ namespace Cliptok
         /// <param name="genericID">Content ID.</param>
         /// <param name="key">Report key (the report type actually).</param>
         /// <returns></returns>
-        public ulong RecreateNewReportFromContentID(ulong genericID, string key)
+        public async Task<ulong> RecreateNewReportFromContentID(ulong genericID, string key)
         {
-            DeleteReportHashFromContentID(genericID, key);
-            return CreateNewReportFromContentID(genericID, key);
+            await DeleteReportHashFromContentID(genericID, key);
+            return await CreateNewReportFromContentID(genericID, key);
         }
 
         /// <summary>
@@ -44,16 +44,34 @@ namespace Cliptok
         /// </summary>
         /// <param name="genericID">Content ID.</param>
         /// <param name="key">Report key (the report type actually).</param>
-        public void DeleteReportHashFromContentID(ulong genericID, string key)
+        public async Task DeleteReportHashFromContentID(ulong genericID, string key)
         {
-            RedisValue reportVal = GetReportFromContentID(genericID, key);
+            RedisValue reportVal = await GetReportFromContentID(genericID, key);
             if (reportVal != RedisValue.Null)
             {
-                db.HashDelete("reports_pending", reportVal);
-                db.HashDelete("reports_reviewed", reportVal);
+                await db.HashDeleteAsync("reports_pending", reportVal);
+                await db.HashDeleteAsync("reports_reviewed", reportVal);
             }
 
-            db.HashDelete($"rp_{key}", genericID.ToString());
+            await db.HashDeleteAsync($"rp_{key}", genericID.ToString());
+        }
+
+        public delegate Task ForEachPendingReportsDelegate(string jsonData);
+        /// <summary>
+        /// Iterate through all pending reports.
+        /// </summary>
+        /// <param name="callback">Callback for each report.</param>
+        /// <returns></returns>
+        public async Task ForEachPendingReports(ForEachPendingReportsDelegate callback)
+        {
+            HashEntry[] entries = await db.HashGetAllAsync("reports_pending");
+            foreach(HashEntry entry in entries)
+            {
+                if (entry.Value != RedisValue.Null)
+                {
+                    await callback((string)entry.Value);
+                }
+            }
         }
 
         /// <summary>
@@ -61,9 +79,9 @@ namespace Cliptok
         /// </summary>
         /// <param name="reportID">Report ID to check.</param>
         /// <returns>Whether or not the report is pending.</returns>
-        public bool IsPendingReport(ulong reportID)
+        public async Task<bool> IsPendingReport(ulong reportID)
         {
-            RedisValue jsonReport = db.HashGet("reports_pending", reportID);
+            RedisValue jsonReport = await db.HashGetAsync("reports_pending", reportID);
             return jsonReport != RedisValue.Null;
         }
 
@@ -72,9 +90,9 @@ namespace Cliptok
         /// </summary>
         /// <param name="reportID">ID to check.</param>
         /// <returns>Report object.</returns>
-        public string GetPendingReport(ulong reportID)
+        public async Task<string> GetPendingReport(ulong reportID)
         {
-            RedisValue jsonReport = db.HashGet("reports_pending", reportID);
+            RedisValue jsonReport = await db.HashGetAsync("reports_pending", reportID);
             // sanity check
             if (jsonReport != RedisValue.Null)
             {
@@ -89,9 +107,9 @@ namespace Cliptok
         /// </summary>
         /// <param name="reportID">ID to check.</param>
         /// <returns>Report object.</returns>
-        public string GetReviewedReport(ulong reportID)
+        public async Task<string> GetReviewedReport(ulong reportID)
         {
-            RedisValue jsonReport = db.HashGet("reports_reviewed", reportID);
+            RedisValue jsonReport = await db.HashGetAsync("reports_reviewed", reportID);
             if (jsonReport != RedisValue.Null)
             {
                 // report has already been reviewed but return it
@@ -166,9 +184,9 @@ namespace Cliptok
         /// <param name="genericID">Content ID.</param>
         /// <param name="key">Report key (the report type actually).</param>
         /// <returns></returns>
-        private RedisValue GetReportFromContentID(ulong genericID, string key)
+        private async Task<RedisValue> GetReportFromContentID(ulong genericID, string key)
         {
-            return db.HashGet($"rp_{key}", genericID.ToString());
+            return await db.HashGetAsync($"rp_{key}", genericID.ToString());
         }
 
         /// <summary>
@@ -177,17 +195,17 @@ namespace Cliptok
         /// <param name="genericID">Content ID.</param>
         /// <param name="key">Report key (the report type actually).</param>
         /// <returns></returns>
-        private ulong CreateNewReportFromContentID(ulong genericID, string key)
+        private async Task<ulong> CreateNewReportFromContentID(ulong genericID, string key)
         {
-            ulong reportID = GenerateID();
-            db.HashSet($"rp_{key}", genericID.ToString(), reportID);
+            ulong reportID = await GenerateID();
+            await db.HashSetAsync($"rp_{key}", genericID.ToString(), reportID);
 
             return reportID;
         }
 
-        private ulong GenerateID()
+        private async Task<ulong> GenerateID()
         {
-            return (ulong)db.StringIncrement("numReports");
+            return (ulong)await db.StringIncrementAsync("numReports");
         }
 
         private IDatabase db { get; }
