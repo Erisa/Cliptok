@@ -213,7 +213,7 @@ namespace Cliptok.Modules
         /// <summary>
         /// Checks if the context user can make a report against the target user.
         /// </summary>
-        public async Task CheckReport(CommandContext ctx, DiscordUser targetUser)
+        public async Task CheckReport(CommandContext ctx, DiscordMember member, DiscordUser targetUser)
         {
 #if DEBUG
             // small debug cheat, useful if you have no friends
@@ -251,19 +251,9 @@ namespace Cliptok.Modules
         /// <param name="reason">Reason to give for the report.</param>
         /// <param name="createReport">Delegate called to create the specific report.</param>
         /// <returns></returns>
-        private async Task<ReportObject> GenericManageReport(CommandContext ctx, DiscordGuild guild, string reportType, ulong ID, string reason, Func<ReportInfo> createReport)
+        private async Task<ReportObject> GenericManageReport(CommandContext ctx, DiscordGuild guild, DiscordMember signaler, string reportType, ulong ID, string reason, Func<ReportInfo> createReport)
         {
             ulong reportID = await reportDatabase.GetOrSetReportFromContentID(ID, reportType);
-
-            DiscordMember member;
-            try
-            {
-                member = await GetContextMember(ctx, guild);
-            }
-            catch(Exception)
-            {
-                throw new ReportCommandError("You must be a member of the server you want to report the content in.");
-            }
 
             ReportObject report = await GetReviewedReportObject(reportID);
             if (report != null)
@@ -289,7 +279,7 @@ namespace Cliptok.Modules
                     // create a brand new report
                     report = new ReportObject(reportID, guild, createReport(), reason);
                 }
-                else if (report.Signalers.Exists(x => x == member))
+                else if (report.Signalers.Exists(x => x == signaler))
                 {
                     // already reported
                     throw new ReportCommandError(GenerateAlreadyReportObject(report));
@@ -297,7 +287,7 @@ namespace Cliptok.Modules
             }
 
             // add the user to the report
-            report.Signalers.Add(member);
+            report.Signalers.Add(signaler);
 
             if (report.ReportHandle == null)
             {
@@ -314,7 +304,7 @@ namespace Cliptok.Modules
             _ = SetReportObjectPending(report);
 
             // notify the user about the report
-            await member.SendMessageAsync(GenerateReportObject(report));
+            await signaler.SendMessageAsync(GenerateReportObject(report));
 
             return report;
         }
@@ -330,20 +320,31 @@ namespace Cliptok.Modules
             // delete the callee message to avoid others from judging the signalman
             DeleteMessageContext(ctx);
 
+            DiscordMember signaler = (DiscordMember)ctx.Member;
+            try
+            {
+                signaler = await GetContextMember(ctx, message.Channel.Guild);
+            }
+            catch (Exception)
+            {
+                // thanks to DSharpPlus, can't even reply to the "user" who sent a DM
+                return;
+            }
+
             if (message.Channel.Guild.Id != pendingReportsChannel.Guild.Id)
             {
-                _ = ctx.Member.SendMessageAsync("Can't report from a different server.");
+                _ = signaler.SendMessageAsync("Can't report from a different server.");
                 return;
             }
 
             try
             {
-                await CheckReport(ctx, message.Author);
-                await GenericManageReport(ctx, message.Channel.Guild, "message", message.Id, reason, () => new MessageReportInfo(message));
+                await CheckReport(ctx, signaler, message.Author);
+                await GenericManageReport(ctx, message.Channel.Guild, signaler, "message", message.Id, reason, () => new MessageReportInfo(message));
             }
             catch(ReportCommandError e)
             {
-                _ = ctx.Member.SendMessageAsync(e.Builder);
+                _ = signaler.SendMessageAsync(e.Builder);
                 return;
             }
         }
@@ -375,14 +376,24 @@ namespace Cliptok.Modules
             }
             */
 
+            DiscordMember signaler = (DiscordMember)ctx.Member;
             try
             {
-                await CheckReport(ctx, member);
-                await GenericManageReport(ctx, ctx.Guild, "user", member.Id, reason, () => new UserReportInfo(member));
+                signaler = await GetContextMember(ctx, ctx.Guild);
+            }
+            catch (Exception)
+            {
+                return;
+            }
+
+            try
+            {
+                await CheckReport(ctx, signaler, member);
+                await GenericManageReport(ctx, ctx.Guild, signaler, "user", member.Id, reason, () => new UserReportInfo(member));
             }
             catch (ReportCommandError e)
             {
-                _ = ctx.Member.SendMessageAsync(e.Builder);
+                _ = signaler.SendMessageAsync(e.Builder);
                 return;
             }
         }
@@ -412,11 +423,24 @@ namespace Cliptok.Modules
                 return;
             }
 
-            if (ctx.Member != report.ReportOwner && !IsUserReviewer(ctx.Member))
+            if (ctx.User != report.ReportOwner)
             {
-                // don't let anyone to edit a report, except their author and moderators
-                _ = ctx.Member.SendMessageAsync($"You must be the owner of the report (#{reportID}), or a moderator to be able to make changes.");
-                return;
+                DiscordMember signaler = (DiscordMember)ctx.Member;
+                try
+                {
+                    signaler = await GetContextMember(ctx, ctx.Guild);
+                }
+                catch (Exception)
+                {
+                    // it's ok to ignore, it means the user isn't in the server
+                }
+
+                if (signaler == null || !IsUserReviewer(signaler))
+                {
+                    // don't let anyone to edit a report, except their author and moderators
+                    _ = ctx.Member.SendMessageAsync($"You must be the owner of the report (#{reportID}), or a moderator to be able to make changes.");
+                    return;
+                }
             }
 
             // set the new reason and store the report
