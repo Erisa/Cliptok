@@ -61,6 +61,12 @@ namespace Cliptok
         [JsonProperty("logChannel")]
         public ulong LogChannel { get; private set; }
 
+        [JsonProperty("pendingReportsChannel")]
+        public ulong PendingReportsChannel { get; private set; }
+
+        [JsonProperty("reviewedReportsChannel")]
+        public ulong ReviewedReportsChannel { get; private set; }
+
         [JsonProperty("serverID")]
         public ulong ServerID { get; private set; }
 
@@ -147,6 +153,9 @@ namespace Cliptok
 
         [JsonProperty("modmailUserId")]
         public ulong ModmailUserId { get; private set; }
+
+        [JsonProperty("reports")]
+        public ReportsConfig reportsConfig { get; private set; }
     }
 
     public class WordListJson
@@ -252,6 +261,33 @@ namespace Cliptok
 
         [JsonProperty("patchTuesday")]
         public ulong PatchTuesday { get; private set; }
+    }
+
+    public class ReportsInteractionConfig
+    {
+        [JsonProperty("accept_warn_clean_emoji")]
+        public string AcceptWarnCleanEmoji { get; private set; }
+
+        [JsonProperty("accept_warn_emoji")]
+        public string AcceptWarnEmoji { get; private set; }
+
+        [JsonProperty("accept_no_warn_emoji")]
+        public string AcceptNoWarnEmoji { get; private set; }
+
+        [JsonProperty("reject_emoji")]
+        public string RejectEmoji { get; private set; }
+    }
+
+    public class ReportsConfig
+    {
+        [JsonProperty("pingModeration")]
+        public bool PingModeration { get; private set; }
+
+        [JsonProperty("allowUserReportModerator")]
+        public bool AllowUserReportModerator { get; private set; }
+
+        [JsonProperty("interactions")]
+        public ReportsInteractionConfig Interactions { get; private set; }
     }
 
 }

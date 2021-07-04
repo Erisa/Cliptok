@@ -16,6 +16,8 @@
   "supportLogChannel": 843181924687806484,
   "communityTechSupportRoleID": 787033266225938472,
   "modmailUserId": 459322015044730903,
+  "pendingReportsChannel": 0,
+  "reviewedReportsChannel": 0,
   "supportRatelimitMinutes": 15,
   "appealLink": "https://msft.chat/member/#ban-appeal-process",
   "warningDaysThreshold": 30,
@@ -96,7 +98,7 @@
     "everyone.txt": {
       "wholeWord": false,
       "reason": "Attempted to ping everyone/here"
-    },
+    }
   },
   "massEmojiThreshold": 6,
   "unrestrictedEmojiChannels": [
@@ -140,5 +142,15 @@
     "544153359712649251"
   ],
   "autoDehoistCharacters": " !\"#$%&'()*+,-./:;<=>?@[\\]^_`'",
-  "secondaryAutoDehoistCharacters": "0123456789"
+  "secondaryAutoDehoistCharacters": "0123456789",
+  "reports": {
+    "pingModeration": true,
+    "allowUserReportModerator": false,
+    "interactions": {
+      "accept_warn_clean_emoji": ":red_circle:",
+      "accept_warn_emoji": ":orange_circle:",
+      "accept_no_warn_emoji": ":purple_circle:",
+      "reject_emoji": ":green_circle:"
+    }
+  }
 }

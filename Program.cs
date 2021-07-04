@@ -299,7 +299,7 @@ namespace Cliptok
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
                 StringPrefixes = cfgjson.Core.Prefixes
-            }); ;
+            });
 
             commands.RegisterCommands<Warnings>();
             commands.RegisterCommands<MuteCmds>();
@@ -307,6 +307,7 @@ namespace Cliptok
             commands.RegisterCommands<ModCmds>();
             commands.RegisterCommands<Lockdown>();
             commands.RegisterCommands<Bans>();
+            commands.RegisterCommands<Reports>();
 
             await discord.ConnectAsync();
 
