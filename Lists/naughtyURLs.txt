@@ -1,3 +1,4 @@
+betterdiscord.app
 grabify.link
 bmwforum.co
 leancoding.co
