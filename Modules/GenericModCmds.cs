@@ -407,7 +407,6 @@ namespace Cliptok.Modules
         public async Task AnnounceCmd(CommandContext ctx, string roleName, [RemainingText] string announcementMessage)
         {
             DiscordRole discordRole;
-            ulong roleID;
 
             if (Program.cfgjson.AnnouncementRoles.ContainsKey(roleName))
             {
@@ -425,7 +424,7 @@ namespace Cliptok.Modules
             }
             else
             {
-                await ctx.RespondAsync("That role name isnt recognised");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That role name isnt recognised!");
                 return;
             }
 
