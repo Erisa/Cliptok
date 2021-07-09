@@ -114,7 +114,7 @@ namespace Cliptok.Modules
         }
 
         [Command("ban")]
-        [Aliases("tempban")]
+        [Aliases("tempban", "bonk")]
         [Description("Bans a user that you have permssion to ban, deleting all their messages in the process. See also: bankeep.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequirePermissions(Permissions.BanMembers)]
         public async Task BanCmd(CommandContext ctx,
