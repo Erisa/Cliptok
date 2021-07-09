@@ -3,3 +3,5 @@ config.dev.json
 Lists/rudeWords.txt
 Lists/autoban.txt
 Lists/usernames.txt
+.vscode/*
+.github/*
