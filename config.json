@@ -17,6 +17,12 @@
   "communityTechSupportRoleID": 787033266225938472,
   "modmailUserId": 459322015044730903,
   "supportRatelimitMinutes": 15,
+  "announcementRoles": {
+    "dev": 434426594271166474,
+    "beta": 643712828217360394,
+    "rp": 288729239921098752,
+    "patch": 445773142233710594
+  },
   "appealLink": "https://msft.chat/member/#ban-appeal-process",
   "warningDaysThreshold": 30,
   "inviteExclusion": [
@@ -96,7 +102,7 @@
     "everyone.txt": {
       "wholeWord": false,
       "reason": "Attempted to ping everyone/here"
-    },
+    }
   },
   "massEmojiThreshold": 6,
   "unrestrictedEmojiChannels": [

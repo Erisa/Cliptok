@@ -402,6 +402,34 @@ namespace Cliptok.Modules
             return success;
         }
 
+        [Command("announce")]
+        [HomeServer,RequireHomeserverPerm(ServerPermLevel.Mod)]
+        public async Task AnnounceCmd(CommandContext ctx, string roleName, [RemainingText] string announcementMessage)
+        {
+            DiscordRole discordRole;
+            ulong roleID;
+
+            if (Program.cfgjson.AnnouncementRoles.ContainsKey(roleName))
+            {
+                discordRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles[roleName]);
+                await discordRole.ModifyAsync(mentionable: true);
+                try
+                {
+                    await ctx.Message.DeleteAsync();
+                    await ctx.Channel.SendMessageAsync($"{discordRole.Mention} {announcementMessage}");
+                } catch
+                {
+                    // We still need to remember to make it unmentionable even if the msg fails.
+                }
+                await discordRole.ModifyAsync(mentionable: false);
+            }
+            else
+            {
+                await ctx.RespondAsync("That role name isnt recognised");
+                return;
+            }
+
+        }
 
 
         [Group("debug")]

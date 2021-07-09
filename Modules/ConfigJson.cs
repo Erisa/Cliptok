@@ -147,6 +147,9 @@ namespace Cliptok
 
         [JsonProperty("modmailUserId")]
         public ulong ModmailUserId { get; private set; }
+
+        [JsonProperty("announcementRoles")]
+        public Dictionary<string, ulong> AnnouncementRoles { get; private set; }
     }
 
     public class WordListJson
