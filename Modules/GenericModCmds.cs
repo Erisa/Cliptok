@@ -327,8 +327,8 @@ namespace Cliptok.Modules
             }
             else if (t < (DateTime.Now + TimeSpan.FromSeconds(59)))
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time must be at least a minute in the future!");
-                return;
+               await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time must be at least a minute in the future!");
+               return;
             }
 
             var reminderObject = new Reminder()
@@ -342,7 +342,22 @@ namespace Cliptok.Modules
             };
 
             await Program.db.ListRightPushAsync("reminders", JsonConvert.SerializeObject(reminderObject));
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} I'll try my best to remind you about that at: `{t}` (In roughly **{Warnings.TimeToPrettyFormat(t.Subtract(ctx.Message.Timestamp.DateTime), false)}**)");
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} I'll try my best to remind you about that on <t:{ToUnixTimestamp(t)}:f> (<t:{ToUnixTimestamp(t)}:R>)"); // (In roughly **{Warnings.TimeToPrettyFormat(t.Subtract(ctx.Message.Timestamp.DateTime), false)}**)");
+        }
+
+        [Command("timestamp")]
+        [Aliases("ts", "time")]
+        [Description("Returns the Unix timestamp of a given Discord ID/snowflake")]
+        public async Task TimestampCmd(CommandContext ctx, [Description("The ID/snowflake to fetch the Unix timestamp for")] ulong snowflake)
+        {
+            var msSinceEpoch = snowflake >> 22;
+            var msUnix = msSinceEpoch + 1420070400000;
+            await ctx.RespondAsync((msUnix / 1000).ToString());
+        }
+
+        public static long ToUnixTimestamp(DateTime dateTime)
+        {
+            return ((DateTimeOffset)dateTime).ToUnixTimeSeconds();
         }
 
         public static async Task<bool> CheckRemindersAsync()
