@@ -119,7 +119,7 @@ namespace Cliptok.Modules
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequirePermissions(Permissions.BanMembers)]
         public async Task BanCmd(CommandContext ctx,
      [Description("The user you wish to ban. Accepts many formats")] DiscordUser targetMember,
-     [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling'")] string timeAndReason = "No reason specified.")
+     [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling' NOTE: Add 'appeal' to the start of the reason to include an appeal link")] string timeAndReason = "No reason specified.")
         {
             bool appealable = false;
             bool timeParsed = false;
@@ -201,7 +201,9 @@ namespace Cliptok.Modules
         [Command("bankeep")]
         [Aliases("bansave")]
         [Description("Bans a user but keeps their messages around."), HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequirePermissions(Permissions.BanMembers)]
-        public async Task BankeepCmd(CommandContext ctx, DiscordUser targetMember, [RemainingText] string timeAndReason = "No reason specified.")
+        public async Task BankeepCmd(CommandContext ctx,
+        [Description("The user you wish to ban. Accepts many formats")] DiscordUser targetMember,
+        [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling' NOTE: Add 'appeal' to the start of the reason to include an appeal link")] string timeAndReason = "No reason specified.")
         {
             bool appealable = false;
             bool timeParsed = false;
@@ -280,8 +282,9 @@ namespace Cliptok.Modules
 
 
         [Command("unban")]
+        [Description("Unbans a user who has been previously banned.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequirePermissions(Permissions.BanMembers)]
-        public async Task UnmuteCmd(CommandContext ctx, DiscordUser targetUser)
+        public async Task UnmuteCmd(CommandContext ctx, [Description("The user to unban, usually a mention or ID")] DiscordUser targetUser)
         {
             if ((await Program.db.HashExistsAsync("bans", targetUser.Id)))
             {
