@@ -109,6 +109,7 @@ namespace Cliptok.Modules
 
         public static async Task<bool> UnmuteUserAsync(DiscordUser targetUser)
         {
+            bool success = false;
             DiscordGuild guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
 
@@ -148,13 +149,16 @@ namespace Cliptok.Modules
                             }
                         }
                     }
-                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Successfully unmuted <@{targetUser.Id}>!");
+                    success = true;
                 }
                 catch
                 {
                     await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} Attempt to removed Muted role from <@{targetUser.Id}> failed because of a Discord API error!" +
                     $"\nIf the role was removed manually, this error can be disregarded safely.");
                 }
+                if (success)
+                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Successfully unmuted <@{targetUser.Id}>!");
+
             }
             // Even if the bot failed to remove the role, it reported that failure to a log channel and thus the mute
             //  can be safely removed internally.
