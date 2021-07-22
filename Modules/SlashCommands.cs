@@ -10,6 +10,7 @@ namespace Cliptok.Modules
     {
 
         [SlashCommand("warn", "Formally warn a user, usually for breaking the server rules.")]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialMod)]
         public async Task TestCommand(InteractionContext ctx,
              [Option("user", "The user to warn.")] DiscordUser user,
              [Option("reason", "The reason they're being warned.")] string reason,
@@ -22,14 +23,6 @@ namespace Cliptok.Modules
 
             // Edits need a webhook rather than interaction..?
             DiscordWebhookBuilder webhookOut;
-
-            if (Warnings.GetPermLevel(ctx.Member) < ServerPermLevel.TrialMod)
-            {
-                webhookOut = new DiscordWebhookBuilder()
-                    .WithContent($"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{ctx.CommandName}**!");
-                await ctx.EditResponseAsync(webhookOut);
-                return;
-            }
 
             DiscordMember targetMember;
 
@@ -62,6 +55,7 @@ namespace Cliptok.Modules
         }
 
         [SlashCommand("ban", "Bans a user from the server, either permanently or temporarily.")]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Mod)]
         public async Task BanSlashCommand(InteractionContext ctx,
                 [Option("user", "The user to ban")] DiscordUser user,
                 [Option("reason", "The reason the user is being banned")] string reason,
@@ -80,13 +74,6 @@ namespace Cliptok.Modules
             int messageDeleteDays = 7;
             if (keepMessages)
                 messageDeleteDays = 0;
-
-            if (Warnings.GetPermLevel(ctx.Member) < ServerPermLevel.Mod)
-            {
-                webhookOut.Content = $"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{ctx.CommandName}**!";
-                await ctx.EditResponseAsync(webhookOut);
-                return;
-            }
 
             DiscordMember targetMember;
 

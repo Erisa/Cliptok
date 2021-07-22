@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
@@ -52,7 +53,9 @@ namespace Cliptok.Modules
                 return true;
             else
                 if (!help)
-                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{ctx.Command.Name}**!");
+                await ctx.RespondAsync(
+                    $"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{ctx.Command.Name}**!\n" +
+                    $"Required: `{TargetLvl}`\nYou have: `{Warnings.GetPermLevel(ctx.Member)}`");
             return false;
         }
     }
@@ -62,6 +65,27 @@ namespace Cliptok.Modules
         public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
         {
             return !ctx.Channel.IsPrivate && ctx.Guild.Id == Program.cfgjson.ServerID;
+        }
+    }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+
+    public class SlashRequireHomeserverPermAttribute : SlashCheckBaseAttribute
+    {
+        public ServerPermLevel TargetLvl;
+
+        public SlashRequireHomeserverPermAttribute(ServerPermLevel targetlvl)
+            => TargetLvl = targetlvl;
+
+        public override async Task<bool> ExecuteChecksAsync(InteractionContext ctx)
+        {
+            if (ctx.Channel.IsPrivate || ctx.Guild.Id != Program.cfgjson.ServerID)
+                return false;
+
+            var level = Warnings.GetPermLevel(ctx.Member);
+            if (level >= this.TargetLvl)
+                return true;
+            else
+                return false;
         }
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously

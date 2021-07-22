@@ -113,6 +113,23 @@ namespace Cliptok
             });
 
             var slash = discord.UseSlashCommands();
+            slash.SlashCommandErrored += async (s, e) =>
+            {
+                if (e.Exception is SlashExecutionChecksFailedException slex)
+                {
+                    foreach (var check in slex.FailedChecks)
+                        if (check is SlashRequireHomeserverPermAttribute att)
+                            await e.Context.CreateResponseAsync(
+                                InteractionResponseType.ChannelMessageWithSource,
+                                new DiscordInteractionResponseBuilder().WithContent(
+                                    $"{cfgjson.Emoji.NoPermissions} Invalid permission level to use command **{e.Context.CommandName}**!\n" +
+                                    $"Required: `{att.TargetLvl}`\n" +
+                                    $"You have: `{Warnings.GetPermLevel(e.Context.Member)}`")
+                                    .AsEphemeral(true)
+                                );
+                }
+            };
+
             slash.RegisterCommands<SlashCommands>(cfgjson.ServerID);
 
             async Task OnReaction(DiscordClient client, MessageReactionAddEventArgs e)
