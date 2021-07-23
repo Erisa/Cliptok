@@ -59,9 +59,9 @@ namespace Cliptok.Modules
         public async Task BanSlashCommand(InteractionContext ctx,
                 [Option("user", "The user to ban")] DiscordUser user,
                 [Option("reason", "The reason the user is being banned")] string reason,
+                [Option("keep_messages", "Whether to keep the users messages when banning")] bool keepMessages = false,
                 [Option("time", "The length of time the user is banned for")] string time = null,
-                [Option("appeal_link", "Whether to show the user an appeal URL in the DM")] bool appealable = false,
-                [Option("keep_messages", "Whether to keep the users messages when banning")] bool keepMessages = false
+                [Option("appeal_link", "Whether to show the user an appeal URL in the DM")] bool appealable = false
         //[Option("silent", "Whether to not send any DM communication about the ban at all")] bool silent = false
         )
         {
