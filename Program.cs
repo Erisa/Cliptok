@@ -30,6 +30,8 @@ namespace Cliptok
         public static DiscordChannel logChannel;
         public static DiscordChannel badMsgLog;
 
+        public static Random rand = new Random();
+
 
         public static async Task<bool> CheckAndDehoistMemberAsync(DiscordMember targetMember)
         {
@@ -119,6 +121,12 @@ namespace Cliptok
                 {
                     foreach (var check in slex.FailedChecks)
                         if (check is SlashRequireHomeserverPermAttribute att)
+                        {
+                            var level = Warnings.GetPermLevel(e.Context.Member);
+                            var levelText = level.ToString();
+                            if (Program.rand.Next(1, 100) == 69)
+                                levelText = $"naught but a thing, my dear human. Congratulations, you win {Program.rand.Next(1, 10)} bonus points.";
+
                             await e.Context.CreateResponseAsync(
                                 InteractionResponseType.ChannelMessageWithSource,
                                 new DiscordInteractionResponseBuilder().WithContent(
@@ -127,6 +135,7 @@ namespace Cliptok
                                     $"You have: `{Warnings.GetPermLevel(e.Context.Member)}`")
                                     .AsEphemeral(true)
                                 );
+                        }
                 }
             };
 
