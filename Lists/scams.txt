@@ -52,4 +52,4 @@ dlscord.store
 oBBqCY0
 /tradeoffer/new/?partner
 iMDSLkfu
-nitro-discord.site/steam
+nitro-discord.site
