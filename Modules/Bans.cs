@@ -118,12 +118,13 @@ namespace Cliptok.Modules
         [HomeServer,RequireHomeserverPerm(ServerPermLevel.Mod)]
         public async Task MassBanCmd(CommandContext ctx, [RemainingText] string input)
         {
-            await ctx.RespondAsync("Processing, please wait.");
 
             List<string> usersString = input.Replace("\n", " ").Replace("\r", "").Split(' ').ToList();
             List<ulong> users = usersString.Select(x => Convert.ToUInt64(x)).ToList();
 
-            foreach(ulong user in users)
+            await ctx.RespondAsync("Processing, please wait.");
+
+            foreach (ulong user in users)
             {
                 try
                 {
