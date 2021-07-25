@@ -114,6 +114,7 @@ namespace Cliptok.Modules
         }
 
         [Command("massban")]
+        [Aliases("bigbonk")]
         [HomeServer,RequireHomeserverPerm(ServerPermLevel.Mod)]
         public async Task MassBanCmd(CommandContext ctx, [RemainingText] string input)
         {
