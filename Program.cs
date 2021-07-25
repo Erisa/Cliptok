@@ -1,9 +1,11 @@
 ﻿using Cliptok.Modules;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
@@ -24,6 +26,7 @@ namespace Cliptok
         public static ConfigJson cfgjson;
         public static ConnectionMultiplexer redis;
         public static IDatabase db;
+        internal static EventId CliptokEventID { get; } = new EventId(1000, "Cliptok");
 
         public static string[] badUsernames;
         public static List<ulong> autoBannedUsersCache = new();
@@ -124,7 +127,7 @@ namespace Cliptok
                         {
                             var level = Warnings.GetPermLevel(e.Context.Member);
                             var levelText = level.ToString();
-                            if (Program.rand.Next(1, 100) == 69)
+                            if (level == ServerPermLevel.nothing && rand.Next(1, 100) == 69)
                                 levelText = $"naught but a thing, my dear human. Congratulations, you win {Program.rand.Next(1, 10)} bonus points.";
 
                             await e.Context.CreateResponseAsync(
@@ -138,6 +141,12 @@ namespace Cliptok
                         }
                 }
             };
+
+            Task ClientError(DiscordClient client, ClientErrorEventArgs e)
+            {
+                client.Logger.LogError(CliptokEventID, e.Exception, "Client threw an exception");
+                return Task.CompletedTask;
+            }
 
             slash.RegisterCommands<SlashCommands>(cfgjson.ServerID);
 
@@ -314,6 +323,37 @@ namespace Cliptok
                 await MessageEvent.MessageHandlerAsync(client, e.Message, true);
             }
 
+            async Task CommandsNextService_CommandErrored(CommandsNextExtension cnext, CommandErrorEventArgs e)
+            {
+                if (e.Exception is CommandNotFoundException && (e.Command == null || e.Command.QualifiedName != "help"))
+                    return;
+
+                e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Exception occurred during {0}'s invocation of '{1}'", e.Context.User.Username, e.Context.Command.QualifiedName);
+
+                var exs = new List<Exception>();
+                if (e.Exception is AggregateException ae)
+                    exs.AddRange(ae.InnerExceptions);
+                else
+                    exs.Add(e.Exception);
+
+                foreach (var ex in exs)
+                {
+                    if (ex is CommandNotFoundException && (e.Command == null || e.Command.QualifiedName != "help"))
+                        return;
+
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Color = new DiscordColor("#FF0000"),
+                        Title = "An exception occurred when executing a command",
+                        Description = $"`{e.Exception.GetType()}` occurred when executing `{e.Command.QualifiedName}`.",
+                        Timestamp = DateTime.UtcNow
+                    };
+                    embed.WithFooter(discord.CurrentUser.Username, discord.CurrentUser.AvatarUrl)
+                        .AddField("Message", ex.Message);
+                    await e.Context.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
+                }
+            }
+
             discord.Ready += OnReady;
             discord.MessageCreated += MessageCreated;
             discord.MessageUpdated += MessageUpdated;
@@ -321,6 +361,7 @@ namespace Cliptok
             discord.MessageReactionAdded += OnReaction;
             discord.GuildMemberUpdated += GuildMemberUpdated;
             discord.UserUpdated += UserUpdated;
+            discord.ClientErrored += ClientError;
 
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
@@ -333,6 +374,7 @@ namespace Cliptok
             commands.RegisterCommands<ModCmds>();
             commands.RegisterCommands<Lockdown>();
             commands.RegisterCommands<Bans>();
+            commands.CommandErrored += CommandsNextService_CommandErrored;
 
             await discord.ConnectAsync();
 

@@ -54,7 +54,7 @@ namespace Cliptok.Modules
             else if (!help)
             {
                 var levelText = level.ToString();
-                if (Program.rand.Next(1, 100) == 69)
+                if (level == ServerPermLevel.nothing && Program.rand.Next(1, 100) == 69)
                     levelText = $"naught but a thing, my dear human. Congratulations, you win {Program.rand.Next(1, 10)} bonus points.";
                 
                 await ctx.RespondAsync(
