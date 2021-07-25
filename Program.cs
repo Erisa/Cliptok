@@ -350,6 +350,9 @@ namespace Cliptok
                     };
                     embed.WithFooter(discord.CurrentUser.Username, discord.CurrentUser.AvatarUrl)
                         .AddField("Message", ex.Message);
+                    if (e.Exception.GetType().ToString() == "System.ArgumentException")
+                        embed.AddField("Note", "This usually means that you used the command incorrectly.\n" +
+                            "Please double-check how to use this command.");
                     await e.Context.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
                 }
             }
