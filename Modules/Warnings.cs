@@ -599,7 +599,7 @@ namespace Cliptok.Modules
 
         [
             Command("editwarn"),
-            Description("Edit the reason of an existing warning. Can only be used on warnings issued by you, unless you are an Admin/Lead Moderator.\n" +
+            Description("Edit the reason of an existing warning.\n" +
                 "The Moderator who is editing the reason will become responsible for the case."),
             HomeServer,
             RequireHomeserverPerm(ServerPermLevel.TrialMod)
