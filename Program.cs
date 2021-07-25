@@ -113,7 +113,7 @@ namespace Cliptok
             {
                 Token = token,
                 TokenType = TokenType.Bot,
-                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Debug,
+                MinimumLogLevel = LogLevel.Information,
                 Intents = DiscordIntents.All
             });
 
@@ -339,6 +339,9 @@ namespace Cliptok
                 foreach (var ex in exs)
                 {
                     if (ex is CommandNotFoundException && (e.Command == null || e.Command.QualifiedName != "help"))
+                        return;
+
+                    if (ex is ChecksFailedException && (e.Command.Name != "help"))
                         return;
 
                     var embed = new DiscordEmbedBuilder
