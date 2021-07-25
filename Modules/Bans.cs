@@ -113,6 +113,31 @@ namespace Cliptok.Modules
             await Program.db.HashDeleteAsync("bans", targetUserId);
         }
 
+        [Command("massban")]
+        [HomeServer,RequireHomeserverPerm(ServerPermLevel.Mod)]
+        public async Task MassBanCmd(CommandContext ctx, [RemainingText] string input)
+        {
+            await ctx.RespondAsync("Processing, please wait.");
+            int successes = 0;
+
+            List<string> usersString = input.Replace("\n", " ").Replace("\r", "").Split(' ').ToList();
+            List<ulong> users = usersString.Select(x => Convert.ToUInt64(x)).ToList();
+
+            foreach(ulong user in users)
+            {
+                try
+                {
+                    await ctx.Guild.BanMemberAsync(user, 7, "Massban");
+                    successes += 1;
+                } catch
+                {
+                    // move on
+                }
+            }
+
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Banned} **{successes}** user(s) were banned successfully.");
+        }
+
         [Command("ban")]
         [Aliases("tempban", "bonk")]
         [Description("Bans a user that you have permssion to ban, deleting all their messages in the process. See also: bankeep.")]
