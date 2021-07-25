@@ -222,6 +222,9 @@ namespace Cliptok
         [JsonProperty("unlock")]
         public string Unlock { get; set; }
 
+        [JsonProperty("bsod")]
+        public string BSOD { get; set; }
+
     }
 
     public class CoreConfig

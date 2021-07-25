@@ -78,7 +78,9 @@
     "shieldHelp": "<:CliptokShieldHelp:843586173204693032>",
     "shieldMicrosoft": "<:CliptokShieldMS:843586173129850930>",
     "user": "<:CliptokUser:843586173334847488>",
-    "unlock": "<:CliptokUnlock:846045637686591498>"
+    "unlock": "<:CliptokUnlock:846045637686591498>",
+    "bsod": "<:CliptokBSOD:868668793935777792>",
+    "
   },
   "redis": {
     "host": "localhost",

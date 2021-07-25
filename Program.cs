@@ -345,7 +345,7 @@ namespace Cliptok
                     {
                         Color = new DiscordColor("#FF0000"),
                         Title = "An exception occurred when executing a command",
-                        Description = $"`{e.Exception.GetType()}` occurred when executing `{e.Command.QualifiedName}`.",
+                        Description = $"`{cfgjson.Emoji.BSOD} {e.Exception.GetType()}` occurred when executing `{e.Command.QualifiedName}`.",
                         Timestamp = DateTime.UtcNow
                     };
                     embed.WithFooter(discord.CurrentUser.Username, discord.CurrentUser.AvatarUrl)
