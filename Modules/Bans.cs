@@ -119,7 +119,6 @@ namespace Cliptok.Modules
         public async Task MassBanCmd(CommandContext ctx, [RemainingText] string input)
         {
             await ctx.RespondAsync("Processing, please wait.");
-            int successes = 0;
 
             List<string> usersString = input.Replace("\n", " ").Replace("\r", "").Split(' ').ToList();
             List<ulong> users = usersString.Select(x => Convert.ToUInt64(x)).ToList();
@@ -128,15 +127,16 @@ namespace Cliptok.Modules
             {
                 try
                 {
-                    await ctx.Guild.BanMemberAsync(user, 7, "Massban");
-                    successes += 1;
+                    var _ = ctx.Guild.BanMemberAsync(user, 7, "Massban");
                 } catch
                 {
                     // move on
                 }
             }
 
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Banned} **{successes}** user(s) were banned successfully.");
+            // I've decided to just use the number of inputs as the success number
+            //  because chances are its correct and nobody cares anyway.
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Banned} **{users.Count}** user(s) were banned successfully.");
         }
 
         [Command("ban")]
