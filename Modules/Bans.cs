@@ -112,6 +112,19 @@ namespace Cliptok.Modules
             //  can be safely removed internally.
             await Program.db.HashDeleteAsync("bans", targetUserId);
         }
+        
+        public static async Task<bool> BanSilently(DiscordGuild targetGuild, ulong targetUserId, string reason = "Mass ban")
+        {
+            try
+            {
+                await targetGuild.BanMemberAsync(targetUserId, 7, reason);
+                return true;
+            } catch
+            {
+                return false;
+            }
+
+        }
 
         [Command("massban")]
         [Aliases("bigbonk")]
@@ -121,23 +134,41 @@ namespace Cliptok.Modules
 
             List<string> usersString = input.Replace("\n", " ").Replace("\r", "").Split(' ').ToList();
             List<ulong> users = usersString.Select(x => Convert.ToUInt64(x)).ToList();
+            if (users.Count == 1 || users.Count == 0)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Not accepting a massban with a single user. Please use `!ban`.");
+                return;
+            }
 
-            await ctx.RespondAsync("Processing, please wait.");
+            List<Task<bool>> taskList = new();
+            int successes = 0; 
+
+            var loading = await ctx.RespondAsync("Processing, please wait.");
 
             foreach (ulong user in users)
             {
                 try
                 {
-                    var _ = ctx.Guild.BanMemberAsync(user, 7, "Massban");
-                } catch
-                {
-                    // move on
+                    taskList.Add(BanSilently(ctx.Guild, user));
                 }
+                catch
+                {
+                    //move on
+                }
+            }
+
+            var tasks = await Task.WhenAll(taskList);
+
+            foreach (var task in taskList)
+            {
+                if (task.Result)
+                    successes += 1;
             }
 
             // I've decided to just use the number of inputs as the success number
             //  because chances are its correct and nobody cares anyway.
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Banned} **{users.Count}** user(s) were banned successfully.");
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Banned} **{successes}**/{users.Count} users were banned successfully.");
+            await loading.DeleteAsync();
         }
 
         [Command("ban")]
