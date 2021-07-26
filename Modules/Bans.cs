@@ -147,14 +147,7 @@ namespace Cliptok.Modules
 
             foreach (ulong user in users)
             {
-                try
-                {
-                    taskList.Add(BanSilently(ctx.Guild, user));
-                }
-                catch
-                {
-                    //move on
-                }
+                taskList.Add(BanSilently(ctx.Guild, user));
             }
 
             var tasks = await Task.WhenAll(taskList);
@@ -165,8 +158,6 @@ namespace Cliptok.Modules
                     successes += 1;
             }
 
-            // I've decided to just use the number of inputs as the success number
-            //  because chances are its correct and nobody cares anyway.
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Banned} **{successes}**/{users.Count} users were banned successfully.");
             await loading.DeleteAsync();
         }
