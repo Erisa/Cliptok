@@ -216,14 +216,23 @@ namespace Cliptok
         [JsonProperty("shieldMicrosoft")]
         public string ShieldMicrosoft { get; set; }
 
-        [JsonProperty("user")]
-        public string User { get; set; }
-
         [JsonProperty("unlock")]
         public string Unlock { get; set; }
 
         [JsonProperty("bsod")]
         public string BSOD { get; set; }
+        
+        [JsonProperty("userJoin")]
+        public string UserJoin { get; set; }
+        
+        [JsonProperty("userLeave")]
+        public string UserLeave { get; set; }
+        
+        [JsonProperty("userUpdate")]
+        public string UserUpdate { get; set; }
+        
+        [JsonProperty("messageEdit")]
+        public string MessageEdit { get; set; }
 
     }
 
