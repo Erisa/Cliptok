@@ -61,6 +61,9 @@ namespace Cliptok
         [JsonProperty("logChannel")]
         public ulong LogChannel { get; private set; }
 
+        [JsonProperty("userLogChannel")]
+        public ulong UserLogChannel { get; private set; }
+
         [JsonProperty("serverID")]
         public ulong ServerID { get; private set; }
 

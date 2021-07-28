@@ -31,6 +31,7 @@ namespace Cliptok
         public static string[] badUsernames;
         public static List<ulong> autoBannedUsersCache = new();
         public static DiscordChannel logChannel;
+        public static DiscordChannel userLogChannel;
         public static DiscordChannel badMsgLog;
 
         public static Random rand = new Random();
@@ -185,6 +186,7 @@ namespace Cliptok
             {
                 Console.WriteLine($"Logged in as {client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
                 logChannel = await discord.GetChannelAsync(cfgjson.LogChannel);
+                userLogChannel = await discord.GetChannelAsync(cfgjson.UserLogChannel);
                 badMsgLog = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
                 Mutes.CheckMutesAsync();
                 ModCmds.CheckBansAsync();
@@ -270,6 +272,21 @@ namespace Cliptok
                 if (e.Guild.Id != cfgjson.ServerID)
                     return;
 
+                var builder = new DiscordEmbedBuilder()
+                   .WithColor(new DiscordColor(0x3E9D28))
+                   .WithTimestamp(DateTimeOffset.Now)
+                   .WithThumbnail(e.Member.AvatarUrl)
+                   .WithAuthor(
+                       name: $"{e.Member.Username}#{e.Member.Discriminator} has joined",
+                       iconUrl: e.Member.AvatarUrl
+                    )
+                   .AddField("User", e.Member.Mention, false)
+                   .AddField("User ID", e.Member.Id.ToString(), false)
+                   .AddField("Action", "Joined the server", false)
+                   .WithFooter($"{client.CurrentUser.Username}JoinEvent");
+
+                userLogChannel.SendMessageAsync($"{cfgjson.Emoji.UserJoin} **Member joined the server!** - {e.Member.Id}", builder);
+
                 if (await db.HashExistsAsync("mutes", e.Member.Id))
                 {
                     // todo: store per-guild
@@ -277,6 +294,37 @@ namespace Cliptok
                     await e.Member.GrantRoleAsync(mutedRole, "Reapplying mute: possible mute evasion.");
                 }
                 CheckAndDehoistMemberAsync(e.Member); ;
+            }
+
+            async Task GuildMemberRemoved(DiscordClient client, GuildMemberRemoveEventArgs e)
+            {
+                string rolesStr  = "None";
+
+                if (e.Member.Roles.Count() != 0)
+                {
+                    rolesStr = "";
+
+                    foreach (DiscordRole role in e.Member.Roles.OrderBy(x => x.Position).Reverse())
+                    {
+                        rolesStr += role.Mention + " ";
+                    }
+                }
+                
+                var builder = new DiscordEmbedBuilder()
+                    .WithColor(new DiscordColor(0xBA4119))
+                    .WithTimestamp(DateTimeOffset.Now)
+                    .WithThumbnail(e.Member.AvatarUrl)
+                    .WithAuthor(
+                        name: $"{e.Member.Username}#{e.Member.Discriminator} has left",
+                        iconUrl: e.Member.AvatarUrl
+                     )
+                    .AddField("User", e.Member.Mention, false)
+                    .AddField("User ID", e.Member.Id.ToString(), false)
+                    .AddField("Action", "Left the server", false)
+                    .AddField("Roles", rolesStr)
+                    .WithFooter($"{client.CurrentUser.Username}LeaveEvent");
+
+                userLogChannel.SendMessageAsync($"{cfgjson.Emoji.UserLeave} **Member left the server!** - {e.Member.Id}", builder);
             }
 
             async Task GuildMemberUpdated(DiscordClient client, GuildMemberUpdateEventArgs e)
@@ -401,6 +449,7 @@ namespace Cliptok
             discord.MessageCreated += MessageCreated;
             discord.MessageUpdated += MessageUpdated;
             discord.GuildMemberAdded += GuildMemberAdded;
+            discord.GuildMemberRemoved += GuildMemberRemoved;
             discord.MessageReactionAdded += OnReaction;
             discord.GuildMemberUpdated += GuildMemberUpdated;
             discord.UserUpdated += UserUpdated;
