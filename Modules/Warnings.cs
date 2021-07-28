@@ -83,7 +83,7 @@ namespace Cliptok.Modules
 
         public override async Task<bool> ExecuteChecksAsync(InteractionContext ctx)
         {
-            if (ctx.Channel.IsPrivate || ctx.Guild.Id != Program.cfgjson.ServerID)
+            if (ctx.Guild.Id != Program.cfgjson.ServerID)
                 return false;
 
             var level = Warnings.GetPermLevel(ctx.Member);
@@ -405,6 +405,8 @@ namespace Cliptok.Modules
             if (reply != null)
                 messageBuild.WithReply(reply.Id, true, false);
 
+            var tmp = ctx.Channel.Type;
+
             var msg = await ctx.Channel.SendMessageAsync(messageBuild);
             _ = await GiveWarningAsync(targetUser, ctx.User, reason, MessageLink(msg), ctx.Channel);
         }
@@ -443,7 +445,7 @@ namespace Cliptok.Modules
                 await ctx.Member.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} Reason must be included for the warning command to work.");
                 return;
             }
-            DiscordMessage msg = await targetChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", null);
+            DiscordMessage msg = await targetChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
             await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned in {targetChannel.Mention}: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
             _ = await GiveWarningAsync(targetUser, ctx.User, reason, MessageLink(msg), ctx.Channel);
         }

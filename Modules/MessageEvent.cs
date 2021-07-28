@@ -105,8 +105,13 @@ namespace Cliptok.Modules
             await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} Deleted infringing message by {infringingMessage.Author.Mention} in {infringingMessage.Channel.Mention}:", embed);
         }
 
-        public static async Task MessageHandlerAsync(DiscordClient client, DiscordMessage message, bool isAnEdit = false)
+        public static async Task MessageHandlerAsync(DiscordClient client, DiscordMessage message, DiscordChannel channel, bool isAnEdit = false)
         {
+            var tmp = message;
+
+            if (message.Author == null)
+                return;
+
 
             if (!isAnEdit && message.Author.Id == Program.cfgjson.ModmailUserId && message.Content == "@here" && message.Embeds[0].Footer.Text.Contains("User ID:"))
             {
@@ -125,7 +130,7 @@ namespace Cliptok.Modules
                 DiscordRole muted = message.Channel.Guild.GetRole(Program.cfgjson.MutedRole);
                 if (modmailMember.Roles.Contains(muted))
                 {
-                    await message.Channel.SendMessageAsync(null, Warnings.GenerateWarningsEmbed(modmailMember));
+                    await channel.SendMessageAsync(null, Warnings.GenerateWarningsEmbed(modmailMember));
                 }
 
             }
@@ -142,7 +147,7 @@ namespace Cliptok.Modules
             if (message.MentionedUsers.Count > Program.cfgjson.MassMentionBanThreshold)
             {
                 _ = message.DeleteAsync();
-                await message.Channel.Guild.BanMemberAsync(message.Author.Id, 7, $"Mentioned more than {Program.cfgjson.MassMentionBanThreshold} users in one message.");
+                await channel.Guild.BanMemberAsync(message.Author.Id, 7, $"Mentioned more than {Program.cfgjson.MassMentionBanThreshold} users in one message.");
             }
 
             bool match = false;
@@ -170,6 +175,8 @@ namespace Cliptok.Modules
                         await Bans.BanFromServerAsync(message.Author.Id, reason, client.CurrentUser.Id, message.Channel.Guild, 0, message.Channel, default, true);
                         return;
                     }
+
+                    //var tmp = message.Channel.Type;
 
                     match = true;
 

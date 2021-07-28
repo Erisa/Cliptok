@@ -315,12 +315,12 @@ namespace Cliptok
 
             async Task MessageCreated(DiscordClient client, MessageCreateEventArgs e)
             {
-                await MessageEvent.MessageHandlerAsync(client, e.Message);
+                await MessageEvent.MessageHandlerAsync(client, e.Message, e.Channel);
             }
 
             async Task MessageUpdated(DiscordClient client, MessageUpdateEventArgs e)
             {
-                await MessageEvent.MessageHandlerAsync(client, e.Message, true);
+                await MessageEvent.MessageHandlerAsync(client, e.Message, e.Channel, true);
             }
 
             async Task CommandsNextService_CommandErrored(CommandsNextExtension cnext, CommandErrorEventArgs e)
@@ -360,6 +360,43 @@ namespace Cliptok
                 }
             }
 
+            Task Discord_ThreadCreated(DiscordClient client, ThreadCreateEventArgs e)
+            {
+                client.Logger.LogDebug(eventId: CliptokEventID, $"Thread created in {e.Guild.Name}. Thread Name: {e.Thread.Name}");
+                return Task.CompletedTask;
+            }
+
+            Task Discord_ThreadUpdated(DiscordClient client, ThreadUpdateEventArgs e)
+            {
+                client.Logger.LogDebug(eventId: CliptokEventID, $"Thread updated in {e.Guild.Name}. New Thread Name: {e.ThreadAfter.Name}");
+                return Task.CompletedTask;
+            }
+
+            Task Discord_ThreadDeleted(DiscordClient client, ThreadDeleteEventArgs e)
+            {
+                client.Logger.LogDebug(eventId: CliptokEventID, $"Thread deleted in {e.Guild.Name}. Thread Name: {e.Thread.Name ?? "Unknown"}");
+                return Task.CompletedTask;
+            }
+
+            Task Discord_ThreadListSynced(DiscordClient client, ThreadListSyncEventArgs e)
+            {
+                client.Logger.LogDebug(eventId: CliptokEventID, $"Threads synced in {e.Guild.Name}.");
+                return Task.CompletedTask;
+            }
+
+            Task Discord_ThreadMemberUpdated(DiscordClient client, ThreadMemberUpdateEventArgs e)
+            {
+                client.Logger.LogDebug(eventId: CliptokEventID, $"Thread member updated.");
+                Console.WriteLine($"Discord_ThreadMemberUpdated fired for thread {e.ThreadMember.ThreadId}. User ID {e.ThreadMember.Id}.");
+                return Task.CompletedTask;
+            }
+
+            Task Discord_ThreadMembersUpdated(DiscordClient client, ThreadMembersUpdateEventArgs e)
+            {
+                client.Logger.LogDebug(eventId: CliptokEventID, $"Thread members updated in {e.Guild.Name}.");
+                return Task.CompletedTask;
+            }
+
             discord.Ready += OnReady;
             discord.MessageCreated += MessageCreated;
             discord.MessageUpdated += MessageUpdated;
@@ -368,6 +405,14 @@ namespace Cliptok
             discord.GuildMemberUpdated += GuildMemberUpdated;
             discord.UserUpdated += UserUpdated;
             discord.ClientErrored += ClientError;
+
+
+            discord.ThreadCreated += Discord_ThreadCreated;
+            discord.ThreadUpdated += Discord_ThreadUpdated;
+            discord.ThreadDeleted += Discord_ThreadDeleted;
+            discord.ThreadListSynced += Discord_ThreadListSynced;
+            discord.ThreadMemberUpdated += Discord_ThreadMemberUpdated;
+            discord.ThreadMembersUpdated += Discord_ThreadMembersUpdated;
 
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {

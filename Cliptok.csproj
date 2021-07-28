@@ -4,15 +4,15 @@
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net5.0</TargetFramework>
 		<RestoreAdditionalProjectSources>
-			https://nuget.emzi0767.com/api/v3/index.json
+			https://www.myget.org/F/erisa/api/v3/index.json
 		</RestoreAdditionalProjectSources>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Abyssal.HumanDateParser" Version="2.0.0-20191113.1" />
-		<PackageReference Include="DSharpPlus" Version="4.1.0-nightly-00927" />
-		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.1.0-nightly-00927" />
-		<PackageReference Include="IDoEverything.DSharpPlus.SlashCommands" Version="1.7.0" />
+		<PackageReference Include="DSharpPlus" Version="4.1.1-nightly-eri-from-dwaffles-threads-d47d52733de5af557bc79fd295e48076957c26c2-patch1" />
+		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.1.1-nightly-eri-from-dwaffles-threads-d47d52733de5af557bc79fd295e48076957c26c2-patch1" />
+		<PackageReference Include="IDoEverything.DSharpPlus.SlashCommands" Version="1.7.1-eri-patch1" />
 		<PackageReference Include="StackExchange.Redis" Version="2.2.62" />
 		<PackageReference Include="System.Linq" Version="4.3.0" />
 	</ItemGroup>
