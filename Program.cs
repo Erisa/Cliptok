@@ -153,222 +153,245 @@ namespace Cliptok
 
             async Task OnReaction(DiscordClient client, MessageReactionAddEventArgs e)
             {
-                if (e.Emoji.Id != cfgjson.HeartosoftId || e.Channel.IsPrivate || e.Guild.Id != cfgjson.ServerID)
-                    return;
-
-                bool handled = false;
-
-                DiscordMessage targetMessage = await e.Channel.GetMessageAsync(e.Message.Id);
-
-                DiscordEmoji noHeartosoft = await e.Guild.GetEmojiAsync(cfgjson.NoHeartosoftId);
-
-                if (targetMessage.Author.Id == e.User.Id)
+                Task.Run(async () =>
                 {
-                    await targetMessage.DeleteReactionAsync(e.Emoji, e.User);
-                    handled = true;
-                }
-
-                foreach (string word in cfgjson.RestrictedHeartosoftPhrases)
-                {
-                    if (targetMessage.Content.ToLower().Contains(word))
-                    {
-                        if (!handled)
-                            await targetMessage.DeleteReactionAsync(e.Emoji, e.User);
-
-                        await targetMessage.CreateReactionAsync(noHeartosoft);
+                    if (e.Emoji.Id != cfgjson.HeartosoftId || e.Channel.IsPrivate || e.Guild.Id != cfgjson.ServerID)
                         return;
+
+                    bool handled = false;
+
+                    DiscordMessage targetMessage = await e.Channel.GetMessageAsync(e.Message.Id);
+
+                    DiscordEmoji noHeartosoft = await e.Guild.GetEmojiAsync(cfgjson.NoHeartosoftId);
+
+                    if (targetMessage.Author.Id == e.User.Id)
+                    {
+                        await targetMessage.DeleteReactionAsync(e.Emoji, e.User);
+                        handled = true;
                     }
-                }
+
+                    foreach (string word in cfgjson.RestrictedHeartosoftPhrases)
+                    {
+                        if (targetMessage.Content.ToLower().Contains(word))
+                        {
+                            if (!handled)
+                                await targetMessage.DeleteReactionAsync(e.Emoji, e.User);
+
+                            await targetMessage.CreateReactionAsync(noHeartosoft);
+                            return;
+                        }
+                    }
+                });
             }
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             async Task OnReady(DiscordClient client, ReadyEventArgs e)
             {
-                Console.WriteLine($"Logged in as {client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
-                logChannel = await discord.GetChannelAsync(cfgjson.LogChannel);
-                userLogChannel = await discord.GetChannelAsync(cfgjson.UserLogChannel);
-                badMsgLog = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
-                Mutes.CheckMutesAsync();
-                ModCmds.CheckBansAsync();
-                ModCmds.CheckRemindersAsync();
-
-                string commitHash;
-                string commitMessage;
-                string commitTime;
-
-                if (File.Exists("CommitHash.txt"))
+                Task.Run(async () =>
                 {
-                    using var sr = new StreamReader("CommitHash.txt");
-                    commitHash = sr.ReadToEnd();
-                }
-                else
-                {
-                    commitHash = "dev";
-                }
+                    Console.WriteLine($"Logged in as {client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
+                    logChannel = await discord.GetChannelAsync(cfgjson.LogChannel);
+                    userLogChannel = await discord.GetChannelAsync(cfgjson.UserLogChannel);
+                    badMsgLog = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
+                    Mutes.CheckMutesAsync();
+                    ModCmds.CheckBansAsync();
+                    ModCmds.CheckRemindersAsync();
 
-                if (File.Exists("CommitMessage.txt"))
-                {
-                    using var sr = new StreamReader("CommitMessage.txt");
-                    commitMessage = sr.ReadToEnd();
-                }
-                else
-                {
-                    commitMessage = "N/A (Bot was built for Windows)";
-                }
+                    string commitHash;
+                    string commitMessage;
+                    string commitTime;
 
-                if (File.Exists("CommitTime.txt"))
-                {
-                    using var sr = new StreamReader("CommitTime.txt");
-                    commitTime = sr.ReadToEnd();
-                }
-                else
-                {
-                    commitTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss zzz");
-                }
+                    if (File.Exists("CommitHash.txt"))
+                    {
+                        using var sr = new StreamReader("CommitHash.txt");
+                        commitHash = sr.ReadToEnd();
+                    }
+                    else
+                    {
+                        commitHash = "dev";
+                    }
 
-                var cliptokChannel = await client.GetChannelAsync(cfgjson.HomeChannel);
-                cliptokChannel.SendMessageAsync($"{cfgjson.Emoji.Connected} {discord.CurrentUser.Username} connected successfully!\n\n" +
-                    $"**Version**: `{commitHash}`\n" +
-                    $"**Version timestamp**: `{commitTime}`\n**Framework**: `{RuntimeInformation.FrameworkDescription}`\n**Platform**: `{RuntimeInformation.OSDescription}`\n\n" +
-                    $"Most recent commit message:\n" +
-                    $"```\n" +
-                    $"{commitMessage}\n" +
-                    $"```");
+                    if (File.Exists("CommitMessage.txt"))
+                    {
+                        using var sr = new StreamReader("CommitMessage.txt");
+                        commitMessage = sr.ReadToEnd();
+                    }
+                    else
+                    {
+                        commitMessage = "N/A (Bot was built for Windows)";
+                    }
 
+                    if (File.Exists("CommitTime.txt"))
+                    {
+                        using var sr = new StreamReader("CommitTime.txt");
+                        commitTime = sr.ReadToEnd();
+                    }
+                    else
+                    {
+                        commitTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss zzz");
+                    }
+
+                    var cliptokChannel = await client.GetChannelAsync(cfgjson.HomeChannel);
+                    cliptokChannel.SendMessageAsync($"{cfgjson.Emoji.Connected} {discord.CurrentUser.Username} connected successfully!\n\n" +
+                        $"**Version**: `{commitHash}`\n" +
+                        $"**Version timestamp**: `{commitTime}`\n**Framework**: `{RuntimeInformation.FrameworkDescription}`\n**Platform**: `{RuntimeInformation.OSDescription}`\n\n" +
+                        $"Most recent commit message:\n" +
+                        $"```\n" +
+                        $"{commitMessage}\n" +
+                        $"```");
+
+                });
             }
 
 
             async Task UsernameCheckAsync(DiscordMember member)
             {
-                foreach (var username in badUsernames)
+                Task.Run(async () =>
                 {
-                    // emergency failsafe, for newlines and other mistaken entries
-                    if (username.Length < 4)
-                        continue;
-
-                    if (member.Username.ToLower().Contains(username.ToLower()))
+                    foreach (var username in badUsernames)
                     {
-                        if (autoBannedUsersCache.Contains(member.Id))
+                        // emergency failsafe, for newlines and other mistaken entries
+                        if (username.Length < 4)
+                            continue;
+
+                        if (member.Username.ToLower().Contains(username.ToLower()))
+                        {
+                            if (autoBannedUsersCache.Contains(member.Id))
+                                break;
+                            IEnumerable<ulong> enumerable = autoBannedUsersCache.Append(member.Id);
+                            var guild = await discord.GetGuildAsync(cfgjson.ServerID);
+                            await Bans.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot accounts. Please appeal if you are a human.", discord.CurrentUser.Id, guild, 7, null, default, true);
+                            var embed = new DiscordEmbedBuilder()
+                                .WithTimestamp(DateTime.Now)
+                                .WithFooter($"User ID: {member.Id}", null)
+                                .WithAuthor($"{member.Username}#{member.Discriminator}", null, member.AvatarUrl)
+                                .AddField("Infringing name", member.Username)
+                                .AddField("Matching pattern", username)
+                                .WithColor(new DiscordColor(0xf03916));
+                            var investigations = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
+                            await investigations.SendMessageAsync($"{cfgjson.Emoji.Banned} {member.Mention} was banned for matching blocked username patterns.", embed);
                             break;
-                        IEnumerable<ulong> enumerable = autoBannedUsersCache.Append(member.Id);
-                        var guild = await discord.GetGuildAsync(cfgjson.ServerID);
-                        await Bans.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot accounts. Please appeal if you are a human.", discord.CurrentUser.Id, guild, 7, null, default, true);
-                        var embed = new DiscordEmbedBuilder()
-                            .WithTimestamp(DateTime.Now)
-                            .WithFooter($"User ID: {member.Id}", null)
-                            .WithAuthor($"{member.Username}#{member.Discriminator}", null, member.AvatarUrl)
-                            .AddField("Infringing name", member.Username)
-                            .AddField("Matching pattern", username)
-                            .WithColor(new DiscordColor(0xf03916));
-                        var investigations = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
-                        await investigations.SendMessageAsync($"{cfgjson.Emoji.Banned} {member.Mention} was banned for matching blocked username patterns.", embed);
-                        break;
+                        }
                     }
-                }
+                });
+
             }
 
             async Task GuildMemberAdded(DiscordClient client, GuildMemberAddEventArgs e)
             {
-                if (e.Guild.Id != cfgjson.ServerID)
-                    return;
-
-                var builder = new DiscordEmbedBuilder()
-                   .WithColor(new DiscordColor(0x3E9D28))
-                   .WithTimestamp(DateTimeOffset.Now)
-                   .WithThumbnail(e.Member.AvatarUrl)
-                   .WithAuthor(
-                       name: $"{e.Member.Username}#{e.Member.Discriminator} has joined",
-                       iconUrl: e.Member.AvatarUrl
-                    )
-                   .AddField("User", e.Member.Mention, false)
-                   .AddField("User ID", e.Member.Id.ToString(), false)
-                   .AddField("Action", "Joined the server", false)
-                   .WithFooter($"{client.CurrentUser.Username}JoinEvent");
-
-                userLogChannel.SendMessageAsync($"{cfgjson.Emoji.UserJoin} **Member joined the server!** - {e.Member.Id}", builder);
-
-                if (await db.HashExistsAsync("mutes", e.Member.Id))
+                Task.Run(async() =>
                 {
-                    // todo: store per-guild
-                    DiscordRole mutedRole = e.Guild.GetRole(cfgjson.MutedRole);
-                    await e.Member.GrantRoleAsync(mutedRole, "Reapplying mute: possible mute evasion.");
-                }
-                CheckAndDehoistMemberAsync(e.Member); ;
+                    if (e.Guild.Id != cfgjson.ServerID)
+                        return;
+
+                    var builder = new DiscordEmbedBuilder()
+                       .WithColor(new DiscordColor(0x3E9D28))
+                       .WithTimestamp(DateTimeOffset.Now)
+                       .WithThumbnail(e.Member.AvatarUrl)
+                       .WithAuthor(
+                           name: $"{e.Member.Username}#{e.Member.Discriminator} has joined",
+                           iconUrl: e.Member.AvatarUrl
+                        )
+                       .AddField("User", e.Member.Mention, false)
+                       .AddField("User ID", e.Member.Id.ToString(), false)
+                       .AddField("Action", "Joined the server", false)
+                       .WithFooter($"{client.CurrentUser.Username}JoinEvent");
+
+                    userLogChannel.SendMessageAsync($"{cfgjson.Emoji.UserJoin} **Member joined the server!** - {e.Member.Id}", builder);
+
+                    if (await db.HashExistsAsync("mutes", e.Member.Id))
+                    {
+                        // todo: store per-guild
+                        DiscordRole mutedRole = e.Guild.GetRole(cfgjson.MutedRole);
+                        await e.Member.GrantRoleAsync(mutedRole, "Reapplying mute: possible mute evasion.");
+                    }
+                    CheckAndDehoistMemberAsync(e.Member); ;
+                });
             }
 
             async Task GuildMemberRemoved(DiscordClient client, GuildMemberRemoveEventArgs e)
             {
-                string rolesStr  = "None";
-
-                if (e.Member.Roles.Count() != 0)
+                Task.Run(async () =>
                 {
-                    rolesStr = "";
+                    string rolesStr = "None";
 
-                    foreach (DiscordRole role in e.Member.Roles.OrderBy(x => x.Position).Reverse())
+                    if (e.Member.Roles.Count() != 0)
                     {
-                        rolesStr += role.Mention + " ";
-                    }
-                }
-                
-                var builder = new DiscordEmbedBuilder()
-                    .WithColor(new DiscordColor(0xBA4119))
-                    .WithTimestamp(DateTimeOffset.Now)
-                    .WithThumbnail(e.Member.AvatarUrl)
-                    .WithAuthor(
-                        name: $"{e.Member.Username}#{e.Member.Discriminator} has left",
-                        iconUrl: e.Member.AvatarUrl
-                     )
-                    .AddField("User", e.Member.Mention, false)
-                    .AddField("User ID", e.Member.Id.ToString(), false)
-                    .AddField("Action", "Left the server", false)
-                    .AddField("Roles", rolesStr)
-                    .WithFooter($"{client.CurrentUser.Username}LeaveEvent");
+                        rolesStr = "";
 
-                userLogChannel.SendMessageAsync($"{cfgjson.Emoji.UserLeave} **Member left the server!** - {e.Member.Id}", builder);
+                        foreach (DiscordRole role in e.Member.Roles.OrderBy(x => x.Position).Reverse())
+                        {
+                            rolesStr += role.Mention + " ";
+                        }
+                    }
+
+                    var builder = new DiscordEmbedBuilder()
+                        .WithColor(new DiscordColor(0xBA4119))
+                        .WithTimestamp(DateTimeOffset.Now)
+                        .WithThumbnail(e.Member.AvatarUrl)
+                        .WithAuthor(
+                            name: $"{e.Member.Username}#{e.Member.Discriminator} has left",
+                            iconUrl: e.Member.AvatarUrl
+                         )
+                        .AddField("User", e.Member.Mention, false)
+                        .AddField("User ID", e.Member.Id.ToString(), false)
+                        .AddField("Action", "Left the server", false)
+                        .AddField("Roles", rolesStr)
+                        .WithFooter($"{client.CurrentUser.Username}LeaveEvent");
+
+                    userLogChannel.SendMessageAsync($"{cfgjson.Emoji.UserLeave} **Member left the server!** - {e.Member.Id}", builder);
+                });
             }
 
             async Task GuildMemberUpdated(DiscordClient client, GuildMemberUpdateEventArgs e)
             {
-                var muteRole = e.Guild.GetRole(cfgjson.MutedRole);
-                var userMute = await db.HashGetAsync("mutes", e.Member.Id);
-
-                if (e.Member.Roles.Contains(muteRole) && userMute.IsNull)
+                Task.Run(async () =>
                 {
-                    MemberPunishment newMute = new()
+                    var muteRole = e.Guild.GetRole(cfgjson.MutedRole);
+                    var userMute = await db.HashGetAsync("mutes", e.Member.Id);
+
+                    if (e.Member.Roles.Contains(muteRole) && userMute.IsNull)
                     {
-                        MemberId = e.Member.Id,
-                        ModId = discord.CurrentUser.Id,
-                        ServerId = e.Guild.Id,
-                        ExpireTime = null
-                    };
+                        MemberPunishment newMute = new()
+                        {
+                            MemberId = e.Member.Id,
+                            ModId = discord.CurrentUser.Id,
+                            ServerId = e.Guild.Id,
+                            ExpireTime = null
+                        };
 
-                    db.HashSetAsync("mutes", e.Member.Id, JsonConvert.SerializeObject(newMute));
+                        db.HashSetAsync("mutes", e.Member.Id, JsonConvert.SerializeObject(newMute));
+                    }
+
+                    if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole))
+                        db.HashDeleteAsync("mutes", e.Member.Id);
+
+                    CheckAndDehoistMemberAsync(e.Member);
+                    UsernameCheckAsync(e.Member);
                 }
-
-                if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole))
-                    db.HashDeleteAsync("mutes", e.Member.Id);
-
-                CheckAndDehoistMemberAsync(e.Member);
-                UsernameCheckAsync(e.Member);
+                );
             }
 
             async Task UserUpdated(DiscordClient client, UserUpdateEventArgs e)
             {
-                var guild = await client.GetGuildAsync(cfgjson.ServerID);
-                var member = await guild.GetMemberAsync(e.UserAfter.Id);
+                Task.Run(async () =>
+                {
+                    var guild = await client.GetGuildAsync(cfgjson.ServerID);
+                    var member = await guild.GetMemberAsync(e.UserAfter.Id);
 
-                CheckAndDehoistMemberAsync(member);
-                UsernameCheckAsync(member);
+                    CheckAndDehoistMemberAsync(member);
+                    UsernameCheckAsync(member);
+                });
             }
 
             async Task MessageCreated(DiscordClient client, MessageCreateEventArgs e)
             {
-                await MessageEvent.MessageHandlerAsync(client, e.Message, e.Channel);
+                MessageEvent.MessageHandlerAsync(client, e.Message, e.Channel);
             }
 
             async Task MessageUpdated(DiscordClient client, MessageUpdateEventArgs e)
             {
-                await MessageEvent.MessageHandlerAsync(client, e.Message, e.Channel, true);
+                MessageEvent.MessageHandlerAsync(client, e.Message, e.Channel, true);
             }
 
             async Task CommandsNextService_CommandErrored(CommandsNextExtension cnext, CommandErrorEventArgs e)

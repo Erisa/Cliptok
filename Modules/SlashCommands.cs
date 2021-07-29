@@ -11,7 +11,7 @@ namespace Cliptok.Modules
 
         [SlashCommand("warn", "Formally warn a user, usually for breaking the server rules.")]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialMod)]
-        public async Task TestCommand(InteractionContext ctx,
+        public async Task WarnSlashCommand(InteractionContext ctx,
              [Option("user", "The user to warn.")] DiscordUser user,
              [Option("reason", "The reason they're being warned.")] string reason,
              [Option("channel", "The channel to warn the user in, implied if not supplied.")] DiscordChannel channel = null
