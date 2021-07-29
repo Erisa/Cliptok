@@ -109,6 +109,10 @@
     "everyone.txt": {
       "wholeWord": false,
       "reason": "Attempted to ping everyone/here"
+    },
+    "malware.txt": {
+      "wholeWord": false,
+      "reason":  "Attempted to send malware"
     }
   },
   "massEmojiThreshold": 6,
