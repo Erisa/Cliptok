@@ -349,7 +349,7 @@ namespace Cliptok.Modules
         [Aliases("ts", "time")]
         [Description("Returns various timestamps for a given Discord ID/snowflake")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
-        class DebugCmds : BaseCommandModule
+        class TimestampCmds : BaseCommandModule
         {
             [Command("unix")]
             [Aliases("u", "epoch")]
