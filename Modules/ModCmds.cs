@@ -351,8 +351,8 @@ namespace Cliptok.Modules
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
         class TimestampCmds : BaseCommandModule
         {
-            [Command("unix")]
-            [Aliases("u", "epoch")]
+            [GroupCommand]
+            [Aliases("u", "unix", "epoch")]
             [Description("Returns the Unix timestamp of a given Discord ID/snowflake")]
             public async Task TimestampUnixCmd(CommandContext ctx, [Description("The ID/snowflake to fetch the Unix timestamp for")] ulong snowflake)
             {
