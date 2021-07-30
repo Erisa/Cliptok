@@ -83,7 +83,8 @@
     "userJoin": "<:CliptokUserJoin:870011255958675496>",
     "userLeave": "<:CliptokUserLeave:870011211750719558>",
     "userUpdate": "<:CliptokUserUpdate:870011211620708372>",
-    "messageEdit": "<:CliptokEdit:870011211125751888>"
+    "messageEdit": "<:CliptokEdit:870011211125751888>",
+    "time": "<:CliptokClock:848246682156138546>"
   },
   "redis": {
     "host": "localhost",
