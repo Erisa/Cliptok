@@ -236,6 +236,9 @@ namespace Cliptok
         
         [JsonProperty("messageEdit")]
         public string MessageEdit { get; set; }
+        
+        [JsonProperty("clockTime")]
+        public string ClockTime { get; set; }
 
     }
 
