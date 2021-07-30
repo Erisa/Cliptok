@@ -360,7 +360,7 @@ namespace Cliptok.Modules
                 var msUnix = msSinceEpoch + 1420070400000;
                 await ctx.RespondAsync($"{(msUnix / 1000).ToString()}");
             }
-            
+
             [Command("relative")]
             [Aliases("r")]
             [Description("Returns the amount of time between now and a given Discord ID/snowflake")]
@@ -370,7 +370,7 @@ namespace Cliptok.Modules
                 var msUnix = msSinceEpoch + 1420070400000;
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.ClockTime} <t:{(msUnix / 1000).ToString()}:R>");
             }
-            
+
             [Command("fulldate")]
             [Aliases("f", "datetime")]
             [Description("Returns the fully-formatted date and time of a given Discord ID/snowflake")]
@@ -382,11 +382,6 @@ namespace Cliptok.Modules
             }
 
         }
-            
-            
-            
-            
-        
 
         public static long ToUnixTimestamp(DateTime dateTime)
         {
