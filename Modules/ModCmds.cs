@@ -358,7 +358,7 @@ namespace Cliptok.Modules
             {
                 var msSinceEpoch = snowflake >> 22;
                 var msUnix = msSinceEpoch + 1420070400000;
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.ClockTime} {(msUnix / 1000).ToString()}");
+                await ctx.RespondAsync($"{(msUnix / 1000).ToString()}");
             }
             
             [Command("relative")]
