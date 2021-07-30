@@ -344,16 +344,49 @@ namespace Cliptok.Modules
             await Program.db.ListRightPushAsync("reminders", JsonConvert.SerializeObject(reminderObject));
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} I'll try my best to remind you about that on <t:{ToUnixTimestamp(t)}:f> (<t:{ToUnixTimestamp(t)}:R>)"); // (In roughly **{Warnings.TimeToPrettyFormat(t.Subtract(ctx.Message.Timestamp.DateTime), false)}**)");
         }
-
-        [Command("timestamp")]
+        
+        [Group("timestamp")]
         [Aliases("ts", "time")]
-        [Description("Returns the Unix timestamp of a given Discord ID/snowflake")]
-        public async Task TimestampCmd(CommandContext ctx, [Description("The ID/snowflake to fetch the Unix timestamp for")] ulong snowflake)
+        [Description("Returns various timestamps for a given Discord ID/snowflake")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
+        class DebugCmds : BaseCommandModule
         {
-            var msSinceEpoch = snowflake >> 22;
-            var msUnix = msSinceEpoch + 1420070400000;
-            await ctx.RespondAsync((msUnix / 1000).ToString());
+            [Command("unix")]
+            [Aliases("u", "epoch")]
+            [Description("Returns the Unix timestamp of a given Discord ID/snowflake")]
+            public async Task TimestampCmd(CommandContext ctx, [Description("The ID/snowflake to fetch the Unix timestamp for")] ulong snowflake)
+            {
+                var msSinceEpoch = snowflake >> 22;
+                var msUnix = msSinceEpoch + 1420070400000;
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.ClockTime} {(msUnix / 1000).ToString()}");
+            }
+            
+            [Command("relative")]
+            [Aliases("r")]
+            [Description("Returns the amount of time between now and a given Discord ID/snowflake")]
+            public async Task TimestampCmd(CommandContext ctx, [Description("The ID/snowflake to fetch the Unix timestamp for")] ulong snowflake)
+            {
+                var msSinceEpoch = snowflake >> 22;
+                var msUnix = msSinceEpoch + 1420070400000;
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.ClockTime} <t:{(msUnix / 1000).ToString()}:R>");
+            }
+            
+            [Command("fulldate")]
+            [Aliases("f", "datetime")]
+            [Description("Returns the fully-formatted date and time of a given Discord ID/snowflake")]
+            public async Task TimestampCmd(CommandContext ctx, [Description("The ID/snowflake to fetch the Unix timestamp for")] ulong snowflake)
+            {
+                var msSinceEpoch = snowflake >> 22;
+                var msUnix = msSinceEpoch + 1420070400000;
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.ClockTime} <t:{(msUnix / 1000).ToString()}:F>");
+            }
+
         }
+            
+            
+            
+            
+        
 
         public static long ToUnixTimestamp(DateTime dateTime)
         {
