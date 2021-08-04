@@ -348,7 +348,7 @@ namespace Cliptok.Modules
         [Group("timestamp")]
         [Aliases("ts", "time")]
         [Description("Returns various timestamps for a given Discord ID/snowflake")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)]
         class TimestampCmds : BaseCommandModule
         {
             [GroupCommand]
