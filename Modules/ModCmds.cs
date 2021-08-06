@@ -561,6 +561,20 @@ namespace Cliptok.Modules
                 await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nReminders check result: `{reminders}`");
             }
         }
+        
+        
+        [Command("ping")]
+        [Description("Pong? This command lets you know whether I'm working well.")]
+        public async Task Ping(CommandContext ctx)
+        {
+            DiscordMessage return_message = await ctx.Message.RespondAsync("Pinging...");
+            ulong ping = (return_message.Id - ctx.Message.Id) >> 22;
+            Char[] choices = new Char[] { 'a', 'e', 'o', 'u', 'i', 'y' };
+            Char letter = choices[Program.rand.Next(0, choices.Length)];
+            await return_message.ModifyAsync($"P{letter}ng! 🏓\n" +
+                $"• It took me `{ping}ms` to reply to your message!\n" +
+                $"• Last Websocket Heartbeat took `{ctx.Client.Ping}ms`!");
+        }
 
     }
 }
