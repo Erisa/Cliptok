@@ -101,13 +101,20 @@ namespace Cliptok
             else
                 token = cfgjson.Core.Token;
 
-            string redisHost;
-            if (Environment.GetEnvironmentVariable("REDIS_DOCKER_OVERRIDE") != null)
-                redisHost = "redis";
-            else
-                redisHost = cfgjson.Redis.Host;
-            redis = ConnectionMultiplexer.Connect($"{redisHost}:{cfgjson.Redis.Port}");
+            if (Environment.GetEnvironmentVariable("REDIS_URL") != null)
+                redis = ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("REDIS_URL"));
+            else {
+                string redisHost;
+                if (Environment.GetEnvironmentVariable("REDIS_DOCKER_OVERRIDE") != null)
+                    redisHost = "redis";
+                else
+                    redisHost = cfgjson.Redis.Host;
+                redis = ConnectionMultiplexer.Connect($"{redisHost}:{cfgjson.Redis.Port}");
+            }
+
             db = redis.GetDatabase();
+
+            // Migration away from a broken attempt at a key in the past.
             db.KeyDelete("messages");
 
             discord = new DiscordClient(new DiscordConfiguration
@@ -313,6 +320,9 @@ namespace Cliptok
             {
                 Task.Run(async () =>
                 {
+                    if (e.Guild.Id != cfgjson.ServerID)
+                        return;
+                        
                     string rolesStr = "None";
 
                     if (e.Member.Roles.Count() != 0)
