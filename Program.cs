@@ -216,7 +216,8 @@ namespace Cliptok
                         using var sr = new StreamReader("CommitHash.txt");
                         commitHash = sr.ReadToEnd();
                     }
-                    else if (Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_SHA") != null)
+                    
+                    if (Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_SHA") != null)
                     {
                         commitHash = Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_SHA");
                         commitHash = commitHash.Substring(0, Math.Min(commitHash.Length, 7));
@@ -232,7 +233,8 @@ namespace Cliptok
                         using var sr = new StreamReader("CommitMessage.txt");
                         commitMessage = sr.ReadToEnd();
                     }
-                    else if (Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_MESSAGE") != null)
+
+                    if (Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_MESSAGE") != null)
                     {
                         commitMessage = Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_MESSAGE");
                     }
