@@ -270,7 +270,6 @@ namespace Cliptok.Modules
                     WarningId = warnId,
                     ContextLink = contextLink
                 };
-                Program.db.StringSet("totalWarnings", warnId);
                 Program.db.HashSet(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
                 return true;
             }
