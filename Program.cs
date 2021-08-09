@@ -207,21 +207,22 @@ namespace Cliptok
                     ModCmds.CheckBansAsync();
                     ModCmds.CheckRemindersAsync();
 
-                    string commitHash;
-                    string commitMessage;
-                    string commitTime;
+                    string commitHash = "";
+                    string commitMessage = "";
+                    string commitTime = "";
 
                     if (File.Exists("CommitHash.txt"))
                     {
                         using var sr = new StreamReader("CommitHash.txt");
                         commitHash = sr.ReadToEnd();
                     }
-                    else if (Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_SHA") != null)
+                    else if (Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_SHA") != null && Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_SHA").All(char.IsWhiteSpace))
                     {
                         commitHash = Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_SHA");
                         commitHash = commitHash.Substring(0, Math.Min(commitHash.Length, 7));
                     }
-                    else
+                    
+                    if (string.IsNullOrWhiteSpace(commitHash))
                     {
                         commitHash = "dev";
                     }
@@ -231,13 +232,14 @@ namespace Cliptok
                         using var sr = new StreamReader("CommitMessage.txt");
                         commitMessage = sr.ReadToEnd();
                     }
-                    else if (Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_MESSAGE") != null)
+                    else if (Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_MESSAGE") != null && Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_MESSAGE").All(char.IsWhiteSpace))
                     {
                         commitMessage = Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_MESSAGE");
                     }
-                    else
+                    
+                    if (string.IsNullOrWhiteSpace(commitMessage))
                     {
-                        commitMessage = "N/A (Bot was built for Windows)";
+                        commitMessage = "N/A (Expected if bot is built for Windows)";
                     }
 
                     if (File.Exists("CommitTime.txt"))
@@ -245,7 +247,8 @@ namespace Cliptok
                         using var sr = new StreamReader("CommitTime.txt");
                         commitTime = sr.ReadToEnd();
                     }
-                    else
+                    
+                    if (string.IsNullOrWhiteSpace(commitTime))
                     {
                         commitTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss zzz");
                     }
