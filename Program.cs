@@ -94,7 +94,10 @@ namespace Cliptok
                 cfgjson.WordListList[key].Words = listOutput;
             }
 
-            badUsernames = File.ReadAllLines($"Lists/usernames.txt");
+            if (File.Exists("Lists/usernames.txt"))
+                badUsernames = File.ReadAllLines("Lists/usernames.txt");
+            else
+                badUsernames = new string[0];
 
             if (Environment.GetEnvironmentVariable("CLIPTOK_TOKEN") != null)
                 token = Environment.GetEnvironmentVariable("CLIPTOK_TOKEN");
