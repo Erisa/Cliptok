@@ -6,7 +6,54 @@ using System.Threading.Tasks;
 
 namespace Cliptok.Modules
 {
-    public class SlashCommands : SlashCommandModule
+    public static class BaseContextExtensions
+    {
+        public static async Task PrepareResponseAsync(this BaseContext ctx)
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+        }
+
+        public static async Task RespondAsync(this BaseContext ctx, string text = null, DiscordEmbed embed = null, bool ephemeral = false, params DiscordComponent[] components)
+        {
+            DiscordInteractionResponseBuilder response = new();
+
+            if (text != null) response.WithContent(text);
+            if (embed != null) response.AddEmbed(embed);
+            if (components.Length != 0) response.AddComponents(components);
+
+            response.AsEphemeral(ephemeral);
+
+            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, response);
+        }
+
+        public static async Task EditAsync(this BaseContext ctx, string text = null, DiscordEmbed embed = null, params DiscordComponent[] components)
+        {
+            DiscordWebhookBuilder response = new();
+
+            if (text != null) response.WithContent(text);
+            if (embed != null) response.AddEmbed(embed);
+            if (components.Length != 0) response.AddComponents(components);
+
+            await ctx.EditResponseAsync(response);
+        }
+
+        public static async Task FollowAsync(this BaseContext ctx, string text = null, DiscordEmbed embed = null, bool ephemeral = false, params DiscordComponent[] components)
+        {
+            DiscordFollowupMessageBuilder response = new();
+
+            response.AddMentions(Mentions.All);
+
+            if (text != null) response.WithContent(text);
+            if (embed != null) response.AddEmbed(embed);
+            if (components.Length != 0) response.AddComponents(components);
+
+            response.AsEphemeral(ephemeral);
+
+            await ctx.FollowUpAsync(response);
+        }
+    }
+
+    public class SlashCommands : ApplicationCommandModule
     {
 
         [SlashCommand("warn", "Formally warn a user, usually for breaking the server rules.")]
@@ -170,6 +217,68 @@ namespace Cliptok.Modules
 
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, eout);
         }
+
+        [ContextMenu(ApplicationCommandType.UserContextMenu, "Show Warnings")]
+        public async Task ContextWarnings(ContextMenuContext ctx)
+        {
+            await ctx.RespondAsync(embed: Warnings.GenerateWarningsEmbed(ctx.TargetUser), ephemeral: true);
+        }
+
+        [ContextMenu(ApplicationCommandType.UserContextMenu, "Hug")]
+        public async Task Hug(ContextMenuContext ctx)
+        {
+            var user = ctx.TargetUser;
+
+            if (ctx.Guild == null)
+            {
+                await ctx.RespondAsync("Pretty sure you want to send that in a server, right?");
+                return;
+            }
+
+            if (user != null)
+            {
+                switch (new Random().Next(4))
+                {
+                    case 0:
+                        await ctx.RespondAsync($"*{ctx.User.Mention} Snuggles {user.Mention}*");
+                        break;
+
+                    case 1:
+                        await ctx.RespondAsync($"*{ctx.User.Mention} Huggles {user.Mention}*");
+                        break;
+
+                    case 2:
+                        await ctx.RespondAsync($"*{ctx.User.Mention} Cuddles {user.Mention}*");
+                        break;
+
+                    case 3:
+                        await ctx.RespondAsync($"*{ctx.User.Mention} Hugs {user.Mention}*");
+                        break;
+                }
+            }
+            else
+            {
+                switch (new Random().Next(4))
+                {
+                    case 0:
+                        await ctx.RespondAsync($"*Snuggles {ctx.User.Mention} back*");
+                        break;
+
+                    case 1:
+                        await ctx.RespondAsync($"*Huggles {ctx.User.Mention} back*");
+                        break;
+
+                    case 2:
+                        await ctx.RespondAsync($"*Cuddles {ctx.User.Mention} back*");
+                        break;
+
+                    case 3:
+                        await ctx.RespondAsync($"*Hugs {ctx.User.Mention} back*");
+                        break;
+                }
+            }
+    }
+
 
     }
 }

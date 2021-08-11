@@ -10,9 +10,9 @@
 
 	<ItemGroup>
 		<PackageReference Include="Abyssal.HumanDateParser" Version="2.0.0-20191113.1" />
-		<PackageReference Include="DSharpPlus" Version="4.1.1-nightly-eri-from-dwaffles-threads-d47d52733de5af557bc79fd295e48076957c26c2-patch1" />
-		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.1.1-nightly-eri-from-dwaffles-threads-d47d52733de5af557bc79fd295e48076957c26c2-patch1" />
-		<PackageReference Include="IDoEverything.DSharpPlus.SlashCommands" Version="1.7.1-eri-patch1" />
+		<PackageReference Include="DSharpPlus" Version="4.2.2-nightly-eri-from-dwaffles-threads-1a58c1d9dede0f29dd7492350b5e40116c1c7602-patch3" />
+		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.2-nightly-eri-from-dwaffles-threads-1a58c1d9dede0f29dd7492350b5e40116c1c7602-patch3" />
+		<PackageReference Include="IDoEverything.DSharpPlus.SlashCommands " Version="2.0.0.2-eri-patch3" />
 		<PackageReference Include="StackExchange.Redis" Version="2.2.62" />
 		<PackageReference Include="System.Linq" Version="4.3.0" />
 	</ItemGroup>
