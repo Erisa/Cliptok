@@ -223,7 +223,7 @@ namespace Cliptok.Modules
         public async Task TransferWarningsSlashCommand(InteractionContext ctx,
             [Option("source_user", "The user currently holding the warnings.")] DiscordUser sourceUser,
             [Option("target_user", "The user recieving the warnings.")] DiscordUser targetUser,
-            [Option("force_override", "DESTRUCTIVE OPERATION: Whether to OVERRIDE and REMOVE the target users existing warnings.")] bool forceOverride = false
+            [Option("force_override", "DESTRUCTIVE OPERATION: Whether to OVERRIDE and DELETE the target users existing warnings.")] bool forceOverride = false
         )
         {
             var sourceWarnings = await Program.db.HashGetAllAsync(sourceUser.Id.ToString());
@@ -250,6 +250,7 @@ namespace Cliptok.Modules
                 await Program.db.KeyRenameAsync(sourceUser.Id.ToString(), targetUser.Id.ToString());
             }
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successully transferred warnings from {sourceUser.Mention} to {targetUser.Mention}!");
+            await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Warnings from {sourceUser.Mention} were transferred to {targetUser.Mention} by `{ctx.User.Username}#{ctx.User.Discriminator}`", Warnings.GenerateWarningsEmbed(targetUser));
         }
 
         [ContextMenu(ApplicationCommandType.UserContextMenu, "Show Warnings")]
