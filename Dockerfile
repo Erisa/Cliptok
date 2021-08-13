@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0.303 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:5.0.400 AS build-env
 WORKDIR /app
 
 # We need Git for Cliptok builds now.
