@@ -350,7 +350,7 @@ namespace Cliptok.Modules
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Tier6)]
         public async Task No(CommandContext ctx)
         {
-            Random noRand = new Random();
+        {
             List<string> noResponses = new List<string> {
                 "Processing...",
                 "Considering it...",
