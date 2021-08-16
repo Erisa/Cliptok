@@ -1,4 +1,4 @@
-﻿using DSharpPlus;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -343,6 +343,44 @@ namespace Cliptok.Modules
 
             await Program.db.ListRightPushAsync("reminders", JsonConvert.SerializeObject(reminderObject));
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} I'll try my best to remind you about that on <t:{ToUnixTimestamp(t)}:f> (<t:{ToUnixTimestamp(t)}:R>)"); // (In roughly **{Warnings.TimeToPrettyFormat(t.Subtract(ctx.Message.Timestamp.DateTime), false)}**)");
+        }
+
+        [Command("no")]
+        [Aliases("yes")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Tier6)]
+        public async Task No(CommandContext ctx)
+        {
+            List<string> noResponses = new List<string> {
+                "Processing...",
+                "Considering it...",
+                "Hmmm...",
+                "Give me a moment...",
+                "Calculating...",
+                "Generating response...",
+                "Asking the Oracle...",
+                "Loading...",
+                "Please wait..."
+            };
+            
+            await ctx.Message.DeleteAsync();
+            var msg = await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Loading} Thinking about it...");
+            await Task.Delay(2000);
+            
+            for (int thinkCount = 1; thinkCount <= 3; thinkCount++)
+            {
+                int r = Program.rand.Next(noResponses.Count);
+                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Loading} {noResponses[r]}");
+                await Task.Delay(2000);
+            }
+            
+            if (Program.rand.Next(10) == 3)
+            {
+                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Yes.");
+            }
+            else
+            {
+                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} No.");
+            }
         }
         
         [Group("timestamp")]
