@@ -28,6 +28,8 @@ namespace Cliptok
         public static IDatabase db;
         internal static EventId CliptokEventID { get; } = new EventId(1000, "Cliptok");
 
+	public static string[] avatars;
+
         public static string[] badUsernames;
         public static List<ulong> autoBannedUsersCache = new();
         public static DiscordChannel logChannel;
@@ -98,6 +100,8 @@ namespace Cliptok
                 badUsernames = File.ReadAllLines("Lists/usernames.txt");
             else
                 badUsernames = new string[0];
+
+	    avatars = File.ReadAllLines("Lists/avatars.txt");
 
             if (Environment.GetEnvironmentVariable("CLIPTOK_TOKEN") != null)
                 token = Environment.GetEnvironmentVariable("CLIPTOK_TOKEN");
@@ -329,7 +333,13 @@ namespace Cliptok
                         DiscordRole mutedRole = e.Guild.GetRole(cfgjson.MutedRole);
                         await e.Member.GrantRoleAsync(mutedRole, "Reapplying mute: possible mute evasion.");
                     }
-                    CheckAndDehoistMemberAsync(e.Member); ;
+                    CheckAndDehoistMemberAsync(e.Member);
+                    
+	            if (avatars.Contains(e.Member.AvatarHash))
+                    {
+                        var _ = Bans.BanSilently(e.Guild, e.Member.Id, "Secret sauce");
+                        await badMsgLog.SendMessageAsync($"{cfgjson.Emoji.Banned} Raid-banned {e.Member.Mention} for matching avatar: {e.Member.AvatarUrl.Replace("1024", "128")}");
+                    }
                 });
             }
 
