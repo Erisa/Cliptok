@@ -224,19 +224,19 @@ namespace Cliptok
 
         [JsonProperty("bsod")]
         public string BSOD { get; set; }
-        
+
         [JsonProperty("userJoin")]
         public string UserJoin { get; set; }
-        
+
         [JsonProperty("userLeave")]
         public string UserLeave { get; set; }
-        
+
         [JsonProperty("userUpdate")]
         public string UserUpdate { get; set; }
-        
+
         [JsonProperty("messageEdit")]
         public string MessageEdit { get; set; }
-        
+
         [JsonProperty("clockTime")]
         public string ClockTime { get; set; }
 

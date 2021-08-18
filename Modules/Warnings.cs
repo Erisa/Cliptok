@@ -56,7 +56,7 @@ namespace Cliptok.Modules
                 var levelText = level.ToString();
                 if (level == ServerPermLevel.nothing && Program.rand.Next(1, 100) == 69)
                     levelText = $"naught but a thing, my dear human. Congratulations, you win {Program.rand.Next(1, 10)} bonus points.";
-                
+
                 await ctx.RespondAsync(
                     $"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{ctx.Command.Name}**!\n" +
                     $"Required: `{TargetLvl}`\nYou have: `{levelText}`");

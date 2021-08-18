@@ -327,8 +327,8 @@ namespace Cliptok.Modules
             }
             else if (t < (DateTime.Now + TimeSpan.FromSeconds(59)))
             {
-               await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time must be at least a minute in the future!");
-               return;
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time must be at least a minute in the future!");
+                return;
             }
 
             var reminderObject = new Reminder()
@@ -361,18 +361,18 @@ namespace Cliptok.Modules
                 "Loading...",
                 "Please wait..."
             };
-            
+
             await ctx.Message.DeleteAsync();
             var msg = await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Loading} Thinking about it...");
             await Task.Delay(2000);
-            
+
             for (int thinkCount = 1; thinkCount <= 3; thinkCount++)
             {
                 int r = Program.rand.Next(noResponses.Count);
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Loading} {noResponses[r]}");
                 await Task.Delay(2000);
             }
-            
+
             if (Program.rand.Next(10) == 3)
             {
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Yes.");
@@ -382,7 +382,7 @@ namespace Cliptok.Modules
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} No.");
             }
         }
-        
+
         [Group("timestamp")]
         [Aliases("ts", "time")]
         [Description("Returns various timestamps for a given Discord ID/snowflake")]
@@ -485,7 +485,7 @@ namespace Cliptok.Modules
 
         [Command("announce")]
         [Description("Announes something in the current channel, pinging an insider role in the process.")]
-        [HomeServer,RequireHomeserverPerm(ServerPermLevel.Mod)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
         public async Task AnnounceCmd(CommandContext ctx, [Description("'dev','beta','rp' or 'patch")] string roleName, [RemainingText, Description("The announcement message to send.")] string announcementMessage)
         {
             DiscordRole discordRole;
@@ -498,7 +498,8 @@ namespace Cliptok.Modules
                 {
                     await ctx.Message.DeleteAsync();
                     await ctx.Channel.SendMessageAsync($"{discordRole.Mention} {announcementMessage}");
-                } catch
+                }
+                catch
                 {
                     // We still need to remember to make it unmentionable even if the msg fails.
                 }
@@ -599,8 +600,8 @@ namespace Cliptok.Modules
                 await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nReminders check result: `{reminders}`");
             }
         }
-        
-        
+
+
         [Command("ping")]
         [Description("Pong? This command lets you know whether I'm working well.")]
         public async Task Ping(CommandContext ctx)

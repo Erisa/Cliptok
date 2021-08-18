@@ -245,7 +245,8 @@ namespace Cliptok.Modules
             {
                 await Program.db.KeyDeleteAsync(targetUser.Id.ToString());
                 await Program.db.KeyRenameAsync(sourceUser.Id.ToString(), targetUser.Id.ToString());
-            } else
+            }
+            else
             {
                 await Program.db.KeyRenameAsync(sourceUser.Id.ToString(), targetUser.Id.ToString());
             }
@@ -312,7 +313,7 @@ namespace Cliptok.Modules
                         break;
                 }
             }
-    }
+        }
 
 
     }

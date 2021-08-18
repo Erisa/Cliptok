@@ -184,7 +184,7 @@ namespace Cliptok.Modules
                 {
                     MemberPunishment mute = entry.Value;
                     if (DateTime.Now > mute.ExpireTime)
-                    { 
+                    {
                         await UnmuteUserAsync(await Program.discord.GetUserAsync(mute.MemberId));
                         success = true;
                     }
