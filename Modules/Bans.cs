@@ -73,19 +73,10 @@ namespace Cliptok.Modules
                 {
                     logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was banned for {Warnings.TimeToPrettyFormat(banDuration, false)} by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**";
                 }
-                await logChannel.SendMessageAsync(logOut);
+                _ = logChannel.SendMessageAsync(logOut);
 
                 logOut += $"\nChannel: {channel.Mention}";
-                foreach (KeyValuePair<ulong, DiscordChannel> potentialChannelPair in guild.Channels)
-                {
-                    var potentialChannel = potentialChannelPair.Value;
-                    if (potentialChannel.Type == ChannelType.Text && potentialChannel.Topic != null && potentialChannel.Topic.EndsWith($"User ID: {targetUserId}"))
-                    {
-                        await potentialChannel.SendMessageAsync(logOut);
-                        break;
-                    }
-                }
-
+                _ = FindModmailThreadAndSendMessage(guild, $"User ID: {targetUserId}", logOut);
             }
             catch
             {
@@ -94,6 +85,16 @@ namespace Cliptok.Modules
             return true;
 
         }
+
+        public static async Task FindModmailThreadAndSendMessage(DiscordGuild guild, string searchText, string messageToSend)
+        {
+            var matchPair = guild.Channels.FirstOrDefault(c => c.Value.Type == ChannelType.Text && c.Value.Topic != null && c.Value.Topic.EndsWith(searchText));
+            var channel = matchPair.Value;
+
+            if (channel != default)
+                await channel.SendMessageAsync(messageToSend);
+        }
+
 
         public static async Task UnbanFromServerAsync(DiscordGuild targetGuild, ulong targetUserId)
         {
