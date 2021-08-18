@@ -95,7 +95,6 @@ namespace Cliptok.Modules
                 await channel.SendMessageAsync(messageToSend);
         }
 
-
         public static async Task UnbanFromServerAsync(DiscordGuild targetGuild, ulong targetUserId)
         {
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);

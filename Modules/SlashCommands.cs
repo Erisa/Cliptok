@@ -275,19 +275,19 @@ namespace Cliptok.Modules
                 switch (new Random().Next(4))
                 {
                     case 0:
-                        await ctx.RespondAsync($"*{ctx.User.Mention} Snuggles {user.Mention}*");
+                        await ctx.RespondAsync($"*{ctx.User.Mention} snuggles {user.Mention}*");
                         break;
 
                     case 1:
-                        await ctx.RespondAsync($"*{ctx.User.Mention} Huggles {user.Mention}*");
+                        await ctx.RespondAsync($"*{ctx.User.Mention} huggles {user.Mention}*");
                         break;
 
                     case 2:
-                        await ctx.RespondAsync($"*{ctx.User.Mention} Cuddles {user.Mention}*");
+                        await ctx.RespondAsync($"*{ctx.User.Mention} cuddles {user.Mention}*");
                         break;
 
                     case 3:
-                        await ctx.RespondAsync($"*{ctx.User.Mention} Hugs {user.Mention}*");
+                        await ctx.RespondAsync($"*{ctx.User.Mention} hugs {user.Mention}*");
                         break;
                 }
             }
