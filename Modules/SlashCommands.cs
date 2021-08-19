@@ -265,12 +265,6 @@ namespace Cliptok.Modules
         {
             var user = ctx.TargetUser;
 
-            if (ctx.Guild == null)
-            {
-                await ctx.RespondAsync("Pretty sure you want to send that in a server, right?");
-                return;
-            }
-
             if (user != null)
             {
                 switch (new Random().Next(4))
@@ -289,27 +283,6 @@ namespace Cliptok.Modules
 
                     case 3:
                         await ctx.RespondAsync($"*{ctx.User.Mention} hugs {user.Mention}*");
-                        break;
-                }
-            }
-            else
-            {
-                switch (new Random().Next(4))
-                {
-                    case 0:
-                        await ctx.RespondAsync($"*Snuggles {ctx.User.Mention} back*");
-                        break;
-
-                    case 1:
-                        await ctx.RespondAsync($"*Huggles {ctx.User.Mention} back*");
-                        break;
-
-                    case 2:
-                        await ctx.RespondAsync($"*Cuddles {ctx.User.Mention} back*");
-                        break;
-
-                    case 3:
-                        await ctx.RespondAsync($"*Hugs {ctx.User.Mention} back*");
                         break;
                 }
             }
