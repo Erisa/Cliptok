@@ -177,7 +177,7 @@ namespace Cliptok.Modules
             return embed;
         }
 
-        public static async Task<UserWarning> GiveWarningAsync(DiscordUser targetUser, DiscordUser modUser, string reason, string contextLink, DiscordChannel channel)
+        public static async Task<UserWarning> GiveWarningAsync(DiscordUser targetUser, DiscordUser modUser, string reason, string contextLink, DiscordChannel channel, string extraWord = " ")
         {
             DiscordGuild guild = channel.Guild;
             ulong warningId = (ulong)Program.db.StringGet("totalWarnings");
@@ -206,7 +206,7 @@ namespace Cliptok.Modules
             try
             {
                 DiscordMember member = await guild.GetMemberAsync(targetUser.Id);
-                await member.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} You were warned in **{guild.Name}**, reason: **{reason}**");
+                await member.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} You were{extraWord}warned in **{guild.Name}**, reason: **{reason}**");
             }
             catch
             {

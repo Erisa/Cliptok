@@ -181,7 +181,7 @@ namespace Cliptok.Modules
                     match = true;
 
                     DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
-                    var warning = await Warnings.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), message.Channel);
+                    var warning = await Warnings.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), message.Channel, " automatically ");
                     await SendInfringingMessaageAsync(Program.badMsgLog, message, reason, warning.ContextLink);
                     return;
                 }
@@ -207,7 +207,7 @@ namespace Cliptok.Modules
                 }
 
                 DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
-                var warning = await Warnings.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), message.Channel);
+                var warning = await Warnings.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), message.Channel, " automatically ");
                 await SendInfringingMessaageAsync(Program.badMsgLog, message, reason, warning.ContextLink);
                 return;
             }
@@ -240,7 +240,7 @@ namespace Cliptok.Modules
                     }
 
                     DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
-                    var warning = await Warnings.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), message.Channel);
+                    var warning = await Warnings.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), message.Channel, " automatically ");
                     await SendInfringingMessaageAsync(Program.badMsgLog, message, reason, warning.ContextLink);
                     return;
                 }
@@ -291,7 +291,7 @@ namespace Cliptok.Modules
                     }
 
                     DiscordMessage msg = await message.Channel.SendMessageAsync(output);
-                    var warning = await Warnings.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), message.Channel);
+                    var warning = await Warnings.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), message.Channel, " automatically ");
                     await SendInfringingMessaageAsync(Program.badMsgLog, message, reason, warning.ContextLink);
                     return;
                 }
