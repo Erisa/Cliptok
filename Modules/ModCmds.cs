@@ -347,7 +347,7 @@ namespace Cliptok.Modules
 
         [Command("no")]
         [Aliases("yes")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Tier6)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Tier5)]
         public async Task No(CommandContext ctx)
         {
             List<string> noResponses = new List<string> {
