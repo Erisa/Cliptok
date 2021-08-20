@@ -47,7 +47,7 @@ namespace Cliptok
                     targetMember.DisplayName[0] != ModCmds.dehoistCharacter
                     && (
                         cfgjson.AutoDehoistCharacters.Contains(targetMember.DisplayName[0])
-                        || (targetMember.Nickname != null && cfgjson.SecondaryAutoDehoistCharacters.Contains(targetMember.Nickname[0]))
+                        || (targetMember.Nickname != null && targetMember.Nickname[0] != targetMember.Username[0] && cfgjson.SecondaryAutoDehoistCharacters.Contains(targetMember.Nickname[0]))
                         )
                 ))
             {
