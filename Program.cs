@@ -1,4 +1,4 @@
-﻿using Cliptok.Modules;
+using Cliptok.Modules;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;

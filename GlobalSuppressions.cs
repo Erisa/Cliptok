@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage(null, "ENC1003")]
 [assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>", Scope = "member", Target = "~M:Cliptok.Modules.ModCmds.BanCmd(DSharpPlus.CommandsNext.CommandContext,DSharpPlus.Entities.DiscordUser,System.String)~System.Threading.Tasks.Task")]
