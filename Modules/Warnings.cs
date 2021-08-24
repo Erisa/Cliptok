@@ -172,7 +172,7 @@ namespace Cliptok.Modules
                 .AddField("Message link", warning.ContextLink == null ? "N/A" : $"[`Jump to warning`]({warning.ContextLink})");
             }
             if (showTime)
-                embed.AddField("Time", detailed ? $"{warning.WarnTimestamp.ToUniversalTime()} UTC" : $"{TimeToPrettyFormat((DateTime.Now - warning.WarnTimestamp))}", true);
+                embed.AddField("Time", detailed ? $"<t:{ModCmds.ToUnixTimestamp(warning.WarnTimestamp)}:f>" : $"<t:{ModCmds.ToUnixTimestamp(warning.WarnTimestamp)}:R>", true);
 
             return embed;
         }
