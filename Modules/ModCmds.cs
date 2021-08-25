@@ -107,7 +107,7 @@ namespace Cliptok.Modules
         }
 
         [Command("dehoist")]
-        [Description("Adds an invisible character to someones nickname that drops them to the bottom of the member list. Accepts multiple members.")]
+        [Description("Adds an invisible character to someone's nickname that drops them to the bottom of the member list. Accepts multiple members.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)]
         public async Task Dehoist(CommandContext ctx, [Description("List of server members to dehoist")] params DiscordMember[] discordMembers)
         {
@@ -484,7 +484,7 @@ namespace Cliptok.Modules
         }
 
         [Command("announce")]
-        [Description("Announes something in the current channel, pinging an insider role in the process.")]
+        [Description("Announces something in the current channel, pinging an Insider role in the process.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
         public async Task AnnounceCmd(CommandContext ctx, [Description("'dev','beta','rp' or 'patch")] string roleName, [RemainingText, Description("The announcement message to send.")] string announcementMessage)
         {

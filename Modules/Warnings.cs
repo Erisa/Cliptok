@@ -457,7 +457,7 @@ namespace Cliptok.Modules
         ]
         public async Task WarningCmd(
             CommandContext ctx,
-            [Description("The user you want to lookup warnings for. Accepts many formats.")] DiscordUser targetUser = null
+            [Description("The user you want to look up warnings for. Accepts many formats.")] DiscordUser targetUser = null
         )
         {
             if (targetUser == null)
@@ -530,8 +530,8 @@ namespace Cliptok.Modules
         ]
         public async Task DelwarnCmd(
             CommandContext ctx,
-            [Description("The user you're removing a warn from. Accepts many formats.")] DiscordUser targetUser,
-            [Description("The ID for the warning you want to delete.")] ulong warnId
+            [Description("The user you're removing a warning from. Accepts many formats.")] DiscordUser targetUser,
+            [Description("The ID of the warning you want to delete.")] ulong warnId
         )
         {
             UserWarning warning = GetWarning(targetUser.Id, warnId);
@@ -607,7 +607,7 @@ namespace Cliptok.Modules
         ]
         public async Task EditwarnCmd(
             CommandContext ctx,
-            [Description("The user you're editing a warning of. Accept many formats.")] DiscordUser targetUser,
+            [Description("The user you're editing a warning for. Accepts many formats.")] DiscordUser targetUser,
             [Description("The ID of the warning you want to edit.")] ulong warnId,
             [RemainingText, Description("The new reason for the warning.")] string newReason)
         {
