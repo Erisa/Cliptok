@@ -159,3 +159,4 @@ discord-gift.com
  take nitro http
 steam-nitro steam give nitro
 / steam give nitro
+discord-app.info
