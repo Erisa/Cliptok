@@ -498,7 +498,7 @@ namespace Cliptok.Modules
                     {
                         reason = Truncate(reason, 29) + "…";
                     }
-                    str += $"`{Pad(warning.WarningId)}` **{reason}** • {TimeToPrettyFormat(span, true)}\n";
+                    str += $"`{Pad(warning.WarningId)}` **{reason}** • <t:{ModCmds.ToUnixTimestamp(warning.WarnTimestamp)}:R>\n";
                     count += 1;
                 }
 
