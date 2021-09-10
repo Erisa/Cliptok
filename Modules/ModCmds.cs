@@ -521,76 +521,108 @@ namespace Cliptok.Modules
         class DebugCmds : BaseCommandModule
         {
             [Command("mutes")]
+            [Aliases("mute")]
             [Description("Debug the list of mutes.")]
-            public async Task MuteDebug(CommandContext ctx)
+            public async Task MuteDebug(CommandContext ctx, DiscordUser targetUser = default)
             {
                 await ctx.TriggerTypingAsync();
                 string strOut = "";
-                var muteList = Program.db.HashGetAll("mutes").ToDictionary();
-                if (muteList == null | muteList.Keys.Count == 0)
+                if (targetUser == default)
                 {
-                    await ctx.RespondAsync("No mutes found in database!");
-                    return;
-                }
-                else
-                {
-                    foreach (var entry in muteList)
+                    var muteList = Program.db.HashGetAll("mutes").ToDictionary();
+                    if (muteList == null | muteList.Keys.Count == 0)
                     {
-                        strOut += $"{entry.Value}\n";
+                        await ctx.RespondAsync("No mutes found in database!");
+                        return;
                     }
-                }
-                if (strOut.Length > 1930)
-                {
-                    HasteBinResult hasteResult = await Program.hasteUploader.Post(strOut);
-                    if (hasteResult.IsSuccess)
+                    else
                     {
-                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} Output exceeded character limit: {hasteResult.FullUrl}.json");
+                        foreach (var entry in muteList)
+                        {
+                            strOut += $"{entry.Value}\n";
+                        }
+                    }
+                    if (strOut.Length > 1930)
+                    {
+                        HasteBinResult hasteResult = await Program.hasteUploader.Post(strOut);
+                        if (hasteResult.IsSuccess)
+                        {
+                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} Output exceeded character limit: {hasteResult.FullUrl}.json");
+                        }
+                        else
+                        {
+                            Console.WriteLine(strOut);
+                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error ocurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
+                        }
+                    }
+                    else
+                    {
+                        await ctx.RespondAsync($"```json\n{strOut}\n```");
+                    }
+                } else // if (targetUser != default)
+                {
+                    var userMute = Program.db.HashGet("mutes", targetUser.Id);
+                    if (userMute.IsNull)
+                    {
+                        await ctx.RespondAsync("That user has no mute registered in the database!");
                     } else
                     {
-                        Console.WriteLine(strOut);
-                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error ocurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
+                        await ctx.RespondAsync($"```json\n{userMute}\n```");
                     }
-                } else
-                {
-                    await ctx.RespondAsync($"```json\n{strOut}\n```");
                 }
             }
 
             [Command("bans")]
+            [Aliases("ban")]
             [Description("Debug the list of bans.")]
-            public async Task BanDebug(CommandContext ctx)
+            public async Task BanDebug(CommandContext ctx, DiscordUser targetUser = default)
             {
                 await ctx.TriggerTypingAsync();
                 string strOut = "";
-                var banList = Program.db.HashGetAll("bans").ToDictionary();
-                if (banList == null | banList.Keys.Count == 0)
+                if (targetUser == default)
                 {
-                    await ctx.RespondAsync("No bans found in database!");
-                    return;
-                }
-                else
-                {
-                    foreach (var entry in banList)
+                    var banList = Program.db.HashGetAll("bans").ToDictionary();
+                    if (banList == null | banList.Keys.Count == 0)
                     {
-                        strOut += $"{entry.Value}\n";
-                    }
-                }
-                if (strOut.Length > 1930)
-                {
-                    HasteBinResult hasteResult = await Program.hasteUploader.Post(strOut);
-                    if (hasteResult.IsSuccess)
-                    {
-                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} Output exceeded character limit: {hasteResult.FullUrl}.json");
+                        await ctx.RespondAsync("No mutes found in database!");
+                        return;
                     }
                     else
                     {
-                        Console.WriteLine(strOut);
-                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error ocurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
+                        foreach (var entry in banList)
+                        {
+                            strOut += $"{entry.Value}\n";
+                        }
+                    }
+                    if (strOut.Length > 1930)
+                    {
+                        HasteBinResult hasteResult = await Program.hasteUploader.Post(strOut);
+                        if (hasteResult.IsSuccess)
+                        {
+                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} Output exceeded character limit: {hasteResult.FullUrl}.json");
+                        }
+                        else
+                        {
+                            Console.WriteLine(strOut);
+                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error ocurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
+                        }
+                    }
+                    else
+                    {
+                        await ctx.RespondAsync($"```json\n{strOut}\n```");
                     }
                 }
-                else
+                else // if (targetUser != default)
                 {
-                    await ctx.RespondAsync($"```json\n{strOut}\n```");
+                    var userMute = Program.db.HashGet("bans", targetUser.Id);
+                    if (userMute.IsNull)
+                    {
+                        await ctx.RespondAsync("That user has no ban registered in the database!");
+                    }
+                    else
+                    {
+                        await ctx.RespondAsync($"```json\n{userMute}\n```");
+                    }
                 }
             }
 
