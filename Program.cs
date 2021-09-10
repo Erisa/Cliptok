@@ -351,6 +351,29 @@ namespace Cliptok
                     if (e.Guild.Id != cfgjson.ServerID)
                         return;
 
+                    var muteRole = e.Guild.GetRole(cfgjson.MutedRole);
+                    var userMute = await db.HashGetAsync("mutes", e.Member.Id);
+
+                    if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole))
+                        db.HashDeleteAsync("mutes", e.Member.Id);
+
+
+                    if (e.Member.Roles.Contains(muteRole) && userMute.IsNull)
+                    {
+                        MemberPunishment newMute = new()
+                        {
+                            MemberId = e.Member.Id,
+                            ModId = discord.CurrentUser.Id,
+                            ServerId = e.Guild.Id,
+                            ExpireTime = null
+                        };
+
+                        db.HashSetAsync("mutes", e.Member.Id, JsonConvert.SerializeObject(newMute));
+                    }
+
+                    if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole))
+                        db.HashDeleteAsync("mutes", e.Member.Id);
+
                     string rolesStr = "None";
 
                     if (e.Member.Roles.Count() != 0)
@@ -388,20 +411,12 @@ namespace Cliptok
                     var muteRole = e.Guild.GetRole(cfgjson.MutedRole);
                     var userMute = await db.HashGetAsync("mutes", e.Member.Id);
 
-                    if (e.Member.Roles.Contains(muteRole) && userMute.IsNull)
-                    {
-                        MemberPunishment newMute = new()
-                        {
-                            MemberId = e.Member.Id,
-                            ModId = discord.CurrentUser.Id,
-                            ServerId = e.Guild.Id,
-                            ExpireTime = null
-                        };
-
-                        db.HashSetAsync("mutes", e.Member.Id, JsonConvert.SerializeObject(newMute));
-                    }
-
-                    if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole))
+                    // If they're externally unmuted, untrack it?
+                    // But not if they just joined.
+                    var currentTime = DateTime.Now;
+                    var joinTime = e.Member.JoinedAt.DateTime;
+                    var differrence = currentTime.Subtract(joinTime).TotalSeconds;
+                    if (differrence > 10 && !userMute.IsNull && !e.Member.Roles.Contains(muteRole))
                         db.HashDeleteAsync("mutes", e.Member.Id);
 
                     CheckAndDehoistMemberAsync(e.Member);
