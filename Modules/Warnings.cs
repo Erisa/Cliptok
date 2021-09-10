@@ -523,9 +523,8 @@ namespace Cliptok.Modules
 
         [
             Command("delwarn"),
-            Description("Delete a warning that was issued by mistake or later became invalid.\n" +
-            "You can only delete warnings issued by you, unless you are an Admin/Lead Moderator."),
-            Aliases("delwarm", "delwam"),
+            Description("Delete a warning that was issued by mistake or later became invalid."),
+            Aliases("delwarm", "delwam", "deletewarn"),
             HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)
         ]
         public async Task DelwarnCmd(
