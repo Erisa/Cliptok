@@ -1,3 +1,4 @@
+using Cliptok.Helpers;
 using Cliptok.Modules;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -37,7 +38,7 @@ namespace Cliptok
         public static DiscordChannel badMsgLog;
 
         public static Random rand = new Random();
-
+        public static HasteBinClient hasteUploader;
 
         public static async Task<bool> CheckAndDehoistMemberAsync(DiscordMember targetMember)
         {
@@ -88,6 +89,8 @@ namespace Cliptok
                 json = await sr.ReadToEndAsync();
 
             cfgjson = JsonConvert.DeserializeObject<ConfigJson>(json);
+
+            hasteUploader = new HasteBinClient(cfgjson.HastebinEndpoint);
 
             var keys = cfgjson.WordListList.Keys;
             foreach (string key in keys)

@@ -114,7 +114,7 @@
     },
     "malware.txt": {
       "wholeWord": false,
-      "reason":  "Attempted to send malware"
+      "reason": "Attempted to send malware"
     }
   },
   "massEmojiThreshold": 6,
@@ -159,5 +159,6 @@
     "544153359712649251"
   ],
   "autoDehoistCharacters": " !\"#$%&'()*+,-./:;<=>?@[\\]^_`'",
-  "secondaryAutoDehoistCharacters": "0123456789"
+  "secondaryAutoDehoistCharacters": "0123456789",
+  "hastebinEndpoint": "https://haste.erisa.uk"
 }

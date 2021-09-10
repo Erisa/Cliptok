@@ -153,6 +153,9 @@ namespace Cliptok
 
         [JsonProperty("announcementRoles")]
         public Dictionary<string, ulong> AnnouncementRoles { get; private set; }
+
+        [JsonProperty("hastebinEndpoint")]
+        public string HastebinEndpoint { get; private set; }
     }
 
     public class WordListJson

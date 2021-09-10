@@ -35,7 +35,7 @@
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition=" '$(OS)' != 'Windows_NT' ">
-	  <Exec Command="git rev-parse --short main &gt; &quot;$(OutDir)/CommitHash.txt&quot;&#xD;&#xA;git log --pretty=format:&quot;%25s&quot; -n 1 &gt; &quot;$(OutDir)/CommitMessage.txt&quot;&#xD;&#xA;git log --pretty=format:&quot;%25ci&quot; -n 1 &gt; &quot;$(OutDir)/CommitTime.txt&quot;&#xD;&#xA;" IgnoreExitCode="true"  />
+	  <Exec Command="git rev-parse --short main &gt; &quot;$(OutDir)/CommitHash.txt&quot;&#xD;&#xA;git log --pretty=format:&quot;%25s&quot; -n 1 &gt; &quot;$(OutDir)/CommitMessage.txt&quot;&#xD;&#xA;git log --pretty=format:&quot;%25ci&quot; -n 1 &gt; &quot;$(OutDir)/CommitTime.txt&quot;&#xD;&#xA;" IgnoreExitCode="true" />
 	</Target>
 
 </Project>
