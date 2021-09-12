@@ -16,5 +16,6 @@ RUN dotnet build -c Release -o out
 FROM mcr.microsoft.com/dotnet/runtime:5.0.9-alpine3.13
 WORKDIR /app
 COPY --from=build-env /app/out .
-COPY config.json Lists ./
+ADD Lists ./Lists
+ADD config.json ./
 ENTRYPOINT ["dotnet", "Cliptok.dll"]
