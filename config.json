@@ -48,7 +48,7 @@
   },
   "massMentionThreshold": 5,
   "massMentionBanThreshold": 20,
-  "inviteTierRequirement": 2,
+  "inviteTierRequirement": 3,
   "tierRoles": [
     191569917542268928,
     200719503435235329,
