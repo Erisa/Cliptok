@@ -53,7 +53,6 @@ namespace Cliptok.Modules
             }
         }
 
-
         // If invoker is allowed to mod target.
         public static bool AllowedToMod(DiscordMember invoker, DiscordMember target)
         {
@@ -64,7 +63,6 @@ namespace Cliptok.Modules
         {
             return target.IsOwner ? int.MaxValue : (!target.Roles.Any() ? 0 : target.Roles.Max(x => x.Position));
         }
-
 
         [Command("kick")]
         [Aliases("yeet", "shoo", "goaway")]
@@ -242,7 +240,6 @@ namespace Cliptok.Modules
 
             }
         }
-
 
         public static string DehoistName(string origName)
         {
@@ -559,13 +556,15 @@ namespace Cliptok.Modules
                     {
                         await ctx.RespondAsync($"```json\n{strOut}\n```");
                     }
-                } else // if (targetUser != default)
+                }
+                else // if (targetUser != default)
                 {
                     var userMute = Program.db.HashGet("mutes", targetUser.Id);
                     if (userMute.IsNull)
                     {
                         await ctx.RespondAsync("That user has no mute registered in the database!");
-                    } else
+                    }
+                    else
                     {
                         await ctx.RespondAsync($"```json\n{userMute}\n```");
                     }
@@ -663,7 +662,6 @@ namespace Cliptok.Modules
                 await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nReminders check result: `{reminders}`");
             }
         }
-
 
         [Command("ping")]
         [Description("Pong? This command lets you know whether I'm working well.")]

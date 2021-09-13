@@ -38,7 +38,6 @@ namespace Cliptok.Modules
                 // nothing
             }
 
-
             if (muteDuration == default)
             {
                 permaMute = true;
@@ -295,7 +294,6 @@ namespace Cliptok.Modules
             {
                 // keep default
             }
-
 
             if (timeParsed)
             {

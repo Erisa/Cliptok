@@ -112,7 +112,6 @@ namespace Cliptok.Modules
             if (message.Author == null)
                 return;
 
-
             if (!isAnEdit && message.Author.Id == Program.cfgjson.ModmailUserId && message.Content == "@here" && message.Embeds[0].Footer.Text.Contains("User ID:"))
             {
                 Console.WriteLine($"Processing modmail message {message.Id} in {message.Channel} with {isAnEdit}");

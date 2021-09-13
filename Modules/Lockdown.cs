@@ -5,7 +5,6 @@ using DSharpPlus.Entities;
 using System.Linq;
 using System.Threading.Tasks;
 
-
 namespace Cliptok.Modules
 {
     class Lockdown : BaseCommandModule
@@ -154,7 +153,6 @@ namespace Cliptok.Modules
             }
             await UnlockChannel(currentChannel, ctx.Member);
         }
-
 
     }
 }

@@ -142,7 +142,6 @@ namespace Cliptok.Modules
                 // do nothing :/
             }
 
-
             TimeSpan banDuration;
             if (time == null)
                 banDuration = default;
@@ -206,7 +205,6 @@ namespace Cliptok.Modules
             webhookOut.Content = $"{Program.cfgjson.Emoji.Success} User was successfully bonked.";
             await ctx.EditResponseAsync(webhookOut);
         }
-
 
         [SlashCommand("warnings", "Fetch the warnings for a user.")]
         public async Task WarningsSlashCommand(InteractionContext ctx,
@@ -290,7 +288,5 @@ namespace Cliptok.Modules
                 }
             }
         }
-
-
     }
 }
