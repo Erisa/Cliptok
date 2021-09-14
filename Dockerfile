@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0.400 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:5.0.401 AS build-env
 WORKDIR /app
 
 # We need Git for Cliptok builds now.
@@ -13,7 +13,7 @@ COPY . ./
 RUN dotnet build -c Release -o out
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/runtime:5.0.9-alpine3.13
+FROM mcr.microsoft.com/dotnet/runtime:5.0.10-alpine3.13
 WORKDIR /app
 COPY --from=build-env /app/out .
 ENTRYPOINT ["dotnet", "Cliptok.dll"]
