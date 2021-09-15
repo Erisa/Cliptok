@@ -675,6 +675,37 @@ namespace Cliptok.Modules
                 $"• It took me `{ping}ms` to reply to your message!\n" +
                 $"• Last Websocket Heartbeat took `{ctx.Client.Ping}ms`!");
         }
+        
+        [Command("ask")]
+        public async Task AskCmd(CommandContext ctx, DiscordUser user = default)
+        {
+            await ctx.Message.DeleteAsync();
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                .WithTitle("**__Need Help Or Have a Problem?__**")
+                .WithDescription(
+                $"You're probably looking for <#{Program.cfgjson.TechSupportChannel}>.\n" +
+                $"Once there, please be sure to provide **plenty of details**, ping the <@&{Program.cfgjson.CommunityTechSupportRoleID}> role, and *be patient!*\n\n" +
+                $"Look under the `🔧 Support` category for the appropriate channel for your issue. See <#413274922413195275> for more info."
+                )
+                .WithColor(13920845);
+
+            if (user != default)
+            {
+                ctx.Channel.SendMessageAsync(user.Mention, embed);
+            } 
+            else if (ctx.Message.ReferencedMessage != null)
+            {
+                var messageBuild = new DiscordMessageBuilder()
+                    .WithEmbed(embed)
+                    .WithReply(ctx.Message.ReferencedMessage.Id, mention: true);
+
+                ctx.Channel.SendMessageAsync(messageBuild);
+            }
+            else
+            {
+                ctx.Channel.SendMessageAsync(embed);
+            }
+        }
 
     }
 }
