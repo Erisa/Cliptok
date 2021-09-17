@@ -13,7 +13,7 @@ RUN dotnet build -c Release -o out
 FROM mcr.microsoft.com/dotnet/sdk:5.0.400 AS git-collector
 WORKDIR /out
 COPY . .
-RUN git rev-parse --short main > CommitHash.txt && \
+RUN git rev-parse --short $(git branch --show-current) > CommitHash.txt && \
     git log --pretty=format:"%s" -n 1 > CommitMessage.txt && \
     git log --pretty=format:"%ci" -n 1 > CommitTime.txt
 
