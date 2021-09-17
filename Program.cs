@@ -251,7 +251,7 @@ namespace Cliptok
 
                     if (string.IsNullOrWhiteSpace(commitMessage))
                     {
-                        commitMessage = "N/A (Expected if bot is built for Windows)";
+                        commitMessage = "N/A (Only available when built with Docker)";
                     }
 
                     if (File.Exists("CommitTime.txt"))
