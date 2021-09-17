@@ -25,3 +25,4 @@ ADD Lists ./Lists
 ADD config.json ./
 COPY --from=git-collector /out/*.txt .
 ENTRYPOINT ["dotnet", "Cliptok.dll"]
+LABEL com.centurylinklabs.watchtower.enable = "true"
