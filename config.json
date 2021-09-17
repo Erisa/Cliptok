@@ -161,5 +161,11 @@
   ],
   "autoDehoistCharacters": " !\"#$%&'()*+,-./:;<=>?@[\\]^_`'",
   "secondaryAutoDehoistCharacters": "0123456789",
-  "hastebinEndpoint": "https://haste.erisa.uk"
+  "hastebinEndpoint": "https://haste.erisa.uk",
+  "userRoles": {
+    "insiderDev": 434426594271166474,
+    "insiderBeta": 643712828217360394,
+    "insiderRP": 288729239921098752,
+    "patchTuesday": 445773142233710594
+  }
 }
