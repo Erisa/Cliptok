@@ -53,7 +53,6 @@ namespace Cliptok.Modules
             }
         }
 
-
         // If invoker is allowed to mod target.
         public static bool AllowedToMod(DiscordMember invoker, DiscordMember target)
         {
@@ -64,7 +63,6 @@ namespace Cliptok.Modules
         {
             return target.IsOwner ? int.MaxValue : (!target.Roles.Any() ? 0 : target.Roles.Max(x => x.Position));
         }
-
 
         [Command("kick")]
         [Aliases("yeet", "shoo", "goaway")]
@@ -242,7 +240,6 @@ namespace Cliptok.Modules
 
             }
         }
-
 
         public static string DehoistName(string origName)
         {
@@ -559,13 +556,15 @@ namespace Cliptok.Modules
                     {
                         await ctx.RespondAsync($"```json\n{strOut}\n```");
                     }
-                } else // if (targetUser != default)
+                }
+                else // if (targetUser != default)
                 {
                     var userMute = Program.db.HashGet("mutes", targetUser.Id);
                     if (userMute.IsNull)
                     {
                         await ctx.RespondAsync("That user has no mute registered in the database!");
-                    } else
+                    }
+                    else
                     {
                         await ctx.RespondAsync($"```json\n{userMute}\n```");
                     }
@@ -664,7 +663,6 @@ namespace Cliptok.Modules
             }
         }
 
-
         [Command("ping")]
         [Description("Pong? This command lets you know whether I'm working well.")]
         public async Task Ping(CommandContext ctx)
@@ -676,6 +674,37 @@ namespace Cliptok.Modules
             await return_message.ModifyAsync($"P{letter}ng! 🏓\n" +
                 $"• It took me `{ping}ms` to reply to your message!\n" +
                 $"• Last Websocket Heartbeat took `{ctx.Client.Ping}ms`!");
+        }
+        
+        [Command("ask")]
+        public async Task AskCmd(CommandContext ctx, DiscordUser user = default)
+        {
+            await ctx.Message.DeleteAsync();
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                .WithTitle("**__Need Help Or Have a Problem?__**")
+                .WithDescription(
+                $"You're probably looking for <#{Program.cfgjson.TechSupportChannel}>.\n" +
+                $"Once there, please be sure to provide **plenty of details**, ping the <@&{Program.cfgjson.CommunityTechSupportRoleID}> role, and *be patient!*\n\n" +
+                $"Look under the `🔧 Support` category for the appropriate channel for your issue. See <#413274922413195275> for more info."
+                )
+                .WithColor(13920845);
+
+            if (user != default)
+            {
+                ctx.Channel.SendMessageAsync(user.Mention, embed);
+            } 
+            else if (ctx.Message.ReferencedMessage != null)
+            {
+                var messageBuild = new DiscordMessageBuilder()
+                    .WithEmbed(embed)
+                    .WithReply(ctx.Message.ReferencedMessage.Id, mention: true);
+
+                ctx.Channel.SendMessageAsync(messageBuild);
+            }
+            else
+            {
+                ctx.Channel.SendMessageAsync(embed);
+            }
         }
 
     }

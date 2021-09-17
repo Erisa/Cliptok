@@ -152,7 +152,14 @@ namespace Cliptok.Modules
                 await UserRoles.RemoveUserRoleAsync(ctx, roleId);
             }
 
-            await ctx.Member.SendMessageAsync("Sad to see you go but if you ever want to rejoin Insiders and continue getting notifications type `!join-insider-dev` in <#740272437719072808> channel");
+            try
+            {
+                await ctx.Member.SendMessageAsync("Sad to see you go but if you ever want to rejoin Insiders and continue getting notifications type `!join-insider-dev` in <#740272437719072808> channel");
+            } 
+            catch (DSharpPlus.Exceptions.UnauthorizedException)
+            {
+                // do nothing, not important if DMs are closed
+            }
         }
 
         [
@@ -164,5 +171,46 @@ namespace Cliptok.Modules
         {
             await UserRoles.RemoveUserRolesAsync(ctx, x => true);
         }
+
+        [
+            Command("leave-insider-dev"),
+            Description("Removes the Windows Insiders (Dev) role"),
+            HomeServer
+        ]
+        public async Task LeaveInsiderDevCmd(CommandContext ctx)
+        {
+            await UserRoles.RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderDev);
+        }
+
+        [
+            Command("leave-insider-beta"),
+            Description("Removes the Windows Insiders (Beta) role"),
+            HomeServer
+        ]
+        public async Task LeaveInsiderBetaCmd(CommandContext ctx)
+        {
+            await UserRoles.RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderBeta);
+        }
+
+        [
+            Command("leave-insider-rp"),
+            Description("Removes the Windows Insiders (Release Preview) role"),
+            HomeServer
+        ]
+        public async Task LeaveInsiderRPCmd(CommandContext ctx)
+        {
+            await UserRoles.RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderRP);
+        }
+
+        [
+            Command("leave-patch-tuesday"),
+            Description("Removes the 💻 Patch Tuesday role"),
+            HomeServer
+        ]
+        public async Task LeavePatchTuesday(CommandContext ctx)
+        {
+            await UserRoles.RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.PatchTuesday);
+        }
+
     }
 }

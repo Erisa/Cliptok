@@ -182,6 +182,8 @@ namespace Cliptok
 
                     DiscordEmoji noHeartosoft = await e.Guild.GetEmojiAsync(cfgjson.NoHeartosoftId);
 
+                    await Task.Delay(1000);
+
                     if (targetMessage.Author.Id == e.User.Id)
                     {
                         await targetMessage.DeleteReactionAsync(e.Emoji, e.User);
@@ -275,7 +277,6 @@ namespace Cliptok
                 });
             }
 
-
             async Task UsernameCheckAsync(DiscordMember member)
             {
                 Task.Run(async () =>
@@ -359,7 +360,6 @@ namespace Cliptok
 
                     if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole))
                         db.HashDeleteAsync("mutes", e.Member.Id);
-
 
                     if (e.Member.Roles.Contains(muteRole) && userMute.IsNull)
                     {
@@ -533,8 +533,6 @@ namespace Cliptok
             discord.GuildMemberUpdated += GuildMemberUpdated;
             discord.UserUpdated += UserUpdated;
             discord.ClientErrored += ClientError;
-
-
             discord.ThreadCreated += Discord_ThreadCreated;
             discord.ThreadUpdated += Discord_ThreadUpdated;
             discord.ThreadDeleted += Discord_ThreadDeleted;
@@ -569,6 +567,4 @@ namespace Cliptok
 
         }
     }
-
-
 }

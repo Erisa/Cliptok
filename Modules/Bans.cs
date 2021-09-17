@@ -329,7 +329,6 @@ namespace Cliptok.Modules
                 await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{Warnings.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
         }
 
-
         [Command("unban")]
         [Description("Unbans a user who has been previously banned.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequirePermissions(Permissions.BanMembers)]
