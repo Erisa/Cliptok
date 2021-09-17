@@ -152,7 +152,14 @@ namespace Cliptok.Modules
                 await UserRoles.RemoveUserRoleAsync(ctx, roleId);
             }
 
-            await ctx.Member.SendMessageAsync("Sad to see you go but if you ever want to rejoin Insiders and continue getting notifications type `!join-insider-dev` in <#740272437719072808> channel");
+            try
+            {
+                await ctx.Member.SendMessageAsync("Sad to see you go but if you ever want to rejoin Insiders and continue getting notifications type `!join-insider-dev` in <#740272437719072808> channel");
+            } 
+            catch (DSharpPlus.Exceptions.UnauthorizedException)
+            {
+                // do nothing, not important if DMs are closed
+            }
         }
 
         [
@@ -204,7 +211,6 @@ namespace Cliptok.Modules
         {
             await UserRoles.RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.PatchTuesday);
         }
-
 
     }
 }
