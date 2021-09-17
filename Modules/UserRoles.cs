@@ -164,5 +164,47 @@ namespace Cliptok.Modules
         {
             await UserRoles.RemoveUserRolesAsync(ctx, x => true);
         }
+
+        [
+            Command("leave-insider-dev"),
+            Description("Removes the Windows Insiders (Dev) role"),
+            HomeServer
+        ]
+        public async Task LeaveInsiderDevCmd(CommandContext ctx)
+        {
+            await UserRoles.RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderDev);
+        }
+
+        [
+            Command("leave-insider-beta"),
+            Description("Removes the Windows Insiders (Beta) role"),
+            HomeServer
+        ]
+        public async Task LeaveInsiderBetaCmd(CommandContext ctx)
+        {
+            await UserRoles.RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderBeta);
+        }
+
+        [
+            Command("leave-insider-rp"),
+            Description("Removes the Windows Insiders (Release Preview) role"),
+            HomeServer
+        ]
+        public async Task LeaveInsiderRPCmd(CommandContext ctx)
+        {
+            await UserRoles.RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderRP);
+        }
+
+        [
+            Command("leave-patch-tuesday"),
+            Description("Removes the 💻 Patch Tuesday role"),
+            HomeServer
+        ]
+        public async Task LeavePatchTuesday(CommandContext ctx)
+        {
+            await UserRoles.RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.PatchTuesday);
+        }
+
+
     }
 }
