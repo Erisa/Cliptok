@@ -16,9 +16,11 @@ FROM --platform=${BUILDPLATFORM} \
     mcr.microsoft.com/dotnet/sdk:5.0.400 AS git-collector
 WORKDIR /out
 COPY . .
-RUN git rev-parse --short HEAD > CommitHash.txt && \
-    git log --pretty=format:"%s" -n 1 > CommitMessage.txt && \
-    git log --pretty=format:"%ci" -n 1 > CommitTime.txt
+RUN if [ -d .git ]; then \
+        git rev-parse --short HEAD > CommitHash.txt && \
+        git log --pretty=format:"%s" -n 1 > CommitMessage.txt && \
+        git log --pretty=format:"%ci" -n 1 > CommitTime.txt; \
+    fi
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/runtime:5.0.10-alpine3.13
