@@ -534,9 +534,9 @@ namespace Cliptok.Modules
             UserWarning warning = GetWarning(targetUser.Id, warnId);
             if (warning == null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
-            else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && warning.ModUserId != ctx.User.Id)
+            else if ( GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you!");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!");
             }
             else
             {
@@ -612,9 +612,9 @@ namespace Cliptok.Modules
             var warning = GetWarning(targetUser.Id, warnId);
             if (warning == null)
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
-            else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && warning.ModUserId != ctx.User.Id)
+            else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
             {
-                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you!");
+                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!");
             }
             else
             {
