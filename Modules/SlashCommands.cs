@@ -255,6 +255,32 @@ namespace Cliptok.Modules
             await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Warnings from {sourceUser.Mention} were transferred to {targetUser.Mention} by `{ctx.User.Username}#{ctx.User.Discriminator}`", Warnings.GenerateWarningsEmbed(targetUser));
         }
 
+        [ContextMenu(ApplicationCommandType.UserContextMenu, "Show Avatar")]
+        public async Task ContextAvatar(ContextMenuContext ctx)
+        {
+            var target = ctx.TargetUser;
+
+            string hash = target.AvatarHash;
+
+            var format = hash.StartsWith("a_") ? "gif" : "png";
+
+            string avatarUrl = $"https://cdn.discordapp.com/avatars/{target.Id}/{hash}.{format}?size=4096";
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+            .WithColor(new DiscordColor(0xC63B68))
+            .WithTimestamp(DateTime.UtcNow)
+            .WithFooter(
+                $"Called by {ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})",
+                ctx.User.AvatarUrl
+            )
+            .WithImageUrl(avatarUrl)
+            .WithAuthor(
+                $"Avatar for {target.Username} (Click to open in browser)",
+                avatarUrl
+            );
+
+            await ctx.RespondAsync(null, embed, ephemeral: true);
+        }
+
         [ContextMenu(ApplicationCommandType.UserContextMenu, "Show Warnings")]
         public async Task ContextWarnings(ContextMenuContext ctx)
         {
