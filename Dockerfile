@@ -19,10 +19,10 @@ RUN git rev-parse --short HEAD > CommitHash.txt && \
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/runtime:5.0.10-alpine3.13
+LABEL com.centurylinklabs.watchtower.enable true
 WORKDIR /app
 COPY --from=build-env /app/out .
 ADD Lists ./Lists
 ADD config.json ./
 COPY --from=git-collector /out/*.txt ./
 ENTRYPOINT ["dotnet", "Cliptok.dll"]
-LABEL com.centurylinklabs.watchtower.enable = "true"
