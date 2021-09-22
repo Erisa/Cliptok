@@ -100,6 +100,9 @@ namespace Cliptok
         [JsonProperty("inviteExclusion")]
         public List<string> InviteExclusion { get; private set; }
 
+        [JsonProperty("inviteIDExclusion")]
+        public List<ulong> InviteIDExclusion { get; private set; }
+
         [JsonProperty("inviteTierRequirement")]
         public int InviteTierRequirement { get; private set; }
 

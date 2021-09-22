@@ -13,7 +13,11 @@ namespace Cliptok.Modules
         public static Dictionary<string, string[]> wordLists = new();
         readonly static Regex emoji_rx = new("((\u203c|\u2049|\u2139|[\u2194-\u2199]|[\u21a9-\u21aa]|[\u231a-\u231b]|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\u24c2|[\u25aa–\u25ab]|\u25b6|\u25c0|[\u25fb–\u25fe]|[\u2600–\u2604]|\u260E|\u2611|[\u2614–\u2615]|\u2618|\u261D|\u2620|[\u2622–\u2623]|\u2626|\u262A|[\u262E–\u262F]|[\u2638–\u263A]|\u2640|\u2642|[\u2648–\u2653]|[\u265F–\u2660]|\u2663|[\u2665–\u2666]|\u2668|\u267B|[\u267E–\u267F]|[\u2692–\u2697]|\u2699|[\u269B–\u269C]|[\u26A0–\u26A1]|\u26A7|[\u26AA–\u26AB]|[\u26B0–\u26B1]|[\u26BD–\u26BE]|[\u26C4–\u26C5]|\u26C8|[\u26CE–\u26CF]|\u26D1|[\u26D3–\u26D4]|[\u26E9–\u26EA]|[\u26F0–\u26F5]|[\u26F7–\u26FA]|\u26FD|\u2702|\u2705|[\u2708–\u270D]|\u270F|\u2712|\u2714|\u2716|\u271D|\u2721|\u2728|[\u2733–\u2734]|\u2744|\u2747|\u274C|\u274E|[\u2753–\u2755]|\u2757|[\u2763–\u2764]|[\u2795–\u2797]|\u27A1|\u27B0|\u27BF|[\u2934–\u2935]|[\u2B05–\u2B07]|[\u2B1B–\u2B1C]|\u2B50|\u2B55|\u3030|\u303D|\u3297|\u3299|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]))|(<a{0,1}:[a-zA-Z0-9_.]{2,32}:[0-9]+>)");
         readonly static Regex modmaiL_rx = new("User ID: ([0-9]+)");
+        readonly static Regex invite_rx = new("(?:discord|discordapp)\\.(?:gg|com\\/invite)\\/([\\w+-]+)");
         public static Dictionary<ulong, DateTime> supportRatelimit = new();
+
+        public static List<string> allowedInviteCodes = new();
+        public static List<string> disallowedInviteCodes = new();
 
         static bool CheckForNaughtyWords(string input, WordListJson naughtyWordList)
         {
@@ -103,6 +107,22 @@ namespace Cliptok.Modules
                 embed.AddField("Message link", $"[`Jump to warning`]({messageURL})", true);
 
             await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} Deleted infringing message by {infringingMessage.Author.Mention} in {infringingMessage.Channel.Mention}:", embed);
+        }
+
+        static async Task DeleteAndWarnAsync(DiscordMessage message, string reason, DiscordClient client)
+        {
+            _ = message.DeleteAsync();
+            try
+            {
+                _ = SendInfringingMessaageAsync(Program.logChannel, message, reason, null);
+            }
+            catch
+            {
+                // still warn anyway
+            }
+            DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+            var warning = await Warnings.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), message.Channel, " automatically ");
+            await SendInfringingMessaageAsync(Program.badMsgLog, message, reason, warning.ContextLink);
         }
 
         public static async Task MessageHandlerAsync(DiscordClient client, DiscordMessage message, DiscordChannel channel, bool isAnEdit = false)
@@ -216,14 +236,8 @@ namespace Cliptok.Modules
             {
 
                 string checkedMessage = message.Content.Replace('\\', '/');
-                foreach (string exclusion in Program.cfgjson.InviteExclusion)
-                {
-                    checkedMessage = checkedMessage.Replace("discord.gg/" + exclusion, "").Replace("discord.com/invite/" + exclusion, "");
-                }
 
-                if (checkedMessage.Contains("discord.gg/") ||
-                    checkedMessage.Contains("discord.com/invite/") ||
-                    checkedMessage.Contains("dsc.gg/") ||
+                if (checkedMessage.Contains("dsc.gg/") ||
                     checkedMessage.Contains("invite.gg/")
                    )
                 {
@@ -244,6 +258,49 @@ namespace Cliptok.Modules
                     return;
                 }
 
+                var matches = invite_rx.Matches(checkedMessage);
+
+                if (matches.Count > 3)
+                {
+                    string reason = "Sent too many invites";
+                    await DeleteAndWarnAsync(message, reason, client);
+                    return;
+                }
+
+                foreach (Match currentMatch in matches)
+                {
+                    string code = currentMatch.Groups[1].Value;
+
+                    if (allowedInviteCodes.Contains(code) || Program.cfgjson.InviteExclusion.Contains(code))
+                    {
+                        continue;
+                    }
+                    else if (disallowedInviteCodes.Contains(code))
+                    {
+                        string reason = "Sent an unapproved invite";
+                        await DeleteAndWarnAsync(message, reason, client);
+                        return;
+                    }
+
+                    DiscordInvite invite;
+                    try
+                    {
+                        invite = await client.GetInviteByCodeAsync(code);
+                    } catch (DSharpPlus.Exceptions.NotFoundException)
+                    {
+                        allowedInviteCodes.Add(code);
+                        continue;
+                    }
+                    
+                    ulong guildId = invite.Guild.Id;
+
+                    if (!Program.cfgjson.InviteExclusion.Contains(code) && !Program.cfgjson.InviteIDExclusion.Contains(guildId))
+                    {
+                        disallowedInviteCodes.Add(code);
+                        string reason = "Sent an unapproved invite";
+                        await DeleteAndWarnAsync(message, reason, client);
+                    }
+                }
             }
 
             // Mass emoji
