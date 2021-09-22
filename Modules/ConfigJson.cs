@@ -159,6 +159,9 @@ namespace Cliptok
 
         [JsonProperty("hastebinEndpoint")]
         public string HastebinEndpoint { get; private set; }
+
+        [JsonProperty("modmailCategory")]
+        public ulong ModmailCategory { get; private set; }
     }
 
     public class WordListJson

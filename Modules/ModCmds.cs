@@ -707,5 +707,19 @@ namespace Cliptok.Modules
             }
         }
 
+        [Command("clipgrant")]
+        [Aliases("grant")]
+        public async Task GrantCommand(CommandContext ctx, DiscordMember member)
+        {
+            if (ctx.Channel.ParentId != Program.cfgjson.ModmailCategory && !ctx.Message.Content.Contains("clipgrant") )
+            {
+                return;
+            }
+
+            var tierOne = ctx.Guild.GetRole(Program.cfgjson.TierRoles[0]);
+            await member.GrantRoleAsync(tierOne);
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {member.Mention} can now access the server!");
+        }
+
     }
 }
