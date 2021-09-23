@@ -4,14 +4,14 @@
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net5.0</TargetFramework>
 		<RestoreAdditionalProjectSources>
-			https://www.myget.org/F/erisa/api/v3/index.json
+			https://nuget.emzi0767.com/api/v3/index.json
 		</RestoreAdditionalProjectSources>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Abyssal.HumanDateParser" Version="2.0.0-20191113.1" />
-		<PackageReference Include="DSharpPlus" Version="4.2.2-nightly-eri-from-dwaffles-threads-1a58c1d9dede0f29dd7492350b5e40116c1c7602-patch3" />
-		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.2-nightly-eri-from-dwaffles-threads-1a58c1d9dede0f29dd7492350b5e40116c1c7602-patch3" />
+		<PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01003" />
+		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01003" />
 		<PackageReference Include="IDoEverything.DSharpPlus.SlashCommands " Version="2.0.0.2-eri-patch3" />
 		<PackageReference Include="StackExchange.Redis" Version="2.2.62" />
 		<PackageReference Include="System.Linq" Version="4.3.0" />
@@ -32,6 +32,10 @@
 	<ItemGroup>
 	  <None Remove="Lists\autoban.txt" />
 	  <None Remove="Lists\usernames.txt" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Update="IDoEverything.DSharpPlus.SlashCommands" Version="2.0.4" />
 	</ItemGroup>
 
 </Project>
