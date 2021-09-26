@@ -709,6 +709,7 @@ namespace Cliptok.Modules
 
         [Command("clipgrant")]
         [Aliases("grant")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
         public async Task GrantCommand(CommandContext ctx, DiscordMember member)
         {
             if (ctx.Channel.ParentId != Program.cfgjson.ModmailCategory && !ctx.Message.Content.Contains("clipgrant") )
