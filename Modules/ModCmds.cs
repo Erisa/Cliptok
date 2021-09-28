@@ -419,7 +419,7 @@ namespace Cliptok.Modules
 
         }
 
-        public static long ToUnixTimestamp(DateTime dateTime)
+        public static long ToUnixTimestamp(DateTime? dateTime)
         {
             return ((DateTimeOffset)dateTime).ToUnixTimeSeconds();
         }
