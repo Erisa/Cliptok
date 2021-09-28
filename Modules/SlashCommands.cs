@@ -259,12 +259,19 @@ namespace Cliptok.Modules
         public async Task ContextAvatar(ContextMenuContext ctx)
         {
             var target = ctx.TargetUser;
+            var member = await ctx.Guild.GetMemberAsync(target.Id);
 
-            string hash = target.AvatarHash;
+            string hash = member.GuildAvatarHash;
 
             var format = hash.StartsWith("a_") ? "gif" : "png";
 
-            string avatarUrl = $"https://cdn.discordapp.com/avatars/{target.Id}/{hash}.{format}?size=4096";
+
+            string avatarUrl;
+            if (member.GuildAvatarHash != target.AvatarHash)
+                avatarUrl = $"https://cdn.discordapp.com/guilds/{ctx.Guild.Id}/users/{target.Id}/avatars/{hash}.{format}?size=4096";
+            else
+                avatarUrl = $"https://cdn.discordapp.com/avatars/{target.Id}/{member.AvatarHash}.{format}?size=4096";
+
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
             .WithColor(new DiscordColor(0xC63B68))
             .WithTimestamp(DateTime.UtcNow)
