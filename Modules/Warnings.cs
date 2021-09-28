@@ -626,5 +626,36 @@ namespace Cliptok.Modules
             }
         }
 
+        [Command("mostwarnings"), Description("Who has the most warnings???")]
+        [RequireHomeserverPerm(ServerPermLevel.TrialMod)]
+        public async Task MostWarningsCmd(CommandContext ctx)
+        {
+            await ctx.Channel.TriggerTypingAsync();
+
+            var server = Program.redis.GetServer(Program.redis.GetEndPoints()[0]);
+            var keys = server.Keys();
+
+            Dictionary<string, int> counts = new();
+            foreach(var key in keys )
+            {
+                ulong number;
+                if (ulong.TryParse(key.ToString(), out number))
+                {
+                    counts[key.ToString()] = Program.db.HashGetAll(key).Count();
+                }
+            }
+
+            List<KeyValuePair<string, int>> myList = counts.ToList();
+            myList.Sort(
+                delegate (KeyValuePair<string, int> pair1,
+                KeyValuePair<string, int> pair2)
+                {
+                    return pair1.Value.CompareTo(pair2.Value);
+                }
+            );
+
+            var user = await ctx.Client.GetUserAsync(Convert.ToUInt64(myList.Last().Key));
+            await ctx.RespondAsync($":thinking: The user with the most warnings is **{user.Username}#{user.Discriminator}** with a total of **{myList.Last().Value} warnings!**\nThis includes users who have left or been banned.");
+        }
     }
 }
