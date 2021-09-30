@@ -275,10 +275,6 @@ namespace Cliptok.Modules
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
             .WithColor(new DiscordColor(0xC63B68))
             .WithTimestamp(DateTime.UtcNow)
-            .WithFooter(
-                $"Called by {ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})",
-                ctx.User.AvatarUrl
-            )
             .WithImageUrl(avatarUrl)
             .WithAuthor(
                 $"Avatar for {target.Username} (Click to open in browser)",
