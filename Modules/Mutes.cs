@@ -77,9 +77,9 @@ namespace Cliptok.Modules
 
                 else
                 {
-                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted for **{Warnings.TimeToPrettyFormat(muteDuration, false)} by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`)." +
-                        $"\nReason: <t:**{reason}**:R>" +
-                        $"\nMute expires: {ModCmds.ToUnixTimestamp(expireTime)}");
+                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted for **{Warnings.TimeToPrettyFormat(muteDuration, false)}** by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`)." +
+                        $"\nReason: **{reason}**" +
+                        $"\nMute expires: <t:{ModCmds.ToUnixTimestamp(expireTime)}:R>");
                     if (naughtyMember != default)
                         await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}** for **{Warnings.TimeToPrettyFormat(muteDuration, false)}**!" +
                             $"\nReason: **{reason}**" +
