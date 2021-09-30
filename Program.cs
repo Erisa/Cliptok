@@ -360,7 +360,7 @@ namespace Cliptok
 
                         await e.Member.BanAsync(7, "Matching patterns of known raiders, please unban if appealed.");
 
-                        await badMsgLog.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the join date of the 2021-09-30 DM scam raiders.");
+                        await badMsgLog.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the creation date of the 2021-09-30 DM scam raiders.");
                     }
 
                     Program.db.HashSet("2021-09-30", e.Member.Id, true);
