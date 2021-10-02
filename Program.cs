@@ -346,7 +346,7 @@ namespace Cliptok
                         await badMsgLog.SendMessageAsync($"{cfgjson.Emoji.Banned} Raid-banned {e.Member.Mention} for matching avatar: {e.Member.AvatarUrl.Replace("1024", "128")}");
                     }
 
-                    RedisValue check = Program.db.HashGet("2021-09-30", e.Member.Id);
+                    RedisValue check = Program.db.HashGet("2021-10-02", e.Member.Id);
                     if (check.HasValue == true)
                     {
                         return;
