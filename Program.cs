@@ -352,7 +352,7 @@ namespace Cliptok
                         return;
                     }
 
-                    if (e.Member.Id > 893390000000000000 && e.Member.Id < 893440000000000000)
+                    if (e.Member.Id > 893390000000000000 && e.Member.Id < 893520000000000000)
                     {
                         await e.Member.SendMessageAsync($"You have been automatically banned from **{e.Guild.Name}** for matching patterns of known raiders.\n" +
                             $"Please send an appeal and you will be unbanned as soon as possible: {Program.cfgjson.AppealLink}\n" +
