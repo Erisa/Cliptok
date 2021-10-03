@@ -139,6 +139,10 @@
     "malware.txt": {
       "wholeWord": false,
       "reason": "Attempted to send malware"
+    },
+    "scamlinks.txt": {
+      "wholeWord": false,
+      "reason": "Sent scam link(s)"
     }
   },
   "massEmojiThreshold": 6,
