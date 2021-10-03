@@ -346,7 +346,27 @@ namespace Cliptok
                         await badMsgLog.SendMessageAsync($"{cfgjson.Emoji.Banned} Raid-banned {e.Member.Mention} for matching avatar: {e.Member.AvatarUrl.Replace("1024", "128")}");
                     }
 
-                    RedisValue check = Program.db.HashGet("2021-10-02", e.Member.Id);
+                    string banDM = $"You have been automatically banned from **{e.Guild.Name}** for matching patterns of known raiders.\n" +
+                            $"Please send an appeal and you will be unbanned as soon as possible: {Program.cfgjson.AppealLink}\n" +
+                            $"The requirements for appeal can be ignored in this case. Sorry for any inconvenience caused.";
+
+                    
+                    RedisValue check = Program.db.HashGet("2021-09-30", e.Member.Id);
+                    if (check.HasValue != true)
+                    {
+                        if (e.Member.Id > 892950000000000000 && e.Member.Id < 893100000000000000)
+                        {
+                            await e.Member.SendMessageAsync(banDM);
+
+                            await e.Member.BanAsync(7, "Matching patterns of known raiders, please unban if appealed.");
+
+                            await badMsgLog.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the creation date of the 2021-09-30 DM scam raiders.");
+                        }
+
+                        Program.db.HashSet("2021-09-30", e.Member.Id, true);
+                    }
+
+                    check = Program.db.HashGet("2021-10-02", e.Member.Id);
                     if (check.HasValue == true)
                     {
                         return;
@@ -354,9 +374,7 @@ namespace Cliptok
 
                     if (e.Member.Id > 893390000000000000 && e.Member.Id < 893520000000000000)
                     {
-                        await e.Member.SendMessageAsync($"You have been automatically banned from **{e.Guild.Name}** for matching patterns of known raiders.\n" +
-                            $"Please send an appeal and you will be unbanned as soon as possible: {Program.cfgjson.AppealLink}\n" +
-                            $"The requirements for appeal can be ignored in this case. Sorry for any inconvenience caused.");
+                        await e.Member.SendMessageAsync(banDM);
 
                         await e.Member.BanAsync(7, "Matching patterns of known raiders, please unban if appealed.");
 
