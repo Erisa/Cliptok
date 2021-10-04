@@ -139,6 +139,10 @@
     "malware.txt": {
       "wholeWord": false,
       "reason": "Attempted to send malware"
+    },
+    "scamlinks.txt": {
+      "wholeWord": false,
+      "reason": "Sent scam link(s)"
     }
   },
   "massEmojiThreshold": 6,
@@ -192,5 +196,22 @@
     "insiderRP": 288729239921098752,
     "patchTuesday": 445773142233710594
   },
-  "modmailCategory": 536572162450915340
+  "modmailCategory": 536572162450915340,
+  "autobanIds": [
+    {
+      "name": "2021-09-30",
+      "lowerBound": 892950000000000000,
+      "upperBound": 893100000000000000
+    },
+    {
+      "name": "2021-10-02",
+      "lowerBound": 893390000000000000,
+      "upperBound": 893520000000000000
+    },
+    {
+      "name": "2021-10-04",
+      "lowerBound": 893910000000000000,
+      "upperBound": 894100000000000000
+    }
+  ]
 }

@@ -79,7 +79,7 @@ namespace Cliptok.Modules
             }
             catch
             {
-                await ctx.Channel.SendMessageAsync($"{ctx.User.Mention}, that user doesn't appear to be in the server.");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be in the server!");
                 return;
             }
 

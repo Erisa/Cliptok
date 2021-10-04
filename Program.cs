@@ -350,38 +350,20 @@ namespace Cliptok
                             $"Please send an appeal and you will be unbanned as soon as possible: {Program.cfgjson.AppealLink}\n" +
                             $"The requirements for appeal can be ignored in this case. Sorry for any inconvenience caused.";
 
-                    
-                    RedisValue check = Program.db.HashGet("2021-09-30", e.Member.Id);
-                    if (check.HasValue != true)
+                    RedisValue check;
+                    foreach (var IdAutoBanSet in Program.cfgjson.AutoBanIds)
                     {
-                        if (e.Member.Id > 892950000000000000 && e.Member.Id < 893100000000000000)
+                        check = Program.db.HashGet(IdAutoBanSet.Name, e.Member.Id);
+                        if (e.Member.Id > IdAutoBanSet.LowerBound && e.Member.Id < IdAutoBanSet.UpperBound)
                         {
                             await e.Member.SendMessageAsync(banDM);
 
                             await e.Member.BanAsync(7, "Matching patterns of known raiders, please unban if appealed.");
 
-                            await badMsgLog.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the creation date of the 2021-09-30 DM scam raiders.");
+                            await badMsgLog.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the creation date of the {IdAutoBanSet.Name} DM scam raiders.");
                         }
-
-                        Program.db.HashSet("2021-09-30", e.Member.Id, true);
                     }
 
-                    check = Program.db.HashGet("2021-10-02", e.Member.Id);
-                    if (check.HasValue == true)
-                    {
-                        return;
-                    }
-
-                    if (e.Member.Id > 893390000000000000 && e.Member.Id < 893520000000000000)
-                    {
-                        await e.Member.SendMessageAsync(banDM);
-
-                        await e.Member.BanAsync(7, "Matching patterns of known raiders, please unban if appealed.");
-
-                        await badMsgLog.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the creation date of the 2021-10-02 DM scam raiders.");
-                    }
-
-                    Program.db.HashSet("2021-10-02", e.Member.Id, true);
                 });
             }
 
