@@ -630,7 +630,14 @@ namespace Cliptok.Modules
         [RequireHomeserverPerm(ServerPermLevel.TrialMod)]
         public async Task MostWarningsCmd(CommandContext ctx)
         {
-            await ctx.Channel.TriggerTypingAsync();
+            try
+            {
+                await ctx.TriggerTypingAsync();
+            }
+            catch
+            {
+                // typing failing is unimportant, move on
+            }
 
             var server = Program.redis.GetServer(Program.redis.GetEndPoints()[0]);
             var keys = server.Keys();

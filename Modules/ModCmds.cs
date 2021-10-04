@@ -522,7 +522,15 @@ namespace Cliptok.Modules
             [Description("Debug the list of mutes.")]
             public async Task MuteDebug(CommandContext ctx, DiscordUser targetUser = default)
             {
-                await ctx.TriggerTypingAsync();
+                try
+                {
+                    await ctx.TriggerTypingAsync();
+                }
+                catch
+                {
+                    // typing failing is unimportant, move on
+                }
+                
                 string strOut = "";
                 if (targetUser == default)
                 {
@@ -576,7 +584,15 @@ namespace Cliptok.Modules
             [Description("Debug the list of bans.")]
             public async Task BanDebug(CommandContext ctx, DiscordUser targetUser = default)
             {
-                await ctx.TriggerTypingAsync();
+                try
+                {
+                    await ctx.TriggerTypingAsync();
+                }
+                catch
+                {
+                    // typing failing is unimportant, move on
+                }
+
                 string strOut = "";
                 if (targetUser == default)
                 {
