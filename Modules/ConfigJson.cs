@@ -162,9 +162,6 @@ namespace Cliptok
 
         [JsonProperty("modmailCategory")]
         public ulong ModmailCategory { get; private set; }
-
-        [JsonProperty("dmScamChannel")]
-        public ulong DmScamChannel { get; private set; }
     }
 
     public class WordListJson

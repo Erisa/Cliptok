@@ -36,7 +36,6 @@ namespace Cliptok
         public static DiscordChannel logChannel;
         public static DiscordChannel userLogChannel;
         public static DiscordChannel badMsgLog;
-        public static DiscordThreadChannel dmScamLog;
 
         public static Random rand = new Random();
         public static HasteBinClient hasteUploader;
@@ -214,10 +213,6 @@ namespace Cliptok
                     logChannel = await discord.GetChannelAsync(cfgjson.LogChannel);
                     userLogChannel = await discord.GetChannelAsync(cfgjson.UserLogChannel);
                     badMsgLog = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
-                    DiscordGuild homeServer = await discord.GetGuildAsync(cfgjson.ServerID);
-                    dmScamLog = homeServer.Threads[cfgjson.DmScamChannel];
-                    await dmScamLog.SendMessageAsync("test it worked");
-
                     Mutes.CheckMutesAsync();
                     ModCmds.CheckBansAsync();
                     ModCmds.CheckRemindersAsync();
@@ -365,7 +360,7 @@ namespace Cliptok
 
                             await e.Member.BanAsync(7, "Matching patterns of known raiders, please unban if appealed.");
 
-                            await dmScamLog.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the creation date of the 2021-09-30 DM scam raiders.");
+                            await badMsgLog.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the creation date of the 2021-09-30 DM scam raiders.");
                         }
 
                         Program.db.HashSet("2021-09-30", e.Member.Id, true);
@@ -383,7 +378,7 @@ namespace Cliptok
 
                         await e.Member.BanAsync(7, "Matching patterns of known raiders, please unban if appealed.");
 
-                        await dmScamLog.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the creation date of the 2021-10-02 DM scam raiders.");
+                        await badMsgLog.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the creation date of the 2021-10-02 DM scam raiders.");
                     }
 
                     Program.db.HashSet("2021-10-02", e.Member.Id, true);
