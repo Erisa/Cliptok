@@ -367,21 +367,34 @@ namespace Cliptok
                     }
 
                     check = Program.db.HashGet("2021-10-02", e.Member.Id);
-                    if (check.HasValue == true)
+                    if (check.HasValue != true)
                     {
-                        return;
+                        if (e.Member.Id > 893390000000000000 && e.Member.Id < 893520000000000000)
+                        {
+                            await e.Member.SendMessageAsync(banDM);
+
+                            await e.Member.BanAsync(7, "Matching patterns of known raiders, please unban if appealed.");
+
+                            await badMsgLog.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the creation date of the 2021-10-02 DM scam raiders.");
+                        }
+                        Program.db.HashSet("2021-10-02", e.Member.Id, true);
                     }
 
-                    if (e.Member.Id > 893390000000000000 && e.Member.Id < 893520000000000000)
+                    check = Program.db.HashGet("2021-10-04", e.Member.Id);
+                    if (check.HasValue != true)
                     {
-                        await e.Member.SendMessageAsync(banDM);
+                        if (e.Member.Id > 893910000000000000 && e.Member.Id < 893960000000000000)
+                        {
+                            await e.Member.SendMessageAsync(banDM);
 
-                        await e.Member.BanAsync(7, "Matching patterns of known raiders, please unban if appealed.");
+                            await e.Member.BanAsync(7, "Matching patterns of known raiders, please unban if appealed.");
 
                         await badMsgLog.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the creation date of the 2021-10-02 DM scam raiders.");
+                        }
+
+                        Program.db.HashSet("2021-10-04", e.Member.Id, true);
                     }
 
-                    Program.db.HashSet("2021-10-02", e.Member.Id, true);
                 });
             }
 
