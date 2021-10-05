@@ -221,6 +221,7 @@ namespace Cliptok.Modules
     public class MuteCmds : BaseCommandModule
     {
         [Command("unmute")]
+        [Aliases("umute")]
         [Description("Unmutes a previously muted user, typically ahead of the standard expiration time. See also: mute")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)]
         public async Task UnmuteCmd(CommandContext ctx, [Description("The user you're trying to unmute.")] DiscordUser targetUser)
