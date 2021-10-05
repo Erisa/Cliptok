@@ -143,6 +143,10 @@
     "scamlinks.txt": {
       "wholeWord": false,
       "reason": "Sent scam link(s)"
+    },
+    "exploits.txt": {
+      "wholeWord": false,
+      "reason": "Using a text-rendering exploit to mask URL(s)"
     }
   },
   "massEmojiThreshold": 6,
