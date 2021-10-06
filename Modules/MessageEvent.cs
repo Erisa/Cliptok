@@ -175,7 +175,11 @@ namespace Cliptok.Modules
             var wordListKeys = Program.cfgjson.WordListList.Keys;
             foreach (string key in wordListKeys)
             {
-                if (CheckForNaughtyWords(message.Content.ToLower(), Program.cfgjson.WordListList[key]))
+                if (Program.cfgjson.WordListList[key].ExcludedChannels.Contains(message.Channel.Id))
+                {
+                    continue;
+                }
+                else if (CheckForNaughtyWords(message.Content.ToLower(), Program.cfgjson.WordListList[key]))
                 {
                     string reason = Program.cfgjson.WordListList[key].Reason;
                     try

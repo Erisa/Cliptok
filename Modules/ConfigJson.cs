@@ -165,6 +165,7 @@ namespace Cliptok
 
         [JsonProperty("autoBanIds")]
         public List<AutoBanIdSet> AutoBanIds { get; private set; }
+
     }
 
     public class WordListJson
@@ -176,6 +177,9 @@ namespace Cliptok
         public string Reason { get; private set; }
 
         public string[] Words { get; set; }
+
+        [JsonProperty("excludedChannels")]
+        public List<ulong> ExcludedChannels { get; private set; } = new();
     }
 
     public class AutoBanIdSet

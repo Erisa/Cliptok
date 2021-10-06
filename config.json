@@ -135,7 +135,11 @@
     },
     "everyone.txt": {
       "wholeWord": false,
-      "reason": "Attempted to ping everyone/here"
+      "reason": "Attempted to ping everyone/here",
+      "excludedChannels": [
+        316600283503394817,
+        726511089461755974
+      ]
     },
     "malware.txt": {
       "wholeWord": false,
