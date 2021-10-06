@@ -264,6 +264,9 @@ namespace Cliptok
         [JsonProperty("clockTime")]
         public string ClockTime { get; set; }
 
+        [JsonProperty("windows11")]
+        public string Windows11 { get; set; }
+
     }
 
     public class CoreConfig

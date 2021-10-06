@@ -109,7 +109,8 @@
     "userLeave": "<:CliptokUserLeave:870011211750719558>",
     "userUpdate": "<:CliptokUserUpdate:870011211620708372>",
     "messageEdit": "<:CliptokEdit:870011211125751888>",
-    "clockTime": "<:CliptokClock:848246682156138546>"
+    "clockTime": "<:CliptokClock:848246682156138546>",
+    "windows11": "<:CliptokWindows11:895420814155993128>"
   },
   "redis": {
     "host": "localhost",
