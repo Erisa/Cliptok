@@ -354,6 +354,11 @@ namespace Cliptok
                     foreach (var IdAutoBanSet in Program.cfgjson.AutoBanIds)
                     {
                         check = Program.db.HashGet(IdAutoBanSet.Name, e.Member.Id);
+                        if (check.HasValue == true)
+                        {
+                            return;
+                        }
+                        
                         if (e.Member.Id > IdAutoBanSet.LowerBound && e.Member.Id < IdAutoBanSet.UpperBound)
                         {
                             await e.Member.SendMessageAsync(banDM);
