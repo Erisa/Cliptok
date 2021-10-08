@@ -367,6 +367,8 @@ namespace Cliptok
 
                             await badMsgLog.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the creation date of the {IdAutoBanSet.Name} DM scam raiders.");
                         }
+                        
+                        Program.db.HashSet(IdAutoBanSet.Name, e.Member.Id, true);
                     }
 
                 });
