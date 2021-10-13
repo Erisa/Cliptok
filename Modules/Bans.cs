@@ -196,7 +196,7 @@ namespace Cliptok.Modules
             if (timeParsed && possibleTime == reason)
                 reason = "No reason specified.";
 
-            if (reason.Length > 6 && reason.Substring(0, 7) == "appeal ")
+            if (reason.Length > 6 && reason.Substring(0, 7).ToLower() == "appeal ")
             {
                 appealable = true;
                 reason = reason[7..^0];
@@ -280,7 +280,7 @@ namespace Cliptok.Modules
             if (timeParsed && possibleTime == reason)
                 reason = "No reason specified.";
 
-            if (reason.Length > 6 && reason.Substring(0, 7) == "appeal ")
+            if (reason.Length > 6 && reason.Substring(0, 7).ToLower() == "appeal ")
             {
                 appealable = true;
                 reason = reason[7..^0];
