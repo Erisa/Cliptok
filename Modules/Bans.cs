@@ -66,7 +66,14 @@ namespace Cliptok.Modules
                 await guild.BanMemberAsync(targetUserId, deleteDays, reason);
                 if (permaBan)
                 {
-                    logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was permanently banned by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**";
+                    if (appealable)
+                    {
+                        logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was permanently banned (with appeal) by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**";
+                    }
+                    else
+                    {
+                        logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was permanently banned by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**";
+                    }
                 }
                 else
                 {
