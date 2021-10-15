@@ -691,6 +691,15 @@ namespace Cliptok.Modules
                 $"• It took me `{ping}ms` to reply to your message!\n" +
                 $"• Last Websocket Heartbeat took `{ctx.Client.Ping}ms`!");
         }
+
+        [Command("edit")]
+        [RequireHomeserverPerm(ServerPermLevel.Mod)]
+        public async Task Edit(CommandContext ctx, ulong messageId, [RemainingText] string content)
+        {
+            await ctx.Message.DeleteAsync();
+            var msg = await ctx.Channel.GetMessageAsync(messageId);
+            await msg.ModifyAsync(content);
+        }
         
         [Command("ask")]
         public async Task AskCmd(CommandContext ctx, DiscordUser user = default)
