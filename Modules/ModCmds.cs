@@ -738,9 +738,9 @@ namespace Cliptok.Modules
             }
         }
 
-        [Command("clipgrant")]
-        [Aliases("grant")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
+        [Command("grant")]
+        [Aliases("clipgrant")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)]
         public async Task GrantCommand(CommandContext ctx, DiscordMember member)
         {
             var tierOne = ctx.Guild.GetRole(Program.cfgjson.TierRoles[0]);
