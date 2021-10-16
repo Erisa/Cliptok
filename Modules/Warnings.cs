@@ -51,7 +51,7 @@ namespace Cliptok.Modules
             var level = Warnings.GetPermLevel(ctx.Member);
             if (level >= this.TargetLvl)
                 return true;
-            else if (!help)
+            else if (!help && ctx.Command.QualifiedName != "edit")
             {
                 var levelText = level.ToString();
                 if (level == ServerPermLevel.nothing && Program.rand.Next(1, 100) == 69)
