@@ -696,6 +696,9 @@ namespace Cliptok.Modules
         [RequireHomeserverPerm(ServerPermLevel.Mod)]
         public async Task Edit(CommandContext ctx, ulong messageId, [RemainingText] string content)
         {
+            if (ctx.Message.Author.Id != ctx.Client.CurrentUser.Id)
+                return;
+
             await ctx.Message.DeleteAsync();
             var msg = await ctx.Channel.GetMessageAsync(messageId);
             await msg.ModifyAsync(content);
