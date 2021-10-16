@@ -481,6 +481,10 @@ namespace Cliptok
                 if (e.Exception is CommandNotFoundException && (e.Command == null || e.Command.QualifiedName != "help"))
                     return;
 
+                // avoid conflicts with modmaail
+                if (e.Command.QualifiedName == "edit")
+                    return;
+
                 e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Exception occurred during {0}'s invocation of '{1}'", e.Context.User.Username, e.Context.Command.QualifiedName);
 
                 var exs = new List<Exception>();
@@ -506,7 +510,7 @@ namespace Cliptok
                     };
                     embed.WithFooter(discord.CurrentUser.Username, discord.CurrentUser.AvatarUrl)
                         .AddField("Message", ex.Message);
-                    if (e.Exception.GetType().ToString() == "System.ArgumentException")
+                    if (e.Exception is System.ArgumentException)
                         embed.AddField("Note", "This usually means that you used the command incorrectly.\n" +
                             "Please double-check how to use this command.");
                     await e.Context.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
