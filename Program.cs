@@ -142,7 +142,7 @@ namespace Cliptok
                 if (e.Exception is SlashExecutionChecksFailedException slex)
                 {
                     foreach (var check in slex.FailedChecks)
-                        if (check is SlashRequireHomeserverPermAttribute att)
+                        if (check is SlashRequireHomeserverPermAttribute att && e.Context.CommandName != "edit")
                         {
                             var level = Warnings.GetPermLevel(e.Context.Member);
                             var levelText = level.ToString();
