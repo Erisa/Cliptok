@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
@@ -13,7 +13,7 @@
 		<PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01008" />
 		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01008" />
 		<PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01008" />
-		<PackageReference Include="StackExchange.Redis" Version="2.2.62" />
+		<PackageReference Include="StackExchange.Redis" Version="2.2.79" />
 		<PackageReference Include="System.Linq" Version="4.3.0" />
 	</ItemGroup>
 
