@@ -1,5 +1,5 @@
 FROM --platform=${BUILDPLATFORM} \
-    mcr.microsoft.com/dotnet/sdk:5.0.402 AS build-env
+    mcr.microsoft.com/dotnet/sdk:6.0.100-rc.2 AS build-env
     
 WORKDIR /app
 
@@ -13,7 +13,7 @@ RUN dotnet build -c Release -o out
 
 # We already have this image pulled, its actually quicker to reuse it
 FROM --platform=${BUILDPLATFORM} \
-    mcr.microsoft.com/dotnet/sdk:5.0.402 AS git-collector
+    mcr.microsoft.com/dotnet/sdk:6.0.100-rc.2 AS git-collector
 WORKDIR /out
 COPY . .
 RUN touch dummy.txt && \
@@ -24,7 +24,7 @@ RUN touch dummy.txt && \
     fi
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/runtime:5.0.11-alpine3.13
+FROM mcr.microsoft.com/dotnet/runtime:6.0.0-rc.2-alpine3.14
 LABEL com.centurylinklabs.watchtower.enable true
 WORKDIR /app
 COPY --from=build-env /app/out .
