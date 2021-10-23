@@ -22,6 +22,7 @@ namespace Cliptok.Modules
         static bool CheckForNaughtyWords(string input, WordListJson naughtyWordList)
         {
             string[] naughtyWords = naughtyWordList.Words;
+            input = input.Replace("\0", "");
             if (naughtyWordList.WholeWord)
             {
                 input = input.Replace("\'", " ")
