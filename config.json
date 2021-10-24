@@ -153,7 +153,7 @@
     },
     "exploits.txt": {
       "wholeWord": false,
-      "reason": "Using a text-rendering exploit to mask URL(s)"
+      "reason": "Using a text-rendering exploit to mask URL(s) and/or mentions"
     }
   },
   "massEmojiThreshold": 6,
