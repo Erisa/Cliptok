@@ -296,8 +296,10 @@ namespace Cliptok.Modules
                         allowedInviteCodes.Add(code);
                         continue;
                     }
+                    
+                    ulong guildId = invite.Guild.Id;
 
-                    if (invite.Channel.Type == ChannelType.Group || (!Program.cfgjson.InviteExclusion.Contains(code) && !Program.cfgjson.InviteIDExclusion.Contains(invite.Guild.Id)))
+                    if (!Program.cfgjson.InviteExclusion.Contains(code) && !Program.cfgjson.InviteIDExclusion.Contains(guildId))
                     {
                         disallowedInviteCodes.Add(code);
                         string reason = "Sent an unapproved invite";
