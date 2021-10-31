@@ -224,56 +224,49 @@ namespace Cliptok.Modules
         public async Task TransferWarningsSlashCommand(InteractionContext ctx,
             [Option("source_user", "The user currently holding the warnings.")] DiscordUser sourceUser,
             [Option("target_user", "The user recieving the warnings.")] DiscordUser targetUser,
+            [Option("merge", "Whether to merge the source user's warnings and the target user's warnings.")] bool merge = false,
             [Option("force_override", "DESTRUCTIVE OPERATION: Whether to OVERRIDE and DELETE the target users existing warnings.")] bool forceOverride = false
         )
         {
             var sourceWarnings = await Program.db.HashGetAllAsync(sourceUser.Id.ToString());
-            var targetWarnings = await Program.db.HashGetAllAsync(targetUser.Id.ToString());
 
             if (sourceWarnings.Length == 0)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} The source user has no warnings to transfer.", Warnings.GenerateWarningsEmbed(sourceUser));
                 return;
             }
-            else if (targetWarnings.Length > 0 && !forceOverride)
+
+            if (merge)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} **CAUTION**: The target user has warnings.\n\n" +
-                    $"If you are sure you want to **OVERRIDE** and **DELETE** these warnings, please consider the consequences before adding `force_override: true` to the command.",
-                    Warnings.GenerateWarningsEmbed(targetUser));
-                return;
-            }
-            else if (targetWarnings.Length > 0 && forceOverride)
-            {
-                await Program.db.KeyDeleteAsync(targetUser.Id.ToString());
-                await Program.db.KeyRenameAsync(sourceUser.Id.ToString(), targetUser.Id.ToString());
+                await Program.db.KeyDeleteAsync(sourceUser.Id.ToString());
+                foreach (var hash in sourceWarnings)
+                {
+                    await Program.db.HashSetAsync(targetUser.Id.ToString(), hash.Name, hash.Value);
+                }
             }
             else
             {
-                await Program.db.KeyRenameAsync(sourceUser.Id.ToString(), targetUser.Id.ToString());
+                var targetWarnings = await Program.db.HashGetAllAsync(targetUser.Id.ToString());
+                if (targetWarnings.Length > 0 && !forceOverride)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} **CAUTION**: The target user has warnings.\n\n" +
+                        $"If you are sure you want to **OVERRIDE** and **DELETE** these warnings, please consider the consequences before adding `force_override: true` to the command.",
+                        Warnings.GenerateWarningsEmbed(targetUser));
+                    return;
+                }
+
+                if (targetWarnings.Length > 0 && forceOverride)
+                {
+                    await Program.db.KeyDeleteAsync(targetUser.Id.ToString());
+                    await Program.db.KeyRenameAsync(sourceUser.Id.ToString(), targetUser.Id.ToString());
+                }
+                else
+                {
+                    await Program.db.KeyRenameAsync(sourceUser.Id.ToString(), targetUser.Id.ToString());
+                }
             }
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successully transferred warnings from {sourceUser.Mention} to {targetUser.Mention}!");
             await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Warnings from {sourceUser.Mention} were transferred to {targetUser.Mention} by `{ctx.User.Username}#{ctx.User.Discriminator}`", Warnings.GenerateWarningsEmbed(targetUser));
-        }
-
-        [SlashCommand("merge_warnings", "Merge warnings from one user to another.")]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Mod)]
-        public async Task MergeWarningsCmd(InteractionContext ctx,
-            [Option("source", "The source user to get warnings from.")]DiscordUser source,
-            [Option("target", "The target user to merge warnings into.")]DiscordUser target)
-        {
-            var sourceWarnings = await Program.db.HashGetAllAsync(source.Id.ToString());
-            if (sourceWarnings.Length == 0)
-            {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} The source user has no warnings to merge.", Warnings.GenerateWarningsEmbed(source));
-                return;
-            }
-            await Program.db.KeyDeleteAsync(source.Id.ToString());
-            foreach (var hash in sourceWarnings)
-            {
-                await Program.db.HashSetAsync(target.Id.ToString(), hash.Name, hash.Value);
-            }
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successully merged warnings from {source.Mention} to {target.Mention}!");
-            await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Warnings from {source.Mention} were merged to {target.Mention} by `{ctx.User.Username}#{ctx.User.Discriminator}`", Warnings.GenerateWarningsEmbed(target));
         }
 
         [ContextMenu(ApplicationCommandType.UserContextMenu, "Show Avatar")]
