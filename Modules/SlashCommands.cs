@@ -255,6 +255,27 @@ namespace Cliptok.Modules
             await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Warnings from {sourceUser.Mention} were transferred to {targetUser.Mention} by `{ctx.User.Username}#{ctx.User.Discriminator}`", Warnings.GenerateWarningsEmbed(targetUser));
         }
 
+        [SlashCommand("merge_warnings", "Merge warnings from one user to another.")]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Mod)]
+        public async Task MergeWarningsCmd(InteractionContext ctx,
+            [Option("source", "The source user to get warnings from.")]DiscordUser source,
+            [Option("target", "The target user to merge warnings into.")]DiscordUser target)
+        {
+            var sourceWarnings = await Program.db.HashGetAllAsync(source.Id.ToString());
+            if (sourceWarnings.Length == 0)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} The source user has no warnings to merge.", Warnings.GenerateWarningsEmbed(source));
+                return;
+            }
+            await Program.db.KeyDeleteAsync(source.Id.ToString());
+            foreach (var hash in sourceWarnings)
+            {
+                await Program.db.HashSetAsync(target.Id.ToString(), hash.Name, hash.Value);
+            }
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successully merged warnings from {source.Mention} to {target.Mention}!");
+            await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Warnings from {source.Mention} were merged to {target.Mention} by `{ctx.User.Username}#{ctx.User.Discriminator}`", Warnings.GenerateWarningsEmbed(target));
+        }
+
         [ContextMenu(ApplicationCommandType.UserContextMenu, "Show Avatar")]
         public async Task ContextAvatar(ContextMenuContext ctx)
         {
