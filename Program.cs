@@ -215,7 +215,7 @@ namespace Cliptok
                     badMsgLog = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
                     Mutes.CheckMutesAsync();
                     ModCmds.CheckBansAsync();
-                    MemberCmds.CheckRemindersAsync();
+                    ModCmds.CheckRemindersAsync();
 
                     string commitHash = "";
                     string commitMessage = "";
@@ -575,7 +575,7 @@ namespace Cliptok
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
                 StringPrefixes = cfgjson.Core.Prefixes
-            });
+            }); ;
 
             commands.RegisterCommands<Warnings>();
             commands.RegisterCommands<MuteCmds>();
@@ -583,7 +583,6 @@ namespace Cliptok
             commands.RegisterCommands<ModCmds>();
             commands.RegisterCommands<Lockdown>();
             commands.RegisterCommands<Bans>();
-            commands.RegisterCommands<MemberCmds>();
             commands.CommandErrored += CommandsNextService_CommandErrored;
 
             await discord.ConnectAsync();
@@ -593,7 +592,7 @@ namespace Cliptok
                 await Task.Delay(10000);
                 Mutes.CheckMutesAsync();
                 ModCmds.CheckBansAsync();
-                MemberCmds.CheckRemindersAsync();
+                ModCmds.CheckRemindersAsync();
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
             }
