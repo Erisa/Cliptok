@@ -238,7 +238,7 @@ namespace Cliptok.Modules
             }
             else if (merge)
             {
-                await Program.db.KeyDeleteAsync(targetUser.Id.ToString());
+                await Program.db.KeyDeleteAsync(sourceUser.Id.ToString());
                 foreach (var warning in sourceWarnings)
                 {
                     await Program.db.HashSetAsync(targetUser.Id.ToString(), warning.Name, warning.Value);
