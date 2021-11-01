@@ -180,7 +180,7 @@ namespace Cliptok.Modules
                 {
                     if (ModCmds.AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
                     {
-                        await Bans.BanFromServerAsync(user.Id, reason, ctx.User.Id, ctx.Guild, 7, ctx.Channel, banDuration, appealable);
+                        await Bans.BanFromServerAsync(user.Id, reason, ctx.User.Id, ctx.Guild, messageDeleteDays, ctx.Channel, banDuration, appealable);
                     }
                     else
                     {
