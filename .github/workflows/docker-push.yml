@@ -20,9 +20,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-iteration1-${{ github.sha }}
+          key: ${{ runner.os }}-buildx-iteration2-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-buildx-iteration1-
+            ${{ runner.os }}-buildx-iteration2-
       -
         name: Login to Registry
         uses: docker/login-action@v1 
