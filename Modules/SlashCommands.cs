@@ -238,11 +238,11 @@ namespace Cliptok.Modules
             }
             else if (merge)
             {
-                await Program.db.KeyDeleteAsync(sourceUser.Id.ToString());
                 foreach (var warning in sourceWarnings)
                 {
                     await Program.db.HashSetAsync(targetUser.Id.ToString(), warning.Name, warning.Value);
                 }
+                await Program.db.KeyDeleteAsync(sourceUser.Id.ToString());
             }
             else if (targetWarnings.Length > 0 && !forceOverride)
             {
