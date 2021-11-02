@@ -224,6 +224,7 @@ namespace Cliptok.Modules
         public async Task TransferWarningsSlashCommand(InteractionContext ctx,
             [Option("source_user", "The user currently holding the warnings.")] DiscordUser sourceUser,
             [Option("target_user", "The user recieving the warnings.")] DiscordUser targetUser,
+            [Option("merge", "Whether to merge the source user's warnings and the target user's warnings.")]bool merge = false,
             [Option("force_override", "DESTRUCTIVE OPERATION: Whether to OVERRIDE and DELETE the target users existing warnings.")] bool forceOverride = false
         )
         {
@@ -235,10 +236,18 @@ namespace Cliptok.Modules
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} The source user has no warnings to transfer.", Warnings.GenerateWarningsEmbed(sourceUser));
                 return;
             }
+            else if (merge)
+            {
+                foreach (var warning in sourceWarnings)
+                {
+                    await Program.db.HashSetAsync(targetUser.Id.ToString(), warning.Name, warning.Value);
+                }
+                await Program.db.KeyDeleteAsync(sourceUser.Id.ToString());
+            }
             else if (targetWarnings.Length > 0 && !forceOverride)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} **CAUTION**: The target user has warnings.\n\n" +
-                    $"If you are sure you want to **OVERRIDE** and **DELETE** these warnings, please consider the consequences before adding `force_override: true` to the command.",
+                    $"If you are sure you want to **OVERRIDE** and **DELETE** these warnings, please consider the consequences before adding `force_override: true` to the command.\nIf you wish to **NOT** override the target's warnings, please use merge: true instead.",
                     Warnings.GenerateWarningsEmbed(targetUser));
                 return;
             }
@@ -251,8 +260,13 @@ namespace Cliptok.Modules
             {
                 await Program.db.KeyRenameAsync(sourceUser.Id.ToString(), targetUser.Id.ToString());
             }
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successully transferred warnings from {sourceUser.Mention} to {targetUser.Mention}!");
-            await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Warnings from {sourceUser.Mention} were transferred to {targetUser.Mention} by `{ctx.User.Username}#{ctx.User.Discriminator}`", Warnings.GenerateWarningsEmbed(targetUser));
+            string operationText = "";
+            if (merge)
+                operationText = "merge ";
+            else if (forceOverride)
+                operationText = "force ";
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successully {operationText}transferred warnings from {sourceUser.Mention} to {targetUser.Mention}!");
+            await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Warnings from {sourceUser.Mention} were {operationText}transferred to {targetUser.Mention} by `{ctx.User.Username}#{ctx.User.Discriminator}`", Warnings.GenerateWarningsEmbed(targetUser));
         }
 
         [ContextMenu(ApplicationCommandType.UserContextMenu, "Show Avatar")]
