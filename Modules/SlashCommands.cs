@@ -260,8 +260,8 @@ namespace Cliptok.Modules
             {
                 await Program.db.KeyRenameAsync(sourceUser.Id.ToString(), targetUser.Id.ToString());
             }
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successully transferred warnings from {sourceUser.Mention} to {targetUser.Mention}!");
-            await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Warnings from {sourceUser.Mention} were transferred to {targetUser.Mention} by `{ctx.User.Username}#{ctx.User.Discriminator}`", Warnings.GenerateWarningsEmbed(targetUser));
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successully {merge ? "merge " : (forceOverride ? "force": "")}transferred warnings from {sourceUser.Mention} to {targetUser.Mention}!");
+            await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Warnings from {sourceUser.Mention} were {merge ? "merge " : (forceOverride ? "force": "")}transferred to {targetUser.Mention} by `{ctx.User.Username}#{ctx.User.Discriminator}`", Warnings.GenerateWarningsEmbed(targetUser));
         }
 
         [ContextMenu(ApplicationCommandType.UserContextMenu, "Show Avatar")]
