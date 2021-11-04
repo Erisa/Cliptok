@@ -707,8 +707,11 @@ namespace Cliptok.Modules
         }
         
         [Command("ask")]
+        [HomeServer]
         public async Task AskCmd(CommandContext ctx, DiscordUser user = default)
         {
+            var test = await ctx.Guild.GetMembershipScreeningFormAsync();
+
             await ctx.Message.DeleteAsync();
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithTitle("**__Need Help Or Have a Problem?__**")
