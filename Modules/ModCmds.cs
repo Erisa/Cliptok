@@ -299,6 +299,9 @@ namespace Cliptok.Modules
             [JsonProperty("channelID")]
             public ulong ChannelID { get; set; }
 
+            [JsonProperty("messageID")]
+            public ulong MessageID { get; set; }
+
             [JsonProperty("messageLink")]
             public string MessageLink { get; set; }
 
@@ -333,6 +336,7 @@ namespace Cliptok.Modules
             {
                 UserID = ctx.User.Id,
                 ChannelID = ctx.Channel.Id,
+                MessageID = ctx.Message.Id,
                 MessageLink = $"https://discord.com/channels/{ctx.Guild.Id}/{ctx.Channel.Id}/{ctx.Message.Id}",
                 ReminderText = reminder,
                 ReminderTime = t,
@@ -474,7 +478,30 @@ namespace Cliptok.Modules
                     )
                     .AddField("Context", $"[`Jump to context`]({reminderObject.MessageLink})", true);
 
-                    await channel.SendMessageAsync($"<@!{reminderObject.UserID}>, you asked to be reminded of something:", embed);
+                    var msg = new DiscordMessageBuilder()
+                        .WithEmbed(embed)
+                        .WithContent($"<@!{reminderObject.UserID}>, you asked to be reminded of something:");
+
+                    if (reminderObject.MessageID != default)
+                    {
+                        
+                        try 
+                        {
+                            msg.WithReply(reminderObject.MessageID, mention: true, failOnInvalidReply: true)
+                                .WithContent($"You asked to be reminded of something:");
+                            await channel.SendMessageAsync(msg);
+                        } catch (DSharpPlus.Exceptions.BadRequestException)
+                        {
+                            msg.WithContent($"<@!{reminderObject.UserID}>, you asked to be reminded of something:");
+                            msg.WithReply(null, false, false);
+                            await channel.SendMessageAsync(msg);
+                        }
+                    } else
+                    {
+                        await channel.SendMessageAsync(msg);
+                    }
+
+                    
                 }
 
             }
