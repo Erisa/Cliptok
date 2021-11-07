@@ -442,9 +442,7 @@ namespace Cliptok.Modules
             foreach (var reminder in Program.db.ListRange("reminders", 0, -1))
             {
                 bool DmFallback = false;
-                var guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
                 var reminderObject = JsonConvert.DeserializeObject<Reminder>(reminder);
-                var member = await guild.GetMemberAsync(reminderObject.UserID);
                 if (reminderObject.ReminderTime <= DateTime.Now)
                 {
                     var user = await Program.discord.GetUserAsync(reminderObject.UserID);
@@ -459,6 +457,9 @@ namespace Cliptok.Modules
                     }
                     if (channel == null)
                     {
+                        var guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
+                        var member = await guild.GetMemberAsync(reminderObject.UserID);
+
                         if (Warnings.GetPermLevel(member) >= ServerPermLevel.TrialMod)
                         {
                             channel = await Program.discord.GetChannelAsync(Program.cfgjson.HomeChannel);

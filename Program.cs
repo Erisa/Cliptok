@@ -590,9 +590,16 @@ namespace Cliptok
             while (true)
             {
                 await Task.Delay(10000);
-                Mutes.CheckMutesAsync();
-                ModCmds.CheckBansAsync();
-                ModCmds.CheckRemindersAsync();
+                try
+                {
+                    Mutes.CheckMutesAsync();
+                    ModCmds.CheckBansAsync();
+                    ModCmds.CheckRemindersAsync();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
             }
 
         }
