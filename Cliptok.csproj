@@ -6,13 +6,14 @@
 		<RestoreAdditionalProjectSources>
 			https://nuget.emzi0767.com/api/v3/index.json
 		</RestoreAdditionalProjectSources>
+		<UserSecretsId>d9345310-5908-4697-8613-28a24d06d183</UserSecretsId>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Abyssal.HumanDateParser" Version="2.0.0-20191113.1" />
-		<PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01008" />
-		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01008" />
-		<PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01008" />
+		<PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01042" />
+		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01042" />
+		<PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01042" />
 		<PackageReference Include="StackExchange.Redis" Version="2.2.79" />
 		<PackageReference Include="System.Linq" Version="4.3.0" />
 	</ItemGroup>
