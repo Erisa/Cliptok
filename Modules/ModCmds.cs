@@ -713,7 +713,7 @@ namespace Cliptok.Modules
             {
                 var msg = await ctx.RespondAsync("Checking for pending unmutes and unbans...");
                 bool bans = await CheckBansAsync();
-                bool mutes = await Mutes.CheckMutesAsync(true);
+                bool mutes = await Mutes.CheckMutesAsync();
                 bool reminders = await ModCmds.CheckRemindersAsync();
                 await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nReminders check result: `{reminders}`");
             }
