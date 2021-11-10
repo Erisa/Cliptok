@@ -745,7 +745,38 @@ namespace Cliptok.Modules
             
             await msg.ModifyAsync(content);
         }
-        
+
+        [Command("editannounce")]
+        [RequireHomeserverPerm(ServerPermLevel.Mod)]
+        public async Task EditAnnounce(CommandContext ctx, ulong messageId, string roleName, [RemainingText] string content)
+        {
+            DiscordRole discordRole;
+
+            if (Program.cfgjson.AnnouncementRoles.ContainsKey(roleName))
+            {
+                discordRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles[roleName]);
+                await discordRole.ModifyAsync(mentionable: true);
+                try
+                {
+                    await ctx.Message.DeleteAsync();
+                    var msg = await ctx.Channel.GetMessageAsync(messageId);
+                    await msg.ModifyAsync($"{discordRole.Mention} {content}");
+                }
+                catch
+                {
+                    // We still need to remember to make it unmentionable even if the msg fails.
+                }
+                await discordRole.ModifyAsync(mentionable: false);
+            }
+            else
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That role name isnt recognised!");
+                return;
+            }
+
+
+        }
+
         [Command("ask")]
         [HomeServer]
         public async Task AskCmd(CommandContext ctx, DiscordUser user = default)
