@@ -76,11 +76,18 @@ namespace Cliptok
         [JsonProperty("mutedRole")]
         public ulong MutedRole { get; private set; }
 
+
         [JsonProperty("warningDaysThreshold")]
         public int WarningDaysThreshold { get; private set; }
 
         [JsonProperty("autoMuteThresholds")]
         public Dictionary<string, int> AutoMuteThresholds { get; private set; }
+
+        [JsonProperty("recentWarningsPeriodHours")]
+        public int RecentWarningsPeriodHours { get; private set; }
+
+        [JsonProperty("recentWarningsAutoMuteThresholds")]
+        public Dictionary<string, int> RecentWarningsAutoMuteThresholds { get; private set; }
 
         [JsonProperty("userRoles")]
         public UserRoleConfig UserRoles { get; private set; }
