@@ -26,7 +26,6 @@
     "patch": 445773142233710594
   },
   "appealLink": "https://msft.chat/member/#ban-appeal-process",
-  "warningDaysThreshold": 30,
   "inviteExclusion": [
     "microsoft",
     "xbox",
@@ -67,10 +66,20 @@
     210900612231987200,
     844992738171682896
   ],
+  "warningDaysThreshold": 30,
   "autoMuteThresholds": {
-    "2": 6,
-    "4": 12,
-    "6": 24
+    "2": 3,
+    "4": 6,
+    "6": 12,
+    "8": 24,
+    "10": -1
+  },
+
+  "recentWarningsPeriodHours": 48,
+  "recentWarningsAutoMuteThresholds": {
+    "2": 3,
+    "3": 6,
+    "4": -1
   },
   "massMentionThreshold": 5,
   "massMentionBanThreshold": 20,
