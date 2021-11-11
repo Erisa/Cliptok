@@ -40,7 +40,7 @@ jobs:
           push: true
           tags: |
             ghcr.io/erisa/cliptok:latest
-            ghcr.io/erisa/cliptok:${{ env.GITHUB_SHA }}
+            ghcr.io/erisa/cliptok:${{ github.sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
