@@ -773,8 +773,6 @@ namespace Cliptok.Modules
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That role name isnt recognised!");
                 return;
             }
-
-
         }
 
         [Command("ask")]

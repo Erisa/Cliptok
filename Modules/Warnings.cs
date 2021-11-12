@@ -40,15 +40,16 @@ namespace Cliptok.Modules
 
         public RequireHomeserverPermAttribute(ServerPermLevel targetlvl, bool workOutside = false)
         {
-            workOutside = workOutside;
+            WorkOutside = workOutside;
             TargetLvl = targetlvl;
         }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
         {
-            if (WorkOutside)
+            if (WorkOutside && (ctx.Guild == null || ctx.Guild.Id != Program.cfgjson.ServerID))
                 return true;
+
             else if (ctx.Channel.IsPrivate || ctx.Guild.Id != Program.cfgjson.ServerID)
                 return false;
 
