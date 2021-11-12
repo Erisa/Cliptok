@@ -47,15 +47,31 @@ namespace Cliptok.Modules
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
         {
-            if (WorkOutside && (ctx.Guild == null || ctx.Guild.Id != Program.cfgjson.ServerID))
-                return true;
-
-            else if (ctx.Channel.IsPrivate || ctx.Guild.Id != Program.cfgjson.ServerID)
+            // If the command is supposed to stay within the server and its being used outside, fail silently
+            if (!WorkOutside && (ctx.Channel.IsPrivate || ctx.Guild.Id != Program.cfgjson.ServerID))
                 return false;
 
-            var level = Warnings.GetPermLevel(ctx.Member);
-            if (level >= this.TargetLvl)
+            DiscordMember member;
+            if (ctx.Channel.IsPrivate || ctx.Guild.Id != Program.cfgjson.ServerID)
+            {
+                var guild = await ctx.Client.GetGuildAsync(Program.cfgjson.ServerID);
+                try
+                {
+                    member = await guild.GetMemberAsync(ctx.User.Id);
+                }
+                catch (DSharpPlus.Exceptions.NotFoundException)
+                {
+                    return false;
+                }
+            } else
+            {
+                member = ctx.Member;
+            }
+
+            var level = Warnings.GetPermLevel(member);
+            if (level >= TargetLvl)
                 return true;
+
             else if (!help && ctx.Command.QualifiedName != "edit")
             {
                 var levelText = level.ToString();
