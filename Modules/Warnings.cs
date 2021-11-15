@@ -535,12 +535,12 @@ namespace Cliptok.Modules
                 {
                     recentCount += 1;
                 }
-                if (count == 71)
+                if (count == 67)
                 {
                     str += $"+ {keys.Count() - 30} more…";
                     count += 1;
                 }
-                else if (count < 70)
+                else if (count < 66)
                 {
                     var reason = warning.WarnReason.Replace("`", "\\`").Replace("*", "\\*");
                     if (reason.Length > 29)
