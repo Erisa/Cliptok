@@ -258,5 +258,14 @@
       "lowerBound": 902670000000000000,
       "upperBound": 902780000000000000
     }
+  ],
+  "lineLimit": 30,
+  "increasedLineLimit": 1000,
+  "lineLimitTier": 3,
+  "lineLimitExcludedChannels": [
+    150909911952392193,
+    240528256292356096,
+    173743310878277634,
+    667438432615792653
   ]
 }

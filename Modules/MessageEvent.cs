@@ -332,7 +332,6 @@ namespace Cliptok.Modules
                 {
                     string reason = "Mass emoji";
                     _ = message.DeleteAsync();
-                    _ = SendInfringingMessaageAsync(Program.logChannel, message, reason, null);
 
                     if (Warnings.GetPermLevel(member) == ServerPermLevel.nothing && !Program.db.HashExists("emojiPardoned", message.Author.Id.ToString()))
                     {
@@ -399,6 +398,56 @@ namespace Cliptok.Modules
                     _ = logOut.CreateReactionAsync(DiscordEmoji.FromName(client, ":CliptokAcknowledge:", true));
                 }
             }
+
+            // line limit
+            var lineCount = CountNewlines(message.Content);
+
+            if (!Program.cfgjson.LineLimitExcludedChannels.Contains(channel.Id)
+                && (lineCount >= Program.cfgjson.IncreasedLineLimit
+                || (lineCount >= Program.cfgjson.LineLimit && Warnings.GetPermLevel(member) < (ServerPermLevel)Program.cfgjson.LineLimitTier)))
+            {
+                string reason = "Too many lines in a single message";
+                _ = message.DeleteAsync();
+
+                if (!Program.db.HashExists("linePardoned", message.Author.Id.ToString()))
+                {
+                    await Program.db.HashSetAsync("linePardoned", member.Id.ToString(), false);
+                    var msgOut = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, your message was deleted for containing too many lines.\n" +
+                        $"Please consider using a Pastebin-style website or <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid further punishment.");
+                    await SendInfringingMessaageAsync(Program.badMsgLog, message, reason, Warnings.MessageLink(msgOut));
+                    return;
+                }
+                else
+                {
+                    string output = $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**\n" +
+                        $"Please consider using a Pastebin-style website or <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.";
+                    DiscordMessage msg = await message.Channel.SendMessageAsync(output);
+                    var warning = await Warnings.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), message.Channel, " automatically ");
+                    await SendInfringingMessaageAsync(Program.badMsgLog, message, reason, warning.ContextLink);
+                    return;
+                }
+
+            }
+
+        }
+
+        public static int CountNewlines(string input)
+        {
+            int count = 0;
+            int len = input.Length;
+            for (int i = 0; i != len; ++i)
+                switch (input[i])
+                {
+                    case '\r':
+                        ++count;
+                        if (i + 1 != len && input[i + 1] == '\n')
+                            ++i;
+                        break;
+                    case '\n':
+                        ++count;
+                        break;
+                }
+            return count;
         }
 
     }

@@ -76,7 +76,6 @@ namespace Cliptok
         [JsonProperty("mutedRole")]
         public ulong MutedRole { get; private set; }
 
-
         [JsonProperty("warningDaysThreshold")]
         public int WarningDaysThreshold { get; private set; }
 
@@ -173,6 +172,18 @@ namespace Cliptok
         [JsonProperty("autoBanIds")]
         public List<AutoBanIdSet> AutoBanIds { get; private set; }
 
+        [JsonProperty("lineLimit")]
+        public int LineLimit { get; private set; }
+
+        [JsonProperty("increasedLineLimit")]
+        public int IncreasedLineLimit { get; private set; }
+
+        [JsonProperty("lineLimitTier")]
+        public int LineLimitTier { get; private set; }
+
+        [JsonProperty("lineLimitExcludedChannels")]
+        public List<ulong> LineLimitExcludedChannels { get; private set; }
+
     }
 
     public class WordListJson
@@ -187,6 +198,7 @@ namespace Cliptok
 
         [JsonProperty("excludedChannels")]
         public List<ulong> ExcludedChannels { get; private set; } = new();
+
     }
 
     public class AutoBanIdSet
