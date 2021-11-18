@@ -321,6 +321,9 @@ namespace Cliptok
         [JsonProperty("insiderRP")]
         public ulong InsiderRP { get; private set; }
 
+        [JsonProperty("insider10RP")]
+        public ulong Insider10RP { get; private set; }
+
         [JsonProperty("patchTuesday")]
         public ulong PatchTuesday { get; private set; }
     }

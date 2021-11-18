@@ -90,8 +90,19 @@ namespace Cliptok.Modules
     public class UserRoleCmds : BaseCommandModule
     {
         [
+            Command("swap-insider-rp"),
+            Description("Removes the Windows 11 Insiders (Release Preview) role and replaces it with Windows 10 Insiders (Release Preview) role"),
+            HomeServer
+        ]
+        public async Task SwapInsiderRpCmd(CommandContext ctx)
+        {
+            await UserRoles.RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderRP);
+            await UserRoles.GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.Insider10RP);
+        }
+
+        [
             Command("join-insider-dev"),
-            Description("Gives you the Windows Insiders (Dev) role"),
+            Description("Gives you the Windows 11 Insiders (Dev) role"),
             HomeServer
         ]
         public async Task JoinInsiderDevCmd(CommandContext ctx)
@@ -101,7 +112,7 @@ namespace Cliptok.Modules
 
         [
             Command("join-insider-beta"),
-            Description("Gives you the Windows Insiders (Beta) role"),
+            Description("Gives you the Windows 11 Insiders (Beta) role"),
             HomeServer
         ]
         public async Task JoinInsiderBetaCmd(CommandContext ctx)
@@ -111,12 +122,22 @@ namespace Cliptok.Modules
 
         [
             Command("join-insider-rp"),
-            Description("Gives you the Windows Insiders (Release Preview) role"),
+            Description("Gives you the Windows 11 Insiders (Release Preview) role"),
             HomeServer
         ]
         public async Task JoinInsiderRPCmd(CommandContext ctx)
         {
             await UserRoles.GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderRP);
+        }
+
+        [
+            Command("join-insiders-10"),
+            Description("Gives you to the Windows 10 Insiders (Release Preview) role"),
+            HomeServer
+        ]
+        public async Task JoinInsiders10Cmd(CommandContext ctx)
+        {
+            await UserRoles.GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.Insider10RP);
         }
 
         [
@@ -174,7 +195,7 @@ namespace Cliptok.Modules
 
         [
             Command("leave-insider-dev"),
-            Description("Removes the Windows Insiders (Dev) role"),
+            Description("Removes the Windows 11 Insiders (Dev) role"),
             HomeServer
         ]
         public async Task LeaveInsiderDevCmd(CommandContext ctx)
@@ -184,7 +205,7 @@ namespace Cliptok.Modules
 
         [
             Command("leave-insider-beta"),
-            Description("Removes the Windows Insiders (Beta) role"),
+            Description("Removes the Windows 11 Insiders (Beta) role"),
             HomeServer
         ]
         public async Task LeaveInsiderBetaCmd(CommandContext ctx)
@@ -193,11 +214,21 @@ namespace Cliptok.Modules
         }
 
         [
-            Command("leave-insider-rp"),
-            Description("Removes the Windows Insiders (Release Preview) role"),
+            Command("leave-insider-10"),
+            Description("Removes the Windows 10 Insiders (Release Preview) role"),
             HomeServer
         ]
         public async Task LeaveInsiderRPCmd(CommandContext ctx)
+        {
+            await UserRoles.RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.Insider10RP);
+        }
+
+        [
+            Command("leave-insider-rp"),
+            Description("Removes the Windows 11 Insiders (Release Preview) role"),
+            HomeServer
+        ]
+        public async Task LeaveInsider10RPCmd(CommandContext ctx)
         {
             await UserRoles.RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderRP);
         }
