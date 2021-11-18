@@ -131,7 +131,7 @@ namespace Cliptok.Modules
         }
 
         [
-            Command("join-insiders-10"),
+            Command("join-insider-10"),
             Description("Gives you to the Windows 10 Insiders (Release Preview) role"),
             HomeServer
         ]
