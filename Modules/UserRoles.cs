@@ -91,6 +91,7 @@ namespace Cliptok.Modules
     {
         [
             Command("swap-insider-rp"),
+            Aliases("swap-insiders-rp"),
             Description("Removes the Windows 11 Insiders (Release Preview) role and replaces it with Windows 10 Insiders (Release Preview) role"),
             HomeServer
         ]
@@ -102,6 +103,7 @@ namespace Cliptok.Modules
 
         [
             Command("join-insider-dev"),
+            Aliases("join-insiders-dev"),
             Description("Gives you the Windows 11 Insiders (Dev) role"),
             HomeServer
         ]
@@ -112,6 +114,7 @@ namespace Cliptok.Modules
 
         [
             Command("join-insider-beta"),
+            Aliases("join-insiders-beta"),
             Description("Gives you the Windows 11 Insiders (Beta) role"),
             HomeServer
         ]
@@ -122,6 +125,7 @@ namespace Cliptok.Modules
 
         [
             Command("join-insider-rp"),
+            Aliases("join-insiders-rp"),
             Description("Gives you the Windows 11 Insiders (Release Preview) role"),
             HomeServer
         ]
@@ -132,6 +136,7 @@ namespace Cliptok.Modules
 
         [
             Command("join-insider-10"),
+            Aliases("join-insiders-10"),
             Description("Gives you to the Windows 10 Insiders (Release Preview) role"),
             HomeServer
         ]
@@ -162,8 +167,8 @@ namespace Cliptok.Modules
 
         [
             Command("leave-insiders"),
-            Description("Removes you from Insider roles"),
             Aliases("leave-insider"),
+            Description("Removes you from Insider roles"),
             HomeServer
         ]
         public async Task LeaveInsiders(CommandContext ctx)
@@ -195,6 +200,7 @@ namespace Cliptok.Modules
 
         [
             Command("leave-insider-dev"),
+            Aliases("leave-insiders-dev"),
             Description("Removes the Windows 11 Insiders (Dev) role"),
             HomeServer
         ]
@@ -205,6 +211,7 @@ namespace Cliptok.Modules
 
         [
             Command("leave-insider-beta"),
+            Aliases("leave-insiders-beta"),
             Description("Removes the Windows 11 Insiders (Beta) role"),
             HomeServer
         ]
@@ -215,6 +222,7 @@ namespace Cliptok.Modules
 
         [
             Command("leave-insider-10"),
+            Aliases("leave-insiders-10"),
             Description("Removes the Windows 10 Insiders (Release Preview) role"),
             HomeServer
         ]
@@ -225,6 +233,7 @@ namespace Cliptok.Modules
 
         [
             Command("leave-insider-rp"),
+            Aliases("leave-insiders-rp"),
             Description("Removes the Windows 11 Insiders (Release Preview) role"),
             HomeServer
         ]
