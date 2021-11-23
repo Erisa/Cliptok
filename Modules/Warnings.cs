@@ -201,17 +201,7 @@ namespace Cliptok.Modules
         public static async Task<UserWarning> GiveWarningAsync(DiscordUser targetUser, DiscordUser modUser, string reason, string contextLink, DiscordChannel channel, string extraWord = " ")
         {
             DiscordGuild guild = channel.Guild;
-            ulong warningId = (ulong)Program.db.StringGet("totalWarnings");
-            // TODO: fix this hell
-            if (warningId == 0)
-            {
-                Program.db.StringSet("totalWarnings", "1");
-                warningId = 1;
-            }
-            else
-            {
-                warningId += 1;
-            }
+            ulong warningId = (ulong)Program.db.StringIncrement("totalWarnings");
 
             UserWarning warning = new()
             {
@@ -222,7 +212,7 @@ namespace Cliptok.Modules
                 WarningId = warningId,
                 ContextLink = contextLink
             };
-            Program.db.StringSet("totalWarnings", warningId);
+
             Program.db.HashSet(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
             try
             {
@@ -248,8 +238,6 @@ namespace Cliptok.Modules
             int toMuteHours = autoMuteResult.MuteHours;
             int warnsSinceThreshold = autoMuteResult.WarnsSinceThreshold;
             string thresholdSpan = "days";
-
-            var test = Program.cfgjson.RecentWarningsPeriodHours;
 
             if (toMuteHours != -1 && Program.cfgjson.RecentWarningsPeriodHours != 0)
             {
