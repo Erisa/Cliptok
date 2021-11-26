@@ -184,6 +184,15 @@ namespace Cliptok
         [JsonProperty("lineLimitExcludedChannels")]
         public List<ulong> LineLimitExcludedChannels { get; private set; }
 
+        [JsonProperty("giveawaysChannel")]
+        public ulong GiveawaysChannel { get; private set; }
+
+        [JsonProperty("giveawayBot")]
+        public ulong GiveawayBot { get; private set; }
+
+        [JsonProperty("giveawayTriggerMessage")]
+        public string GiveawayTriggerMessage { get; private set; }
+
     }
 
     public class WordListJson
@@ -198,7 +207,6 @@ namespace Cliptok
 
         [JsonProperty("excludedChannels")]
         public List<ulong> ExcludedChannels { get; private set; } = new();
-
     }
 
     public class AutoBanIdSet

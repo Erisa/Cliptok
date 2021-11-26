@@ -128,8 +128,6 @@ namespace Cliptok.Modules
 
         public static async Task MessageHandlerAsync(DiscordClient client, DiscordMessage message, DiscordChannel channel, bool isAnEdit = false)
         {
-            var tmp = message;
-
             if (message.Author == null)
                 return;
 
@@ -152,17 +150,29 @@ namespace Cliptok.Modules
                 {
                     await channel.SendMessageAsync(null, Warnings.GenerateWarningsEmbed(modmailMember));
                 }
-
             }
 
+            // handle #giveawayss
+            if (!isAnEdit && message.Channel.Id == Program.cfgjson.GiveawaysChannel && message.Content == Program.cfgjson.GiveawayTriggerMessage)
+            {
+                string giveawayTitle = message.Embeds[0].Author.Name;
+
+                if (giveawayTitle.Length > 100)
+                {
+                    giveawayTitle = Warnings.Truncate(giveawayTitle, 100, false);
+                }
+
+                await message.CreateThreadAsync(giveawayTitle, AutoArchiveDuration.Day, "Automatically creating giveaway thread.");
+            }
+
+            // Skip DMs, external guilds, and messages from bots, beyond this point.
             if (message.Channel.IsPrivate || message.Channel.Guild.Id != Program.cfgjson.ServerID || message.Author.IsBot)
                 return;
 
+            // Skip messages from moderators beyond this point.
             DiscordMember member = await message.Channel.Guild.GetMemberAsync(message.Author.Id);
             if (Warnings.GetPermLevel(member) >= ServerPermLevel.TrialMod)
-            {
                 return;
-            }
 
             if (message.MentionedUsers.Count > Program.cfgjson.MassMentionBanThreshold)
             {
