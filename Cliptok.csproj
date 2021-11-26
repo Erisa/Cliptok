@@ -14,7 +14,7 @@
 		<PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01042" />
 		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01042" />
 		<PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01042" />
-		<PackageReference Include="StackExchange.Redis" Version="2.2.79" />
+		<PackageReference Include="StackExchange.Redis" Version="2.2.88" />
 		<PackageReference Include="System.Linq" Version="4.3.0" />
 	</ItemGroup>
 
