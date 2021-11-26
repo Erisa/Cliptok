@@ -152,8 +152,8 @@ namespace Cliptok.Modules
                 }
             }
 
-            // handle #giveawayss
-            if (!isAnEdit && message.Channel.Id == Program.cfgjson.GiveawaysChannel && message.Content == Program.cfgjson.GiveawayTriggerMessage)
+            // handle #giveaways
+            if (!isAnEdit && message.Author.Id == Program.cfgjson.GiveawayBot && message.Channel.Id == Program.cfgjson.GiveawaysChannel && message.Content == Program.cfgjson.GiveawayTriggerMessage)
             {
                 string giveawayTitle = message.Embeds[0].Author.Name;
 
