@@ -63,7 +63,8 @@ namespace Cliptok.Modules
                 {
                     return false;
                 }
-            } else
+            }
+            else
             {
                 member = ctx.Member;
             }
@@ -254,7 +255,8 @@ namespace Cliptok.Modules
             if (toMuteHours > 0)
             {
                 await Mutes.MuteUserAsync(targetUser, $"Automatic mute after {warnsSinceThreshold} warnings in the past {acceptedThreshold} {thresholdSpan}.", modUser.Id, guild, channel, TimeSpan.FromHours(toMuteHours));
-            } else if (toMuteHours <= -1)
+            }
+            else if (toMuteHours <= -1)
             {
                 await Mutes.MuteUserAsync(targetUser, $"Automatic permanent mute after {warnsSinceThreshold} warnings in the past {acceptedThreshold} {thresholdSpan}.", modUser.Id, guild, channel);
             }
@@ -695,7 +697,7 @@ namespace Cliptok.Modules
             var keys = server.Keys();
 
             Dictionary<string, int> counts = new();
-            foreach(var key in keys )
+            foreach (var key in keys)
             {
                 ulong number;
                 if (ulong.TryParse(key.ToString(), out number))

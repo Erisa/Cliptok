@@ -181,7 +181,7 @@ namespace Cliptok.Modules
             try
             {
                 await ctx.Member.SendMessageAsync("Sad to see you go but if you ever want to rejoin Insiders and continue getting notifications type `!join-insider-dev` in <#740272437719072808> channel");
-            } 
+            }
             catch (DSharpPlus.Exceptions.UnauthorizedException)
             {
                 // do nothing, not important if DMs are closed

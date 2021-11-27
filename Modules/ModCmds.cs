@@ -3,6 +3,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
@@ -47,7 +48,7 @@ namespace Cliptok.Modules
 
                 }
 #if DEBUG
-                Console.WriteLine($"Checked bans at {DateTime.Now} with result: {success}");
+                Program.discord.Logger.LogDebug(Program.CliptokEventID, $"Checked bans at {DateTime.Now} with result: {success}");
 #endif
                 return success;
             }
@@ -500,24 +501,29 @@ namespace Cliptok.Modules
                     }
                     else if (reminderObject.MessageID != default)
                     {
-                        try 
+                        try
                         {
                             msg.WithReply(reminderObject.MessageID, mention: true, failOnInvalidReply: true)
                                 .WithContent("You asked to be reminded of something:");
                             await channel.SendMessageAsync(msg);
-                        } catch (DSharpPlus.Exceptions.BadRequestException)
+                        }
+                        catch (DSharpPlus.Exceptions.BadRequestException)
                         {
                             msg.WithContent($"<@!{reminderObject.UserID}>, you asked to be reminded of something:");
                             msg.WithReply(null, false, false);
                             await channel.SendMessageAsync(msg);
                         }
-                    } else
+                    }
+                    else
                     {
                         await channel.SendMessageAsync(msg);
-                    }                 
+                    }
                 }
 
             }
+#if DEBUG
+            Program.discord.Logger.LogDebug(Program.CliptokEventID, $"Checked reminders at {DateTime.Now} with result: {success}");
+#endif
             return success;
         }
 
@@ -570,7 +576,7 @@ namespace Cliptok.Modules
                 {
                     // typing failing is unimportant, move on
                 }
-                
+
                 string strOut = "";
                 if (targetUser == default)
                 {
@@ -742,7 +748,7 @@ namespace Cliptok.Modules
                 return;
 
             await ctx.Message.DeleteAsync();
-            
+
             await msg.ModifyAsync(content);
         }
 
@@ -793,7 +799,7 @@ namespace Cliptok.Modules
             if (user != default)
             {
                 ctx.Channel.SendMessageAsync(user.Mention, embed);
-            } 
+            }
             else if (ctx.Message.ReferencedMessage != null)
             {
                 var messageBuild = new DiscordMessageBuilder()

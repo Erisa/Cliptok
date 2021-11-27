@@ -224,7 +224,7 @@ namespace Cliptok.Modules
         public async Task TransferWarningsSlashCommand(InteractionContext ctx,
             [Option("source_user", "The user currently holding the warnings.")] DiscordUser sourceUser,
             [Option("target_user", "The user recieving the warnings.")] DiscordUser targetUser,
-            [Option("merge", "Whether to merge the source user's warnings and the target user's warnings.")]bool merge = false,
+            [Option("merge", "Whether to merge the source user's warnings and the target user's warnings.")] bool merge = false,
             [Option("force_override", "DESTRUCTIVE OPERATION: Whether to OVERRIDE and DELETE the target users existing warnings.")] bool forceOverride = false
         )
         {

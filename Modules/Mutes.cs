@@ -1,6 +1,7 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -193,7 +194,7 @@ namespace Cliptok.Modules
                     }
                 }
 #if DEBUG
-                Console.WriteLine($"Checked mutes at {DateTime.Now} with result: {success}");
+                Program.discord.Logger.LogDebug(Program.CliptokEventID, $"Checked mutes at {DateTime.Now} with result: {success}");
 #endif
                 return success;
             }
