@@ -556,6 +556,12 @@ namespace Cliptok
                 return Task.CompletedTask;
             }
 
+            Task Discord_SocketErrored(DiscordClient client, SocketErrorEventArgs e)
+            {
+                client.Logger.LogError(eventId: CliptokEventID, e.Exception, "A socket error ocurred!");
+                return Task.CompletedTask;
+            }
+
             discord.Ready += OnReady;
             discord.MessageCreated += MessageCreated;
             discord.MessageUpdated += MessageUpdated;
@@ -565,6 +571,8 @@ namespace Cliptok
             discord.GuildMemberUpdated += GuildMemberUpdated;
             discord.UserUpdated += UserUpdated;
             discord.ClientErrored += ClientError;
+            discord.SocketErrored += Discord_SocketErrored;
+
             discord.ThreadCreated += Discord_ThreadCreated;
             discord.ThreadUpdated += Discord_ThreadUpdated;
             discord.ThreadDeleted += Discord_ThreadDeleted;
@@ -575,7 +583,7 @@ namespace Cliptok
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
                 StringPrefixes = cfgjson.Core.Prefixes
-            }); ;
+            });
 
             commands.RegisterCommands<Warnings>();
             commands.RegisterCommands<MuteCmds>();
