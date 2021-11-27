@@ -173,9 +173,13 @@ namespace Cliptok.Modules
             if (userID == default)
                 userID = warning.TargetUserId;
 
+            string reason = warning.WarnReason;
+            if (string.IsNullOrWhiteSpace(reason))
+                reason = "No reason provided.";
+
             DiscordUser targetUser = await Program.discord.GetUserAsync(userID);
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-            .WithDescription($"**Reason**\n{warning.WarnReason}")
+            .WithDescription($"**Reason**\n{reason}")
             .WithColor(new DiscordColor(colour))
             .WithTimestamp(DateTime.Now)
             .WithFooter(
@@ -530,7 +534,13 @@ namespace Cliptok.Modules
                 }
                 else if (count < 66)
                 {
-                    var reason = warning.WarnReason.Replace("`", "\\`").Replace("*", "\\*");
+                    var reason = warning.WarnReason;
+                    if (string.IsNullOrWhiteSpace(reason))
+                    {
+                        reason = "No reason provided.";
+                    }
+                    reason = reason.Replace("`", "\\`").Replace("*", "\\*");
+
                     if (reason.Length > 29)
                     {
                         reason = Truncate(reason, 29) + "…";
