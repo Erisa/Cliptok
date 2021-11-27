@@ -662,6 +662,12 @@ namespace Cliptok.Modules
             [Description("The ID of the warning you want to edit.")] ulong warnId,
             [RemainingText, Description("The new reason for the warning.")] string newReason)
         {
+            if (string.IsNullOrWhiteSpace(newReason))
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} You haven't given a new reason to set for the warning!");
+                return;
+            }
+
             var msg = await ctx.RespondAsync("Processing your request...");
             var warning = GetWarning(targetUser.Id, warnId);
             if (warning == null)
