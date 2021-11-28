@@ -296,7 +296,7 @@ namespace Cliptok.Modules
             return (toMuteHours, warnsSinceThreshold);
         }
 
-        public static bool EditWarning(DiscordUser targetUser, ulong warnId, DiscordUser modUser, string reason, string contextLink)
+        public static bool EditWarning(DiscordUser targetUser, ulong warnId, DiscordUser modUser, string reason)
         {
 
             if (Program.db.HashExists(targetUser.Id.ToString(), warnId))
@@ -309,7 +309,7 @@ namespace Cliptok.Modules
                     WarnReason = reason,
                     WarnTimestamp = oldWarn.WarnTimestamp,
                     WarningId = warnId,
-                    ContextLink = contextLink
+                    ContextLink = oldWarn.ContextLink
                 };
                 Program.db.HashSet(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
                 return true;
@@ -688,7 +688,7 @@ namespace Cliptok.Modules
             }
             else
             {
-                EditWarning(targetUser, warnId, ctx.User, newReason, MessageLink(msg));
+                EditWarning(targetUser, warnId, ctx.User, newReason);
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Information} Successfully edited warning `{Pad(warnId)}` (belonging to {targetUser.Mention})",
                     await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId), userID: targetUser.Id));
                 await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Warning edited:" +
