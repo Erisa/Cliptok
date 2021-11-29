@@ -131,8 +131,6 @@ namespace Cliptok.Modules
         {
             try
             {
-
-
                 if (message.Author == null)
                     return;
 
@@ -375,7 +373,6 @@ namespace Cliptok.Modules
                         if (supportRatelimit.ContainsKey(message.Author.Id))
                         {
                             if (supportRatelimit[message.Author.Id] > DateTime.Now)
-
                                 return;
                             else
                                 supportRatelimit.Remove(message.Author.Id);
@@ -393,14 +390,16 @@ namespace Cliptok.Modules
 
                         if (msgMatch != null)
                         {
-                            embed.AddField("Previous message", Warnings.Truncate(msgMatch.Content, 1020, true));
+                            var matchContent = Warnings.Truncate(string.IsNullOrWhiteSpace(msgMatch.Content) ? "`[No content]`" : msgMatch.Content, 1020, true);
+                            embed.AddField("Previous message", matchContent);
                             if (msgMatch.Attachments.Count != 0)
                             {
                                 embed.WithImageUrl(msgMatch.Attachments[0].Url);
                             }
                         }
 
-                        embed.AddField("Current message", Warnings.Truncate(message.Content, 1020));
+                        var messageContent = Warnings.Truncate(string.IsNullOrWhiteSpace(message.Content) ? "`[No content]`" : message.Content, 1020, true);
+                        embed.AddField("Current message", messageContent);
                         if (message.Attachments.Count != 0)
                         {
                             if (embed.ImageUrl == null)
