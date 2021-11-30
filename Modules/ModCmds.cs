@@ -317,7 +317,7 @@ namespace Cliptok.Modules
         }
 
         [Command("remindme")]
-        [Aliases("reminder", "rember", "wemember", "remember")]
+        [Aliases("reminder", "rember", "wemember", "remember", "remind")]
         [RequireHomeserverPerm(ServerPermLevel.Tier4, WorkOutside = true)]
         public async Task RemindMe(CommandContext ctx, string timetoParse, [RemainingText] string reminder)
         {
