@@ -42,8 +42,8 @@ If you want to run the bot as a standalone application rather than a Docker cont
 - .NET SDK 5.0, instructions can be found on the [Microsoft website](https://dotnet.microsoft.com/download).
 - Redis server, on Debian or Ubuntu-based Linux distributions this should be `sudo apt-get install redis-server`
     - It may be in your best interests to configure Redis to use AOF persistence. This will dramatically decrease the risk of losing data due to power failure or similar issues. You can find more information about that on the [Redis website](https://redis.io/topics/persistence).
-    - If running on Windows, WSL is preferred rather than any other method of running Redis.
-        - You may need to `sudo service redis-server start` or `redis-server` manually on WSL.
+    - If running on Windows, [tporadowski/redis](https://github.com/tporadowski/redis) is preferred over WSL or other methods of running Redis. Do not use `microsoftarchive/redis`.
+        - If using WSL, you may need to `sudo service redis-server start` or `redis-server` manually.
 
 Once you have everything installed:
 1. Clone this repository and `cd` into the directory.
