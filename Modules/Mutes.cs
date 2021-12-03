@@ -141,7 +141,7 @@ namespace Cliptok.Modules
                     await member.RevokeRoleAsync(mutedRole);
                     foreach (var role in member.Roles)
                     {
-                        if (role.Name == "Muted")
+                        if (role.Name == "Muted" && role.Id != Program.cfgjson.MutedRole)
                         {
                             try
                             {
