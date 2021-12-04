@@ -67,7 +67,7 @@ If you go with this method you will have to fork the bot to the background yours
 If you want to develop and make changes to the bot, you need the following:
 - First read [our contribution guidelines](CONTRIBUTING.md) if you intend to submit changes back to the repository.
 - You will need .NET SDK 6.0, instructions can be found on the [Microsoft website](https://dotnet.microsoft.com/download).
-- [Visual Studio 2022(https://visualstudio.microsoft.com/vs/), with `.NET desktop development` selected on the installer. 
+- [Visual Studio 2022](https://visualstudio.microsoft.com/vs/), with `.NET desktop development` selected on the installer. 
     - Visual Studio 2019 is untested and no longer preferred.
 - Redis. It is recommended to install [tporadowski/redis](https://github.com/tporadowski/redis).
     - Simply download the latest .msi and run it. Adding the Windows Firewall exception is not required.
