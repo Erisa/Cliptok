@@ -23,6 +23,8 @@ namespace Cliptok.Modules
 
             response.AsEphemeral(ephemeral);
 
+            response.AddMentions(Mentions.All);
+
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, response);
         }
 
