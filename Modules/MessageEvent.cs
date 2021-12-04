@@ -347,7 +347,7 @@ namespace Cliptok.Modules
                         string reason = "Mass emoji";
                         _ = message.DeleteAsync();
 
-                        if (Warnings.GetPermLevel(member) == ServerPermLevel.nothing && !Program.db.HashExists("emojiPardoned", message.Author.Id.ToString()))
+                        if (Warnings.GetPermLevel(member) == ServerPermLevel.Nothing && !Program.db.HashExists("emojiPardoned", message.Author.Id.ToString()))
                         {
                             await Program.db.HashSetAsync("emojiPardoned", member.Id.ToString(), false);
                             DiscordMessage msgOut;

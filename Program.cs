@@ -150,7 +150,7 @@ namespace Cliptok
                         {
                             var level = Warnings.GetPermLevel(e.Context.Member);
                             var levelText = level.ToString();
-                            if (level == ServerPermLevel.nothing && rand.Next(1, 100) == 69)
+                            if (level == ServerPermLevel.Nothing && rand.Next(1, 100) == 69)
                                 levelText = $"naught but a thing, my dear human. Congratulations, you win {Program.rand.Next(1, 10)} bonus points.";
 
                             await e.Context.CreateResponseAsync(

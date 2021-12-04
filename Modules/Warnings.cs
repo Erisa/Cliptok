@@ -15,7 +15,8 @@ namespace Cliptok.Modules
 
     public enum ServerPermLevel
     {
-        nothing = 0,
+        Muted = -1,
+        Nothing = 0,
         Tier1,
         Tier2,
         Tier3,
@@ -76,7 +77,7 @@ namespace Cliptok.Modules
             else if (!help && ctx.Command.QualifiedName != "edit")
             {
                 var levelText = level.ToString();
-                if (level == ServerPermLevel.nothing && Program.rand.Next(1, 100) == 69)
+                if (level == ServerPermLevel.Nothing && Program.rand.Next(1, 100) == 69)
                     levelText = $"naught but a thing, my dear human. Congratulations, you win {Program.rand.Next(1, 10)} bonus points.";
 
                 await ctx.RespondAsync(
@@ -128,7 +129,7 @@ namespace Cliptok.Modules
         public static ServerPermLevel GetPermLevel(DiscordMember target)
         {
             if (target.Guild.Id != Program.cfgjson.ServerID)
-                return ServerPermLevel.nothing;
+                return ServerPermLevel.Nothing;
 
             // Torch approved of this.
             if (target.IsOwner)
@@ -137,6 +138,8 @@ namespace Cliptok.Modules
                 return ServerPermLevel.Admin;
             else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.ModRole)))
                 return ServerPermLevel.Mod;
+            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.MutedRole)))
+                return ServerPermLevel.Muted;
             else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TrialModRole)))
                 return ServerPermLevel.TrialMod;
             else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[9])))
@@ -160,7 +163,7 @@ namespace Cliptok.Modules
             else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[0])))
                 return ServerPermLevel.Tier1;
             else
-                return ServerPermLevel.nothing;
+                return ServerPermLevel.Nothing;
         }
 
         internal static string MessageLink(Task<DiscordMessage> msg)

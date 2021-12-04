@@ -1,7 +1,9 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
+using Newtonsoft.Json;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Cliptok.Modules
@@ -304,6 +306,68 @@ namespace Cliptok.Modules
         public async Task ContextWarnings(ContextMenuContext ctx)
         {
             await ctx.RespondAsync(embed: Warnings.GenerateWarningsEmbed(ctx.TargetUser), ephemeral: true);
+        }
+
+        [ContextMenu(ApplicationCommandType.UserContextMenu, "User Information")]
+        public async Task ContextUserInformation(ContextMenuContext ctx)
+        {
+            var target = ctx.TargetUser;
+            DiscordEmbed embed;
+            DiscordMember member = default;
+
+            try
+            {
+                member = await ctx.Guild.GetMemberAsync(target.Id);
+            } catch (DSharpPlus.Exceptions.NotFoundException)
+            {
+                embed = new DiscordEmbedBuilder()
+                    .WithThumbnail(target.AvatarUrl)
+                    .WithTitle($"User information for {target.Username}#{target.Discriminator} ({target.Id})")
+                    .AddField("User", target.Mention, true)
+                    .AddField("User ID", target.Id.ToString(), true)
+                    .AddField("Cliptok permission level", "N/A (not in server)", true)
+                    .AddField("Roles", "N/A (not in server)", false)
+                    .AddField("Last joined server at", "N/A (not in server)", true)
+                    .AddField("Account created", $"<t:{ModCmds.ToUnixTimestamp(target.CreationTimestamp.DateTime)}:F>", true);
+                await ctx.RespondAsync(embed: embed, ephemeral: true);
+                return;
+            }
+
+            string hash = member.GuildAvatarHash;
+
+            var format = hash.StartsWith("a_") ? "gif" : "png";
+
+
+            string avatarUrl;
+            if (member.GuildAvatarHash != target.AvatarHash)
+                avatarUrl = $"https://cdn.discordapp.com/guilds/{ctx.Guild.Id}/users/{target.Id}/avatars/{hash}.{format}?size=256";
+            else
+                avatarUrl = $"https://cdn.discordapp.com/avatars/{target.Id}/{member.AvatarHash}.{format}?size=256";
+
+            string rolesStr = "None";
+
+            if (member.Roles.Count() != 0)
+            {
+                rolesStr = "";
+
+                foreach (DiscordRole role in member.Roles.OrderBy(x => x.Position).Reverse())
+                {
+                    rolesStr += role.Mention + " ";
+                }
+            }
+
+            embed = new DiscordEmbedBuilder()
+                .WithThumbnail(avatarUrl)
+                .WithTitle($"User information for {target.Username}#{target.Discriminator} ({target.Id})")
+                .AddField("User", member.Mention, true)
+                .AddField("User ID", member.Id.ToString(), true)
+                .AddField("Cliptok permission level", Warnings.GetPermLevel(member).ToString(), false)
+                .AddField("Roles", rolesStr, false)
+                .AddField("Last joined server at", $"<t:{ModCmds.ToUnixTimestamp(member.JoinedAt.DateTime)}:F>", true)
+                .AddField("Account created", $"<t:{ModCmds.ToUnixTimestamp(member.CreationTimestamp.DateTime)}:F>", true);
+
+            await ctx.RespondAsync(embed: embed, ephemeral: true);
+
         }
 
         [ContextMenu(ApplicationCommandType.UserContextMenu, "Hug")]
