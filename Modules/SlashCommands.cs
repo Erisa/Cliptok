@@ -322,12 +322,12 @@ namespace Cliptok.Modules
             {
                 embed = new DiscordEmbedBuilder()
                     .WithThumbnail(target.AvatarUrl)
-                    .WithTitle($"User information for {target.Username}#{target.Discriminator} ({target.Id})")
+                    .WithTitle($"User information for {target.Username}#{target.Discriminator}")
                     .AddField("User", target.Mention, true)
                     .AddField("User ID", target.Id.ToString(), true)
                     .AddField("Cliptok permission level", "N/A (not in server)", true)
                     .AddField("Roles", "N/A (not in server)", false)
-                    .AddField("Last joined server at", "N/A (not in server)", true)
+                    .AddField("Last joined server", "N/A (not in server)", true)
                     .AddField("Account created", $"<t:{ModCmds.ToUnixTimestamp(target.CreationTimestamp.DateTime)}:F>", true);
                 await ctx.RespondAsync(embed: embed, ephemeral: true);
                 return;
@@ -358,12 +358,12 @@ namespace Cliptok.Modules
 
             embed = new DiscordEmbedBuilder()
                 .WithThumbnail(avatarUrl)
-                .WithTitle($"User information for {target.Username}#{target.Discriminator} ({target.Id})")
+                .WithTitle($"User information for {target.Username}#{target.Discriminator}")
                 .AddField("User", member.Mention, true)
                 .AddField("User ID", member.Id.ToString(), true)
                 .AddField("Cliptok permission level", Warnings.GetPermLevel(member).ToString(), false)
                 .AddField("Roles", rolesStr, false)
-                .AddField("Last joined server at", $"<t:{ModCmds.ToUnixTimestamp(member.JoinedAt.DateTime)}:F>", true)
+                .AddField("Last joined server", $"<t:{ModCmds.ToUnixTimestamp(member.JoinedAt.DateTime)}:F>", true)
                 .AddField("Account created", $"<t:{ModCmds.ToUnixTimestamp(member.CreationTimestamp.DateTime)}:F>", true);
 
             await ctx.RespondAsync(embed: embed, ephemeral: true);
