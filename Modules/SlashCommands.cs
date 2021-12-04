@@ -325,7 +325,7 @@ namespace Cliptok.Modules
                     .WithTitle($"User information for {target.Username}#{target.Discriminator}")
                     .AddField("User", target.Mention, true)
                     .AddField("User ID", target.Id.ToString(), true)
-                    .AddField("Cliptok permission level", "N/A (not in server)", true)
+                    .AddField($"{ctx.Client.CurrentUser.Username} permission level", "N/A (not in server)", true)
                     .AddField("Roles", "N/A (not in server)", false)
                     .AddField("Last joined server", "N/A (not in server)", true)
                     .AddField("Account created", $"<t:{ModCmds.ToUnixTimestamp(target.CreationTimestamp.DateTime)}:F>", true);
@@ -361,7 +361,7 @@ namespace Cliptok.Modules
                 .WithTitle($"User information for {target.Username}#{target.Discriminator}")
                 .AddField("User", member.Mention, true)
                 .AddField("User ID", member.Id.ToString(), true)
-                .AddField("Cliptok permission level", Warnings.GetPermLevel(member).ToString(), false)
+                .AddField($"{ctx.Client.CurrentUser.Username} permission level", Warnings.GetPermLevel(member).ToString(), false)
                 .AddField("Roles", rolesStr, false)
                 .AddField("Last joined server", $"<t:{ModCmds.ToUnixTimestamp(member.JoinedAt.DateTime)}:F>", true)
                 .AddField("Account created", $"<t:{ModCmds.ToUnixTimestamp(member.CreationTimestamp.DateTime)}:F>", true);
