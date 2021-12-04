@@ -1,4 +1,4 @@
-# Cliptok - A Discord bot for Microsoft Community
+﻿# Cliptok - A Discord bot for Microsoft Community
 
 ## About
 This bot is a Discord moderation bot specifically designed for the [Microsoft Community](https://msft.chat/).  
@@ -15,8 +15,16 @@ Simply copy `.env-example` to `.env` and edit in the token for your Discord bot.
 
 If you're using the bot elsewhere, you will need to edit the configuration file more thoroughly, including all of the role IDs and the server ID. It is vital that every config value is present and valid.
 
+## Limitations
+Currently the bot will only work with one server. This choice was made because the bot was specifically created for a single server and will never be made publicly available. If you are looking to host a bot for multiple servers, this bot is not for you.
+
+A lot of the configuration (Role IDs, emoji IDs, etc.) are in the `config.json` file and cannot be edited at runtime. This means the bot will have to be relaunched for changes to those settings to take effect. This may be improved in the future, however it is not a high priority.
+
 ## Usage
-There are two methods of launching this bot. Through [Docker](https://www.docker.com/) or as a standalone application.
+There are three methods of launching this bot:
+- (Recommended) Through [Docker](https://www.docker.com/).
+- As a standalone application.
+- From Visual Studio, aka development/debug mode.
 
 If you are not familiar with deploying .NET (Core) and Redis applications, it is recommended to use the Docker method as dependencies are automatically handled for you without polluting your main system, and the setup can be handled with a few simple commands.
 
@@ -39,7 +47,7 @@ To update the bot in the future, `git pull` the repository and then pull and res
 
 ### Setup - Standalone
 If you want to run the bot as a standalone application rather than a Docker container, you'll need to install the dependencies manually:
-- .NET SDK 5.0, instructions can be found on the [Microsoft website](https://dotnet.microsoft.com/download).
+- .NET SDK 6.0, instructions can be found on the [Microsoft website](https://dotnet.microsoft.com/download).
 - Redis server, on Debian or Ubuntu-based Linux distributions this should be `sudo apt-get install redis-server`
     - It may be in your best interests to configure Redis to use AOF persistence. This will dramatically decrease the risk of losing data due to power failure or similar issues. You can find more information about that on the [Redis website](https://redis.io/topics/persistence).
     - If running on Windows, [tporadowski/redis](https://github.com/tporadowski/redis) is preferred over WSL or other methods of running Redis.
@@ -55,20 +63,40 @@ Once you have everything installed:
 
 If you go with this method you will have to fork the bot to the background yourself, through the use of a process manager like `pm2` or a systemd service.
 
-## Limitations
-Currently the bot will only work with one server. This choice was made because the bot was specifically created for a single server and will never be made publicly available. If you are looking to host a bot for multiple servers, this bot is not for you.
+### Setup - Development
+If you want to develop and make changes to the bot, you need the following:
+- First read [our contribution guidelines](CONTRIBUTING.md) if you intend to submit changes back to the repository.
+- You will need .NET SDK 6.0, instructions can be found on the [Microsoft website](https://dotnet.microsoft.com/download).
+- [Visual Studio 2022(https://visualstudio.microsoft.com/vs/), with `.NET desktop development` selected on the installer. 
+    - Visual Studio 2019 is untested and no longer preferred.
+- Redis. It is recommended to install [tporadowski/redis](https://github.com/tporadowski/redis).
+    - Simply download the latest .msi and run it. Adding the Windows Firewall exception is not required.
+- [Git for Windows](https://gitforwindows.org/)
+- A Discord server for testing, with all the roles and channels required for bot functionality.
 
-A lot of the configuration (Role IDs, emoji IDs, etc.) are in the `config.json` file and cannot be edited at runtime. This means the bot will have to be relaunched for changes to those settings to take effect. This may be improved in the future, however it is not a high priority.
+Once you have everything installed:
+1. Create a new Discord application and bot with all intents enabled, set `CLIPTOK_TOKEN` Windows environment variable to the bots token.
+2. Clone the repository (or your fork of it) to a folder.
+3. Open the `Cliptok.sln` within, making sure to use Visual Studio 2022.
+4. Copy `config.json` to `config.dev.json` and make changes for your testing sever.
+    - This is the most difficult part by far. Please try to replicate the required roles/channels/etc as closely as possible.
+5. Edit, run, debug, etc.
+
+If you have a change to make that follows the contribution guidelines, send a Pull Request like any other project. I assume you are a developer if you got this far, so no specific instructions for sending Pull Requests will be given.
 
 ## Credits
 
-### Developer(s)
+### 🖥️ Developer(s)
 - [Erisa](https://github.com/Erisa)
 
-### Code contributor(s)
+### ⚙️ Code contributor(s)
 - [TorchGM](https://github.com/TorchGM)
 
-### Special thanks
+### 💗 Significant sponsor(s) 
+- [FloatingMilkshake](https://github.com/FloatingMilkshake)
+
+### 🙏Special thanks
 - [TorchGM](https://github.com/TorchGM) for testing and providing design feedback. Seriously, thank you Torch.
+- All of my [GitHub Sponsors](https://github.com/sponsors/Erisa) 💝
 - The developers of [DSharpPlus](https://github.com/DSharpPlus/DSharpPlus), without their library none of this would  be possible.
 - The excellent moderation team over at [Microsoft Community](https://msft.chat/), and all of its wonderful members.
