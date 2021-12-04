@@ -174,7 +174,7 @@ namespace Cliptok.Modules
 
                 // Skip messages from moderators beyond this point.
                 DiscordMember member = await message.Channel.Guild.GetMemberAsync(message.Author.Id);
-                if (Warnings.GetPermLevel(member) >= ServerPermLevel.TrialMod)
+                if (Warnings.GetPermLevel(member) >= ServerPermLevel.TrialModerator)
                     return;
 
                 if (message.MentionedUsers.Count > Program.cfgjson.MassMentionBanThreshold)

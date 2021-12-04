@@ -14,7 +14,7 @@ namespace Cliptok.Modules
         [Command("lockdown")]
         [Aliases("lock")]
         [Description("Locks the current channel, preventing any new messages. See also: unlock")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequireBotPermissions(Permissions.ManageChannels)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequireBotPermissions(Permissions.ManageChannels)]
         public async Task LockdownCommand(CommandContext ctx, [RemainingText] string reason = "")
         {
             var currentChannel = ctx.Channel;
@@ -115,7 +115,7 @@ namespace Cliptok.Modules
 
         [Command("unlock")]
         [Description("Unlocks a previously locked channel. See also: lockdown")]
-        [Aliases("unlockdown"), HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod), RequireBotPermissions(Permissions.ManageChannels)]
+        [Aliases("unlockdown"), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequireBotPermissions(Permissions.ManageChannels)]
         public async Task UnlockCommand(CommandContext ctx, [RemainingText] string reason = "")
         {
             var currentChannel = ctx.Channel;

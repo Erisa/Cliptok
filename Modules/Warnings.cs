@@ -27,8 +27,8 @@ namespace Cliptok.Modules
         Tier8,
         TierS,
         TierX,
-        TrialMod,
-        Mod,
+        TrialModerator,
+        Moderator,
         Admin,
         Owner = int.MaxValue
     }
@@ -137,11 +137,11 @@ namespace Cliptok.Modules
             else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.AdminRole)))
                 return ServerPermLevel.Admin;
             else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.ModRole)))
-                return ServerPermLevel.Mod;
+                return ServerPermLevel.Moderator;
             else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.MutedRole)))
                 return ServerPermLevel.Muted;
             else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TrialModRole)))
-                return ServerPermLevel.TrialMod;
+                return ServerPermLevel.TrialModerator;
             else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[9])))
                 return ServerPermLevel.TierX;
             else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[8])))
@@ -410,7 +410,7 @@ namespace Cliptok.Modules
             Command("warn"),
             Description("Issues a formal warning to a user."),
             Aliases("wam", "warm"),
-            HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)
+            HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
         public async Task WarnCmd(
             CommandContext ctx,
@@ -422,7 +422,7 @@ namespace Cliptok.Modules
             try
             {
                 targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
-                if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
+                if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialModerator || targetMember.IsBot))
                 {
                     await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
                     return;
@@ -458,7 +458,7 @@ namespace Cliptok.Modules
             Command("anonwarn"),
             Description("Issues a formal warning to a user from a private channel."),
             Aliases("anonwam", "anonwarm"),
-            HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)
+            HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
         public async Task AnonWarnCmd(
             CommandContext ctx,
@@ -471,7 +471,7 @@ namespace Cliptok.Modules
             try
             {
                 targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
-                if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
+                if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialModerator || targetMember.IsBot))
                 {
                     await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
                     return;
@@ -590,7 +590,7 @@ namespace Cliptok.Modules
             Command("delwarn"),
             Description("Delete a warning that was issued by mistake or later became invalid."),
             Aliases("delwarm", "delwam", "deletewarn"),
-            HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)
+            HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
         public async Task DelwarnCmd(
             CommandContext ctx,
@@ -601,7 +601,7 @@ namespace Cliptok.Modules
             UserWarning warning = GetWarning(targetUser.Id, warnId);
             if (warning == null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
-            else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
+            else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!");
             }
@@ -645,7 +645,7 @@ namespace Cliptok.Modules
             Command("warndetails"),
             Description("Check the details of a warning in depth. Shows extra information (Such as responsible Mod) that may not be wanted to be public."),
             HomeServer,
-            RequireHomeserverPerm(ServerPermLevel.TrialMod)
+            RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
         public async Task WarnDetailsCmd(
             CommandContext ctx,
@@ -667,7 +667,7 @@ namespace Cliptok.Modules
             Description("Edit the reason of an existing warning.\n" +
                 "The Moderator who is editing the reason will become responsible for the case."),
             HomeServer,
-            RequireHomeserverPerm(ServerPermLevel.TrialMod)
+            RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
         public async Task EditwarnCmd(
             CommandContext ctx,
@@ -685,7 +685,7 @@ namespace Cliptok.Modules
             var warning = GetWarning(targetUser.Id, warnId);
             if (warning == null)
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
-            else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
+            else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
             {
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!");
             }
@@ -700,7 +700,7 @@ namespace Cliptok.Modules
         }
 
         [Command("mostwarnings"), Description("Who has the most warnings???")]
-        [RequireHomeserverPerm(ServerPermLevel.TrialMod)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task MostWarningsCmd(CommandContext ctx)
         {
             try

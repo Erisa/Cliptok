@@ -68,7 +68,7 @@ namespace Cliptok.Modules
         [Command("kick")]
         [Aliases("yeet", "shoo", "goaway")]
         [Description("Kicks a user, removing them from the server until they rejoin. Generally not very useful.")]
-        [RequirePermissions(Permissions.KickMembers), HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
+        [RequirePermissions(Permissions.KickMembers), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task Kick(CommandContext ctx, DiscordUser target, [RemainingText] string reason = "No reason specified.")
         {
             reason = reason.Replace("`", "\\`").Replace("*", "\\*");
@@ -108,7 +108,7 @@ namespace Cliptok.Modules
 
         [Command("dehoist")]
         [Description("Adds an invisible character to someone's nickname that drops them to the bottom of the member list. Accepts multiple members.")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task Dehoist(CommandContext ctx, [Description("List of server members to dehoist")] params DiscordMember[] discordMembers)
         {
             if (discordMembers.Length == 0)
@@ -169,7 +169,7 @@ namespace Cliptok.Modules
 
         [Command("massdehoist")]
         [Description("Dehoist everyone on the server who has a bad name. WARNING: This is a computationally expensive operation.")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task MassDehoist(CommandContext ctx)
         {
             var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it. This will take a while.");
@@ -187,7 +187,7 @@ namespace Cliptok.Modules
 
         [Command("massundehoist")]
         [Description("Remove the dehoist for users attached via a txt file.")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task MassUndhoist(CommandContext ctx)
         {
             int failedCount = 0;
@@ -276,7 +276,7 @@ namespace Cliptok.Modules
         }
 
         [Command("tellraw")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task TellRaw(CommandContext ctx, DiscordChannel discordChannel, [RemainingText] string output)
         {
             try
@@ -461,7 +461,7 @@ namespace Cliptok.Modules
                         var guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
                         var member = await guild.GetMemberAsync(reminderObject.UserID);
 
-                        if (Warnings.GetPermLevel(member) >= ServerPermLevel.TrialMod)
+                        if (Warnings.GetPermLevel(member) >= ServerPermLevel.TrialModerator)
                         {
                             channel = await Program.discord.GetChannelAsync(Program.cfgjson.HomeChannel);
                         }
@@ -529,7 +529,7 @@ namespace Cliptok.Modules
 
         [Command("announce")]
         [Description("Announces something in the current channel, pinging an Insider role in the process.")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task AnnounceCmd(CommandContext ctx, [Description("'dev','beta','rp' or 'patch")] string roleName, [RemainingText, Description("The announcement message to send.")] string announcementMessage)
         {
             DiscordRole discordRole;
@@ -560,7 +560,7 @@ namespace Cliptok.Modules
         [Group("debug")]
         [Aliases("troubleshoot", "unbug", "bugn't", "helpsomethinghasgoneverywrong")]
         [Description("Commands and things for fixing the bot in the unlikely event that it breaks a bit.")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Mod)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         class DebugCmds : BaseCommandModule
         {
             [Command("mutes")]
@@ -713,7 +713,7 @@ namespace Cliptok.Modules
             }
 
             [Command("refresh")]
-            [RequireHomeserverPerm(ServerPermLevel.TrialMod)]
+            [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
             [Description("Manually run all the automatic actions.")]
             public async Task Refresh(CommandContext ctx)
             {
@@ -739,7 +739,7 @@ namespace Cliptok.Modules
         }
 
         [Command("edit")]
-        [RequireHomeserverPerm(ServerPermLevel.Mod)]
+        [RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task Edit(CommandContext ctx, ulong messageId, [RemainingText] string content)
         {
             var msg = await ctx.Channel.GetMessageAsync(messageId);
@@ -753,7 +753,7 @@ namespace Cliptok.Modules
         }
 
         [Command("editannounce")]
-        [RequireHomeserverPerm(ServerPermLevel.Mod)]
+        [RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task EditAnnounce(CommandContext ctx, ulong messageId, string roleName, [RemainingText] string content)
         {
             DiscordRole discordRole;
@@ -816,7 +816,7 @@ namespace Cliptok.Modules
 
         [Command("grant")]
         [Aliases("clipgrant")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task GrantCommand(CommandContext ctx, DiscordMember member)
         {
             var tierOne = ctx.Guild.GetRole(Program.cfgjson.TierRoles[0]);

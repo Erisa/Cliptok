@@ -61,7 +61,7 @@ namespace Cliptok.Modules
     {
 
         [SlashCommand("warn", "Formally warn a user, usually for breaking the server rules.")]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialMod)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task WarnSlashCommand(InteractionContext ctx,
              [Option("user", "The user to warn.")] DiscordUser user,
              [Option("reason", "The reason they're being warned.")] string reason,
@@ -80,7 +80,7 @@ namespace Cliptok.Modules
             try
             {
                 targetMember = await ctx.Guild.GetMemberAsync(user.Id);
-                if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
+                if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialModerator || targetMember.IsBot))
                 {
                     webhookOut = new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} As a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
                     await ctx.EditResponseAsync(webhookOut);
@@ -109,7 +109,7 @@ namespace Cliptok.Modules
         }
 
         [SlashCommand("ban", "Bans a user from the server, either permanently or temporarily.")]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Mod)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task BanSlashCommand(InteractionContext ctx,
                 [Option("user", "The user to ban")] DiscordUser user,
                 [Option("reason", "The reason the user is being banned")] string reason,
@@ -134,7 +134,7 @@ namespace Cliptok.Modules
             try
             {
                 targetMember = await ctx.Guild.GetMemberAsync(user.Id);
-                if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
+                if (Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialModerator || targetMember.IsBot))
                 {
                     webhookOut.Content = $"{Program.cfgjson.Emoji.Error} As a Trial Moderator you cannot perform moderation actions on other staff members or bots.";
                     await ctx.EditResponseAsync(webhookOut);
@@ -224,7 +224,7 @@ namespace Cliptok.Modules
         }
 
         [SlashCommand("transfer_warnings", "Transfer warnings from one user to another.")]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Mod)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task TransferWarningsSlashCommand(InteractionContext ctx,
             [Option("source_user", "The user currently holding the warnings.")] DiscordUser sourceUser,
             [Option("target_user", "The user recieving the warnings.")] DiscordUser targetUser,

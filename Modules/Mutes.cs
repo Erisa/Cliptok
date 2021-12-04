@@ -206,7 +206,7 @@ namespace Cliptok.Modules
         [Command("unmute")]
         [Aliases("umute")]
         [Description("Unmutes a previously muted user, typically ahead of the standard expiration time. See also: mute")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task UnmuteCmd(CommandContext ctx, [Description("The user you're trying to unmute.")] DiscordUser targetUser)
         {
             DiscordGuild guild = ctx.Guild;
@@ -244,7 +244,7 @@ namespace Cliptok.Modules
 
         [Command("mute")]
         [Description("Mutes a user, preventing them from sending messages until they're unmuted. See also: unmute")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialMod)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task MuteCmd(
             CommandContext ctx, [Description("The user you're trying to mute")] DiscordUser targetUser,
             [RemainingText, Description("Combined argument for the time and reason for the mute. For example '1h rule 7' or 'rule 10'")] string timeAndReason = "No reason specified."
@@ -260,7 +260,7 @@ namespace Cliptok.Modules
                 // nothing
             }
 
-            if (targetMember != default && Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialMod && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialMod || targetMember.IsBot))
+            if (targetMember != default && Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialModerator || targetMember.IsBot))
             {
                 await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
                 return;
