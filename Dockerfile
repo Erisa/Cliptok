@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0.100 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:6.0.101 AS build-env
 WORKDIR /app
 
 # Copy csproj and restore as distinct layers
@@ -21,7 +21,7 @@ RUN touch dummy.txt && \
     fi
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/runtime:6.0.0-alpine3.14
+FROM mcr.microsoft.com/dotnet/runtime:6.0.1-alpine3.14
 LABEL com.centurylinklabs.watchtower.enable true
 WORKDIR /app
 COPY --from=build-env /app/out .
