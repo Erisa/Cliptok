@@ -172,9 +172,17 @@ namespace Cliptok.Modules
                 if (message.Channel.IsPrivate || message.Channel.Guild.Id != Program.cfgjson.ServerID || message.Author.IsBot)
                     return;
 
+                DiscordMember member;
+                try
+                {
+                    member = await message.Channel.Guild.GetMemberAsync(message.Author.Id);
+                } catch (DSharpPlus.Exceptions.NotFoundException)
+                {
+                    member = default;   
+                }
+
                 // Skip messages from moderators beyond this point.
-                DiscordMember member = await message.Channel.Guild.GetMemberAsync(message.Author.Id);
-                if (Warnings.GetPermLevel(member) >= ServerPermLevel.TrialModerator)
+                if (member == default || Warnings.GetPermLevel(member) >= ServerPermLevel.TrialModerator)
                     return;
 
                 if (message.MentionedUsers.Count > Program.cfgjson.MassMentionBanThreshold)
