@@ -276,26 +276,14 @@ namespace Cliptok.Modules
         [ContextMenu(ApplicationCommandType.UserContextMenu, "Show Avatar")]
         public async Task ContextAvatar(ContextMenuContext ctx)
         {
-            var target = ctx.TargetUser;
-            var member = await ctx.Guild.GetMemberAsync(target.Id);
-
-            string hash = member.GuildAvatarHash;
-
-            var format = hash.StartsWith("a_") ? "gif" : "png";
-
-
-            string avatarUrl;
-            if (member.GuildAvatarHash != target.AvatarHash)
-                avatarUrl = $"https://cdn.discordapp.com/guilds/{ctx.Guild.Id}/users/{target.Id}/avatars/{hash}.{format}?size=4096";
-            else
-                avatarUrl = $"https://cdn.discordapp.com/avatars/{target.Id}/{member.AvatarHash}.{format}?size=4096";
+            string avatarUrl = await Helpers.LykosAvatarMethods.UserOrMemberAvatarURL(ctx.TargetUser, ctx.Guild);
 
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
             .WithColor(new DiscordColor(0xC63B68))
             .WithTimestamp(DateTime.UtcNow)
             .WithImageUrl(avatarUrl)
             .WithAuthor(
-                $"Avatar for {target.Username} (Click to open in browser)",
+                $"Avatar for {ctx.TargetUser.Username} (Click to open in browser)",
                 avatarUrl
             );
 
@@ -315,13 +303,15 @@ namespace Cliptok.Modules
             DiscordEmbed embed;
             DiscordMember member = default;
 
+            string avatarUrl = await Helpers.LykosAvatarMethods.UserOrMemberAvatarURL(ctx.TargetUser, ctx.Guild, "default", 256);
+
             try
             {
                 member = await ctx.Guild.GetMemberAsync(target.Id);
             } catch (DSharpPlus.Exceptions.NotFoundException)
             {
                 embed = new DiscordEmbedBuilder()
-                    .WithThumbnail(target.AvatarUrl)
+                    .WithThumbnail(avatarUrl)
                     .WithTitle($"User information for {target.Username}#{target.Discriminator}")
                     .AddField("User", target.Mention, true)
                     .AddField("User ID", target.Id.ToString(), true)
@@ -332,17 +322,6 @@ namespace Cliptok.Modules
                 await ctx.RespondAsync(embed: embed, ephemeral: true);
                 return;
             }
-
-            string hash = member.GuildAvatarHash;
-
-            var format = hash.StartsWith("a_") ? "gif" : "png";
-
-
-            string avatarUrl;
-            if (member.GuildAvatarHash != target.AvatarHash)
-                avatarUrl = $"https://cdn.discordapp.com/guilds/{ctx.Guild.Id}/users/{target.Id}/avatars/{hash}.{format}?size=256";
-            else
-                avatarUrl = $"https://cdn.discordapp.com/avatars/{target.Id}/{member.AvatarHash}.{format}?size=256";
 
             string rolesStr = "None";
 
