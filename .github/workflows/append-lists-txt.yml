@@ -1,0 +1,45 @@
+name: Append data to list
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: "The file in the Lists directory to append to"
+        required: true
+        default: "scams.txt"
+      text:
+        description: "The text to append to the end of the list"
+        required: true
+      user:
+        description: "The Discord user to credit for the addition"
+        required: true
+
+jobs:
+  fileappend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: Check file exists
+        run: |
+          if [ ! -f Lists/${{ github.event.inputs.file }} ]; then
+              echo "File not found!"
+              exit 1
+          fi
+
+      - name: Append to file
+        run: |
+          echo '${{ github.event.inputs.text }}' >> Lists/${{ github.event.inputs.file }}
+
+      - name: setup git config
+        run: |
+          # setup the username and email. I tend to use 'GitHub Actions Bot' with no email by default
+          git config user.name "GitHub Actions via Discord user ${{ github.event.inputs.user }}"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: commit
+        run: |
+          # Stage the file, commit and push
+          git add .
+          git commit -m "${{ github.event.inputs.user }}: Update ${{ github.event.inputs.file }}"
+          git push
