@@ -836,6 +836,9 @@ namespace Cliptok.Modules
                 return;
             }
 
+            if (!fileName.EndsWith(".txt"))
+                fileName = fileName + ".txt";
+
             if (content.Length < 3)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Your input is too short, please reconsider.");
