@@ -193,6 +193,21 @@ namespace Cliptok
         [JsonProperty("giveawayTriggerMessage")]
         public string GiveawayTriggerMessage { get; private set; }
 
+        [JsonProperty("githubWorkflow")]
+        public WorkflowConfig GitHubWorkFlow { get; private set; }
+
+    }
+
+    public class WorkflowConfig
+    {
+        [JsonProperty("repo")]
+        public string Repo { get; private set; }
+
+        [JsonProperty("ref")]
+        public string Ref { get; private set; }
+
+        [JsonProperty("workflowId")]
+        public string WorkflowId { get; private set; }
     }
 
     public class WordListJson

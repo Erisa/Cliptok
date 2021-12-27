@@ -123,6 +123,9 @@ namespace Cliptok
                 redis = ConnectionMultiplexer.Connect($"{redisHost}:{cfgjson.Redis.Port}");
             }
 
+            if (Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == null)
+                Console.Write("GitHub API features disabled due to missing access token.");
+
             db = redis.GetDatabase();
 
             // Migration away from a broken attempt at a key in the past.

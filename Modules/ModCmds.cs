@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Cliptok.Modules
@@ -822,6 +824,98 @@ namespace Cliptok.Modules
             var tierOne = ctx.Guild.GetRole(Program.cfgjson.TierRoles[0]);
             await member.GrantRoleAsync(tierOne);
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {member.Mention} can now access the server!");
+        }
+
+        [Command("listadd")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        public async Task ListAdd(CommandContext ctx, string fileName, [RemainingText] string content)
+        {
+            if (Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == null)
+            {
+                ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} `CLIPTOK_GITHUB_TOKEN` was not set, so GitHub API commands cannot be used.");
+                return;
+            }
+
+            if (content.Length < 3)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Your input is too short, please reconsider.");
+                return;
+            }
+
+            await ctx.Channel.TriggerTypingAsync();
+
+            if (content.Substring(0, 3) == "```")
+                content = content.Replace("```", "").Trim();
+
+            string[] lines = content.Split(
+                new string[] { "\r\n", "\r", "\n" },
+                StringSplitOptions.None
+            );
+
+            if (lines.Any(line => line.Length < 4))
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} One of your lines is shorter than 4 characters.\nFor safety reasons I can't accept this input over command. Please submit a PR manually.");
+                return;
+            }
+
+            string nameToSend = $"{ctx.User.Username}#{ctx.User.Discriminator}";
+
+            using HttpClient httpClient = new()
+            {
+                BaseAddress = new Uri("https://api.github.com/")
+            };
+
+            httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("Cliptok", "1.0"));
+            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Token", Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN"));
+
+            HttpRequestMessage request = new(HttpMethod.Post, $"/repos/{Program.cfgjson.GitHubWorkFlow.Repo}/actions/workflows/{Program.cfgjson.GitHubWorkFlow.WorkflowId}/dispatches");
+
+            GitHubDispatchInputs inputs = new()
+            {
+                File = fileName,
+                Text = content,
+                User = nameToSend
+            };
+
+            GitHubDispatchBody body = new()
+            {
+                Ref = Program.cfgjson.GitHubWorkFlow.Ref,
+                Inputs = inputs
+            };
+
+            request.Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/vnd.github.v3+json");
+
+            HttpResponseMessage response = await httpClient.SendAsync(request);
+            string responseText = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} The request was successful.\n" +
+                    $"You should see the result in <#{Program.cfgjson.HomeChannel}> soon or can check at <https://github.com/{Program.cfgjson.GitHubWorkFlow.Repo}/actions>");
+            else
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} An error with code `{response.StatusCode}` was returned when trying to request the Action run.\n" +
+                    $"Body: ```json\n{responseText}```");
+        }
+
+        public class GitHubDispatchBody
+        {
+            [JsonProperty("ref")]
+            public string Ref { get; set; }
+
+            [JsonProperty("inputs")]
+            public GitHubDispatchInputs Inputs { get; set; }
+        }
+
+        public class GitHubDispatchInputs
+        {
+            [JsonProperty("file")]
+            public string File { get; set; }
+
+            [JsonProperty("text")]
+            public string Text { get; set; }
+
+            [JsonProperty("user")]
+            public string User { get; set; }
         }
 
     }
