@@ -1,4 +1,6 @@
 name: Append data to list
+concurrency: listappend-${{ github.ref }}
+
 on:
   workflow_dispatch:
     inputs:
