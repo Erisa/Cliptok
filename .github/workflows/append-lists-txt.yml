@@ -47,4 +47,4 @@ jobs:
           # Stage the file, commit and push
           git add .
           git commit -m "${{ github.event.inputs.user }}: Update ${{ github.event.inputs.file }}"
-          git push
+          git push https://${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git
