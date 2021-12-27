@@ -23,7 +23,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: main
-          github_token: ${{ secrets.GH_PAT }}
 
       - name: Check file exists
         run: |
@@ -36,15 +35,21 @@ jobs:
         run: |
           echo '${{ github.event.inputs.text }}' >> Lists/${{ github.event.inputs.file }}
 
-      - name: setup git config
+      - name: Setup git config
         run: |
           # setup the username and email. I tend to use 'GitHub Actions Bot' with no email by default
           git config user.name "GitHub Actions via Discord user ${{ github.event.inputs.user }}"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: commit
+      - name: Commit and push
         run: |
           # Stage the file, commit and push
           git add .
           git commit -m "${{ github.event.inputs.user }}: Update ${{ github.event.inputs.file }}"
-          git push https://${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git
+          git push
+      - name: Trigger rebuild
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.GH_PAT }}
+          event-type: docker-push.yml
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
