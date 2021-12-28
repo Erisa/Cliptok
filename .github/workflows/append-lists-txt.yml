@@ -21,8 +21,6 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-        with:
-          ref: main
 
       - name: Check file exists
         run: |
@@ -34,7 +32,7 @@ jobs:
       - name: Append to file
         uses: DamianReeves/write-file-action@v1.0
         with:
-          path: ${{ env.GITHUB_WORKSPACE }}/Lists/${{ github.events.inputs.file }}
+          path: Lists/${{ github.event.inputs.file }}
           contents: |
             ${{ github.event.inputs.text }}
           write-mode: append
