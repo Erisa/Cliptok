@@ -32,18 +32,20 @@ jobs:
           fi
 
       - name: Append to file
-        run: |
-          echo '${{ github.event.inputs.text }}' >> Lists/${{ github.event.inputs.file }}
+        uses: DamianReeves/write-file-action@v1.0
+        with:
+          path: ${{ env.GITHUB_WORKSPACE }}/Lists/${{ github.events.inputs.file }}
+          contents: |
+            ${{ github.event.inputs.text }}
+          write-mode: append
 
       - name: Setup git config
         run: |
-          # setup the username and email. I tend to use 'GitHub Actions Bot' with no email by default
           git config user.name "GitHub Actions via Discord user ${{ github.event.inputs.user }}"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Commit and push
         run: |
-          # Stage the file, commit and push
           git add .
           git commit -m "${{ github.event.inputs.user }}: Update ${{ github.event.inputs.file }}"
           git push
