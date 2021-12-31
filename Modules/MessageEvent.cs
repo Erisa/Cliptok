@@ -79,7 +79,7 @@ namespace Cliptok.Modules
             {
                 foreach (string word in naughtyWords)
                 {
-                    if (input.Contains(word))
+                    if (!string.IsNullOrWhiteSpace(word) && input.Contains(word))
                     {
                         return true;
                     }
