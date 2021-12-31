@@ -164,6 +164,10 @@
     "exploits.txt": {
       "wholeWord": false,
       "reason": "Using a text-rendering exploit to mask URL(s) and/or mentions"
+    },
+    "phishing.txt": {
+      "wholeWord": false,
+      "reason": "Sending phishing URL(s)"
     }
   },
   "massEmojiThreshold": 6,

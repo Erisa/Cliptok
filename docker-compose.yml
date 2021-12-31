@@ -17,6 +17,9 @@ services:
       - type: bind
         source: ./Lists/autoban.txt
         target: /app/Lists/autoban.txt
+      - type: bind
+        source: ./Lists/phishing.txt
+        target: /app/Lists/phishing.txt
       # Uncomment the below lines to use your own config file.
       #- type: bind
       #  source: ./config.json
