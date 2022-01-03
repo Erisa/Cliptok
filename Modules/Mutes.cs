@@ -64,6 +64,7 @@ namespace Cliptok.Modules
                     try
                     {
                         await naughtyMember.TimeoutAsync(expireTime + TimeSpan.FromSeconds(10), fullReason);
+                        await naughtyMember.ModifyAsync(x => x.VoiceChannel = null);
                     }
                     catch (DSharpPlus.Exceptions.UnauthorizedException)
                     {
