@@ -149,7 +149,6 @@ namespace Cliptok.Modules
                 try
                 {
                     await member.RevokeRoleAsync(mutedRole);
-                    await member.TimeoutAsync(null);
                     foreach (var role in member.Roles)
                     {
                         if (role.Name == "Muted" && role.Id != Program.cfgjson.MutedRole)
@@ -170,6 +169,14 @@ namespace Cliptok.Modules
                 {
                     await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} Attempt to removed Muted role from <@{targetUser.Id}> failed because of a Discord API error!" +
                     $"\nIf the role was removed manually, this error can be disregarded safely.");
+                }
+
+                try
+                {
+                    await member.TimeoutAsync(null);
+                } catch
+                {
+                    // do nothing. not important really...
                 }
                 if (success)
                     await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Successfully unmuted <@{targetUser.Id}>!");
