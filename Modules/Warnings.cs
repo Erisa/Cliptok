@@ -530,7 +530,7 @@ namespace Cliptok.Modules
                 {
                     recentCount += 1;
                 }
-                if (count == 67)
+                if (count == 66)
                 {
                     str += $"+ {keys.Count() - 30} more…";
                     count += 1;

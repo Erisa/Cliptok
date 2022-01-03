@@ -59,7 +59,17 @@ namespace Cliptok.Modules
             {
                 try
                 {
-                    await naughtyMember.GrantRoleAsync(mutedRole, $"[Mute by {moderator.Username}#{moderator.Discriminator}]: {reason}");
+                    string fullReason = $"[Mute by {moderator.Username}#{moderator.Discriminator}]: {reason}";
+                    await naughtyMember.GrantRoleAsync(mutedRole, fullReason);
+                    try
+                    {
+                        await naughtyMember.TimeoutAsync(expireTime + TimeSpan.FromSeconds(10), fullReason);
+                    }
+                    catch (DSharpPlus.Exceptions.UnauthorizedException)
+                    {
+                        // do literally nothing. who cares?
+                    }
+                    
                 }
                 catch
                 {
@@ -139,6 +149,7 @@ namespace Cliptok.Modules
                 try
                 {
                     await member.RevokeRoleAsync(mutedRole);
+                    await member.TimeoutAsync(null);
                     foreach (var role in member.Roles)
                     {
                         if (role.Name == "Muted" && role.Id != Program.cfgjson.MutedRole)
