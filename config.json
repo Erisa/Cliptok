@@ -155,18 +155,22 @@
     },
     "malware.txt": {
       "wholeWord": false,
+      "url": false,
       "reason": "Attempted to send malware"
     },
     "scamlinks.txt": {
       "wholeWord": false,
+      "url": true,
       "reason": "Sent scam link(s)"
     },
     "exploits.txt": {
       "wholeWord": false,
+      "url": false,
       "reason": "Using a text-rendering exploit to mask URL(s) and/or mentions"
     },
     "phishing.txt": {
       "wholeWord": false,
+      "url": true,
       "reason": "Sending phishing URL(s)"
     }
   },

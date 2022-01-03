@@ -215,6 +215,9 @@ namespace Cliptok
         [JsonProperty("wholeWord")]
         public bool WholeWord { get; private set; }
 
+        [JsonProperty("url")]
+        public bool Url { get; private set; }
+
         [JsonProperty("reason")]
         public string Reason { get; private set; }
 
