@@ -532,7 +532,7 @@ namespace Cliptok.Modules
                 }
                 if (count == 66)
                 {
-                    str += $"+ {keys.Count() - 30} more…";
+                    str += $"+ {keys.Count() - 65} more…";
                     count += 1;
                 }
                 else if (count < 66)
