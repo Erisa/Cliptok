@@ -15,9 +15,13 @@ namespace Cliptok.Helpers
 
         public static string MemberAvatarURL(DiscordMember member, string format = "default", int size = 4096)
         {
-            var hash = member.GuildAvatarHash;
-            if (hash == null)
+            string hash;
+            if (member.GuildAvatarHash == null && member.AvatarHash == null)
                 return member.DefaultAvatarUrl;
+            else if (member.GuildAvatarHash != null)
+                hash = member.GuildAvatarHash;
+            else
+                hash = member.AvatarHash;
 
             if (format == "default" || format == "png or gif")
             {
@@ -34,7 +38,7 @@ namespace Cliptok.Helpers
                     "The user you are trying to lookup does not have an animated avatar.");
             }
 
-            if (member.GuildAvatarHash != member.AvatarHash)
+            if (member.GuildAvatarHash != null)
                 return $"https://cdn.discordapp.com/guilds/{member.Guild.Id}/users/{member.Id}/avatars/{hash}.{format}?size=4096";
             else
                 return $"https://cdn.discordapp.com/avatars/{member.Id}/{member.AvatarHash}.{format}?size=4096";
