@@ -48,10 +48,13 @@ jobs:
           git commit -m "${{ github.event.inputs.user }}: Update ${{ github.event.inputs.file }}"
           git push
       - name: Trigger rebuild
+        if: github.event.pull_request.base.ref == 'master'
         run: |
-          curl \
+          if [[ "${GITHUB_REF##*/}" == "main" ]]; then
+            curl \
             -X POST \
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: token ${{ secrets.GH_PAT }}" \
             https://api.github.com/repos/${{ github.repository }}/actions/workflows/docker-push.yml/dispatches \
             -d '{"ref":"main"}'
+          fi
