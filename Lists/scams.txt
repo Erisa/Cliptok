@@ -471,4 +471,8 @@ newthingafteremptylinetestduperdupernew thing ababababa
 new thing one 
 newthingnospace
 
-superdupernewthingafteremptylinetest
+superdupernewthingafteremptylinetestunique new line
+new thing one 
+newthingnospace
+
+unique ending line
