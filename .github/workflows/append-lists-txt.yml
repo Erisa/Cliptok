@@ -48,7 +48,6 @@ jobs:
           git commit -m "${{ github.event.inputs.user }}: Update ${{ github.event.inputs.file }}"
           git push
       - name: Trigger rebuild
-        if: github.event.pull_request.base.ref == 'master'
         run: |
           if [[ "${GITHUB_REF##*/}" == "main" ]]; then
             curl \
