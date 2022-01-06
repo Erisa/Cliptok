@@ -30,7 +30,7 @@ jobs:
           fi
 
       - name: Append to file
-        uses: DamianReeves/write-file-action@v1.0
+        uses: Erisa/write-file-action@master
         with:
           path: Lists/${{ github.event.inputs.file }}
           contents: |
