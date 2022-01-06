@@ -35,7 +35,7 @@ jobs:
           path: Lists/${{ github.event.inputs.file }}
           contents: |
             ${{ github.event.inputs.text }}
-          write-mode: append
+          write-mode: append-newline
 
       - name: Setup git config
         run: |
