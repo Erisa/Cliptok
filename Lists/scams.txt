@@ -467,4 +467,8 @@ newthingafteremptylinetestsupernew thing supernew thing
 new thing one 
 newthingnospace
 
-newthingafteremptylinetest
+newthingafteremptylinetestduperdupernew thing ababababa
+new thing one 
+newthingnospace
+
+superdupernewthingafteremptylinetest
