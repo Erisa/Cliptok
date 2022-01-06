@@ -475,4 +475,8 @@ superdupernewthingafteremptylinetestunique new line
 new thing one 
 newthingnospace
 
-unique ending line
+unique ending lineamazingly unique new line
+new thing one 
+newthingnospace
+
+super unique ending line
