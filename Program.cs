@@ -572,6 +572,39 @@ namespace Cliptok
                 return Task.CompletedTask;
             }
 
+            discord.ComponentInteractionCreated += async (s, e) =>
+            {
+                // Initial response to avoid the 3 second timeout, will edit later.
+                var eout = new DiscordInteractionResponseBuilder().AsEphemeral(true);
+                await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, eout);
+
+                // Edits need a webhook rather than interaction..?
+                DiscordWebhookBuilder webhookOut;
+
+                if (e.Id == "line-limit-deleted-message-callback")
+                {
+                    var text = await Program.db.HashGetAsync("deletedMessageReferences", e.Message.Id);
+                    if (text.IsNullOrEmpty)
+                    {
+                        webhookOut = new DiscordWebhookBuilder().WithContent("I couldn't find any content for that message! This might be a bug?");
+                        await e.Interaction.EditOriginalResponseAsync(webhookOut);
+                    }
+                    else
+                    {
+                        DiscordEmbedBuilder embed = new();
+                        embed.Description = text;
+                        embed.Title = "Deleted message content";
+                        webhookOut = new DiscordWebhookBuilder().AddEmbed(embed);
+                        await e.Interaction.EditOriginalResponseAsync(webhookOut);
+                    }
+                    
+                } else
+                {
+
+                }
+                
+            };
+
             discord.Ready += OnReady;
             discord.MessageCreated += MessageCreated;
             discord.MessageUpdated += MessageUpdated;
