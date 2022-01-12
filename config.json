@@ -145,6 +145,26 @@
       "wholeWord": false,
       "reason": "[Automatic] Suspected to be following the patterns of known raiders."
     },
+    "phishing.txt": {
+      "wholeWord": false,
+      "url": true,
+      "reason": "Sending phishing URL(s)"
+    },
+    "scamlinks.txt": {
+      "wholeWord": false,
+      "url": true,
+      "reason": "Sent scam link(s)"
+    },
+    "malware.txt": {
+      "wholeWord": false,
+      "url": false,
+      "reason": "Attempted to send malware"
+    },
+    "exploits.txt": {
+      "wholeWord": false,
+      "url": false,
+      "reason": "Using a text-rendering exploit to mask URL(s) and/or mentions"
+    },
     "everyone.txt": {
       "wholeWord": false,
       "reason": "Attempted to ping everyone/here",
@@ -153,26 +173,6 @@
         726511089461755974
       ]
     },
-    "malware.txt": {
-      "wholeWord": false,
-      "url": false,
-      "reason": "Attempted to send malware"
-    },
-    "scamlinks.txt": {
-      "wholeWord": false,
-      "url": true,
-      "reason": "Sent scam link(s)"
-    },
-    "exploits.txt": {
-      "wholeWord": false,
-      "url": false,
-      "reason": "Using a text-rendering exploit to mask URL(s) and/or mentions"
-    },
-    "phishing.txt": {
-      "wholeWord": false,
-      "url": true,
-      "reason": "Sending phishing URL(s)"
-    }
   },
   "massEmojiThreshold": 6,
   "unrestrictedEmojiChannels": [
