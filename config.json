@@ -128,52 +128,61 @@
     "host": "localhost",
     "port": 6379
   },
-  "wordLists": {
-    "scams.txt": {
+  "wordLists": [
+    {
+      "name": "scams.txt",
       "wholeWord": false,
       "reason": "Attempted scam message"
     },
-    "naughtyURLs.txt": {
+    {
+      "name": "naughtyURLs.txt",
       "wholeWord": false,
       "reason": "Sent malicious URL(s)"
     },
-    "rudeWords.txt": {
-      "wholeWord": true,
-      "reason": "Use of restricted word(s)"
+    {
+      "name": "rudeWords.txt",
+      "wholeWord": false,
+      "reason": "Sent malicious URL(s)"
     },
-    "autoban.txt": {
+    {
+      "name": "autoban.txt",
       "wholeWord": false,
       "reason": "[Automatic] Suspected to be following the patterns of known raiders."
     },
-    "phishing.txt": {
+    {
+      "name": "phishing.txt",
       "wholeWord": false,
       "url": true,
       "reason": "Sending phishing URL(s)"
     },
-    "scamlinks.txt": {
+    {
+      "name": "scamlinks.txt",
       "wholeWord": false,
       "url": true,
       "reason": "Sent scam link(s)"
     },
-    "malware.txt": {
+    {
+      "name": "malware.txt",
       "wholeWord": false,
       "url": false,
       "reason": "Attempted to send malware"
     },
-    "exploits.txt": {
+    {
+      "name": "exploits.txt",
       "wholeWord": false,
       "url": false,
       "reason": "Using a text-rendering exploit to mask URL(s) and/or mentions"
     },
-    "everyone.txt": {
+    {
+      "name": "everyone.txt",
       "wholeWord": false,
       "reason": "Attempted to ping everyone/here",
       "excludedChannels": [
         316600283503394817,
         726511089461755974
       ]
-    },
-  },
+    }
+  ],
   "massEmojiThreshold": 6,
   "unrestrictedEmojiChannels": [
     150909911952392193,

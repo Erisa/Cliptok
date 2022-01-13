@@ -116,7 +116,7 @@ namespace Cliptok
         public List<ulong> UnrestrictedEmojiChannels { get; private set; }
 
         [JsonProperty("wordLists")]
-        public Dictionary<string, WordListJson> WordListList { get; private set; }
+        public List<WordListJson> WordListList { get; private set; }
 
         [JsonProperty("lockdownEnabledChannels")]
         public List<ulong> LockdownEnabledChannels { get; private set; }
@@ -212,6 +212,9 @@ namespace Cliptok
 
     public class WordListJson
     {
+        [JsonProperty("name")]
+        public string Name { get; private set; }
+
         [JsonProperty("wholeWord")]
         public bool WholeWord { get; private set; }
 

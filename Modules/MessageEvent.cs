@@ -204,16 +204,15 @@ namespace Cliptok.Modules
                 bool match = false;
 
                 // Matching word list
-                var wordListKeys = Program.cfgjson.WordListList.Keys;
-                foreach (string key in wordListKeys)
+                foreach (var listItem in Program.cfgjson.WordListList)
                 {
-                    if (Program.cfgjson.WordListList[key].ExcludedChannels.Contains(message.Channel.Id))
+                    if (listItem.ExcludedChannels.Contains(message.Channel.Id))
                     {
                         continue;
                     }
-                    else if (CheckForNaughtyWords(message.Content.ToLower(), Program.cfgjson.WordListList[key]))
+                    else if (CheckForNaughtyWords(message.Content.ToLower(), listItem))
                     {
-                        string reason = Program.cfgjson.WordListList[key].Reason;
+                        string reason = listItem.Reason;
                         try
                         {
                             _ = message.DeleteAsync();
@@ -224,7 +223,7 @@ namespace Cliptok.Modules
                             // still warn anyway
                         }
 
-                        if (key == "autoban.txt" && Warnings.GetPermLevel(member) < ServerPermLevel.Tier4)
+                        if (listItem.Name == "autoban.txt" && Warnings.GetPermLevel(member) < ServerPermLevel.Tier4)
                         {
                             _ = message.DeleteAsync();
                             await Bans.BanFromServerAsync(message.Author.Id, reason, client.CurrentUser.Id, message.Channel.Guild, 0, message.Channel, default, true);

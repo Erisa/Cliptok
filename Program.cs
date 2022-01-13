@@ -92,11 +92,10 @@ namespace Cliptok
 
             hasteUploader = new HasteBinClient(cfgjson.HastebinEndpoint);
 
-            var keys = cfgjson.WordListList.Keys;
-            foreach (string key in keys)
+            foreach (var list in cfgjson.WordListList)
             {
-                var listOutput = File.ReadAllLines($"Lists/{key}");
-                cfgjson.WordListList[key].Words = listOutput;
+                var listOutput = File.ReadAllLines($"Lists/{list.Name}");
+                cfgjson.WordListList[cfgjson.WordListList.FindIndex(a => a.Name == list.Name)].Words = listOutput;
             }
 
             if (File.Exists("Lists/usernames.txt"))
