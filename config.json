@@ -141,7 +141,7 @@
     },
     {
       "name": "rudeWords.txt",
-      "wholeWord": false,
+      "wholeWord": true,
       "reason": "Use of restricted word(s)"
     },
     {
