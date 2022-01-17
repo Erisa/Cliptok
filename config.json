@@ -156,12 +156,6 @@
       "reason": "Sending phishing URL(s)"
     },
     {
-      "name": "scamlinks.txt",
-      "wholeWord": false,
-      "url": true,
-      "reason": "Sent scam link(s)"
-    },
-    {
       "name": "malware.txt",
       "wholeWord": false,
       "url": false,

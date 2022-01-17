@@ -6,7 +6,18 @@ This bot is a Discord moderation bot specifically designed for the [Microsoft Co
 The bot has not been designed for use outside of that server. A lot is assumed about the environment and you **will** encounter problems along the way.
 Modularity is not the goal of this project. You are on your own if you attempt to host this bot outside of the intended environment. (Good luck though, I hope it works out!)
 
+If you want my help setting up an instance of this bot and don't know me personally, you are welcome to [Sponsor me](https://github.com/sponsors/Erisa) for at least $5 and then you are welcome to reach out and I will try my best.  
+Still though, I recommendd you find a better bot.
+
 GitHub Issues will only be accepted if they are reproducible on the production bot (Cliptok in Microsoft Community).
+
+## Note about scam domains
+Cliptok no longer includes scam domains in its public source code. If you are using Cliptok or its lists to assist with your moderation, **don't**.  
+There are many projects better suited to this, and Cliptok now uses new methods of detecting phishing links that we do not wish to make public.
+
+Scam message parts continue to be available at [Lists/scams.txt](Lists/scams.txt) and you are free to contribute to those. Do not contribute scam domains, we don't need them.
+
+If you have questions about this, reach out to `Moderator's mail` on https://discord.gg/microsoft and ask for Erisa, citing this README as a source. Do not Direct Message me unless we are friends or you are sponsoring me on GitHub.
 
 ## Configuration
 If you're using the bot on the Microsoft Community Discord server, the configuration should be fairly simple since the default configuration values are filled in for you.  
