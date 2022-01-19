@@ -166,16 +166,11 @@
       "wholeWord": false,
       "url": false,
       "reason": "Using a text-rendering exploit to mask URL(s) and/or mentions"
-    },
-    {
-      "name": "everyone.txt",
-      "wholeWord": false,
-      "reason": "Attempted to ping everyone/here",
-      "excludedChannels": [
-        316600283503394817,
-        726511089461755974
-      ]
     }
+  ],
+  "everyoneExcludedChannels": [
+    316600283503394817,
+    726511089461755974
   ],
   "massEmojiThreshold": 6,
   "unrestrictedEmojiChannels": [
