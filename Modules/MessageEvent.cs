@@ -487,7 +487,7 @@ namespace Cliptok.Modules
                         {
                             foreach (PhishingMatch phishingMatch in phishingResponse.Matches)
                             {
-                                if (phishingMatch.Type == "PHISHING" && phishingMatch.TrustRating == 1)
+                                if (phishingMatch.Domain != "discord.net" && phishingMatch.Type == "PHISHING" && phishingMatch.TrustRating == 1)
                                 {
                                     _ = message.DeleteAsync();
                                     string reason = "Sending phishing URL(s)";
