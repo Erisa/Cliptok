@@ -222,6 +222,11 @@
   },
   "modmailCategory": 536572162450915340,
   "autobanIds": [
+    {
+      "name": "2022-01-23",
+      "lowerBound": 931710000000000000,
+      "upperBound": 932070000000000000
+    }
   ],
   "lineLimit": 30,
   "increasedLineLimit": 1000,
