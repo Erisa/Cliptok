@@ -37,10 +37,7 @@
     "iphone",
     "directx",
     "winadmins",
-    "5W9mr96h4V",
-    "5gFr29XZ",
-    "minecraft",
-    "yQ6PFyUqXC"
+    "minecraft"
   ],
   "inviteIDExclusion": [
     150662382874525696,
@@ -64,8 +61,7 @@
     133980319010258944,
     568863120609640463,
     675491639804035089,
-    210900612231987200,
-    844992738171682896
+    210900612231987200
   ],
   "warningDaysThreshold": 30,
   "autoMuteThresholds": {
