@@ -11,8 +11,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using static Cliptok.Modules.MessageEvent;
 
 namespace Cliptok.Modules
 {
@@ -824,6 +826,73 @@ namespace Cliptok.Modules
             var tierOne = ctx.Guild.GetRole(Program.cfgjson.TierRoles[0]);
             await member.GrantRoleAsync(tierOne);
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {member.Mention} can now access the server!");
+        }
+
+        [Command("createthread")]
+        public async Task CreateThread(CommandContext ctx)
+        {
+            var thread = await ctx.Channel.CreateThreadAsync("new thread", AutoArchiveDuration.Hour, ChannelType.PublicThread, "blah");
+            await ctx.RespondAsync($"{thread.Id} / {thread.Mention}");
+        }
+
+        [Command("scamcheck")]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        public async Task ScamCheck(CommandContext ctx, string content)
+        {
+            var urlMatches = MessageEvent.url_rx.Matches(content);
+            if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
+            {
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT"));
+                request.Headers.Add("User-Agent", "Cliptok (https://github.com/Erisa/Cliptok)");
+                MessageEvent.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var bodyObject = new PhishingRequestBody()
+                {
+                    Message = content
+                };
+
+                request.Content = new StringContent(JsonConvert.SerializeObject(bodyObject), Encoding.UTF8, "application/json");
+
+                HttpResponseMessage response = await httpClient.SendAsync(request);
+                int httpStatusCode = (int)response.StatusCode;
+                var httpStatus = response.StatusCode;
+                string responseText = await response.Content.ReadAsStringAsync();
+
+                if (httpStatus == System.Net.HttpStatusCode.OK)
+                {
+                    var phishingResponse = JsonConvert.DeserializeObject<MessageEvent.PhishingResponseBody>(responseText);
+
+                    if (phishingResponse.Match)
+                    {
+                        foreach (PhishingMatch phishingMatch in phishingResponse.Matches)
+                        {
+                            if (phishingMatch.Domain != "discord.net" && phishingMatch.Type == "PHISHING" && phishingMatch.TrustRating == 1)
+                            {
+                                string responseToSend = $"```json\n{responseText}\n```";
+                                if (responseToSend.Length > 1940)
+                                {
+                                    try
+                                    {
+                                        HasteBinResult hasteURL = await Program.hasteUploader.Post(responseText);
+                                        if (hasteURL.IsSuccess)
+                                            responseToSend = hasteURL.FullUrl + ".json";
+                                        else
+                                            responseToSend = "Response was too big and Hastebin failed, sorry.";
+                                    }
+                                    catch
+                                    {
+                                        responseToSend = "Response was too big and Hastebin failed, sorry.";
+                                    }
+                                }
+
+                                await ctx.RespondAsync(responseToSend);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+            await ctx.RespondAsync("No matches found.");
         }
 
         [Command("listadd")]
