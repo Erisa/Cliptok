@@ -828,13 +828,6 @@ namespace Cliptok.Modules
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {member.Mention} can now access the server!");
         }
 
-        [Command("createthread")]
-        public async Task CreateThread(CommandContext ctx)
-        {
-            var thread = await ctx.Channel.CreateThreadAsync("new thread", AutoArchiveDuration.Hour, ChannelType.PublicThread, "blah");
-            await ctx.RespondAsync($"{thread.Id} / {thread.Mention}");
-        }
-
         [Command("scamcheck")]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task ScamCheck(CommandContext ctx, [RemainingText] string content)
