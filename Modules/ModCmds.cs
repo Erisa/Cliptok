@@ -837,7 +837,7 @@ namespace Cliptok.Modules
 
         [Command("scamcheck")]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public async Task ScamCheck(CommandContext ctx, string content)
+        public async Task ScamCheck(CommandContext ctx, [RemainingText] string content)
         {
             var urlMatches = MessageEvent.url_rx.Matches(content);
             if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
