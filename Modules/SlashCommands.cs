@@ -251,7 +251,7 @@ namespace Cliptok.Modules
             else if (targetWarnings.Length > 0 && !forceOverride)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} **CAUTION**: The target user has warnings.\n\n" +
-                    $"If you are sure you want to **OVERRIDE** and **DELETE** these warnings, please consider the consequences before adding `force_override: true` to the command.\nIf you wish to **NOT** override the target's warnings, please use merge: true instead.",
+                    $"If you are sure you want to **OVERRIDE** and **DELETE** these warnings, please consider the consequences before adding `force_override: True` to the command.\nIf you wish to **NOT** override the target's warnings, please use `merge: True` instead.",
                     Warnings.GenerateWarningsEmbed(targetUser));
                 return;
             }
