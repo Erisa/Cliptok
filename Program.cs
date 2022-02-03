@@ -289,6 +289,9 @@ namespace Cliptok
             {
                 Task.Run(async () =>
                 {
+                    if (db.HashExists("unbanned", member.Id))
+                        return;
+
                     foreach (var username in badUsernames)
                     {
                         // emergency failsafe, for newlines and other mistaken entries
@@ -351,6 +354,9 @@ namespace Cliptok
                     }
                     CheckAndDehoistMemberAsync(e.Member);
 
+                    if (db.HashExists("unbanned", e.Member.Id))
+                        return;
+
                     if (avatars.Contains(e.Member.AvatarHash))
                     {
                         var _ = Bans.BanSilently(e.Guild, e.Member.Id, "Secret sauce");
@@ -364,8 +370,7 @@ namespace Cliptok
                     RedisValue check;
                     foreach (var IdAutoBanSet in Program.cfgjson.AutoBanIds)
                     {
-                        check = Program.db.HashGet(IdAutoBanSet.Name, e.Member.Id);
-                        if (check.HasValue == true)
+                        if (db.HashExists(IdAutoBanSet.Name, e.Member.Id))
                         {
                             return;
                         }

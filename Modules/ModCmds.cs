@@ -258,6 +258,7 @@ namespace Cliptok.Modules
         public async static Task<bool> UnbanUserAsync(DiscordGuild guild, DiscordUser target)
         {
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
+            await Program.db.HashSetAsync("unbanned", target.Id, true);
             try
             {
                 await guild.UnbanMemberAsync(target);

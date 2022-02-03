@@ -81,7 +81,9 @@ namespace Cliptok.Modules
                 }
                 _ = logChannel.SendMessageAsync(logOut);
 
-                logOut += $"\nChannel: {channel.Mention}";
+                if (channel != null)
+                    logOut += $"\nChannel: {channel.Mention}";
+
                 _ = FindModmailThreadAndSendMessage(guild, $"User ID: {targetUserId}", logOut);
             }
             catch
