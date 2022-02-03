@@ -148,3 +148,4 @@ freebitco.in
 minero.cc
 outbuck.com
 malwarewatch.org
+malwat.ch
