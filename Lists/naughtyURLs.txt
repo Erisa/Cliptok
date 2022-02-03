@@ -147,3 +147,4 @@ btcpool.io
 freebitco.in
 minero.cc
 outbuck.com
+malwarewatch.org
