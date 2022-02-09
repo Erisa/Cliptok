@@ -722,12 +722,11 @@ namespace Cliptok.Modules
             [Description("Manually run all the automatic actions.")]
             public async Task Refresh(CommandContext ctx)
             {
-                var msg = await ctx.RespondAsync("Checking for pending scheduled tasks...");
+                var msg = await ctx.RespondAsync("Checking for pending unmutes and unbans...");
                 bool bans = await CheckBansAsync();
                 bool mutes = await Mutes.CheckMutesAsync();
                 bool reminders = await ModCmds.CheckRemindersAsync();
-                bool raidmode = await CheckRaidmodeAsync(ctx.Guild.Id);
-                await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nReminders check result: `{reminders}`\nRaidmode check result: `{raidmode}`");
+                await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nReminders check result: `{reminders}`");
             }
         }
 
@@ -888,100 +887,6 @@ namespace Cliptok.Modules
                 }
             }
             await ctx.RespondAsync("No matches found.");
-        }
-
-        [Group("raidmode")]
-        [RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        class RaidmodeCommands : BaseCommandModule
-        {
-            [GroupCommand]
-            [Aliases("status")]
-            public async Task RaidmodeStatus(CommandContext ctx)
-            {
-                if (Program.db.HashExists("raidmode", ctx.Guild.Id))
-                {
-                    string output = $"{Program.cfgjson.Emoji.Unbanned} Raidmode is currently **enabled**.";
-                    ulong expirationTimeUnix = (ulong)Program.db.HashGet("raidmode", ctx.Guild.Id);
-                    output += $"\nRaidmode ends <t:{expirationTimeUnix}>";
-                    await ctx.RespondAsync("output");
-                } else
-                {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Banned} Raidmode is currently **disabled**.");
-                }
-            }
-
-            [Command("on")]
-            public async Task RaidmodeOn(CommandContext ctx, string duration = default)
-            {
-                if (Program.db.HashExists("raidmode", ctx.Guild.Id))
-                {
-                    string output = $"{Program.cfgjson.Emoji.Unbanned} Raidmode is already **enabled**.";
-
-                    ulong expirationTimeUnix = (ulong)Program.db.HashGet("raidmode", ctx.Guild.Id);
-                    output += $"\nRaidmode ends <t:{expirationTimeUnix}>";
-                    await ctx.RespondAsync(output);
-                }
-                else
-                {
-                    DateTime parsedExpiration;
-
-                    if (duration == default)
-                        parsedExpiration = DateTime.Now.AddHours(3);
-                    else
-                        parsedExpiration = HumanDateParser.HumanDateParser.Parse(duration);
-
-                    long unixExpiration = ToUnixTimestamp(parsedExpiration);
-                    Program.db.HashSet("raidmode", ctx.Guild.Id, unixExpiration);
-
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Raidmode is now **enabled** and will end <t:{unixExpiration}:R>.");
-                    DiscordMessageBuilder response = new DiscordMessageBuilder()
-                        .WithContent($"{Program.cfgjson.Emoji.Unbanned} Raidmode was **enabled** by {ctx.User.Mention} and ends <t:{unixExpiration}:R>.")
-                        .WithAllowedMentions(Mentions.None);
-                    await Program.logChannel.SendMessageAsync(response);
-                }
-            }
-
-            [Command("off")]
-            public async Task RaidmdodeOff(CommandContext ctx)
-            {
-                if (Program.db.HashExists("raidmode", ctx.Guild.Id))
-                {
-                    long expirationTimeUnix = (long)Program.db.HashGet("raidmode", ctx.Guild.Id);
-                    Program.db.HashDelete("raidmode", ctx.Guild.Id);
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Raidmode is now **disabled**.\nIt was supposed to end <t:{expirationTimeUnix}:R>.");
-                    DiscordMessageBuilder response = new DiscordMessageBuilder()
-                        .WithContent($"{Program.cfgjson.Emoji.Banned} Raidmode was **disabled** by {ctx.User.Mention}.\nIt was supposed to end <t:{expirationTimeUnix}:R>.")
-                        .WithAllowedMentions(Mentions.None);
-                    await Program.logChannel.SendMessageAsync(response);
-                }
-                else
-                {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Raidmode is already **disabled**.");
-                }
-            }
-        }
-
-        public static async Task<bool> CheckRaidmodeAsync(ulong guildId)
-        {
-            if (!Program.db.HashExists("raidmode", guildId))
-            {
-                return false;
-            } else
-            {
-                long unixExpiration = (long)Program.db.HashGet("raidmode", guildId);
-                long currentUnixTime = ToUnixTimestamp(DateTime.Now);
-                if (currentUnixTime >= unixExpiration)
-                {
-                    Program.db.HashDelete("raidmode", guildId);
-                    await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Raidmode was **disabled** automatically.");
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-                
         }
 
         [Command("listadd")]
