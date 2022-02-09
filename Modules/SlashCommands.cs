@@ -273,6 +273,78 @@ namespace Cliptok.Modules
             await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Warnings from {sourceUser.Mention} were {operationText}transferred to {targetUser.Mention} by `{ctx.User.Username}#{ctx.User.Discriminator}`", Warnings.GenerateWarningsEmbed(targetUser));
         }
 
+        [SlashCommandGroup("raidmode", "Commands relating to Raidmode")]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator)]
+        public class RaidmodeSlashCommands : ApplicationCommandModule
+        {
+            [SlashCommand("status", "Check the current state of raidmode.")]
+            public async Task RaidmodeStatus(InteractionContext ctx)
+            {
+                if (Program.db.HashExists("raidmode", ctx.Guild.Id))
+                {
+                    string output = $"Raidmode is currently **enabled**.";
+                    ulong expirationTimeUnix = (ulong)Program.db.HashGet("raidmode", ctx.Guild.Id);
+                    output += $"\nRaidmode ends <t:{expirationTimeUnix}>";
+                    await ctx.RespondAsync(output, ephemeral: true);
+                } else
+                {
+                    await ctx.RespondAsync($" Raidmode is currently **disabled**.");
+                }
+                
+            }
+
+            [SlashCommand("on", "Enable raidmode. Defaults to 3 hour length if not specified.")]
+            public async Task RaidmodeOnSlash(InteractionContext ctx,
+                [Option("duration", "How long to keep raidmode enabled for.")] string duration = default)
+            {
+                if (Program.db.HashExists("raidmode", ctx.Guild.Id))
+                {
+                    string output = $"Raidmode is already **enabled**.";
+
+                    ulong expirationTimeUnix = (ulong)Program.db.HashGet("raidmode", ctx.Guild.Id);
+                    output += $"\nRaidmode ends <t:{expirationTimeUnix}>";
+                    await ctx.RespondAsync(output);
+                }
+                else
+                {
+                    DateTime parsedExpiration;
+
+                    if (duration == default)
+                        parsedExpiration = DateTime.Now.AddHours(3);
+                    else
+                        parsedExpiration = HumanDateParser.HumanDateParser.Parse(duration);
+
+                    long unixExpiration = ModCmds.ToUnixTimestamp(parsedExpiration);
+                    Program.db.HashSet("raidmode", ctx.Guild.Id, unixExpiration);
+
+                    await ctx.RespondAsync($"Raidmode is now **enabled** and will end <t:{unixExpiration}:R>.");
+                    DiscordMessageBuilder response = new DiscordMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Unbanned} Raidmode was **enabled** by {ctx.User.Mention} and ends <t:{unixExpiration}:R>.")
+                        .WithAllowedMentions(Mentions.None);
+                    await Program.logChannel.SendMessageAsync(response);
+                }
+            }
+
+            [SlashCommand("off", "Disable raidmode immediately.")]
+            public async Task RaidmodeOffSlash(InteractionContext ctx)
+            {
+                if (Program.db.HashExists("raidmode", ctx.Guild.Id))
+                {
+                    long expirationTimeUnix = (long)Program.db.HashGet("raidmode", ctx.Guild.Id);
+                    Program.db.HashDelete("raidmode", ctx.Guild.Id);
+                    await ctx.RespondAsync($"Raidmode is now **disabled**.\nIt was supposed to end <t:{expirationTimeUnix}:R>.");
+                    DiscordMessageBuilder response = new DiscordMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Banned} Raidmode was **disabled** by {ctx.User.Mention}.\nIt was supposed to end <t:{expirationTimeUnix}:R>.")
+                        .WithAllowedMentions(Mentions.None);
+                    await Program.logChannel.SendMessageAsync(response);
+                }
+                else
+                {
+                    await ctx.RespondAsync($" Raidmode is already **disabled**.");
+                }
+            }
+        }
+
         [ContextMenu(ApplicationCommandType.UserContextMenu, "Show Avatar")]
         public async Task ContextAvatar(ContextMenuContext ctx)
         {
