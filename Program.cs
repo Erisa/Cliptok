@@ -343,6 +343,18 @@ namespace Cliptok
 
                     userLogChannel.SendMessageAsync($"{cfgjson.Emoji.UserJoin} **Member joined the server!** - {e.Member.Id}", builder);
 
+                    if (db.HashExists("raidmode", e.Guild.Id))
+                    {
+                        try
+                        {
+                            await e.Member.SendMessageAsync($"Hi, you tried to join **{e.Guild.Name}** while it was in lockdown and your join was refused.\nPlease try to join again later.");
+                        } catch (DSharpPlus.Exceptions.UnauthorizedException)
+                        {
+                            // welp, their DMs are closed. not my problem.
+                        }
+                        await e.Member.RemoveAsync();
+                    }
+
                     if (await db.HashExistsAsync("mutes", e.Member.Id))
                     {
                         // todo: store per-guild
@@ -650,6 +662,7 @@ namespace Cliptok
                     Mutes.CheckMutesAsync();
                     ModCmds.CheckBansAsync();
                     ModCmds.CheckRemindersAsync();
+                    ModCmds.CheckRaidmodeAsync(cfgjson.ServerID);
                 }
                 catch (Exception e)
                 {
