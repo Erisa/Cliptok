@@ -149,3 +149,4 @@ minero.cc
 outbuck.com
 malwarewatch.org
 malwat.ch
+shrinke.me
