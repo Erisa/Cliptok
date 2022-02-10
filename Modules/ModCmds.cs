@@ -890,7 +890,7 @@ namespace Cliptok.Modules
             await ctx.RespondAsync("No matches found.");
         }
 
-        [Group("raidmode")]
+        [Group("clipraidmode")]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
         class RaidmodeCommands : BaseCommandModule
         {
