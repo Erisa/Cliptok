@@ -10,7 +10,7 @@ COPY *.cs Helpers Modules *.sln ./
 RUN dotnet build -c Release -o out
 
 # We already have this image pulled, its actually quicker to reuse it
-FROM mcr.microsoft.com/dotnet/sdk:6.0.102-rc.2 AS git-collector
+FROM mcr.microsoft.com/dotnet/sdk:6.0.102 AS git-collector
 WORKDIR /out
 COPY . .
 RUN touch dummy.txt && \
@@ -24,6 +24,7 @@ RUN touch dummy.txt && \
 FROM mcr.microsoft.com/dotnet/runtime:6.0.2-alpine3.14
 LABEL com.centurylinklabs.watchtower.enable true
 WORKDIR /app
+RUN apk add --no-cache git
 COPY --from=build-env /app/out .
 ADD Lists ./Lists
 ADD config.json ./
