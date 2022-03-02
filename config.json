@@ -163,6 +163,7 @@
       "reason": "Using a text-rendering exploit to mask URL(s) and/or mentions"
     }
   ],
+  "gitListDirectory": "Private",
   "everyoneExcludedChannels": [
     316600283503394817,
     726511089461755974

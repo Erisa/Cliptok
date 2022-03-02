@@ -199,6 +199,9 @@ namespace Cliptok
         [JsonProperty("everyoneExcludedChannels")]
         public List<ulong> EveryoneExcludedChannels { get; private set; }
 
+        [JsonProperty("gitListDirectory")]
+        public string GitListDirectory { get; private set; }
+
     }
 
     public class WorkflowConfig

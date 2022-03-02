@@ -288,7 +288,7 @@ namespace Cliptok.Modules
                     await ctx.RespondAsync(output, ephemeral: true);
                 } else
                 {
-                    await ctx.RespondAsync($" Raidmode is currently **disabled**.");
+                    await ctx.RespondAsync($" Raidmode is currently **disabled**.", ephemeral: true);
                 }
                 
             }

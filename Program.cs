@@ -15,7 +15,9 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static Cliptok.Helpers.ShellCommand;
 
 namespace Cliptok
 {
@@ -39,6 +41,15 @@ namespace Cliptok
 
         public static Random rand = new Random();
         public static HasteBinClient hasteUploader;
+
+        public static void UpdateLists()
+        {
+            foreach (var list in cfgjson.WordListList)
+            {
+                var listOutput = File.ReadAllLines($"Lists/{list.Name}");
+                cfgjson.WordListList[cfgjson.WordListList.FindIndex(a => a.Name == list.Name)].Words = listOutput;
+            }
+        }
 
         public static async Task<bool> CheckAndDehoistMemberAsync(DiscordMember targetMember)
         {
@@ -92,11 +103,7 @@ namespace Cliptok
 
             hasteUploader = new HasteBinClient(cfgjson.HastebinEndpoint);
 
-            foreach (var list in cfgjson.WordListList)
-            {
-                var listOutput = File.ReadAllLines($"Lists/{list.Name}");
-                cfgjson.WordListList[cfgjson.WordListList.FindIndex(a => a.Name == list.Name)].Words = listOutput;
-            }
+            UpdateLists();
 
             if (File.Exists("Lists/usernames.txt"))
                 badUsernames = File.ReadAllLines("Lists/usernames.txt");
@@ -271,12 +278,34 @@ namespace Cliptok
                         commitTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss zzz");
                     }
 
+                    bool listSuccess = false;
+                    if (cfgjson.GitListDirectory != null && cfgjson.GitListDirectory != "")
+                    {
+                        
+                        ShellResult finishedShell = RunShellCommand($"cd Lists/${cfgjson.GitListDirectory} && git pull");
+
+                        string result = Regex.Replace(finishedShell.result, "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED");
+
+                        if (finishedShell.proc.ExitCode != 0)
+                        {
+                            listSuccess = false;
+                            client.Logger.LogError(eventId: CliptokEventID, $"Error updating lists:\n{result}");
+                        }
+                        else
+                        {
+                            UpdateLists();
+                            client.Logger.LogInformation(eventId: CliptokEventID, $"Success updating lists:\n{result}");
+                            listSuccess = true;
+                        }
+                    }
+
                     var cliptokChannel = await client.GetChannelAsync(cfgjson.HomeChannel);
                     cliptokChannel.SendMessageAsync($"{cfgjson.Emoji.Connected} {discord.CurrentUser.Username} connected successfully!\n\n" +
                         $"**Version**: `{commitHash.Trim()}`\n" +
                         $"**Version timestamp**: `{commitTime}`\n**Framework**: `{RuntimeInformation.FrameworkDescription}`\n" +
                         $"**Platform**: `{RuntimeInformation.OSDescription}`\n" +
-                        $"**Library**: `DSharpPlus {discord.VersionString}`\n\n" +
+                        $"**Library**: `DSharpPlus {discord.VersionString}`\n" +
+                        $"**List update success**: `{listSuccess}\n\n`" + 
                         $"Most recent commit message:\n" +
                         $"```\n" +
                         $"{commitMessage}\n" +
@@ -379,7 +408,6 @@ namespace Cliptok
                             $"Please send an appeal and you will be unbanned as soon as possible: {Program.cfgjson.AppealLink}\n" +
                             $"The requirements for appeal can be ignored in this case. Sorry for any inconvenience caused.";
 
-                    RedisValue check;
                     foreach (var IdAutoBanSet in Program.cfgjson.AutoBanIds)
                     {
                         if (db.HashExists(IdAutoBanSet.Name, e.Member.Id))

@@ -13,7 +13,9 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static Cliptok.Helpers.ShellCommand;
 using static Cliptok.Modules.MessageEvent;
 
 namespace Cliptok.Modules
@@ -714,7 +716,6 @@ namespace Cliptok.Modules
                     await ctx.RespondAsync("Invalid argument. Make sure you know what you are doing.");
 
                 };
-
             }
 
             [Command("refresh")]
@@ -729,6 +730,72 @@ namespace Cliptok.Modules
                 bool raidmode = await CheckRaidmodeAsync(ctx.Guild.Id);
                 await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nReminders check result: `{reminders}`\nRaidmode check result: `{raidmode}`");
             }
+
+            [Command("sh")]
+            [Aliases("cmd")]
+            [Description("Run shell commands! Bash for Linux/macOS, batch for Windows!")]
+            public async Task Shell(CommandContext ctx, [RemainingText] string command)
+            {
+                if (ctx.User.Id != 228574821590499329)
+                {
+                    await ctx.RespondAsync("Nope, you're not Erisa.");
+                    return;
+                }
+
+
+                DiscordMessage msg = await ctx.RespondAsync("executing..");
+
+                ShellResult finishedShell = RunShellCommand(command);
+                string result = Regex.Replace(finishedShell.result, "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT"), "REDACTED");
+
+                if (finishedShell.result.Length > 1947)
+                {
+                    HasteBinResult hasteURL = await Program.hasteUploader.Post(result);
+                    if (hasteURL.IsSuccess)
+                    {
+                        await msg.ModifyAsync($"Done, but output exceeded character limit! (`{result.Length}`/`1947`)\n" +
+                            $"Full output can be viewed here: https://paste.erisa.moe/raw/{hasteURL.Key}\nProcess exited with code `{finishedShell.proc.ExitCode}`.");
+                    }
+                    else
+                    {
+                        Console.WriteLine(finishedShell.result);
+                        await msg.ModifyAsync($"Error occured during upload to Hastebin.\nAction was executed regardless, shell exit code was `{finishedShell.proc.ExitCode}`. Hastebin status code is `{hasteURL.StatusCode}`.\nPlease check the console/log for the command output.");
+                    }
+                }
+                else
+                {
+                    await msg.ModifyAsync($"Done, output: ```\n" +
+                        $"{result}```Process exited with code `{finishedShell.proc.ExitCode}`.");
+                }
+            }
+        }
+
+        [Command("listupdate")]
+        [RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        public async Task ListUpdate(CommandContext ctx)
+        {
+            if (Program.cfgjson.GitListDirectory == null || Program.cfgjson.GitListDirectory == "")
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Private lists directory is not configured in bot config.");
+                return;
+            }
+
+            string command = $"cd Lists/${Program.cfgjson.GitListDirectory} && git pull";
+            DiscordMessage msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Updating private lists..");
+
+            ShellResult finishedShell = RunShellCommand(command);
+
+            string result = Regex.Replace(finishedShell.result, "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED");
+
+            if (finishedShell.proc.ExitCode != 0)
+            {
+                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} An error ocurred trying to update private lists!\n```\n{result}\n```");
+            } else
+            {
+                Program.UpdateLists();
+                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully updated and reloaded private lists!\n```\n{result}\n```");
+            }
+
         }
 
         [Command("ping")]

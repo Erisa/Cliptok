@@ -9,21 +9,12 @@ services:
     restart: on-failure
     volumes:
       - type: bind
-        source: ./Lists/rudeWords.txt
-        target: /app/Lists/rudeWords.txt
-      - type: bind
-        source: ./Lists/usernames.txt
-        target: /app/Lists/usernames.txt
-      - type: bind
-        source: ./Lists/autoban.txt
-        target: /app/Lists/autoban.txt
-      - type: bind
-        source: ./Lists/phishing.txt
-        target: /app/Lists/phishing.txt
+        source: ./Lists/Private
+        target: /app/Lists/Private
       # Uncomment the below lines to use your own config file.
-      #- type: bind
-      #  source: ./config.json
-      #  target: /app/config.json
+      - type: bind
+        source: ./config.dev.json
+        target: /app/config.json
     environment:
       # Overrides your configs Redis options for use with Docker Compose
       #  I don't advise changing this unless you have a strange setup
@@ -36,9 +27,9 @@ services:
         source: ./data
         target: /data
     command: --appendonly yes
-  watchtower:
-    image: containrrr/watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 30 --label-enable
-    restart: always
+  #watchtower:
+  #  image: containrrr/watchtower
+  #  volumes:
+  #    - /var/run/docker.sock:/var/run/docker.sock
+  #  command: --interval 30 --label-enable
+  #  restart: always

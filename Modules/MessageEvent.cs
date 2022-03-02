@@ -60,7 +60,6 @@ namespace Cliptok.Modules
                             if (distinctString.Length == 1)
                             {
                                 isNaughty = true;
-
                             }
                             else if (distinctString.Length == 2 && (naughty.EndsWith(distinctString[1].ToString()) || naughty.StartsWith(distinctString[0].ToString())))
                             {
@@ -184,7 +183,7 @@ namespace Cliptok.Modules
         {
             try
             {
-                if (message.Author == null)
+                if (message.Author == null || message.Author.Id == client.CurrentUser.Id)
                     return;
 
                 if (!isAnEdit && message.Author.Id == Program.cfgjson.ModmailUserId && message.Content == "@here" && message.Embeds[0].Footer.Text.Contains("User ID:"))
