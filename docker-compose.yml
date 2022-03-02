@@ -13,7 +13,7 @@ services:
         target: /app/Lists/Private
       # Uncomment the below lines to use your own config file.
       - type: bind
-        source: ./config.dev.json
+        source: ./config.json
         target: /app/config.json
     environment:
       # Overrides your configs Redis options for use with Docker Compose

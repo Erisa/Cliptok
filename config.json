@@ -135,7 +135,7 @@
       "reason": "Sent malicious URL(s)"
     },
     {
-      "name": "rudeWords.txt",
+      "name": "Private/rudeWords.txt",
       "wholeWord": true,
       "reason": "Use of restricted word(s)"
     },
@@ -145,7 +145,7 @@
       "reason": "[Automatic] Suspected to be following the patterns of known raiders."
     },
     {
-      "name": "phishing.txt",
+      "name": "Private/phishing.txt",
       "wholeWord": false,
       "url": true,
       "reason": "Sending phishing URL(s)"
