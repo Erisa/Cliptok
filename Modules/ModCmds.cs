@@ -780,7 +780,7 @@ namespace Cliptok.Modules
                 return;
             }
 
-            string command = $"cd Lists/${Program.cfgjson.GitListDirectory} && git pull";
+            string command = $"cd Lists/{Program.cfgjson.GitListDirectory} && git pull";
             DiscordMessage msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Updating private lists..");
 
             ShellResult finishedShell = RunShellCommand(command);

@@ -282,7 +282,7 @@ namespace Cliptok
                     if (cfgjson.GitListDirectory != null && cfgjson.GitListDirectory != "")
                     {
                         
-                        ShellResult finishedShell = RunShellCommand($"cd Lists/${cfgjson.GitListDirectory} && git pull");
+                        ShellResult finishedShell = RunShellCommand($"cd Lists/{cfgjson.GitListDirectory} && git pull");
 
                         string result = Regex.Replace(finishedShell.result, "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED");
 
