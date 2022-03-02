@@ -140,11 +140,6 @@
       "reason": "Use of restricted word(s)"
     },
     {
-      "name": "autoban.txt",
-      "wholeWord": false,
-      "reason": "[Automatic] Suspected to be following the patterns of known raiders."
-    },
-    {
       "name": "Private/phishing.txt",
       "wholeWord": false,
       "url": true,
