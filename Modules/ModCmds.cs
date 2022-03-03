@@ -728,7 +728,9 @@ namespace Cliptok.Modules
                 bool mutes = await Mutes.CheckMutesAsync();
                 bool reminders = await ModCmds.CheckRemindersAsync();
                 bool raidmode = await CheckRaidmodeAsync(ctx.Guild.Id);
-                await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nReminders check result: `{reminders}`\nRaidmode check result: `{raidmode}`");
+                bool unlocks = await Lockdown.CheckUnlocksAsync();
+
+                await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nReminders check result: `{reminders}`\nRaidmode check result: `{raidmode}`\nUnlocks check result: `{unlocks}`");
             }
 
             [Command("sh")]

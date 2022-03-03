@@ -2,6 +2,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,8 +16,34 @@ namespace Cliptok.Modules
         [Aliases("lock")]
         [Description("Locks the current channel, preventing any new messages. See also: unlock")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequireBotPermissions(Permissions.ManageChannels)]
-        public async Task LockdownCommand(CommandContext ctx, [RemainingText] string reason = "")
+        public async Task LockdownCommand(CommandContext ctx, [RemainingText] string timeAndReason = "")
         {
+            bool timeParsed = false;
+            TimeSpan lockDuration = default;
+            string reason = "";
+
+            if (timeAndReason != "")
+            {
+                string possibleTime = timeAndReason.Split(' ').First();
+                try
+                {
+                    lockDuration = HumanDateParser.HumanDateParser.Parse(possibleTime).Subtract(ctx.Message.Timestamp.DateTime);
+                    timeParsed = true;
+                }
+                catch
+                {
+                    // keep default
+                }
+
+                reason = timeAndReason;
+
+                if (timeParsed)
+                {
+                    int i = reason.IndexOf(" ") + 1;
+                    reason = reason[i..];
+                }
+            }
+
             var currentChannel = ctx.Channel;
             if (!Program.cfgjson.LockdownEnabledChannels.Contains(currentChannel.Id))
             {
@@ -26,11 +53,11 @@ namespace Cliptok.Modules
 
             if (ongoingLockdown)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} A mass lockdown or unlock is already ongoing. Refusing your request. sorry.");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} A mass lockdown or unlock is already ongoing. Refusing your request to avoid conflicts, sorry.");
                 return;
             }
 
-            if (reason == "all")
+            if (timeAndReason == "all")
             {
                 ongoingLockdown = true;
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it, please hold...");
@@ -62,11 +89,20 @@ namespace Cliptok.Modules
             await currentChannel.AddOverwriteAsync(ctx.Guild.GetRole(Program.cfgjson.ModRole), Permissions.SendMessages, Permissions.None, "Failsafe 2 for Lockdown");
             await currentChannel.AddOverwriteAsync(ctx.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, "Lockdown command");
 
+            await Program.db.HashSetAsync("unlocks", ctx.Channel.Id, ModCmds.ToUnixTimestamp(DateTime.Now + lockDuration));
+
+            string msg;
             if (reason == "")
-                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Locked} This channel has been locked by a Moderator.");
+                msg = $"{Program.cfgjson.Emoji.Locked} This channel has been locked by a Moderator.";
             else
-                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Locked} This channel has been locked: **{reason}**");
-            ;
+                msg = $"{Program.cfgjson.Emoji.Locked} This channel has been locked: **{reason}**";
+
+            if (timeParsed)
+            {
+                msg += $"\nChannel unlocks: {ModCmds.ToUnixTimestamp(DateTime.Now + lockDuration)}";
+            }
+
+            await ctx.Channel.SendMessageAsync(msg);
         }
 
         public static async Task<bool> UnlockChannel(DiscordChannel discordChannel, DiscordMember discordMember)
@@ -104,12 +140,34 @@ namespace Cliptok.Modules
             }
             if (success)
             {
+                await Program.db.HashDeleteAsync("unlocks", discordChannel.Id);
                 await discordChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Unlock} This channel has been unlocked!");
             }
             else
             {
-                await discordChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} This channel is not locked.");
+                await discordChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} This channel is not locked, or unlock failed.");
             }
+            return success;
+        }
+
+        public static async Task<bool> CheckUnlocksAsync()
+        {
+            var channelUnlocks = await Program.db.HashGetAllAsync("unlocks");
+            var success = false;
+
+            foreach (var channelUnlock in channelUnlocks)
+            {
+                long unixExpiration = (long)channelUnlock.Value;
+                long currentUnixTime = ModCmds.ToUnixTimestamp(DateTime.Now);
+                if (currentUnixTime >= unixExpiration)
+                {
+                    var channel = await Program.discord.GetChannelAsync((ulong)channelUnlock.Name);
+                    var currentMember = await channel.Guild.GetMemberAsync(Program.discord.CurrentUser.Id);
+                    await UnlockChannel(channel, currentMember);
+                    success = true;
+                }
+            }
+
             return success;
         }
 

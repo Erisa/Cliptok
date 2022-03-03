@@ -691,6 +691,7 @@ namespace Cliptok
                     ModCmds.CheckBansAsync();
                     ModCmds.CheckRemindersAsync();
                     ModCmds.CheckRaidmodeAsync(cfgjson.ServerID);
+                    Lockdown.CheckUnlocksAsync();
                 }
                 catch (Exception e)
                 {
