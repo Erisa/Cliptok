@@ -40,7 +40,11 @@ namespace Cliptok.Modules
                 if (timeParsed)
                 {
                     int i = reason.IndexOf(" ") + 1;
-                    reason = reason[i..];
+
+                    if (i == 0)
+                        reason = "";
+                    else
+                        reason = reason[i..];
                 }
             }
 
@@ -99,7 +103,7 @@ namespace Cliptok.Modules
 
             if (timeParsed)
             {
-                msg += $"\nChannel unlocks: {ModCmds.ToUnixTimestamp(DateTime.Now + lockDuration)}";
+                msg += $"\nChannel unlocks: <t:{ModCmds.ToUnixTimestamp(DateTime.Now + lockDuration)}:R>";
             }
 
             await ctx.Channel.SendMessageAsync(msg);
