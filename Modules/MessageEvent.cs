@@ -85,7 +85,7 @@ namespace Cliptok.Modules
             else if (naughtyWordList.Url)
             {
                 var urlMatches = url_rx.Matches(input);
-                foreach(Match match in urlMatches)
+                foreach (Match match in urlMatches)
                 {
                     if (naughtyWords.Contains(match.Value))
                         return true;
@@ -228,9 +228,10 @@ namespace Cliptok.Modules
                 try
                 {
                     member = await message.Channel.Guild.GetMemberAsync(message.Author.Id);
-                } catch (DSharpPlus.Exceptions.NotFoundException)
+                }
+                catch (DSharpPlus.Exceptions.NotFoundException)
                 {
-                    member = default;   
+                    member = default;
                 }
 
                 // Skip messages from moderators beyond this point.
@@ -481,7 +482,7 @@ namespace Cliptok.Modules
                     if (httpStatus == System.Net.HttpStatusCode.OK)
                     {
                         var phishingResponse = JsonConvert.DeserializeObject<PhishingResponseBody>(responseText);
-                        
+
                         if (phishingResponse.Match)
                         {
                             foreach (PhishingMatch phishingMatch in phishingResponse.Matches)
@@ -492,7 +493,7 @@ namespace Cliptok.Modules
                                     string reason = "Sending phishing URL(s)";
                                     DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
                                     var warning = await Warnings.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), message.Channel, " automatically ");
-                                    
+
                                     string responseToSend = $"```json\n{responseText}\n```";
                                     if (responseToSend.Length > 1940)
                                     {
@@ -503,7 +504,8 @@ namespace Cliptok.Modules
                                                 responseToSend = hasteURL.FullUrl + ".json";
                                             else
                                                 responseToSend = "Response was too big and Hastebin failed, sorry.";
-                                        } catch
+                                        }
+                                        catch
                                         {
                                             responseToSend = "Response was too big and Hastebin failed, sorry.";
                                         }

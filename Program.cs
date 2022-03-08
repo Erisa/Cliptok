@@ -284,7 +284,7 @@ namespace Cliptok
                     bool listSuccess = false;
                     if (cfgjson.GitListDirectory != null && cfgjson.GitListDirectory != "")
                     {
-                        
+
                         ShellResult finishedShell = RunShellCommand($"cd Lists/{cfgjson.GitListDirectory} && git pull");
 
                         string result = Regex.Replace(finishedShell.result, "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED");
@@ -308,7 +308,7 @@ namespace Cliptok
                         $"**Version timestamp**: `{commitTime}`\n**Framework**: `{RuntimeInformation.FrameworkDescription}`\n" +
                         $"**Platform**: `{RuntimeInformation.OSDescription}`\n" +
                         $"**Library**: `DSharpPlus {discord.VersionString}`\n" +
-                        $"**List update success**: `{listSuccess}\n\n`" + 
+                        $"**List update success**: `{listSuccess}\n\n`" +
                         $"Most recent commit message:\n" +
                         $"```\n" +
                         $"{commitMessage}\n" +
@@ -380,7 +380,8 @@ namespace Cliptok
                         try
                         {
                             await e.Member.SendMessageAsync($"Hi, you tried to join **{e.Guild.Name}** while it was in lockdown and your join was refused.\nPlease try to join again later.");
-                        } catch (DSharpPlus.Exceptions.UnauthorizedException)
+                        }
+                        catch (DSharpPlus.Exceptions.UnauthorizedException)
                         {
                             // welp, their DMs are closed. not my problem.
                         }
@@ -392,7 +393,8 @@ namespace Cliptok
                         // todo: store per-guild
                         DiscordRole mutedRole = e.Guild.GetRole(cfgjson.MutedRole);
                         await e.Member.GrantRoleAsync(mutedRole, "Reapplying mute: possible mute evasion.");
-                    } else if (e.Member.CommunicationDisabledUntil != null)
+                    }
+                    else if (e.Member.CommunicationDisabledUntil != null)
                     {
                         await e.Member.TimeoutAsync(null, "Removing timeout since member was presumably unmuted while left");
                     }
@@ -643,12 +645,13 @@ namespace Cliptok
                         webhookOut = new DiscordWebhookBuilder().AddEmbed(embed);
                         await e.Interaction.EditOriginalResponseAsync(webhookOut);
                     }
-                    
-                } else
+
+                }
+                else
                 {
 
                 }
-                
+
             };
 
             discord.Ready += OnReady;

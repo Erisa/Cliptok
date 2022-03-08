@@ -1,7 +1,6 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Newtonsoft.Json;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -286,11 +285,12 @@ namespace Cliptok.Modules
                     ulong expirationTimeUnix = (ulong)Program.db.HashGet("raidmode", ctx.Guild.Id);
                     output += $"\nRaidmode ends <t:{expirationTimeUnix}>";
                     await ctx.RespondAsync(output, ephemeral: true);
-                } else
+                }
+                else
                 {
                     await ctx.RespondAsync($" Raidmode is currently **disabled**.", ephemeral: true);
                 }
-                
+
             }
 
             [SlashCommand("on", "Enable raidmode. Defaults to 3 hour length if not specified.")]
@@ -380,7 +380,8 @@ namespace Cliptok.Modules
             try
             {
                 member = await ctx.Guild.GetMemberAsync(target.Id);
-            } catch (DSharpPlus.Exceptions.NotFoundException)
+            }
+            catch (DSharpPlus.Exceptions.NotFoundException)
             {
                 embed = new DiscordEmbedBuilder()
                     .WithThumbnail(avatarUrl)

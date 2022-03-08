@@ -42,7 +42,8 @@ namespace Cliptok.Modules
                 bool success = false;
                 foreach (KeyValuePair<string, MemberPunishment> entry in banList)
                 {
-                    MemberPunishment banEntry = entry.Value;                    if (DateTime.Now > banEntry.ExpireTime)
+                    MemberPunishment banEntry = entry.Value;
+                    if (DateTime.Now > banEntry.ExpireTime)
                     {
                         targetGuild = await Program.discord.GetGuildAsync(banEntry.ServerId);
                         var user = await Program.discord.GetUserAsync(banEntry.MemberId);
@@ -791,7 +792,8 @@ namespace Cliptok.Modules
             if (finishedShell.proc.ExitCode != 0)
             {
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} An error ocurred trying to update private lists!\n```\n{result}\n```");
-            } else
+            }
+            else
             {
                 Program.UpdateLists();
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully updated and reloaded private lists!\n```\n{result}\n```");
@@ -972,7 +974,8 @@ namespace Cliptok.Modules
                     ulong expirationTimeUnix = (ulong)Program.db.HashGet("raidmode", ctx.Guild.Id);
                     output += $"\nRaidmode ends <t:{expirationTimeUnix}>";
                     await ctx.RespondAsync("output");
-                } else
+                }
+                else
                 {
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Banned} Raidmode is currently **disabled**.");
                 }
@@ -1034,7 +1037,8 @@ namespace Cliptok.Modules
             if (!Program.db.HashExists("raidmode", guildId))
             {
                 return false;
-            } else
+            }
+            else
             {
                 long unixExpiration = (long)Program.db.HashGet("raidmode", guildId);
                 long currentUnixTime = ToUnixTimestamp(DateTime.Now);
@@ -1049,7 +1053,7 @@ namespace Cliptok.Modules
                     return false;
                 }
             }
-                
+
         }
 
         [Command("listadd")]

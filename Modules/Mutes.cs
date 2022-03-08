@@ -70,7 +70,7 @@ namespace Cliptok.Modules
                     {
                         // do literally nothing. who cares?
                     }
-                    
+
                 }
                 catch
                 {
@@ -175,7 +175,8 @@ namespace Cliptok.Modules
                 try
                 {
                     await member.TimeoutAsync(null);
-                } catch
+                }
+                catch
                 {
                     // do nothing. not important really...
                 }
