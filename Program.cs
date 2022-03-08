@@ -38,6 +38,7 @@ namespace Cliptok
         public static DiscordChannel logChannel;
         public static DiscordChannel userLogChannel;
         public static DiscordChannel badMsgLog;
+        public static DiscordGuild homeGuild;
 
         public static Random rand = new Random();
         public static HasteBinClient hasteUploader;
@@ -226,6 +227,8 @@ namespace Cliptok
                     logChannel = await discord.GetChannelAsync(cfgjson.LogChannel);
                     userLogChannel = await discord.GetChannelAsync(cfgjson.UserLogChannel);
                     badMsgLog = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
+                    homeGuild = await discord.GetGuildAsync(cfgjson.ServerID);
+
                     Mutes.CheckMutesAsync();
                     ModCmds.CheckBansAsync();
                     ModCmds.CheckRemindersAsync();
@@ -316,6 +319,7 @@ namespace Cliptok
 
             async Task UsernameCheckAsync(DiscordMember member)
             {
+                var guild = Program.homeGuild;
                 Task.Run(async () =>
                 {
                     if (db.HashExists("unbanned", member.Id))
@@ -332,7 +336,6 @@ namespace Cliptok
                             if (autoBannedUsersCache.Contains(member.Id))
                                 break;
                             IEnumerable<ulong> enumerable = autoBannedUsersCache.Append(member.Id);
-                            var guild = await discord.GetGuildAsync(cfgjson.ServerID);
                             await Bans.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot accounts. Please appeal if you are a human.", discord.CurrentUser.Id, guild, 7, null, default, true);
                             var embed = new DiscordEmbedBuilder()
                                 .WithTimestamp(DateTime.Now)
@@ -514,8 +517,7 @@ namespace Cliptok
             {
                 Task.Run(async () =>
                 {
-                    var guild = await client.GetGuildAsync(cfgjson.ServerID);
-                    var member = await guild.GetMemberAsync(e.UserAfter.Id);
+                    var member = await homeGuild.GetMemberAsync(e.UserAfter.Id);
 
                     CheckAndDehoistMemberAsync(member);
                     UsernameCheckAsync(member);

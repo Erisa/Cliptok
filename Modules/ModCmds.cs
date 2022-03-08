@@ -28,6 +28,7 @@ namespace Cliptok.Modules
 
         public static async Task<bool> CheckBansAsync()
         {
+            DiscordGuild targetGuild = Program.homeGuild;
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
             Dictionary<string, MemberPunishment> banList = Program.db.HashGetAll("bans").ToDictionary(
                 x => x.Name.ToString(),
@@ -41,9 +42,7 @@ namespace Cliptok.Modules
                 bool success = false;
                 foreach (KeyValuePair<string, MemberPunishment> entry in banList)
                 {
-                    MemberPunishment banEntry = entry.Value;
-                    DiscordGuild targetGuild = await Program.discord.GetGuildAsync(banEntry.ServerId);
-                    if (DateTime.Now > banEntry.ExpireTime)
+                    MemberPunishment banEntry = entry.Value;                    if (DateTime.Now > banEntry.ExpireTime)
                     {
                         targetGuild = await Program.discord.GetGuildAsync(banEntry.ServerId);
                         var user = await Program.discord.GetUserAsync(banEntry.MemberId);
@@ -465,7 +464,7 @@ namespace Cliptok.Modules
                     }
                     if (channel == null)
                     {
-                        var guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
+                        var guild = Program.homeGuild;
                         var member = await guild.GetMemberAsync(reminderObject.UserID);
 
                         if (Warnings.GetPermLevel(member) >= ServerPermLevel.TrialModerator)
