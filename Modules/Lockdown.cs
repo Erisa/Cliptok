@@ -93,8 +93,6 @@ namespace Cliptok.Modules
             await currentChannel.AddOverwriteAsync(ctx.Guild.GetRole(Program.cfgjson.ModRole), Permissions.SendMessages, Permissions.None, "Failsafe 2 for Lockdown");
             await currentChannel.AddOverwriteAsync(ctx.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, "Lockdown command");
 
-            await Program.db.HashSetAsync("unlocks", ctx.Channel.Id, ModCmds.ToUnixTimestamp(DateTime.Now + lockDuration));
-
             string msg;
             if (reason == "")
                 msg = $"{Program.cfgjson.Emoji.Locked} This channel has been locked by a Moderator.";
@@ -103,6 +101,7 @@ namespace Cliptok.Modules
 
             if (timeParsed)
             {
+                await Program.db.HashSetAsync("unlocks", ctx.Channel.Id, ModCmds.ToUnixTimestamp(DateTime.Now + lockDuration));
                 msg += $"\nChannel unlocks: <t:{ModCmds.ToUnixTimestamp(DateTime.Now + lockDuration)}:R>";
             }
 
