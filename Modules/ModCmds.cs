@@ -47,7 +47,7 @@ namespace Cliptok.Modules
                     {
                         targetGuild = await Program.discord.GetGuildAsync(banEntry.ServerId);
                         var user = await Program.discord.GetUserAsync(banEntry.MemberId);
-                        await UnbanUserAsync(targetGuild, user);
+                        await UnbanUserAsync(targetGuild, user, reason: "Ban naturally expired.");
                         success = true;
 
                     }
@@ -257,13 +257,13 @@ namespace Cliptok.Modules
             return dehoistCharacter + origName;
         }
 
-        public async static Task<bool> UnbanUserAsync(DiscordGuild guild, DiscordUser target)
+        public async static Task<bool> UnbanUserAsync(DiscordGuild guild, DiscordUser target, string reason = "")
         {
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
             await Program.db.HashSetAsync("unbanned", target.Id, true);
             try
             {
-                await guild.UnbanMemberAsync(target);
+                await guild.UnbanMemberAsync(user: target, reason: reason);
             }
             catch (Exception e)
             {
@@ -283,8 +283,9 @@ namespace Cliptok.Modules
         }
 
         [Command("tellraw")]
+        [Description("Nothing of interest.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task TellRaw(CommandContext ctx, DiscordChannel discordChannel, [RemainingText] string output)
+        public async Task TellRaw(CommandContext ctx, [Description("???")] DiscordChannel discordChannel, [RemainingText, Description("???")] string output)
         {
             try
             {
@@ -324,9 +325,14 @@ namespace Cliptok.Modules
         }
 
         [Command("remindme")]
+        [Description("Set a reminder for yourself. Example: !reminder 1h do the thing")]
         [Aliases("reminder", "rember", "wemember", "remember", "remind")]
         [RequireHomeserverPerm(ServerPermLevel.Tier4, WorkOutside = true)]
-        public async Task RemindMe(CommandContext ctx, string timetoParse, [RemainingText] string reminder)
+        public async Task RemindMe(
+            CommandContext ctx,
+            [Description("The amount of time to wait before reminding you. For example: 2s, 5m, 1h, 1d")] string timetoParse,
+            [RemainingText, Description("The text to send when the reminder triggers.")] string reminder
+        )
         {
             DateTime t = HumanDateParser.HumanDateParser.Parse(timetoParse);
             if (t <= DateTime.Now)
@@ -364,6 +370,7 @@ namespace Cliptok.Modules
         }
 
         [Command("no")]
+        [Description("Makes Cliptok choose something for you. Outputs either Yes or No.")]
         [Aliases("yes")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Tier5)]
         public async Task No(CommandContext ctx)
@@ -773,6 +780,7 @@ namespace Cliptok.Modules
         }
 
         [Command("listupdate")]
+        [Description("Updates the private lists from the GitHub repository, then reloads them into memory.")]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task ListUpdate(CommandContext ctx)
         {
@@ -815,8 +823,13 @@ namespace Cliptok.Modules
         }
 
         [Command("edit")]
+        [Description("Edit a message.")]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task Edit(CommandContext ctx, ulong messageId, [RemainingText] string content)
+        public async Task Edit(
+            CommandContext ctx,
+            [Description("The ID of the message to edit.")] ulong messageId,
+            [RemainingText, Description("New message content.")] string content
+        )
         {
             var msg = await ctx.Channel.GetMessageAsync(messageId);
 
@@ -829,8 +842,14 @@ namespace Cliptok.Modules
         }
 
         [Command("editannounce")]
+        [Description("Edit an announcement, preserving the ping highlight.")]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task EditAnnounce(CommandContext ctx, ulong messageId, string roleName, [RemainingText] string content)
+        public async Task EditAnnounce(
+            CommandContext ctx,
+            [Description("The ID of the message to edit.")] ulong messageId,
+            [Description("The short name for the role to ping.")] string roleName,
+            [RemainingText, Description("The new message content, excluding the ping.")] string content
+        )
         {
             DiscordRole discordRole;
 
@@ -858,8 +877,9 @@ namespace Cliptok.Modules
         }
 
         [Command("ask")]
+        [Description("Outputs information on how and where to ask tech support questions. Replying to a message while triggering the command will mirror the reply in the respnose.")]
         [HomeServer]
-        public async Task AskCmd(CommandContext ctx, DiscordUser user = default)
+        public async Task AskCmd(CommandContext ctx, [Description("Optional, a user to ping with the information")] DiscordUser user = default)
         {
             await ctx.Message.DeleteAsync();
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
@@ -891,18 +911,20 @@ namespace Cliptok.Modules
         }
 
         [Command("grant")]
+        [Description("Grant a user access to the server, by giving them the Tier 1 role.")]
         [Aliases("clipgrant")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public async Task GrantCommand(CommandContext ctx, DiscordMember member)
+        public async Task GrantCommand(CommandContext ctx, [Description("The member to grant Tier 1 role to.")] DiscordMember member)
         {
             var tierOne = ctx.Guild.GetRole(Program.cfgjson.TierRoles[0]);
-            await member.GrantRoleAsync(tierOne);
+            await member.GrantRoleAsync(tierOne, $"!grant used by {ctx.User.Username}#{ctx.User.Discriminator}");
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {member.Mention} can now access the server!");
         }
 
         [Command("scamcheck")]
+        [Description("Check if a link or message is known to the anti-phishing API.")]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public async Task ScamCheck(CommandContext ctx, [RemainingText] string content)
+        public async Task ScamCheck(CommandContext ctx, [RemainingText, Description("Domain or message content to scan.")] string content)
         {
             var urlMatches = MessageEvent.url_rx.Matches(content);
             if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
@@ -923,7 +945,7 @@ namespace Cliptok.Modules
                 var httpStatus = response.StatusCode;
                 string responseText = await response.Content.ReadAsStringAsync();
 
-                if (httpStatus == System.Net.HttpStatusCode.OK)
+                if (httpStatus == HttpStatusCode.OK)
                 {
                     var phishingResponse = JsonConvert.DeserializeObject<MessageEvent.PhishingResponseBody>(responseText);
 
@@ -961,10 +983,12 @@ namespace Cliptok.Modules
         }
 
         [Group("clipraidmode")]
+        [Description("Manage the server's raidmode, preventing joins while on.")]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
         class RaidmodeCommands : BaseCommandModule
         {
             [GroupCommand]
+            [Description("Check whether raidmode is enabled or not, and when it ends.")]
             [Aliases("status")]
             public async Task RaidmodeStatus(CommandContext ctx)
             {
@@ -982,7 +1006,8 @@ namespace Cliptok.Modules
             }
 
             [Command("on")]
-            public async Task RaidmodeOn(CommandContext ctx, string duration = default)
+            [Description("Enable raidmode.")]
+            public async Task RaidmodeOn(CommandContext ctx, [Description("The amount of time to keep raidmode enabled for. Default is 3 hours.")] string duration = default)
             {
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {
@@ -1013,6 +1038,7 @@ namespace Cliptok.Modules
             }
 
             [Command("off")]
+            [Description("Disable raidmode.")]
             public async Task RaidmdodeOff(CommandContext ctx)
             {
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
@@ -1057,8 +1083,13 @@ namespace Cliptok.Modules
         }
 
         [Command("listadd")]
+        [Description("Add a piece of text to a public list.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task ListAdd(CommandContext ctx, string fileName, [RemainingText] string content)
+        public async Task ListAdd(
+            CommandContext ctx,
+            [Description("The filename of the public list to add to. For example scams.txt")] string fileName,
+            [RemainingText, Description("The text to add the list. Can be in a codeblock and across multiple line.")] string content
+        )
         {
             if (Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == null)
             {

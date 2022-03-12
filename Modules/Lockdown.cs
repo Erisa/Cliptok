@@ -16,7 +16,10 @@ namespace Cliptok.Modules
         [Aliases("lock")]
         [Description("Locks the current channel, preventing any new messages. See also: unlock")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequireBotPermissions(Permissions.ManageChannels)]
-        public async Task LockdownCommand(CommandContext ctx, [RemainingText] string timeAndReason = "")
+        public async Task LockdownCommand(
+            CommandContext ctx,
+            [RemainingText, Description("The time and reason for the lockdown. For example '3h' or '3h spam'. Default is permanent with no reason.")] string timeAndReason = ""
+        )
         {
             bool timeParsed = false;
             TimeSpan lockDuration = default;

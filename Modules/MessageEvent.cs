@@ -26,7 +26,7 @@ namespace Cliptok.Modules
         public static List<string> allowedInviteCodes = new();
         public static List<string> disallowedInviteCodes = new();
 
-        static public readonly HttpClient httpClient = new HttpClient();
+        static public readonly HttpClient httpClient = new();
 
         static bool CheckForNaughtyWords(string input, WordListJson naughtyWordList)
         {
@@ -170,7 +170,7 @@ namespace Cliptok.Modules
             public string Domain { get; set; }
 
             [JsonProperty("source")]
-            public string source { get; set; }
+            public string Source { get; set; }
 
             [JsonProperty("type")]
             public string Type { get; set; }
@@ -463,7 +463,7 @@ namespace Cliptok.Modules
                 var urlMatches = url_rx.Matches(message.Content);
                 if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
                 {
-                    HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT"));
+                    HttpRequestMessage request = new(HttpMethod.Post, Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT"));
                     request.Headers.Add("User-Agent", "Cliptok (https://github.com/Erisa/Cliptok)");
                     httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -595,7 +595,7 @@ namespace Cliptok.Modules
             }
             catch (Exception e)
             {
-                client.Logger.LogError(eventId: Program.CliptokEventID, e.ToString());
+                client.Logger.LogError(eventId: Program.CliptokEventID, message: e.ToString());
 
                 var exs = new List<Exception>();
                 if (e is AggregateException ae)

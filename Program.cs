@@ -72,6 +72,7 @@ namespace Cliptok
                 await targetMember.ModifyAsync(a =>
                 {
                     a.Nickname = ModCmds.DehoistName(targetMember.DisplayName);
+                    a.AuditLogReason = "Dehoisted";
                 });
                 return true;
             }
@@ -392,7 +393,7 @@ namespace Cliptok
                     {
                         // todo: store per-guild
                         DiscordRole mutedRole = e.Guild.GetRole(cfgjson.MutedRole);
-                        await e.Member.GrantRoleAsync(mutedRole, "Reapplying mute: possible mute evasion.");
+                        await e.Member.GrantRoleAsync(mutedRole, "Reapplying mute on join: possible mute evasion.");
                     }
                     else if (e.Member.CommunicationDisabledUntil != null)
                     {
@@ -466,7 +467,7 @@ namespace Cliptok
 
                     string rolesStr = "None";
 
-                    if (e.Member.Roles.Count() != 0)
+                    if (e.Member.Roles.Any())
                     {
                         rolesStr = "";
 
@@ -700,7 +701,7 @@ namespace Cliptok
                 }
                 catch (Exception e)
                 {
-                    discord.Logger.LogError(CliptokEventID, e.ToString());
+                    discord.Logger.LogError(CliptokEventID, message: e.ToString());
                 }
             }
 
