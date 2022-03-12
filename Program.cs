@@ -8,6 +8,9 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Serilog;
+using Serilog.Expressions;
+using Serilog.Filters;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -123,6 +126,19 @@ namespace Cliptok
 
         static async Task MainAsync(string[] _)
         {
+            var logFormat = "[{Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{Level}] {Message}{NewLine}{Exception}\n";
+            Log.Logger = new LoggerConfiguration()
+#if DEBUG
+                .MinimumLevel.Debug()
+#else
+                .Filter.ByExcluding("Contains(@m, 'Unknown event:')")
+                .MinimumLevel.Warning()
+#endif
+                .WriteTo.Console(outputTemplate: logFormat)
+                .CreateLogger();
+
+            var logFactory = new LoggerFactory().AddSerilog();
+
             string token;
             var json = "";
 
@@ -182,6 +198,7 @@ namespace Cliptok
 #else
                 MinimumLogLevel = LogLevel.Information,
 #endif
+                LoggerFactory = logFactory,
                 Intents = DiscordIntents.All
             });
 
@@ -258,7 +275,7 @@ namespace Cliptok
             {
                 Task.Run(async () =>
                 {
-                    Console.WriteLine($"Logged in as {client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
+                    client.Logger.LogInformation(CliptokEventID, $"Logged in as {client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
                     logChannel = await discord.GetChannelAsync(cfgjson.LogChannel);
                     userLogChannel = await discord.GetChannelAsync(cfgjson.UserLogChannel);
                     badMsgLog = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
