@@ -805,7 +805,7 @@ namespace Cliptok.Modules
                 }
                 else
                 {
-                    await ctx.RespondAsync($"Logs:```\n```");
+                    await ctx.RespondAsync($"Logs:```\n{result}```");
                 }
             }
         }
