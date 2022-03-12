@@ -787,7 +787,7 @@ namespace Cliptok.Modules
                     await ctx.TriggerTypingAsync();
                 } catch
                 {
-                    // ignore typing errorss
+                    // ignore typing errors
                 }
                 string result = Regex.Replace(Program.outputCapture.Captured.ToString(), "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT"), "REDACTED");
 
@@ -805,7 +805,7 @@ namespace Cliptok.Modules
                 }
                 else
                 {
-                    await ctx.RespondAsync($"Logs:```\n");
+                    await ctx.RespondAsync($"Logs:```\n```");
                 }
             }
         }
