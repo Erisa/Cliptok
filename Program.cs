@@ -132,7 +132,7 @@ namespace Cliptok
                 .MinimumLevel.Debug()
 #else
                 .Filter.ByExcluding("Contains(@m, 'Unknown event:')")
-                .MinimumLevel.Warning()
+                .MinimumLevel.Information()
 #endif
                 .WriteTo.Console(outputTemplate: logFormat)
                 .CreateLogger();
