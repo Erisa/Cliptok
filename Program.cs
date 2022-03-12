@@ -688,21 +688,28 @@ namespace Cliptok
 
             await discord.ConnectAsync();
 
+            // Only wait 3 seconds before the first set of tasks.
+            await Task.Delay(3000);
             while (true)
             {
-                await Task.Delay(10000);
                 try
                 {
-                    Mutes.CheckMutesAsync();
-                    ModCmds.CheckBansAsync();
-                    ModCmds.CheckRemindersAsync();
-                    ModCmds.CheckRaidmodeAsync(cfgjson.ServerID);
-                    Lockdown.CheckUnlocksAsync();
+                    List<Task<bool>> taskList = new();
+                    taskList.Add(Mutes.CheckMutesAsync());
+                    taskList.Add(ModCmds.CheckBansAsync());
+                    taskList.Add(ModCmds.CheckRemindersAsync());
+                    taskList.Add(ModCmds.CheckRaidmodeAsync(cfgjson.ServerID));
+                    taskList.Add(Lockdown.CheckUnlocksAsync());
+
+                    // To prevent a future issue if checks take longer than 10 seconds,
+                    // we only start the 10 second counter after all tasks have concluded.
+                    await Task.WhenAll(taskList);
                 }
                 catch (Exception e)
                 {
                     discord.Logger.LogError(CliptokEventID, message: e.ToString());
                 }
+                await Task.Delay(10000);
             }
 
         }
