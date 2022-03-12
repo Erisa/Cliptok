@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -757,13 +758,13 @@ namespace Cliptok.Modules
                 ShellResult finishedShell = RunShellCommand(command);
                 string result = Regex.Replace(finishedShell.result, "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT"), "REDACTED");
 
-                if (finishedShell.result.Length > 1947)
+                if (result.Length > 1947)
                 {
                     HasteBinResult hasteURL = await Program.hasteUploader.Post(result);
                     if (hasteURL.IsSuccess)
                     {
                         await msg.ModifyAsync($"Done, but output exceeded character limit! (`{result.Length}`/`1947`)\n" +
-                            $"Full output can be viewed here: https://paste.erisa.moe/raw/{hasteURL.Key}\nProcess exited with code `{finishedShell.proc.ExitCode}`.");
+                            $"Full output can be viewed here: https://haste.erisa.uk/{hasteURL.Key}\nProcess exited with code `{finishedShell.proc.ExitCode}`.");
                     }
                     else
                     {
@@ -775,6 +776,36 @@ namespace Cliptok.Modules
                 {
                     await msg.ModifyAsync($"Done, output: ```\n" +
                         $"{result}```Process exited with code `{finishedShell.proc.ExitCode}`.");
+                }
+            }
+
+            [Command("logs")]
+            public async Task Logs(CommandContext ctx)
+            {
+                try
+                {
+                    await ctx.TriggerTypingAsync();
+                } catch
+                {
+                    // ignore typing errorss
+                }
+                string result = Regex.Replace(Program.outputCapture.Captured.ToString(), "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT"), "REDACTED");
+
+                if (result.Length > 1947)
+                {
+                    HasteBinResult hasteURL = await Program.hasteUploader.Post(result);
+                    if (hasteURL.IsSuccess)
+                    {
+                        await ctx.RespondAsync($"Logs: https://haste.erisa.uk/{hasteURL.Key}");
+                    }
+                    else
+                    {
+                        await ctx.RespondAsync($"Error occured during upload to Hastebin. Hastebin status code is `{hasteURL.StatusCode}`.\n");
+                    }
+                }
+                else
+                {
+                    await ctx.RespondAsync($"Logs:```\n");
                 }
             }
         }

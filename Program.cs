@@ -21,6 +21,35 @@ using static Cliptok.Helpers.ShellCommand;
 
 namespace Cliptok
 {
+    // https://stackoverflow.com/a/34944872
+    public class OutputCapture : TextWriter, IDisposable
+    {
+        private TextWriter stdOutWriter;
+        public TextWriter Captured { get; private set; }
+        public override Encoding Encoding { get { return Encoding.ASCII; } }
+
+        public OutputCapture()
+        {
+            this.stdOutWriter = Console.Out;
+            Console.SetOut(this);
+            Captured = new StringWriter();
+        }
+
+        override public void Write(string output)
+        {
+            // Capture the output and also send it to StdOut
+            Captured.Write(output);
+            stdOutWriter.Write(output);
+        }
+
+        override public void WriteLine(string output)
+        {
+            // Capture the output and also send it to StdOut
+            Captured.WriteLine(output);
+            stdOutWriter.WriteLine(output);
+        }
+    }
+
     class Program : BaseCommandModule
     {
         public static DiscordClient discord;
@@ -42,6 +71,8 @@ namespace Cliptok
 
         public static Random rand = new Random();
         public static HasteBinClient hasteUploader;
+
+        public static OutputCapture outputCapture;
 
         public static void UpdateLists()
         {
@@ -84,7 +115,10 @@ namespace Cliptok
 
         static void Main(string[] args)
         {
-            MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
+            using (outputCapture = new OutputCapture())
+            {
+                MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
+            }
         }
 
         static async Task MainAsync(string[] _)
