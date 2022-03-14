@@ -74,6 +74,5 @@ namespace Cliptok.Helpers
 
         }
 
-
     }
 }

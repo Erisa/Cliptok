@@ -606,7 +606,7 @@ namespace Cliptok
  //               } else
  //               {
                     usedHash = member.AvatarHash;
-                    usedUrl = member.AvatarUrl;
+                    usedUrl = member.GetAvatarUrl(ImageFormat.Png);
 //                }
 
                 if (db.HashGet("safeAvatars", usedHash) == true)
@@ -630,11 +630,11 @@ namespace Cliptok
                 int httpStatusCode = (int)response.StatusCode;
                 var httpStatus = response.StatusCode;
                 string responseText = await response.Content.ReadAsStringAsync();
-                discord.Logger.LogInformation($"Avatar check for {member.Id}: {httpStatusCode} {responseText}");
 
                 if (httpStatus == System.Net.HttpStatusCode.OK)
                 {
                     var avatarResponse = JsonConvert.DeserializeObject<AvatarResponseBody>(responseText);
+                    discord.Logger.LogInformation($"Avatar check for {member.Id}: {httpStatusCode} {responseText}");
 
                     if (avatarResponse.Matched)
                     {
@@ -653,6 +653,9 @@ namespace Cliptok
                         await db.HashSetAsync("safeAvatars", usedHash, true);
                         return false;
                     }
+                } else
+                {
+                    discord.Logger.LogError($"Avatar check for {member.Id}: {httpStatusCode} {responseText}");
                 }
 
                 return false;
