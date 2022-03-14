@@ -259,7 +259,7 @@ namespace Cliptok.Modules
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.ToString());
+                    Program.discord.Logger.LogError(e, $"An error ocurred unmuting {targetUser.Id}");
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be muted, *and* an error ocurred while attempting to unmute them anyway. Please contact the bot owner, the error has been logged.");
                 }
         }

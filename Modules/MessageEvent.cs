@@ -188,7 +188,7 @@ namespace Cliptok.Modules
 
                 if (!isAnEdit && message.Author.Id == Program.cfgjson.ModmailUserId && message.Content == "@here" && message.Embeds[0].Footer.Text.Contains("User ID:"))
                 {
-                    Console.WriteLine($"Processing modmail message {message.Id} in {message.Channel} with {isAnEdit}");
+                    Program.discord.Logger.LogInformation(Program.CliptokEventID, $"Processing modmail message {message.Id} in {message.Channel} with {isAnEdit}");
                     var idString = modmaiL_rx.Match(message.Embeds[0].Footer.Text).Groups[1].Captures[0].Value;
                     DiscordMember modmailMember = default;
                     try

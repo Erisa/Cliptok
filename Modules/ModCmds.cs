@@ -268,7 +268,7 @@ namespace Cliptok.Modules
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Program.discord.Logger.LogError(Program.CliptokEventID, e, $"An exception ocurred while unbanning {target.Id}");
                 return false;
             }
             await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned <@{target.Id}>!");

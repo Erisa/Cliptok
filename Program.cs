@@ -181,9 +181,6 @@ namespace Cliptok
                 redis = ConnectionMultiplexer.Connect($"{redisHost}:{cfgjson.Redis.Port}");
             }
 
-            if (Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == null)
-                Console.Write("GitHub API features disabled due to missing access token.");
-
             db = redis.GetDatabase();
 
             // Migration away from a broken attempt at a key in the past.
@@ -201,6 +198,10 @@ namespace Cliptok
                 LoggerFactory = logFactory,
                 Intents = DiscordIntents.All
             });
+
+            if (Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == null)
+                discord.Logger.LogWarning(CliptokEventID, "GitHub API features disabled due to missing access token.");
+
 
             var slash = discord.UseSlashCommands();
             slash.SlashCommandErrored += async (s, e) =>
@@ -656,7 +657,7 @@ namespace Cliptok
             Task Discord_ThreadMemberUpdated(DiscordClient client, ThreadMemberUpdateEventArgs e)
             {
                 client.Logger.LogDebug(eventId: CliptokEventID, $"Thread member updated.");
-                Console.WriteLine($"Discord_ThreadMemberUpdated fired for thread {e.ThreadMember.ThreadId}. User ID {e.ThreadMember.Id}.");
+                client.Logger.LogDebug(CliptokEventID, $"Discord_ThreadMemberUpdated fired for thread {e.ThreadMember.ThreadId}. User ID {e.ThreadMember.Id}.");
                 return Task.CompletedTask;
             }
 
