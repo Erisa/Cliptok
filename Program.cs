@@ -16,10 +16,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 using static Cliptok.Helpers.ShellCommand;
 
 namespace Cliptok
@@ -52,6 +55,11 @@ namespace Cliptok
             stdOutWriter.WriteLine(output);
         }
     }
+    public class AvatarResponseBody
+    {
+        [JsonProperty("matched")]
+        public bool Matched { get; set; }
+    }
 
     class Program : BaseCommandModule
     {
@@ -76,6 +84,8 @@ namespace Cliptok
         public static HasteBinClient hasteUploader;
 
         public static OutputCapture outputCapture;
+
+        static public readonly HttpClient httpClient = new();
 
         public static void UpdateLists()
         {
@@ -199,8 +209,11 @@ namespace Cliptok
                 Intents = DiscordIntents.All
             });
 
-            if (Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == null)
+            if (Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == null || Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == "githubtokenhere")
                 discord.Logger.LogWarning(CliptokEventID, "GitHub API features disabled due to missing access token.");
+
+            if (Environment.GetEnvironmentVariable("RAVY_API_TOKEN") == null || Environment.GetEnvironmentVariable("RAVY_API_TOKEN") == "goodluckfindingone")
+                discord.Logger.LogWarning(CliptokEventID, "Ravy API features disabled due to missing API token.");
 
 
             var slash = discord.UseSlashCommands();
@@ -370,40 +383,41 @@ namespace Cliptok
                 });
             }
 
-            async Task UsernameCheckAsync(DiscordMember member)
+            async Task<bool> UsernameCheckAsync(DiscordMember member)
             {
                 var guild = Program.homeGuild;
-                Task.Run(async () =>
+                if (db.HashExists("unbanned", member.Id))
+                    return false;
+
+                bool result = false;
+
+                foreach (var username in badUsernames)
                 {
-                    if (db.HashExists("unbanned", member.Id))
-                        return;
+                    // emergency failsafe, for newlines and other mistaken entries
+                    if (username.Length < 4)
+                        continue;
 
-                    foreach (var username in badUsernames)
+                    if (member.Username.ToLower().Contains(username.ToLower()))
                     {
-                        // emergency failsafe, for newlines and other mistaken entries
-                        if (username.Length < 4)
-                            continue;
-
-                        if (member.Username.ToLower().Contains(username.ToLower()))
-                        {
-                            if (autoBannedUsersCache.Contains(member.Id))
-                                break;
-                            IEnumerable<ulong> enumerable = autoBannedUsersCache.Append(member.Id);
-                            await Bans.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot accounts. Please appeal if you are a human.", discord.CurrentUser.Id, guild, 7, null, default, true);
-                            var embed = new DiscordEmbedBuilder()
-                                .WithTimestamp(DateTime.Now)
-                                .WithFooter($"User ID: {member.Id}", null)
-                                .WithAuthor($"{member.Username}#{member.Discriminator}", null, member.AvatarUrl)
-                                .AddField("Infringing name", member.Username)
-                                .AddField("Matching pattern", username)
-                                .WithColor(new DiscordColor(0xf03916));
-                            var investigations = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
-                            await investigations.SendMessageAsync($"{cfgjson.Emoji.Banned} {member.Mention} was banned for matching blocked username patterns.", embed);
+                        if (autoBannedUsersCache.Contains(member.Id))
                             break;
-                        }
+                        IEnumerable<ulong> enumerable = autoBannedUsersCache.Append(member.Id);
+                        await Bans.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot accounts. Please appeal if you are a human.", discord.CurrentUser.Id, guild, 7, null, default, true);
+                        var embed = new DiscordEmbedBuilder()
+                            .WithTimestamp(DateTime.Now)
+                            .WithFooter($"User ID: {member.Id}", null)
+                            .WithAuthor($"{member.Username}#{member.Discriminator}", null, member.AvatarUrl)
+                            .AddField("Infringing name", member.Username)
+                            .AddField("Matching pattern", username)
+                            .WithColor(new DiscordColor(0xf03916));
+                        var investigations = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
+                        await investigations.SendMessageAsync($"{cfgjson.Emoji.Banned} {member.Mention} was banned for matching blocked username patterns.", embed);
+                        result = true;
+                        break;
                     }
-                });
+                }
 
+                return result;
             }
 
             async Task GuildMemberAdded(DiscordClient client, GuildMemberAddEventArgs e)
@@ -562,10 +576,86 @@ namespace Cliptok
                     if (differrence > 10 && !userMute.IsNull && !e.Member.Roles.Contains(muteRole))
                         db.HashDeleteAsync("mutes", e.Member.Id);
 
+                    bool usernameBanned = await UsernameCheckAsync(e.Member);
+                    if (usernameBanned)
+                        return;
+
                     CheckAndDehoistMemberAsync(e.Member);
-                    UsernameCheckAsync(e.Member);
+                    CheckAvatarsAsync(e.Member);
                 }
                 );
+            }
+
+            async Task<bool> CheckAvatarsAsync(DiscordMember member)
+            {
+                if (Environment.GetEnvironmentVariable("RAVY_API_TOKEN") == null || Environment.GetEnvironmentVariable("RAVY_API_TOKEN") == "goodluckfindingone")
+                    return false;
+
+                string usedHash;
+                string usedUrl;
+
+                if (member.GuildAvatarHash == null && member.AvatarHash == null)
+                    return false;
+
+                // turns out checking guild avatars isnt important
+
+ //               if (member.GuildAvatarHash != null)
+ //               {
+ //                   usedHash = member.GuildAvatarHash;
+ //                   usedUrl = member.GuildAvatarUrl;
+ //               } else
+ //               {
+                    usedHash = member.AvatarHash;
+                    usedUrl = member.AvatarUrl;
+//                }
+
+                if (db.HashGet("safeAvatars", usedHash) == true)
+                {
+                    discord.Logger.LogDebug("Unnecessary avatar check skipped for " + member.Id);
+                    return false;
+                }
+
+                var builder = new UriBuilder("https://ravy.org/api/v1/avatars");
+                var query = HttpUtility.ParseQueryString(builder.Query);
+                query["avatar"] = usedUrl;
+                builder.Query = query.ToString();
+                string url = builder.ToString();
+
+                HttpRequestMessage request = new(HttpMethod.Get, url);
+                request.Headers.Add("User-Agent", "Cliptok (https://github.com/Erisa/Cliptok)");
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                request.Headers.Add("Authorization", Environment.GetEnvironmentVariable("RAVY_API_TOKEN"));
+
+                HttpResponseMessage response = await httpClient.SendAsync(request);
+                int httpStatusCode = (int)response.StatusCode;
+                var httpStatus = response.StatusCode;
+                string responseText = await response.Content.ReadAsStringAsync();
+                discord.Logger.LogInformation($"Avatar check for {member.Id}: {httpStatusCode} {responseText}");
+
+                if (httpStatus == System.Net.HttpStatusCode.OK)
+                {
+                    var avatarResponse = JsonConvert.DeserializeObject<AvatarResponseBody>(responseText);
+
+                    if (avatarResponse.Matched)
+                    {
+                        var embed = new DiscordEmbedBuilder()
+                            .WithDescription($"API Response:\n```json\n{responseText}\n```")
+                            .WithAuthor($"{member.Username}#{member.Discriminator}", null, usedUrl)
+                            .WithFooter($"User ID: {member.Id}")
+                            .WithImageUrl(await LykosAvatarMethods.UserOrMemberAvatarURL(member, member.Guild, "default", 256));
+
+                        await badMsgLog.SendMessageAsync($"{cfgjson.Emoji.Banned} {member.Mention} has been appeal-banned for an infringing avatar.", embed);
+                        await Bans.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot/compromised accounts. Please appeal if you are human.", discord.CurrentUser.Id, member.Guild, 7, appealable: true);
+                        return true;
+                    }
+                    else if (!avatarResponse.Matched)
+                    {
+                        await db.HashSetAsync("safeAvatars", usedHash, true);
+                        return false;
+                    }
+                }
+
+                return false;
             }
 
             async Task UserUpdated(DiscordClient client, UserUpdateEventArgs e)

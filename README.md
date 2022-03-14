@@ -108,6 +108,7 @@ If you have a change to make that follows the contribution guidelines, send a Pu
 
 ### 🙏Special thanks
 - [TorchGM](https://github.com/TorchGM) for testing and providing design feedback. Seriously, thank you Torch.
+- [PrincessRavy](https://github.com/PrincessRavy) for providing [an API](https://docs.ravy.org/share/5bc92059-64ef-4d6d-816e-144b78e97d89) used by Cliptok.
 - All of my [GitHub Sponsors](https://github.com/sponsors/Erisa) 💝
 - The developers of [DSharpPlus](https://github.com/DSharpPlus/DSharpPlus), without their library none of this would  be possible.
 - The excellent moderation team over at [Microsoft Community](https://msft.chat/), and all of its wonderful members.

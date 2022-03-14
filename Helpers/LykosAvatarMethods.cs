@@ -35,9 +35,9 @@ namespace Cliptok.Helpers
             }
 
             if (member.GuildAvatarHash != null)
-                return $"https://cdn.discordapp.com/guilds/{member.Guild.Id}/users/{member.Id}/avatars/{hash}.{format}?size=4096";
+                return $"https://cdn.discordapp.com/guilds/{member.Guild.Id}/users/{member.Id}/avatars/{hash}.{format}?size={size}";
             else
-                return $"https://cdn.discordapp.com/avatars/{member.Id}/{member.AvatarHash}.{format}?size=4096";
+                return $"https://cdn.discordapp.com/avatars/{member.Id}/{member.AvatarHash}.{format}?size={size}";
         }
 
         public static async Task<string> UserOrMemberAvatarURL(DiscordUser user, DiscordGuild guild, string format = "default", int size = 4096)
@@ -50,7 +50,7 @@ namespace Cliptok.Helpers
 
             try
             {
-                return MemberAvatarURL(await guild.GetMemberAsync(user.Id), format);
+                return MemberAvatarURL(await guild.GetMemberAsync(user.Id), format, size);
             }
             catch (DSharpPlus.Exceptions.NotFoundException)
             {
@@ -69,7 +69,7 @@ namespace Cliptok.Helpers
                         "The user you are trying to lookup does not have an animated avatar.");
                 }
 
-                return $"https://cdn.discordapp.com/avatars/{user.Id}/{user.AvatarHash}.{format}?size=4096";
+                return $"https://cdn.discordapp.com/avatars/{user.Id}/{user.AvatarHash}.{format}?size={size}";
             }
 
         }
