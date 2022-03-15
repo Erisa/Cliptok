@@ -27,6 +27,13 @@ services:
         source: ./data
         target: /data
     command: --appendonly yes
+  redis-exposer:
+    image: ghcr.io/erisa/redis-exposer
+    restart: always
+    env_file:
+      - .exposer.env
+    ports:
+      - 127.0.0.1:3000:3000
   watchtower:
     image: containrrr/watchtower
     volumes:
