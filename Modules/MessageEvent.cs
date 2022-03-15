@@ -465,7 +465,6 @@ namespace Cliptok.Modules
                 {
                     HttpRequestMessage request = new(HttpMethod.Post, Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT"));
                     request.Headers.Add("User-Agent", "Cliptok (https://github.com/Erisa/Cliptok)");
-                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                     var bodyObject = new PhishingRequestBody()
                     {
@@ -474,7 +473,7 @@ namespace Cliptok.Modules
 
                     request.Content = new StringContent(JsonConvert.SerializeObject(bodyObject), Encoding.UTF8, "application/json");
 
-                    HttpResponseMessage response = await httpClient.SendAsync(request);
+                    HttpResponseMessage response = await Program.httpClient.SendAsync(request);
                     int httpStatusCode = (int)response.StatusCode;
                     var httpStatus = response.StatusCode;
                     string responseText = await response.Content.ReadAsStringAsync();

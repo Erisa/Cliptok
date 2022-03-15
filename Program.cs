@@ -136,6 +136,7 @@ namespace Cliptok
 
         static async Task MainAsync(string[] _)
         {
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var logFormat = "[{Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{Level}] {Message}{NewLine}{Exception}\n";
             Log.Logger = new LoggerConfiguration()
 #if DEBUG
@@ -623,7 +624,6 @@ namespace Cliptok
 
                 HttpRequestMessage request = new(HttpMethod.Get, url);
                 request.Headers.Add("User-Agent", "Cliptok (https://github.com/Erisa/Cliptok)");
-                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 request.Headers.Add("Authorization", Environment.GetEnvironmentVariable("RAVY_API_TOKEN"));
 
                 HttpResponseMessage response = await httpClient.SendAsync(request);
