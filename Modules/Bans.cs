@@ -16,8 +16,9 @@ namespace Cliptok.Modules
         public static async Task<bool> BanFromServerAsync(ulong targetUserId, string reason, ulong moderatorId, DiscordGuild guild, int deleteDays = 7, DiscordChannel channel = null, TimeSpan banDuration = default, bool appealable = false)
         {
             bool permaBan = false;
+            DateTime? actionTime = DateTime.Now;
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
-            DateTime? expireTime = DateTime.Now + banDuration;
+            DateTime? expireTime = actionTime + banDuration;
             DiscordMember moderator = await guild.GetMemberAsync(moderatorId);
 
             if (banDuration == default)
@@ -31,7 +32,8 @@ namespace Cliptok.Modules
                 MemberId = targetUserId,
                 ModId = moderatorId,
                 ServerId = guild.Id,
-                ExpireTime = expireTime
+                ExpireTime = expireTime,
+                ActionTime = actionTime
             };
 
             await Program.db.HashSetAsync("bans", targetUserId, JsonConvert.SerializeObject(newBan));

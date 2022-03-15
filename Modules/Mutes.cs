@@ -24,9 +24,10 @@ namespace Cliptok.Modules
         public static async Task<bool> MuteUserAsync(DiscordUser naughtyUser, string reason, ulong moderatorId, DiscordGuild guild, DiscordChannel channel = null, TimeSpan muteDuration = default, bool alwaysRespond = false)
         {
             bool permaMute = false;
+            DateTime? actionTime = DateTime.Now;
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
             DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
-            DateTime? expireTime = DateTime.Now + muteDuration;
+            DateTime? expireTime = actionTime + muteDuration;
             DiscordMember moderator = await guild.GetMemberAsync(moderatorId);
 
             DiscordMember naughtyMember = default;
@@ -50,7 +51,8 @@ namespace Cliptok.Modules
                 MemberId = naughtyUser.Id,
                 ModId = moderatorId,
                 ServerId = guild.Id,
-                ExpireTime = expireTime
+                ExpireTime = expireTime,
+                ActionTime = actionTime
             };
 
             await Program.db.HashSetAsync("mutes", naughtyUser.Id, JsonConvert.SerializeObject(newMute));

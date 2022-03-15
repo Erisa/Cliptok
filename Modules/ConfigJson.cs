@@ -23,13 +23,15 @@ namespace Cliptok
 
         [JsonProperty("contextLink")]
         public string ContextLink { get; set; }
-
     }
 
     public class MemberPunishment
     {
         [JsonProperty("memberId")]
         public ulong MemberId { get; set; }
+        
+        [JsonProperty("actionTime")]
+        public DateTime? ActionTime { get; set; }
 
         [JsonProperty("expireTime")]
         public DateTime? ExpireTime { get; set; }

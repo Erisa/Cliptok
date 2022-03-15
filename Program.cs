@@ -523,7 +523,8 @@ namespace Cliptok
                             MemberId = e.Member.Id,
                             ModId = discord.CurrentUser.Id,
                             ServerId = e.Guild.Id,
-                            ExpireTime = null
+                            ExpireTime = null,
+                            ActionTime = DateTime.Now
                         };
 
                         db.HashSetAsync("mutes", e.Member.Id, JsonConvert.SerializeObject(newMute));
