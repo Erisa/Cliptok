@@ -41,6 +41,9 @@ namespace Cliptok
 
         [JsonProperty("serverId")]
         public ulong ServerId { get; set; }
+        
+        [JsonProperty("reason")]
+        public string Reason { get; set; }
     }
 
     public struct ConfigJson

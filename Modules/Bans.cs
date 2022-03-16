@@ -33,7 +33,8 @@ namespace Cliptok.Modules
                 ModId = moderatorId,
                 ServerId = guild.Id,
                 ExpireTime = expireTime,
-                ActionTime = actionTime
+                ActionTime = actionTime,
+                Reason = reason
             };
 
             await Program.db.HashSetAsync("bans", targetUserId, JsonConvert.SerializeObject(newBan));
