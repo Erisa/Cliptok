@@ -375,7 +375,7 @@ namespace Cliptok
                         $"**Version timestamp**: `{commitTime}`\n**Framework**: `{RuntimeInformation.FrameworkDescription}`\n" +
                         $"**Platform**: `{RuntimeInformation.OSDescription}`\n" +
                         $"**Library**: `DSharpPlus {discord.VersionString}`\n" +
-                        $"**List update success**: `{listSuccess}\n\n`" +
+                        $"**List update success**: `{listSuccess}`\n\n" +
                         $"Most recent commit message:\n" +
                         $"```\n" +
                         $"{commitMessage}\n" +
