@@ -66,7 +66,13 @@ namespace Cliptok.Modules
                     await naughtyMember.GrantRoleAsync(mutedRole, fullReason);
                     try
                     {
-                        await naughtyMember.TimeoutAsync(expireTime + TimeSpan.FromSeconds(10), fullReason);
+                        try
+                        {
+                            await naughtyMember.TimeoutAsync(expireTime + TimeSpan.FromSeconds(10), fullReason);
+                        } catch (Exception e)
+                        {
+                            Program.discord.Logger.LogError(e, "Failed to issue timeout");
+                        }
 
                         // Remove the member from any Voice Channel they're currently in.
                         await naughtyMember.ModifyAsync(x => x.VoiceChannel = null);
