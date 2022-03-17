@@ -239,7 +239,7 @@ namespace Cliptok.Modules
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task UnmuteCmd(CommandContext ctx, [Description("The user you're trying to unmute.")] DiscordUser targetUser)
         {
-            string reason = $"[Manual unmute by {ctx.User.Username}#{ctx.User.Discriminator}";
+            string reason = $"[Manual unmute by {ctx.User.Username}#{ctx.User.Discriminator}]";
             DiscordGuild guild = ctx.Guild;
 
             // todo: store per-guild
