@@ -59,6 +59,9 @@ namespace Cliptok
     {
         [JsonProperty("matched")]
         public bool Matched { get; set; }
+
+        [JsonProperty("key")]
+        public string Key { get; set; }
     }
 
     class Program : BaseCommandModule
@@ -637,7 +640,7 @@ namespace Cliptok
                     var avatarResponse = JsonConvert.DeserializeObject<AvatarResponseBody>(responseText);
                     discord.Logger.LogInformation($"Avatar check for {member.Id}: {httpStatusCode} {responseText}");
 
-                    if (avatarResponse.Matched)
+                    if (avatarResponse.Matched && avatarResponse.Key != "logo")
                     {
                         var embed = new DiscordEmbedBuilder()
                             .WithDescription($"API Response:\n```json\n{responseText}\n```")
