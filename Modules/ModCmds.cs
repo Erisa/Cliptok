@@ -890,6 +890,32 @@ namespace Cliptok.Modules
 
             await msg.ModifyAsync(content);
         }
+        
+        [Command("editappend")]
+        [Description("Append content to an existing bot messsage with a newline.")]
+        [RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        public async Task EditAppend(
+            CommandContext ctx,
+            [Description("The ID of the message to edit")] ulong messageId,
+            [RemainingText, Description("Content to append on the end of the message.")] string content
+        )
+        {
+            var msg = await ctx.Channel.GetMessageAsync(messageId);
+
+            if (msg == null || msg.Author.Id != ctx.Client.CurrentUser.Id)
+                return;
+
+            var newContent = msg.Content + "\n" + content;
+            if (newContent.Length > 2000)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} New content exceeded 2000 characters.");
+            }
+            else
+            {
+                await ctx.Message.DeleteAsync();
+                await msg.ModifyAsync(newContent);
+            }
+        }
 
         [Command("editannounce")]
         [Description("Edit an announcement, preserving the ping highlight.")]
