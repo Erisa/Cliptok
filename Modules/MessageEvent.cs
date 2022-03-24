@@ -596,8 +596,13 @@ namespace Cliptok.Modules
                 {
                     var captures = bold_rx.Match(message.Content).Groups[1].Captures;
 
-                    if (Warnings.GetPermLevel(member) < ServerPermLevel.TrialModerator && (captures == null || ( !message.Content.Contains("aka.ms/") && !message.Content.Contains("feedback-hub:"))))
+                    if (captures == null || ( !message.Content.Contains("aka.ms/") && !message.Content.Contains("feedback-hub:")))
                     {
+                        if (Warnings.GetPermLevel(member) >= ServerPermLevel.TrialModerator)
+                        {
+                            return;
+                        }
+
                         await message.DeleteAsync();
                         var msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {message.Author.Mention}, please read the pinned messages in this channel and follow the message format given.");
                         await Task.Delay(5000);
