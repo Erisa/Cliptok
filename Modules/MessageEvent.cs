@@ -592,7 +592,7 @@ namespace Cliptok.Modules
                     }
                 }
 
-                if ( message.Channel.Id == Program.cfgjson.FeedbackHubChannelId)
+                if (!isAnEdit && message.Channel.Id == Program.cfgjson.FeedbackHubChannelId)
                 {
                     var captures = bold_rx.Match(message.Content).Groups[1].Captures;
 
@@ -613,6 +613,8 @@ namespace Cliptok.Modules
 
                         if (title.Length > 100)
                             title = Warnings.Truncate(title, 100, false);
+
+                        await message.ModifyEmbedSuppressionAsync(true);
 
                         await message.CreateThreadAsync(title, AutoArchiveDuration.Day, "Automatically creating feedback hub thread.");
                     }
