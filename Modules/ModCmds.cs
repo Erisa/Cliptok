@@ -1260,3 +1260,10 @@ namespace Cliptok.Modules
 
     }
 }
+
+// oh look,
+// a secret message at the end of a file
+// i wonder what it means
+// how surprising
+// it would be a shame
+// if it ended with nothing special.

@@ -207,6 +207,9 @@ namespace Cliptok
         [JsonProperty("gitListDirectory")]
         public string GitListDirectory { get; private set; }
 
+        [JsonProperty("feedbackHubChannelId")]
+        public ulong FeedbackHubChannelId { get; private set; }
+
     }
 
     public class WorkflowConfig

@@ -236,5 +236,6 @@
     "repo": "Erisa/Cliptok",
     "ref": "main",
     "workflowId": "append-lists-txt.yml"
-  }
+  },
+  "feedbackHubChannelId": 865734819995582464
 }
