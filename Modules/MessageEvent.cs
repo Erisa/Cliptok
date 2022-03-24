@@ -235,8 +235,11 @@ namespace Cliptok.Modules
                     member = default;
                 }
 
+                if (member == default)
+                    return;
+
                 // Skip messages from moderators beyond this point.
-                if (member != default || Warnings.GetPermLevel(member) < ServerPermLevel.TrialModerator)
+                if (Warnings.GetPermLevel(member) < ServerPermLevel.TrialModerator)
                 {
                     if (message.MentionedUsers.Count > Program.cfgjson.MassMentionBanThreshold)
                     {
