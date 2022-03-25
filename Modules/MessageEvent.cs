@@ -625,7 +625,12 @@ namespace Cliptok.Modules
                             Program.discord.Logger.LogError(eventId: Program.CliptokEventID, e.ToString());
                         }
 
-                        await message.CreateThreadAsync(title, AutoArchiveDuration.Day, "Automatically creating feedback hub thread.");
+                        var autoArchiveTime = AutoArchiveDuration.Day;
+
+                        if (message.Channel.Guild.Features.Contains("THREE_DAY_THREAD_ARCHIVE"))
+                            autoArchiveTime = AutoArchiveDuration.ThreeDays;
+
+                        await message.CreateThreadAsync(title, autoArchiveTime, "Automatically creating feedback hub thread.");
                     }
                 }
 
