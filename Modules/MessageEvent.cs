@@ -599,7 +599,7 @@ namespace Cliptok.Modules
                 {
                     var captures = bold_rx.Match(message.Content).Groups[1].Captures;
 
-                    if (captures == null || ( !message.Content.Contains("aka.ms/") && !message.Content.Contains("feedback-hub:")))
+                    if (captures == null || captures.Count == 0 || ( !message.Content.Contains("aka.ms/") && !message.Content.Contains("feedback-hub:")))
                     {
                         if (Warnings.GetPermLevel(member) >= ServerPermLevel.TrialModerator)
                         {
