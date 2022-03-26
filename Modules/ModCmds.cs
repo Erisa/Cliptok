@@ -1158,6 +1158,27 @@ namespace Cliptok.Modules
 
         }
 
+        [Command("joinwatch")]
+        [Description("Watch for joins and leaves of a given user. Output goes to #investigations.")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        public async Task JoinWatch(
+            CommandContext ctx,
+            [Description("The user to watch for joins and leaves of.")] DiscordUser user
+        )
+        {
+            var joinWatchlist = await Program.db.ListRangeAsync("joinWatchedUsers");
+
+            if (joinWatchlist.Contains(user.Id))
+            {
+                Program.db.ListRemove("joinWatchedUsers", joinWatchlist.First(x => x == user.Id));
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully unwatched {user.Mention}, since they were already in the list.");
+            } else
+            {
+                await Program.db.ListRightPushAsync("joinWatchedUsers", user.Id);
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Now watching for joins/leaves of {user.Mention} to send to {Program.badMsgLog.Mention}!");
+            }
+        }
+
         [Command("listadd")]
         [Description("Add a piece of text to a public list.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]

@@ -446,6 +446,13 @@ namespace Cliptok
 
                     userLogChannel.SendMessageAsync($"{cfgjson.Emoji.UserJoin} **Member joined the server!** - {e.Member.Id}", builder);
 
+                    var joinWatchlist = await Program.db.ListRangeAsync("joinWatchedUsers");
+
+                    if (joinWatchlist.Contains(e.Member.Id))
+                    {
+                        badMsgLog.SendMessageAsync($"{cfgjson.Emoji.Warning} Watched user {e.Member.Mention} just joined the server!", builder);
+                    }
+
                     if (db.HashExists("raidmode", e.Guild.Id))
                     {
                         try
@@ -563,6 +570,13 @@ namespace Cliptok
                         .WithFooter($"{client.CurrentUser.Username}LeaveEvent");
 
                     userLogChannel.SendMessageAsync($"{cfgjson.Emoji.UserLeave} **Member left the server!** - {e.Member.Id}", builder);
+
+                    var joinWatchlist = await Program.db.ListRangeAsync("joinWatchedUsers");
+
+                    if (joinWatchlist.Contains(e.Member.Id))
+                    {
+                        badMsgLog.SendMessageAsync($"{cfgjson.Emoji.Warning} Watched user {e.Member.Mention} just left the server!", builder);
+                    }
                 });
             }
 
