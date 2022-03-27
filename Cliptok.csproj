@@ -4,16 +4,13 @@
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net6.0</TargetFramework>
 		<UserSecretsId>d9345310-5908-4697-8613-28a24d06d183</UserSecretsId>
-		<RestoreAdditionalProjectSources>
-			https://nuget.emzi0767.com/api/v3/index.json
-		</RestoreAdditionalProjectSources>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Abyssal.HumanDateParser" Version="2.0.0-20191113.1" />
-		<PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01084" />
-		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01084" />
-		<PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01084" />
+		<PackageReference Include="DSharpPlus" Version="4.2.0-nightly-01102" />
+		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.2.0-nightly-01102" />
+		<PackageReference Include="DSharpPlus.SlashCommands" Version="4.2.0-nightly-01102" />
 		<PackageReference Include="Serilog" Version="2.10.0" />
 		<PackageReference Include="Serilog.Expressions" Version="3.3.0" />
 		<PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
