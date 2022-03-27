@@ -184,6 +184,9 @@ namespace Cliptok.Modules
         {
             try
             {
+                if (message.Timestamp.Year < (DateTime.Now.Year - 2))
+                    return;
+
                 if (message.Author == null || message.Author.Id == client.CurrentUser.Id)
                     return;
 
