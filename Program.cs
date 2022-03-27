@@ -743,6 +743,7 @@ namespace Cliptok
 
             Task Discord_ThreadCreated(DiscordClient client, ThreadCreateEventArgs e)
             {
+                e.Thread.JoinThreadAsync();
                 client.Logger.LogDebug(eventId: CliptokEventID, $"Thread created in {e.Guild.Name}. Thread Name: {e.Thread.Name}");
                 return Task.CompletedTask;
             }
