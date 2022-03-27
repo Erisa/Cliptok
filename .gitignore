@@ -1,4 +1,5 @@
 .env
+*.env
 config.dev.json
 Lists/rudeWords.txt
 Lists/usernames.txt
