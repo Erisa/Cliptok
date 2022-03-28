@@ -8,7 +8,6 @@ using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -563,7 +562,8 @@ namespace Cliptok.Modules
                     // We still need to remember to make it unmentionable even if the msg fails.
                 }
                 await discordRole.ModifyAsync(mentionable: false);
-            } else if (roleName == "rpbeta")
+            }
+            else if (roleName == "rpbeta")
             {
                 var rpRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles["rp"]);
                 var betaRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles["beta"]);
@@ -575,7 +575,8 @@ namespace Cliptok.Modules
                 {
                     await ctx.Message.DeleteAsync();
                     await ctx.Channel.SendMessageAsync($"{rpRole.Mention} {betaRole.Mention}\n{announcementMessage}");
-                } catch
+                }
+                catch
                 {
                     // We still need to remember to make it unmentionable even if the msg fails.
                 }
@@ -804,7 +805,8 @@ namespace Cliptok.Modules
                 try
                 {
                     await ctx.TriggerTypingAsync();
-                } catch
+                }
+                catch
                 {
                     // ignore typing errors
                 }
@@ -890,7 +892,7 @@ namespace Cliptok.Modules
 
             await msg.ModifyAsync(content);
         }
-        
+
         [Command("editappend")]
         [Description("Append content to an existing bot messsage with a newline.")]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
@@ -1172,7 +1174,8 @@ namespace Cliptok.Modules
             {
                 Program.db.ListRemove("joinWatchedUsers", joinWatchlist.First(x => x == user.Id));
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully unwatched {user.Mention}, since they were already in the list.");
-            } else
+            }
+            else
             {
                 await Program.db.ListRightPushAsync("joinWatchedUsers", user.Id);
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Now watching for joins/leaves of {user.Mention} to send to {Program.badMsgLog.Mention}!");

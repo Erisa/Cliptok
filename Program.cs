@@ -9,8 +9,6 @@ using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Serilog;
-using Serilog.Expressions;
-using Serilog.Filters;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -618,15 +616,15 @@ namespace Cliptok
 
                 // turns out checking guild avatars isnt important
 
- //               if (member.GuildAvatarHash != null)
- //               {
- //                   usedHash = member.GuildAvatarHash;
- //                   usedUrl = member.GuildAvatarUrl;
- //               } else
- //               {
-                    usedHash = member.AvatarHash;
-                    usedUrl = member.GetAvatarUrl(ImageFormat.Png);
-//                }
+                //               if (member.GuildAvatarHash != null)
+                //               {
+                //                   usedHash = member.GuildAvatarHash;
+                //                   usedUrl = member.GuildAvatarUrl;
+                //               } else
+                //               {
+                usedHash = member.AvatarHash;
+                usedUrl = member.GetAvatarUrl(ImageFormat.Png);
+                //                }
 
                 if (db.HashGet("safeAvatars", usedHash) == true)
                 {
@@ -671,7 +669,8 @@ namespace Cliptok
                         await db.HashSetAsync("safeAvatars", usedHash, true);
                         return false;
                     }
-                } else
+                }
+                else
                 {
                     discord.Logger.LogError($"Avatar check for {member.Id}: {httpStatusCode} {responseText}");
                 }

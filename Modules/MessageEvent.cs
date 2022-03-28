@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -602,7 +601,7 @@ namespace Cliptok.Modules
                 {
                     var captures = bold_rx.Match(message.Content).Groups[1].Captures;
 
-                    if (captures == null || captures.Count == 0 || ( !message.Content.Contains("aka.ms/") && !message.Content.Contains("feedback-hub:")))
+                    if (captures == null || captures.Count == 0 || (!message.Content.Contains("aka.ms/") && !message.Content.Contains("feedback-hub:")))
                     {
                         if (Warnings.GetPermLevel(member) >= ServerPermLevel.TrialModerator)
                         {
@@ -613,13 +612,14 @@ namespace Cliptok.Modules
                         var msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {message.Author.Mention}, please read the pinned messages in this channel and follow the message format given.");
                         await Task.Delay(5000);
                         await msg.DeleteAsync();
-                    } else
+                    }
+                    else
                     {
                         var title = captures[0].Value;
 
                         if (title.Length > 100)
                             title = Warnings.Truncate(title, 100, false);
-                        
+
                         var autoArchiveTime = AutoArchiveDuration.Day;
 
                         if (message.Channel.Guild.Features.Contains("THREE_DAY_THREAD_ARCHIVE"))

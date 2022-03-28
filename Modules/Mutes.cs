@@ -69,7 +69,8 @@ namespace Cliptok.Modules
                         try
                         {
                             await naughtyMember.TimeoutAsync(expireTime + TimeSpan.FromSeconds(10), fullReason);
-                        } catch (Exception e)
+                        }
+                        catch (Exception e)
                         {
                             Program.discord.Logger.LogError(e, "Failed to issue timeout");
                         }
