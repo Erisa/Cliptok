@@ -568,20 +568,27 @@ namespace Cliptok.Modules
                     targetUser.AvatarUrl
                 );
 
-            if (Program.cfgjson.RecentWarningsPeriodHours != 0)
+            if (warningsOutput.Count == 0)
+                embed.WithDescription("This user has no warnings on record.");
+            else
             {
-                var hourRecentMatches = keys.Where(key =>
+                if (Program.cfgjson.RecentWarningsPeriodHours != 0)
                 {
-                    TimeSpan span = DateTime.Now - warningsOutput[key].WarnTimestamp;
-                    return (span.TotalHours < Program.cfgjson.RecentWarningsPeriodHours);
-                }
-                );
+                    var hourRecentMatches = keys.Where(key =>
+                    {
+                        TimeSpan span = DateTime.Now - warningsOutput[key].WarnTimestamp;
+                        return (span.TotalHours < Program.cfgjson.RecentWarningsPeriodHours);
+                    }
+                    );
 
-                embed.AddField($"Last {Program.cfgjson.RecentWarningsPeriodHours} hours", hourRecentMatches.Count().ToString(), true);
+                    embed.AddField($"Last {Program.cfgjson.RecentWarningsPeriodHours} hours", hourRecentMatches.Count().ToString(), true);
+
+                    embed.AddField("Last 30 days", recentCount.ToString(), true)
+                        .AddField("Total", keys.Count().ToString(), true);
+                }
+
             }
 
-            embed.AddField("Last 30 days", recentCount.ToString(), true)
-                .AddField("Total", keys.Count().ToString(), true);
 
             return embed;
         }
