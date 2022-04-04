@@ -650,6 +650,7 @@ namespace Cliptok.Modules
 
         [
             Command("warndetails"),
+            Aliases("warninfo", "waminfo", "wamdetails", "warndetail", "wamdetail"),
             Description("Check the details of a warning in depth. Shows extra information (Such as responsible Mod) that may not be wanted to be public."),
             HomeServer,
             RequireHomeserverPerm(ServerPermLevel.TrialModerator)
@@ -671,6 +672,7 @@ namespace Cliptok.Modules
 
         [
             Command("editwarn"),
+            Aliases("warnedit"),
             Description("Edit the reason of an existing warning.\n" +
                 "The Moderator who is editing the reason will become responsible for the case."),
             HomeServer,
