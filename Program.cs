@@ -127,16 +127,10 @@ namespace Cliptok
             }
         }
 
-        static void Main(string[] args)
+        static async Task Main(string[] _)
         {
-            using (outputCapture = new OutputCapture())
-            {
-                MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
-            }
-        }
+            outputCapture = new OutputCapture();
 
-        static async Task MainAsync(string[] _)
-        {
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var logFormat = "[{Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{Level}] {Message}{NewLine}{Exception}\n";
             Log.Logger = new LoggerConfiguration()
