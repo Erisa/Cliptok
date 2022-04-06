@@ -544,7 +544,7 @@ namespace Cliptok.Modules
         [Command("announce")]
         [Description("Announces something in the current channel, pinging an Insider role in the process.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task AnnounceCmd(CommandContext ctx, [Description("'dev','beta','rp', 'rp10, 'patch', 'rpbeta'")] string roleName, [RemainingText, Description("The announcement message to send.")] string announcementMessage)
+        public async Task AnnounceCmd(CommandContext ctx, [Description("'dev','beta','rp', 'rp10, 'patch', 'rpbeta', 'betadev'")] string roleName, [RemainingText, Description("The announcement message to send.")] string announcementMessage)
         {
             DiscordRole discordRole;
 
@@ -583,6 +583,28 @@ namespace Cliptok.Modules
 
                 await rpRole.ModifyAsync(mentionable: false);
                 await betaRole.ModifyAsync(mentionable: false);
+            }
+            // this is rushed pending an actual solution
+            else if (roleName == "betadev")
+            {
+                var betaRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles["beta"]);
+                var devRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles["dev"]);
+
+                await betaRole.ModifyAsync(mentionable: true);
+                await devRole.ModifyAsync(mentionable: true);
+
+                try
+                {
+                    await ctx.Message.DeleteAsync();
+                    await ctx.Channel.SendMessageAsync($"{betaRole.Mention} {devRole.Mention}\n{announcementMessage}");
+                }
+                catch
+                {
+                    // We still need to remember to make it unmentionable even if the msg fails.
+                }
+
+                await betaRole.ModifyAsync(mentionable: false);
+                await devRole.ModifyAsync(mentionable: false);
             }
             else
             {
