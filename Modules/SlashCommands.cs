@@ -115,7 +115,6 @@ namespace Cliptok.Modules
                 [Option("keep_messages", "Whether to keep the users messages when banning")] bool keepMessages = false,
                 [Option("time", "The length of time the user is banned for")] string time = null,
                 [Option("appeal_link", "Whether to show the user an appeal URL in the DM")] bool appealable = false
-        //[Option("silent", "Whether to not send any DM communication about the ban at all")] bool silent = false
         )
         {
             // Initial response to avoid the 3 second timeout, will edit later.
@@ -263,6 +262,7 @@ namespace Cliptok.Modules
             {
                 await Program.db.KeyRenameAsync(sourceUser.Id.ToString(), targetUser.Id.ToString());
             }
+
             string operationText = "";
             if (merge)
                 operationText = "merge ";

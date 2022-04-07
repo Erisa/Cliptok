@@ -491,34 +491,34 @@ namespace Cliptok.Modules
                             {
                                 foreach (PhishingMatch phishingMatch in phishingResponse.Matches)
                                 {
-                                    if (phishingMatch.Domain != "discord.net" && phishingMatch.Type == "PHISHING" && phishingMatch.TrustRating == 1)
-                                    {
-                                        _ = message.DeleteAsync();
-                                        string reason = "Sending phishing URL(s)";
-                                        DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
-                                        var warning = await Warnings.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), message.Channel, " automatically ");
-
-                                        string responseToSend = $"```json\n{responseText}\n```";
-                                        if (responseToSend.Length > 1940)
-                                        {
-                                            try
-                                            {
-                                                HasteBinResult hasteURL = await Program.hasteUploader.Post(responseText);
-                                                if (hasteURL.IsSuccess)
-                                                    responseToSend = hasteURL.FullUrl + ".json";
-                                                else
-                                                    responseToSend = "Response was too big and Hastebin failed, sorry.";
-                                            }
-                                            catch
-                                            {
-                                                responseToSend = "Response was too big and Hastebin failed, sorry.";
-                                            }
-                                        }
-
-                                        (string name, string value, bool inline) extraField = new("API Response", responseToSend, false);
-                                        await SendInfringingMessaageAsync(Program.badMsgLog, message, reason, warning.ContextLink, extraField);
+                                    if (phishingMatch.Domain == "discord.net" || phishingMatch.Type != "PHISHING" | phishingMatch.TrustRating != 1)
                                         return;
+
+                                    _ = message.DeleteAsync();
+                                    string reason = "Sending phishing URL(s)";
+                                    DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                                    var warning = await Warnings.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextLink: Warnings.MessageLink(msg), message.Channel, " automatically ");
+
+                                    string responseToSend = $"```json\n{responseText}\n```";
+                                    if (responseToSend.Length > 1940)
+                                    {
+                                        try
+                                        {
+                                            HasteBinResult hasteURL = await Program.hasteUploader.Post(responseText);
+                                            if (hasteURL.IsSuccess)
+                                                responseToSend = hasteURL.FullUrl + ".json";
+                                            else
+                                                responseToSend = "Response was too big and Hastebin failed, sorry.";
+                                        }
+                                        catch
+                                        {
+                                            responseToSend = "Response was too big and Hastebin failed, sorry.";
+                                        }
                                     }
+
+                                    (string name, string value, bool inline) extraField = new("API Response", responseToSend, false);
+                                    await SendInfringingMessaageAsync(Program.badMsgLog, message, reason, warning.ContextLink, extraField);
+                                    return;
                                 }
                             }
                         }
@@ -620,10 +620,9 @@ namespace Cliptok.Modules
                         if (title.Length > 100)
                             title = Warnings.Truncate(title, 100, false);
 
-                        var autoArchiveTime = AutoArchiveDuration.Day;
+                        AutoArchiveDuration autoArchiveTime;
 
-                        if (message.Channel.Guild.Features.Contains("THREE_DAY_THREAD_ARCHIVE"))
-                            autoArchiveTime = AutoArchiveDuration.ThreeDays;
+                        autoArchiveTime = message.Channel.Guild.Features.Contains("THREE_DAY_THREAD_ARCHIVE") ? AutoArchiveDuration.ThreeDays : AutoArchiveDuration.Day;
 
                         await message.CreateThreadAsync(title, autoArchiveTime, "Automatically creating feedback hub thread.");
 

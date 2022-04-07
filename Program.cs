@@ -132,7 +132,12 @@ namespace Cliptok
             outputCapture = new OutputCapture();
 
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            var logFormat = "[{Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{Level}] {Message}{NewLine}{Exception}\n";
+            var logFormat = "[{Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{Level}] {Message}{NewLine}{Exception}";
+
+// resolves a weird bug on Windows where the limes are vomitted together
+#if DEBUG
+            logFormat += "\n";
+#endif
             Log.Logger = new LoggerConfiguration()
 #if DEBUG
                 .MinimumLevel.Debug()

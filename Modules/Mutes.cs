@@ -188,10 +188,11 @@ namespace Cliptok.Modules
                 {
                     await member.TimeoutAsync(until: null, reason: reason);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // do nothing. not important really...
+                    Program.discord.Logger.LogError(message: "Error ocurred trying to remove Timeout from {0}", args: member.Id, exception: ex, eventId: Program.CliptokEventID);
                 }
+
                 if (success)
                     await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Successfully unmuted <@{targetUser.Id}>!");
 

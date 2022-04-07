@@ -519,38 +519,6 @@ namespace Cliptok.Modules
             int count = 1;
             int recentCount = 0;
 
-            foreach (string key in keys)
-            {
-                UserWarning warning = warningsOutput[key];
-                TimeSpan span = DateTime.Now - warning.WarnTimestamp;
-                if (span.Days < 31)
-                {
-                    recentCount += 1;
-                }
-                if (count == 66)
-                {
-                    str += $"+ {keys.Count() - 65} more…";
-                    count += 1;
-                }
-                else if (count < 66)
-                {
-                    var reason = warning.WarnReason;
-                    if (string.IsNullOrWhiteSpace(reason))
-                    {
-                        reason = "No reason provided.";
-                    }
-                    reason = reason.Replace("`", "\\`").Replace("*", "\\*");
-
-                    if (reason.Length > 29)
-                    {
-                        reason = Truncate(reason, 29) + "…";
-                    }
-                    str += $"`{Pad(warning.WarningId)}` **{reason}** • <t:{ModCmds.ToUnixTimestamp(warning.WarnTimestamp)}:R>\n";
-                    count += 1;
-                }
-
-            }
-
             var embed = new DiscordEmbedBuilder()
                 .WithDescription(str)
                 .WithColor(new DiscordColor(0xFEC13D))
@@ -569,6 +537,38 @@ namespace Cliptok.Modules
                 embed.WithDescription("This user has no warnings on record.");
             else
             {
+                foreach (string key in keys)
+                {
+                    UserWarning warning = warningsOutput[key];
+                    TimeSpan span = DateTime.Now - warning.WarnTimestamp;
+                    if (span.Days < 31)
+                    {
+                        recentCount += 1;
+                    }
+                    if (count == 66)
+                    {
+                        str += $"+ {keys.Count() - 65} more…";
+                        count += 1;
+                    }
+                    else if (count < 66)
+                    {
+                        var reason = warning.WarnReason;
+                        if (string.IsNullOrWhiteSpace(reason))
+                        {
+                            reason = "No reason provided.";
+                        }
+                        reason = reason.Replace("`", "\\`").Replace("*", "\\*");
+
+                        if (reason.Length > 29)
+                        {
+                            reason = Truncate(reason, 29) + "…";
+                        }
+                        str += $"`{Pad(warning.WarningId)}` **{reason}** • <t:{ModCmds.ToUnixTimestamp(warning.WarnTimestamp)}:R>\n";
+                        count += 1;
+                    }
+
+                }
+
                 if (Program.cfgjson.RecentWarningsPeriodHours != 0)
                 {
                     var hourRecentMatches = keys.Where(key =>
@@ -583,9 +583,7 @@ namespace Cliptok.Modules
                     embed.AddField("Last 30 days", recentCount.ToString(), true)
                         .AddField("Total", keys.Count().ToString(), true);
                 }
-
             }
-
 
             return embed;
         }
@@ -709,14 +707,7 @@ namespace Cliptok.Modules
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task MostWarningsCmd(CommandContext ctx)
         {
-            try
-            {
-                await ctx.TriggerTypingAsync();
-            }
-            catch
-            {
-                // typing failing is unimportant, move on
-            }
+            await ModCmds.SafeTyping(ctx.Channel);
 
             var server = Program.redis.GetServer(Program.redis.GetEndPoints()[0]);
             var keys = server.Keys();

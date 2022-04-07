@@ -626,14 +626,9 @@ namespace Cliptok.Modules
             [Description("Debug the list of mutes.")]
             public async Task MuteDebug(CommandContext ctx, DiscordUser targetUser = default)
             {
-                try
-                {
-                    await ctx.TriggerTypingAsync();
-                }
-                catch
-                {
-                    // typing failing is unimportant, move on
-                }
+
+                await SafeTyping(ctx.Channel);
+
 
                 string strOut = "";
                 if (targetUser == default)
@@ -688,14 +683,7 @@ namespace Cliptok.Modules
             [Description("Debug the list of bans.")]
             public async Task BanDebug(CommandContext ctx, DiscordUser targetUser = default)
             {
-                try
-                {
-                    await ctx.TriggerTypingAsync();
-                }
-                catch
-                {
-                    // typing failing is unimportant, move on
-                }
+                await SafeTyping(ctx.Channel);
 
                 string strOut = "";
                 if (targetUser == default)
@@ -824,14 +812,8 @@ namespace Cliptok.Modules
             [Command("logs")]
             public async Task Logs(CommandContext ctx)
             {
-                try
-                {
-                    await ctx.TriggerTypingAsync();
-                }
-                catch
-                {
-                    // ignore typing errors
-                }
+                await SafeTyping(ctx.Channel);
+
                 string result = Regex.Replace(Program.outputCapture.Captured.ToString(), "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT"), "REDACTED");
 
                 if (result.Length > 1947)
@@ -1280,6 +1262,19 @@ namespace Cliptok.Modules
             else
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} An error with code `{response.StatusCode}` was returned when trying to request the Action run.\n" +
                     $"Body: ```json\n{responseText}```");
+        }
+
+        public static async Task<bool> SafeTyping(DiscordChannel channel)
+        {
+            try
+            {
+                await channel.TriggerTypingAsync();
+                return true;
+            } catch (Exception ex)
+            {
+                Program.discord.Logger.LogError(eventId: Program.CliptokEventID, exception: ex, message: "Error ocurred trying to type in {0}", args: channel.Id);
+                return false;
+            }
         }
 
         public class GitHubDispatchBody
