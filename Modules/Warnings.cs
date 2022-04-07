@@ -583,6 +583,8 @@ namespace Cliptok.Modules
                     embed.AddField("Last 30 days", recentCount.ToString(), true)
                         .AddField("Total", keys.Count().ToString(), true);
                 }
+
+                embed.WithDescription(str);
             }
 
             return embed;
