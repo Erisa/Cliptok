@@ -398,7 +398,7 @@ namespace Cliptok.Modules
 
             string rolesStr = "None";
 
-            if (member.Roles.Count() != 0)
+            if (member.Roles.Any())
             {
                 rolesStr = "";
 

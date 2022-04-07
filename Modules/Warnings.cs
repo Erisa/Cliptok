@@ -116,7 +116,6 @@ namespace Cliptok.Modules
                 return false;
         }
     }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
     public class Warnings : BaseCommandModule
     {
@@ -249,11 +248,11 @@ namespace Cliptok.Modules
 
             if (toMuteHours != -1 && Program.cfgjson.RecentWarningsPeriodHours != 0)
             {
-                var recentAutoMuteResult = GetHoursToMuteFor(warningDictionary: warningsOutput, timeToCheck: TimeSpan.FromHours(Program.cfgjson.RecentWarningsPeriodHours), autoMuteThresholds: Program.cfgjson.RecentWarningsAutoMuteThresholds);
-                if (recentAutoMuteResult.MuteHours == -1 || recentAutoMuteResult.MuteHours >= toMuteHours)
+                var (MuteHours, WarnsSinceThreshold) = GetHoursToMuteFor(warningDictionary: warningsOutput, timeToCheck: TimeSpan.FromHours(Program.cfgjson.RecentWarningsPeriodHours), autoMuteThresholds: Program.cfgjson.RecentWarningsAutoMuteThresholds);
+                if (MuteHours == -1 || MuteHours >= toMuteHours)
                 {
-                    toMuteHours = recentAutoMuteResult.MuteHours;
-                    warnsSinceThreshold = recentAutoMuteResult.WarnsSinceThreshold;
+                    toMuteHours = MuteHours;
+                    warnsSinceThreshold = WarnsSinceThreshold;
                     thresholdSpan = "hours";
                     acceptedThreshold = Program.cfgjson.RecentWarningsPeriodHours;
                 }
@@ -343,7 +342,7 @@ namespace Cliptok.Modules
         public static string Truncate(string value, int maxLength, bool elipsis = false)
         {
             if (string.IsNullOrEmpty(value)) return value;
-            var strOut = value.Length <= maxLength ? value : value.Substring(0, maxLength);
+            var strOut = value.Length <= maxLength ? value : value[..maxLength];
             if (elipsis && value.Length > maxLength)
                 return strOut + '…';
             else
@@ -447,8 +446,6 @@ namespace Cliptok.Modules
 
             if (reply != null)
                 messageBuild.WithReply(reply.Id, true, false);
-
-            var tmp = ctx.Channel.Type;
 
             var msg = await ctx.Channel.SendMessageAsync(messageBuild);
             _ = await GiveWarningAsync(targetUser, ctx.User, reason, MessageLink(msg), ctx.Channel);
@@ -727,10 +724,9 @@ namespace Cliptok.Modules
             Dictionary<string, int> counts = new();
             foreach (var key in keys)
             {
-                ulong number;
-                if (ulong.TryParse(key.ToString(), out number))
+                if (ulong.TryParse(key.ToString(), out ulong number))
                 {
-                    counts[key.ToString()] = Program.db.HashGetAll(key).Count();
+                    counts[key.ToString()] = Program.db.HashGetAll(key).Length;
                 }
             }
 

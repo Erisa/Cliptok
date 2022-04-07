@@ -113,7 +113,7 @@ namespace Cliptok.Modules
             catch
             {
                 // A DM failing to send isn't important, but let's put it in chat just so it's somewhere.
-                if (!(channel is null))
+                if (channel is not null)
                 {
                     if (muteDuration == default)
                         await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} has been muted: **{reason}**");
@@ -123,7 +123,7 @@ namespace Cliptok.Modules
                 }
             }
 
-            if (!(channel is null) && alwaysRespond)
+            if (channel is not null && alwaysRespond)
             {
                 reason = reason.Replace("`", "\\`").Replace("*", "\\*");
                 if (muteDuration == default)

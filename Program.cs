@@ -81,7 +81,7 @@ namespace Cliptok
         public static DiscordChannel badMsgLog;
         public static DiscordGuild homeGuild;
 
-        public static Random rand = new Random();
+        public static Random rand = new();
         public static HasteBinClient hasteUploader;
 
         public static OutputCapture outputCapture;
@@ -308,7 +308,7 @@ namespace Cliptok
                     if (Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_SHA") != null)
                     {
                         commitHash = Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_SHA");
-                        commitHash = commitHash.Substring(0, Math.Min(commitHash.Length, 7));
+                        commitHash = commitHash[..Math.Min(commitHash.Length, 7)];
                     }
 
                     if (string.IsNullOrWhiteSpace(commitHash))
@@ -620,6 +620,9 @@ namespace Cliptok
                 usedUrl = member.GetAvatarUrl(ImageFormat.Png);
                 //                }
 
+                if (usedHash.StartsWith("a_"))
+                    return false;
+
                 if (db.HashGet("safeAvatars", usedHash) == true)
                 {
                     discord.Logger.LogDebug("Unnecessary avatar check skipped for " + member.Id);
@@ -644,7 +647,7 @@ namespace Cliptok
                 if (httpStatus == System.Net.HttpStatusCode.OK)
                 {
                     var avatarResponse = JsonConvert.DeserializeObject<AvatarResponseBody>(responseText);
-                    discord.Logger.LogInformation($"Avatar check for {member.Id}: {httpStatusCode} {responseText}");
+                    discord.Logger.LogDebug($"Avatar check for {member.Id}: {httpStatusCode} {responseText}");
 
                     if (avatarResponse.Matched && avatarResponse.Key != "logo")
                     {
