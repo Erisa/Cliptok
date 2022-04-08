@@ -534,7 +534,8 @@ namespace Cliptok.Modules
                 );
 
             if (warningsOutput.Count == 0)
-                embed.WithDescription("This user has no warnings on record.");
+                embed.WithDescription("This user has no warnings on record.")
+                    .WithColor(color: DiscordColor.DarkGreen);
             else
             {
                 foreach (string key in keys)
