@@ -460,7 +460,7 @@ namespace Cliptok
                         {
                             // welp, their DMs are closed. not my problem.
                         }
-                        await e.Member.RemoveAsync();
+                        await e.Member.RemoveAsync(reason: "Raidmode is enabled, join was rejected.");
                     }
 
                     if (await db.HashExistsAsync("mutes", e.Member.Id))

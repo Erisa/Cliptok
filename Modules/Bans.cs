@@ -344,11 +344,11 @@ namespace Cliptok.Modules
         [Command("unban")]
         [Description("Unbans a user who has been previously banned.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(Permissions.BanMembers)]
-        public async Task UnmuteCmd(CommandContext ctx, [Description("The user to unban, usually a mention or ID")] DiscordUser targetUser)
+        public async Task UnmuteCmd(CommandContext ctx, [Description("The user to unban, usually a mention or ID")] DiscordUser targetUser, [Description("Used in audit log only currently")] string reason = "No reason specified.")
         {
             if ((await Program.db.HashExistsAsync("bans", targetUser.Id)))
             {
-                await ModCmds.UnbanUserAsync(ctx.Guild, targetUser);
+                await ModCmds.UnbanUserAsync(ctx.Guild, targetUser, $"[Unban by {ctx.User.Username}#{ctx.User.Discriminator}]: {reason}");
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned **{targetUser.Username}#{targetUser.Discriminator}**.");
             }
             else
