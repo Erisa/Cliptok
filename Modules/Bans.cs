@@ -55,7 +55,7 @@ namespace Cliptok.Modules
                 }
                 else
                 {
-                    await targetMember.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}** for {Warnings.TimeToPrettyFormat(banDuration, false)}!\nReason: **{reason}**");
+                    await targetMember.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}** for {Warnings.TimeToPrettyFormat(banDuration, false)}!\nReason: **{reason}**\nBan expires: <t:{ModCmds.ToUnixTimestamp(expireTime)}:R>");
                 }
             }
             catch
@@ -80,7 +80,7 @@ namespace Cliptok.Modules
                 }
                 else
                 {
-                    logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was banned for {Warnings.TimeToPrettyFormat(banDuration, false)} by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**";
+                    logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was banned for {Warnings.TimeToPrettyFormat(banDuration, false)} by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**\nBan expires: <t:{ModCmds.ToUnixTimestamp(expireTime)}:R>";
                 }
                 _ = logChannel.SendMessageAsync(logOut);
 
