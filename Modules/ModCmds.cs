@@ -1205,6 +1205,30 @@ namespace Cliptok.Modules
             await thread.ModifyAsync(a =>
             {
                 a.IsArchived = true;
+                a.Locked = false;
+            });
+        }
+
+        [Command("lockthread")]
+        [Description("Lock the current thread or another thread.")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        public async Task LockThreadCommand(CommandContext ctx, DiscordChannel channel = default)
+        {
+            if (channel == default)
+                channel = ctx.Channel;
+
+            if (channel.Type is not ChannelType.PrivateThread && channel.Type is not ChannelType.PublicThread)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {channel.Mention} is not a thread!");
+                return;
+            }
+
+            var thread = (DiscordThreadChannel)channel;
+            await Program.db.SetRemoveAsync("openthread", thread.Id);
+
+            await thread.ModifyAsync(a =>
+            {
+                a.IsArchived = true;
                 a.Locked = true;
             });
         }
