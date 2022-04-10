@@ -1200,7 +1200,7 @@ namespace Cliptok.Modules
             }
 
             var thread = (DiscordThreadChannel)channel;
-            await Program.db.SetRemoveAsync("openthread", thread.Id);
+            await Program.db.SetRemoveAsync("openthreads", thread.Id);
 
             await thread.ModifyAsync(a =>
             {
@@ -1224,7 +1224,7 @@ namespace Cliptok.Modules
             }
 
             var thread = (DiscordThreadChannel)channel;
-            await Program.db.SetRemoveAsync("openthread", thread.Id);
+            await Program.db.SetRemoveAsync("openthreads", thread.Id);
 
             await thread.ModifyAsync(a =>
             {
