@@ -1186,7 +1186,7 @@ namespace Cliptok.Modules
         }
 
         [Command("archive")]
-        [Description("archive a thread. testing.")]
+        [Description("Archive the current thread or another thread.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task ArchiveCommand(CommandContext ctx, DiscordChannel channel = default)
         {
@@ -1210,6 +1210,7 @@ namespace Cliptok.Modules
         }
 
         [Command("unarchive")]
+        [Description("Unarchive a thread")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task UnarchiveCommand(CommandContext ctx, DiscordChannel channel = default)
         {
@@ -1232,6 +1233,7 @@ namespace Cliptok.Modules
         }
 
         [Command("keepalive")]
+        [Description("Toggle whether or not to keep a threed alive permamnently until locked.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task KeepaliveCommand(CommandContext ctx, DiscordChannel channel = default)
         {
