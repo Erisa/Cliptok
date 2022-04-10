@@ -762,6 +762,7 @@ namespace Cliptok
                     await e.ThreadAfter.ModifyAsync(a =>
                     {
                         a.IsArchived = false;
+                        a.AuditLogReason = "Auto unarchiving thread due to enabled keepalive state.";
                     });
                 }
 
