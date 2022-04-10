@@ -749,9 +749,22 @@ namespace Cliptok
                 return Task.CompletedTask;
             }
 
-            Task Discord_ThreadUpdated(DiscordClient client, ThreadUpdateEventArgs e)
+            async Task<Task> Discord_ThreadUpdated(DiscordClient client, ThreadUpdateEventArgs e)
             {
                 client.Logger.LogDebug(eventId: CliptokEventID, $"Thread updated in {e.Guild.Name}. New Thread Name: {e.ThreadAfter.Name}");
+
+                if (
+                    db.SetContains("openthreads", e.ThreadAfter.Id)
+                    && e.ThreadAfter.ThreadMetadata.IsArchived
+                    && e.ThreadAfter.ThreadMetadata.IsLocked != true
+                )
+                {
+                    await e.ThreadAfter.ModifyAsync(a =>
+                    {
+                        a.IsArchived = false;
+                    });
+                }
+
                 return Task.CompletedTask;
             }
 

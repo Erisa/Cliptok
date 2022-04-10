@@ -333,6 +333,12 @@ namespace Cliptok
         [JsonProperty("windows11")]
         public string Windows11 { get; set; }
 
+        [JsonProperty("on")]
+        public string On { get; set; }
+
+        [JsonProperty("off")]
+        public string Off { get; set; }
+
     }
 
     public class CoreConfig
