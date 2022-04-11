@@ -814,7 +814,7 @@ namespace Cliptok.Modules
             {
                 await SafeTyping(ctx.Channel);
 
-                string result = Regex.Replace(Program.outputCapture.Captured.ToString(), "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT"), "REDACTED");
+                string result = Regex.Replace(Program.outputCapture.ToString(), "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT"), "REDACTED");
 
                 if (result.Length > 1947)
                 {

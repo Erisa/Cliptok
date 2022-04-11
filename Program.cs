@@ -9,6 +9,7 @@ using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -25,34 +26,6 @@ using static Cliptok.Helpers.ShellCommand;
 
 namespace Cliptok
 {
-    // https://stackoverflow.com/a/34944872
-    public class OutputCapture : TextWriter, IDisposable
-    {
-        private TextWriter stdOutWriter;
-        public TextWriter Captured { get; private set; }
-        public override Encoding Encoding { get { return Encoding.ASCII; } }
-
-        public OutputCapture()
-        {
-            this.stdOutWriter = Console.Out;
-            Console.SetOut(this);
-            Captured = new StringWriter();
-        }
-
-        override public void Write(string output)
-        {
-            // Capture the output and also send it to StdOut
-            Captured.Write(output);
-            stdOutWriter.Write(output);
-        }
-
-        override public void WriteLine(string output)
-        {
-            // Capture the output and also send it to StdOut
-            Captured.WriteLine(output);
-            stdOutWriter.WriteLine(output);
-        }
-    }
     public class AvatarResponseBody
     {
         [JsonProperty("matched")]
@@ -84,7 +57,7 @@ namespace Cliptok
         public static Random rand = new();
         public static HasteBinClient hasteUploader;
 
-        public static OutputCapture outputCapture;
+        public static StringWriter outputCapture = new();
 
         static public readonly HttpClient httpClient = new();
 
@@ -128,16 +101,10 @@ namespace Cliptok
         }
 
         static async Task Main(string[] _)
-        {
-            outputCapture = new OutputCapture();
-
+        {            
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var logFormat = "[{Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{Level}] {Message}{NewLine}{Exception}";
 
-// resolves a weird bug on Windows where the limes are vomitted together
-#if DEBUG
-            logFormat += "\n";
-#endif
             Log.Logger = new LoggerConfiguration()
 #if DEBUG
                 .MinimumLevel.Debug()
@@ -145,7 +112,8 @@ namespace Cliptok
                 .Filter.ByExcluding("Contains(@m, 'Unknown event:')")
                 .MinimumLevel.Information()
 #endif
-                .WriteTo.Console(outputTemplate: logFormat)
+                .WriteTo.Console(outputTemplate: logFormat, theme: AnsiConsoleTheme.Literate)
+                .WriteTo.TextWriter(outputCapture)
                 .CreateLogger();
 
             var logFactory = new LoggerFactory().AddSerilog();
