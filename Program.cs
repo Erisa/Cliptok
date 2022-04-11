@@ -107,7 +107,7 @@ namespace Cliptok
 
             Log.Logger = new LoggerConfiguration()
 #if DEBUG
-                .MinimumLevel.Debug()
+                .MinimumLevel.Verbose()
 #else
                 .Filter.ByExcluding("Contains(@m, 'Unknown event:')")
                 .MinimumLevel.Information()
@@ -183,7 +183,6 @@ namespace Cliptok
 
             if (Environment.GetEnvironmentVariable("RAVY_API_TOKEN") == null || Environment.GetEnvironmentVariable("RAVY_API_TOKEN") == "goodluckfindingone")
                 discord.Logger.LogWarning(CliptokEventID, "Ravy API features disabled due to missing API token.");
-
 
             var slash = discord.UseSlashCommands();
             slash.SlashCommandErrored += async (s, e) =>

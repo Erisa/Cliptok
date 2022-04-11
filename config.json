@@ -159,6 +159,14 @@
       "wholeWord": false,
       "url": false,
       "reason": "Using a text-rendering exploit to mask URL(s) and/or mentions"
+    },
+    {
+      "name": "Private/passive.txt",
+      "wholeWord": false,
+      "url": false,
+      "reason": "",
+      "passive": true,
+      "channelId": 963070640292782160
     }
   ],
   "gitListDirectory": "Private",

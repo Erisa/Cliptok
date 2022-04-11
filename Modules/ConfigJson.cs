@@ -242,6 +242,12 @@ namespace Cliptok
 
         [JsonProperty("excludedChannels")]
         public List<ulong> ExcludedChannels { get; private set; } = new();
+
+        [JsonProperty("passive")]
+        public bool Passive { get; private set; } = false;
+
+        [JsonProperty("channelId")]
+        public ulong? ChannelId { get; private set; }
     }
 
     public class AutoBanIdSet

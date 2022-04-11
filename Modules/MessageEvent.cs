@@ -105,11 +105,14 @@ namespace Cliptok.Modules
 
         }
 
-        static async Task SendInfringingMessaageAsync(DiscordChannel channel, DiscordMessage infringingMessage, string reason, string messageURL, (string name, string value, bool inline) extraField = default)
+        static async Task SendInfringingMessaageAsync(DiscordChannel channel, DiscordMessage infringingMessage, string reason, string messageURL, (string name, string value, bool inline) extraField = default, string content = default, DiscordColor? colour = null)
         {
+            if (colour == null)
+                colour = new DiscordColor(0xf03916);
+
             var embed = new DiscordEmbedBuilder()
             .WithDescription(infringingMessage.Content)
-            .WithColor(new DiscordColor(0xf03916))
+            .WithColor((DiscordColor)colour)
             .WithTimestamp(infringingMessage.Timestamp)
             .WithFooter(
                 $"User ID: {infringingMessage.Author.Id}",
@@ -119,15 +122,21 @@ namespace Cliptok.Modules
                 $"{infringingMessage.Author.Username}#{infringingMessage.Author.Discriminator} in #{infringingMessage.Channel.Name}",
                 null,
                 infringingMessage.Author.AvatarUrl
-            )
-            .AddField("Reason", reason, true);
+            );
+
+            if (reason != null && reason != "")
+                embed.AddField("Reason", reason, true);
+
             if (messageURL != null)
                 embed.AddField("Message link", $"[`Jump to warning`]({messageURL})", true);
 
             if (extraField != default)
                 embed.AddField(extraField.name, extraField.value, extraField.inline);
 
-            await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} Deleted infringing message by {infringingMessage.Author.Mention} in {infringingMessage.Channel.Mention}:", embed);
+            if (content == default)
+                content = $"{Program.cfgjson.Emoji.Denied} Deleted infringing message by {infringingMessage.Author.Mention} in {infringingMessage.Channel.Mention}:";
+
+            await channel.SendMessageAsync(content, embed);
         }
 
         static async Task DeleteAndWarnAsync(DiscordMessage message, string reason, DiscordClient client)
@@ -254,7 +263,7 @@ namespace Cliptok.Modules
                     // Matching word list
                     foreach (var listItem in Program.cfgjson.WordListList)
                     {
-                        if (listItem.ExcludedChannels.Contains(message.Channel.Id))
+                        if (listItem.ExcludedChannels.Contains(message.Channel.Id) || listItem.Passive)
                         {
                             continue;
                         }
@@ -631,6 +640,31 @@ namespace Cliptok.Modules
                     }
                 }
 
+                // Check the passive lists AFTER all other checks.
+                if (Warnings.GetPermLevel(member) >= ServerPermLevel.TrialModerator)
+                    return;
+
+                foreach (var listItem in Program.cfgjson.WordListList)
+                {
+                    if (!listItem.Passive)
+                    {
+                        continue;
+                    }
+                    else if (CheckForNaughtyWords(message.Content.ToLower(), listItem))
+                    {
+                        DiscordChannel logChannel = Program.badMsgLog;
+
+                        if (listItem.ChannelId != null)
+                        {
+                            logChannel = await Program.discord.GetChannelAsync(listItem.ChannelId);
+                        }
+
+                        string content = $"{Program.cfgjson.Emoji.Warning} Detected potentially suspicious message by {message.Author.Mention} in {message.Channel.Mention}:";
+
+                        await SendInfringingMessaageAsync(logChannel, message, reason, Warnings.MessageLink(message), content: content, colour: new DiscordColor(0xFEC13D));
+
+                    }
+                }
             }
             catch (Exception e)
             {
