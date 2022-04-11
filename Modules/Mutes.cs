@@ -147,9 +147,9 @@ namespace Cliptok.Modules
             {
                 member = await guild.GetMemberAsync(targetUser.Id);
             }
-            catch (DSharpPlus.Exceptions.NotFoundException)
+            catch (DSharpPlus.Exceptions.NotFoundException ex)
             {
-                // they probably left :(
+                Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, exception: ex, message: "Failed to unmute {0} in {1} because they weren't in the server.", $"{targetUser.Username}#{targetUser.Discriminator}", guild.Name);
             }
 
             if (member == default)
@@ -251,9 +251,9 @@ namespace Cliptok.Modules
             {
                 member = await ctx.Guild.GetMemberAsync(targetUser.Id);
             }
-            catch (DSharpPlus.Exceptions.NotFoundException)
+            catch (DSharpPlus.Exceptions.NotFoundException ex)
             {
-                // nothing
+                Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, exception: ex, message: "Failed to unmute {0} in {1} because they weren't in the server.", $"{targetUser.Username}#{targetUser.Discriminator}", ctx.Guild.Name);
             }
 
             if ((await Program.db.HashExistsAsync("mutes", targetUser.Id)) || (member != default && member.Roles.Contains(mutedRole)))
@@ -289,7 +289,7 @@ namespace Cliptok.Modules
             }
             catch (DSharpPlus.Exceptions.NotFoundException)
             {
-                // nothing
+                // is this worth logging?
             }
 
             if (targetMember != default && Warnings.GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && (Warnings.GetPermLevel(targetMember) >= ServerPermLevel.TrialModerator || targetMember.IsBot))
