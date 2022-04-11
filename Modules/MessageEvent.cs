@@ -105,7 +105,7 @@ namespace Cliptok.Modules
 
         }
 
-        static async Task SendInfringingMessaageAsync(DiscordChannel channel, DiscordMessage infringingMessage, string reason, string messageURL, (string name, string value, bool inline) extraField = default, string content = default, DiscordColor? colour = null)
+        static async Task SendInfringingMessaageAsync(DiscordChannel channel, DiscordMessage infringingMessage, string reason, string messageURL, (string name, string value, bool inline) extraField = default, string content = default, DiscordColor? colour = null, string jumpText = "Jump to warning")
         {
             if (colour == null)
                 colour = new DiscordColor(0xf03916);
@@ -128,7 +128,7 @@ namespace Cliptok.Modules
                 embed.AddField("Reason", reason, true);
 
             if (messageURL != null)
-                embed.AddField("Message link", $"[`Jump to warning`]({messageURL})", true);
+                embed.AddField("Message link", $"[`{jumpText}`]({messageURL})", true);
 
             if (extraField != default)
                 embed.AddField(extraField.name, extraField.value, extraField.inline);
@@ -661,7 +661,7 @@ namespace Cliptok.Modules
 
                         string content = $"{Program.cfgjson.Emoji.Warning} Detected potentially suspicious message by {message.Author.Mention} in {message.Channel.Mention}:";
 
-                        await SendInfringingMessaageAsync(logChannel, message, listItem.Reason, Warnings.MessageLink(message), content: content, colour: new DiscordColor(0xFEC13D));
+                        await SendInfringingMessaageAsync(logChannel, message, listItem.Reason, Warnings.MessageLink(message), content: content, colour: new DiscordColor(0xFEC13D), jumpText: "Jump to message");
 
                     }
                 }
