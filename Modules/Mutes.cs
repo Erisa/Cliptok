@@ -239,18 +239,17 @@ namespace Cliptok.Modules
         [Aliases("umute")]
         [Description("Unmutes a previously muted user, typically ahead of the standard expiration time. See also: mute")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public async Task UnmuteCmd(CommandContext ctx, [Description("The user you're trying to unmute.")] DiscordUser targetUser)
+        public async Task UnmuteCmd(CommandContext ctx, [Description("The user you're trying to unmute.")] DiscordUser targetUser, string reason = "No reason provided.")
         {
-            string reason = $"[Manual unmute by {ctx.User.Username}#{ctx.User.Discriminator}]";
-            DiscordGuild guild = ctx.Guild;
+            reason = $"[Manual unmute by {ctx.User.Username}#{ctx.User.Discriminator}]: {reason}";
 
             // todo: store per-guild
-            DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
+            DiscordRole mutedRole = ctx.Guild.GetRole(Program.cfgjson.MutedRole);
 
             DiscordMember member = default;
             try
             {
-                member = await guild.GetMemberAsync(targetUser.Id);
+                member = await ctx.Guild.GetMemberAsync(targetUser.Id);
             }
             catch (DSharpPlus.Exceptions.NotFoundException)
             {
