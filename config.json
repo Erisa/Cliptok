@@ -162,7 +162,7 @@
     },
     {
       "name": "Private/passive.txt",
-      "wholeWord": false,
+      "wholeWord": true,
       "url": false,
       "reason": "",
       "passive": true,
