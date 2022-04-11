@@ -656,12 +656,12 @@ namespace Cliptok.Modules
 
                         if (listItem.ChannelId != null)
                         {
-                            logChannel = await Program.discord.GetChannelAsync(listItem.ChannelId);
+                            logChannel = await Program.discord.GetChannelAsync((ulong)listItem.ChannelId);
                         }
 
                         string content = $"{Program.cfgjson.Emoji.Warning} Detected potentially suspicious message by {message.Author.Mention} in {message.Channel.Mention}:";
 
-                        await SendInfringingMessaageAsync(logChannel, message, reason, Warnings.MessageLink(message), content: content, colour: new DiscordColor(0xFEC13D));
+                        await SendInfringingMessaageAsync(logChannel, message, listItem.Reason, Warnings.MessageLink(message), content: content, colour: new DiscordColor(0xFEC13D));
 
                     }
                 }
