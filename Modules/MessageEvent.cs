@@ -198,6 +198,17 @@ namespace Cliptok.Modules
                 if (message.Author == null || message.Author.Id == client.CurrentUser.Id)
                     return;
 
+                if (!isAnEdit && channel.IsPrivate && Program.cfgjson.DmLogChannelId != 0)
+                {
+                    var dmLog = await client.GetChannelAsync(Program.cfgjson.DmLogChannelId);
+                    DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                        .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}", null, message.Author.AvatarUrl)
+                        .WithDescription(message.Content)
+                        .WithFooter($"Channel ID: {channel.Id}");
+
+                    dmLog.SendMessageAsync(embed);
+                }
+
                 if (!isAnEdit && message.Author.Id == Program.cfgjson.ModmailUserId && message.Content == "@here" && message.Embeds[0].Footer.Text.Contains("User ID:"))
                 {
                     Program.discord.Logger.LogInformation(Program.CliptokEventID, $"Processing modmail message {message.Id} in {message.Channel} with {isAnEdit}");

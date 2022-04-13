@@ -46,7 +46,7 @@ namespace Cliptok
         public string Reason { get; set; }
     }
 
-    public struct ConfigJson
+    public class ConfigJson
     {
         [JsonProperty("core")]
         public CoreConfig Core { get; private set; }
@@ -209,6 +209,9 @@ namespace Cliptok
 
         [JsonProperty("feedbackHubChannelId")]
         public ulong FeedbackHubChannelId { get; private set; }
+
+        [JsonProperty("dmLogChannelId")]
+        public ulong DmLogChannelId { get; private set; } = 0;
 
     }
 
