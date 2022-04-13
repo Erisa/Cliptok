@@ -123,7 +123,7 @@ namespace Cliptok
 
             string configFile = "config.json";
 #if DEBUG
-            configFile = "config.dev.json";
+            configFile = "config.megu.json";
 #endif
 
             using (var fs = File.OpenRead(configFile))
@@ -595,7 +595,7 @@ namespace Cliptok
                 if (usedHash.StartsWith("a_"))
                     return false;
 
-                if (db.HashGet("safeAvatars", usedHash) == true)
+                if (db.SetContains("safeavatarstore", usedHash))
                 {
                     discord.Logger.LogDebug("Unnecessary avatar check skipped for " + member.Id);
                     return false;
@@ -635,7 +635,7 @@ namespace Cliptok
                     }
                     else if (!avatarResponse.Matched)
                     {
-                        await db.HashSetAsync("safeAvatars", usedHash, true);
+                        await db.SetAddAsync("safeavatarstore", usedHash);
                         return false;
                     }
                 }
