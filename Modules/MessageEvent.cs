@@ -210,7 +210,14 @@ namespace Cliptok.Modules
                     {
                         foreach(var sticker in message.Stickers)
                         {
-                            string fieldValue = $"[{sticker.Name}]({sticker.StickerUrl})";
+                            var url = sticker.StickerUrl;
+                            // d#+ is dumb
+                            if (sticker.FormatType is StickerFormat.APNG)
+                            {
+                                url = url.Replace(".apng", ".png");
+                            }
+
+                            string fieldValue = $"[{sticker.Name}]({url})";
                             if (sticker.FormatType is StickerFormat.APNG or StickerFormat.LOTTIE)
                             {
                                 fieldValue += " (Animated)";
@@ -220,12 +227,6 @@ namespace Cliptok.Modules
 
                             if (message.Attachments.Count == 0 && message.Stickers.Count == 1)
                             {
-                                var url = sticker.StickerUrl;
-                                // d#+ is dumb
-                                if (sticker.FormatType is StickerFormat.APNG)
-                                {
-                                    url = url.Replace(".apng", ".png");
-                                }
                                 embed.WithImageUrl(url);
                             }
                         }
