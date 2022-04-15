@@ -206,7 +206,51 @@ namespace Cliptok.Modules
                         .WithDescription(message.Content)
                         .WithFooter($"Channel ID: {channel.Id}");
 
-                    dmLog.SendMessageAsync(embed);
+                    if (message.Stickers.Count > 0)
+                    {
+                        foreach(var sticker in message.Stickers)
+                        {
+                            string fieldValue = $"[{sticker.Name}]({sticker.StickerUrl})";
+                            if (sticker.FormatType is StickerFormat.APNG or StickerFormat.LOTTIE)
+                            {
+                                fieldValue += " (Animated)";
+                            }
+
+                            embed.AddField($"Sticker", fieldValue);
+
+                            if (message.Attachments.Count == 0 && message.Stickers.Count == 1)
+                            {
+                                var url = sticker.StickerUrl;
+                                // d#+ is dumb
+                                if (sticker.FormatType is StickerFormat.APNG)
+                                {
+                                    url = url.Replace(".apng", ".png");
+                                }
+                                embed.WithImageUrl(url);
+                            }
+                        }
+                    }
+
+                    if (message.Attachments.Count > 0)
+                        embed.WithImageUrl(message.Attachments[0].Url)
+                            .AddField($"Attachment", $"[{message.Attachments[0].FileName}]({message.Attachments[0].Url})");
+
+                    List<DiscordEmbed> embeds = new List<DiscordEmbed>();
+                    embeds.Add(embed);
+
+                    if (message.Attachments.Count > 1)
+                    {
+                        foreach(var attachment in message.Attachments.Skip(1))
+                        {
+                            embeds.Add(new DiscordEmbedBuilder()
+                                .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}", null, message.Author.AvatarUrl)
+                                .AddField("Additional attachment", $"[{attachment.FileName}]({attachment.Url})")
+                                .WithImageUrl(attachment.Url));
+                        }
+                    }
+
+                    var msg = new DiscordMessageBuilder().AddEmbeds(embeds.AsEnumerable());
+                    await dmLog.SendMessageAsync(msg);
                 }
 
                 if (!isAnEdit && message.Author.Id == Program.cfgjson.ModmailUserId && message.Content == "@here" && message.Embeds[0].Footer.Text.Contains("User ID:"))

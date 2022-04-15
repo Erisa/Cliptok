@@ -123,7 +123,7 @@ namespace Cliptok
 
             string configFile = "config.json";
 #if DEBUG
-            configFile = "config.megu.json";
+            configFile = "config.dev.json";
 #endif
 
             using (var fs = File.OpenRead(configFile))
