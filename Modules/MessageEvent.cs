@@ -204,7 +204,7 @@ namespace Cliptok.Modules
                     DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                         .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}", null, message.Author.AvatarUrl)
                         .WithDescription(message.Content)
-                        .WithFooter($"Channel ID: {channel.Id}");
+                        .WithFooter($"Channel ID: {channel.Id} | User ID: {message.Author.Id}");
 
                     if (message.Stickers.Count > 0)
                     {
