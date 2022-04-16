@@ -1,3 +1,4 @@
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -220,11 +221,62 @@ namespace Cliptok.Modules
                 ContextLink = contextLink
             };
 
+            DiscordGuildMembershipScreening screeningForm = default;
+            IReadOnlyList<string> rules = default;
+            var embeds = new List<DiscordEmbed>();
+
+            try
+            {
+                screeningForm = await channel.Guild.GetMembershipScreeningFormAsync();
+                rules = screeningForm.Fields.FirstOrDefault(field => field.Type is MembershipScreeningFieldType.Terms).Values;
+            } catch (DSharpPlus.Exceptions.NotFoundException ex)
+            {
+                // thats fine, community must be disabled
+            }
+
+            if (screeningForm != default && rules != default)
+            {
+                var rulesBaseStr = reason.ToLower().Replace("rules ", "").Replace("rule ", "");
+                var rulesBrokenStr = rulesBaseStr.Split("/");
+                if (rulesBrokenStr.Length == 1)
+                    rulesBrokenStr = rulesBaseStr.Split(",");
+
+                List<int> rulesBroken = new();
+                //int ruleInt;
+                foreach (var probablyRule in rulesBrokenStr)
+                {
+                    var probablyRuleSplit = probablyRule.Split()[0];
+                    if (int.TryParse(probablyRuleSplit, out int ruleInt) && ruleInt >= 0 && ruleInt <= rules.Count)
+                    {
+                        rulesBroken.Add(ruleInt);
+                    }
+                }
+
+                rulesBroken.Sort();
+                rulesBroken = rulesBroken.Distinct().ToList();
+
+                foreach (var ruleBroken in rulesBroken)
+                {
+                    if (embeds.Count == 10)
+                        break;
+
+                    string ruleText;
+
+                    if (ruleBroken == 0)
+                        ruleText = "Under no circumstances should you ever ██████████████. "
+                            + "In the event you're caught ███████ with the █████████ on your ███████ then you will immediately be ████████████ and your ██████ forcefully removed with ██████████.";
+                    else
+                        ruleText = rules[ruleBroken - 1];
+
+                    embeds.Add(new DiscordEmbedBuilder().AddField($"Rule {ruleBroken}", ruleText).WithColor(0xFEC13D));
+                }
+            }
+
             Program.db.HashSet(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
             try
             {
                 DiscordMember member = await guild.GetMemberAsync(targetUser.Id);
-                await member.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} You were{extraWord}warned in **{guild.Name}**, reason: **{reason}**");
+                await member.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Warning} You were{extraWord}warned in **{guild.Name}**, reason: **{reason}**").AddEmbeds(embeds.AsEnumerable()));
             }
             catch
             {
