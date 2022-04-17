@@ -94,16 +94,23 @@ namespace Cliptok.Modules
             {
                 if (permaMute)
                 {
-                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**");
+                    await logChannel.SendMessageAsync(new DiscordMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted by {moderator.Mention} (`{moderatorId}`).\nReason: **{reason}**")
+                        .WithAllowedMentions(Mentions.None)
+                    );
                     if (naughtyMember != default)
                         await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}**!\nReason: **{reason}**");
                 }
 
                 else
                 {
-                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted for **{Warnings.TimeToPrettyFormat(muteDuration, false)}** by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`)." +
-                        $"\nReason: **{reason}**" +
-                        $"\nMute expires: <t:{ModCmds.ToUnixTimestamp(expireTime)}:R>");
+                    await logChannel.SendMessageAsync(new DiscordMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted for **{Warnings.TimeToPrettyFormat(muteDuration, false)}** by {moderator.Mention} (`{moderatorId}`)." +
+                            $"\nReason: **{reason}**" +
+                            $"\nMute expires: <t:{ModCmds.ToUnixTimestamp(expireTime)}:R>")
+                        .WithAllowedMentions(Mentions.None)
+                    );
+
                     if (naughtyMember != default)
                         await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}** for **{Warnings.TimeToPrettyFormat(muteDuration, false)}**!" +
                             $"\nReason: **{reason}**" +
@@ -154,7 +161,11 @@ namespace Cliptok.Modules
 
             if (member == default)
             {
-                await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Attempt to remove Muted role from <@{targetUser.Id}> failed because the user could not be found.\nThis is expected if the user was banned or left.");
+                await logChannel.SendMessageAsync(
+                    new DiscordMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Information} Attempt to remove Muted role from {targetUser.Mention} failed because the user could not be found.\nThis is expected if the user was banned or left.")
+                        .WithAllowedMentions(Mentions.None)
+                    );
             }
             else
             {
@@ -179,11 +190,14 @@ namespace Cliptok.Modules
                     success = true;
                 }
                 catch
-                {
-                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} Attempt to removed Muted role from <@{targetUser.Id}> failed because of a Discord API error!" +
-                    $"\nIf the role was removed manually, this error can be disregarded safely.");
-                }
-
+                { 
+                    await logChannel.SendMessageAsync(
+                        new DiscordMessageBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.Error} Attempt to removed Muted role from {targetUser.Mention} failed because of a Discord API error!" +
+                                $"\nIf the role was removed manually, this error can be disregarded safely.")
+                            .WithAllowedMentions(Mentions.None)
+                        );
+                    }
                 try
                 {
                     await member.TimeoutAsync(until: null, reason: reason);
@@ -194,7 +208,7 @@ namespace Cliptok.Modules
                 }
 
                 if (success)
-                    await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Successfully unmuted <@{targetUser.Id}>!");
+                    await logChannel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Successfully unmuted {targetUser.Mention}!").WithAllowedMentions(Mentions.None));
 
             }
             // Even if the bot failed to remove the role, it reported that failure to a log channel and thus the mute

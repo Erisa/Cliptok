@@ -270,7 +270,11 @@ namespace Cliptok.Modules
             else if (forceOverride)
                 operationText = "force ";
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successully {operationText}transferred warnings from {sourceUser.Mention} to {targetUser.Mention}!");
-            await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Warnings from {sourceUser.Mention} were {operationText}transferred to {targetUser.Mention} by `{ctx.User.Username}#{ctx.User.Discriminator}`", Warnings.GenerateWarningsEmbed(targetUser));
+            await Program.logChannel.SendMessageAsync(
+                new DiscordMessageBuilder()
+                    .WithContent($"{Program.cfgjson.Emoji.Information} Warnings from {sourceUser.Mention} were {operationText}transferred to {targetUser.Mention} by `{ctx.User.Username}#{ctx.User.Discriminator}`")
+                    .WithEmbed(Warnings.GenerateWarningsEmbed(targetUser))
+           );
         }
 
         [SlashCommand("announcebuild", "Announce a Windows Insider build in the current channel.")]

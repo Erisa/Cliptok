@@ -117,7 +117,11 @@ namespace Cliptok.Modules
             }
             catch
             {
-                await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} Attempt to unban <@{targetUserId}> failed!\nMaybe they were already unbanned?");
+                await logChannel.SendMessageAsync(
+                    new DiscordMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Denied} Attempt to unban <@{targetUserId}> failed!\nMaybe they were already unbanned?")
+                        .WithAllowedMentions(Mentions.None)
+                    );
             }
             // Even if the bot failed to unban, it reported that failure to a log channel and thus the ban record
             //  can be safely removed internally.

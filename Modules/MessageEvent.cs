@@ -250,8 +250,7 @@ namespace Cliptok.Modules
                         }
                     }
 
-                    var msg = new DiscordMessageBuilder().AddEmbeds(embeds.AsEnumerable());
-                    await dmLog.SendMessageAsync(msg);
+                    await dmLog.SendMessageAsync(new DiscordMessageBuilder().AddEmbeds(embeds.AsEnumerable()));
                 }
 
                 if (!isAnEdit && message.Author.Id == Program.cfgjson.ModmailUserId && message.Content == "@here" && message.Embeds[0].Footer.Text.Contains("User ID:"))

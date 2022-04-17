@@ -270,7 +270,7 @@ namespace Cliptok.Modules
                 Program.discord.Logger.LogError(Program.CliptokEventID, e, $"An exception ocurred while unbanning {target.Id}");
                 return false;
             }
-            await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned <@{target.Id}>!");
+            await logChannel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned {target.Mention}!").WithAllowedMentions(Mentions.None));
             await Program.db.HashDeleteAsync("bans", target.Id.ToString());
             return true;
         }
@@ -279,7 +279,11 @@ namespace Cliptok.Modules
         {
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
             await target.RemoveAsync(reason);
-            await logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Ejected} <@{target.Id}> was kicked by `{moderator.Username}#{moderator.Discriminator}` (`{moderator.Id}`).\nReason: **{reason}**");
+            await logChannel.SendMessageAsync(
+                new DiscordMessageBuilder()
+                    .WithContent($"{Program.cfgjson.Emoji.Ejected} {target.Mention} was kicked by `{moderator.Username}#{moderator.Discriminator}` (`{moderator.Id}`).\nReason: **{reason}**")
+                    .WithAllowedMentions(Mentions.None)
+           );
         }
 
         [Command("tellraw")]
@@ -1111,10 +1115,11 @@ namespace Cliptok.Modules
                     Program.db.HashSet("raidmode", ctx.Guild.Id, unixExpiration);
 
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Raidmode is now **enabled** and will end <t:{unixExpiration}:R>.");
-                    DiscordMessageBuilder response = new DiscordMessageBuilder()
-                        .WithContent($"{Program.cfgjson.Emoji.Unbanned} Raidmode was **enabled** by {ctx.User.Mention} and ends <t:{unixExpiration}:R>.")
-                        .WithAllowedMentions(Mentions.None);
-                    await Program.logChannel.SendMessageAsync(response);
+                    await Program.logChannel.SendMessageAsync(
+                        new DiscordMessageBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.Unbanned} Raidmode was **enabled** by {ctx.User.Mention} and ends <t:{unixExpiration}:R>.")
+                            .WithAllowedMentions(Mentions.None)
+                   );
                 }
             }
 
@@ -1127,10 +1132,11 @@ namespace Cliptok.Modules
                     long expirationTimeUnix = (long)Program.db.HashGet("raidmode", ctx.Guild.Id);
                     Program.db.HashDelete("raidmode", ctx.Guild.Id);
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Raidmode is now **disabled**.\nIt was supposed to end <t:{expirationTimeUnix}:R>.");
-                    DiscordMessageBuilder response = new DiscordMessageBuilder()
-                        .WithContent($"{Program.cfgjson.Emoji.Banned} Raidmode was **disabled** by {ctx.User.Mention}.\nIt was supposed to end <t:{expirationTimeUnix}:R>.")
-                        .WithAllowedMentions(Mentions.None);
-                    await Program.logChannel.SendMessageAsync(response);
+                    await Program.logChannel.SendMessageAsync(
+                        new DiscordMessageBuilder()
+                           .WithContent($"{Program.cfgjson.Emoji.Banned} Raidmode was **disabled** by {ctx.User.Mention}.\nIt was supposed to end <t:{expirationTimeUnix}:R>.")
+                            .WithAllowedMentions(Mentions.None)
+                    );
                 }
                 else
                 {

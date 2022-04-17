@@ -395,7 +395,7 @@ namespace Cliptok
                     if (e.Guild.Id != cfgjson.ServerID)
                         return;
 
-                    var builder = new DiscordEmbedBuilder()
+                    var embed = new DiscordEmbedBuilder()
                        .WithColor(new DiscordColor(0x3E9D28))
                        .WithTimestamp(DateTimeOffset.Now)
                        .WithThumbnail(e.Member.AvatarUrl)
@@ -408,13 +408,13 @@ namespace Cliptok
                        .AddField("Action", "Joined the server", false)
                        .WithFooter($"{client.CurrentUser.Username}JoinEvent");
 
-                    userLogChannel.SendMessageAsync($"{cfgjson.Emoji.UserJoin} **Member joined the server!** - {e.Member.Id}", builder);
+                    userLogChannel.SendMessageAsync($"{cfgjson.Emoji.UserJoin} **Member joined the server!** - {e.Member.Id}", embed);
 
                     var joinWatchlist = await Program.db.ListRangeAsync("joinWatchedUsers");
 
                     if (joinWatchlist.Contains(e.Member.Id))
                     {
-                        badMsgLog.SendMessageAsync($"{cfgjson.Emoji.Warning} Watched user {e.Member.Mention} just joined the server!", builder);
+                        badMsgLog.SendMessageAsync($"{cfgjson.Emoji.Warning} Watched user {e.Member.Mention} just joined the server!", embed);
                     }
 
                     if (db.HashExists("raidmode", e.Guild.Id))
@@ -519,7 +519,7 @@ namespace Cliptok
                         }
                     }
 
-                    var builder = new DiscordEmbedBuilder()
+                    var embed = new DiscordEmbedBuilder()
                         .WithColor(new DiscordColor(0xBA4119))
                         .WithTimestamp(DateTimeOffset.Now)
                         .WithThumbnail(e.Member.AvatarUrl)
@@ -533,13 +533,13 @@ namespace Cliptok
                         .AddField("Roles", rolesStr)
                         .WithFooter($"{client.CurrentUser.Username}LeaveEvent");
 
-                    userLogChannel.SendMessageAsync($"{cfgjson.Emoji.UserLeave} **Member left the server!** - {e.Member.Id}", builder);
+                    userLogChannel.SendMessageAsync($"{cfgjson.Emoji.UserLeave} **Member left the server!** - {e.Member.Id}", embed);
 
                     var joinWatchlist = await Program.db.ListRangeAsync("joinWatchedUsers");
 
                     if (joinWatchlist.Contains(e.Member.Id))
                     {
-                        badMsgLog.SendMessageAsync($"{cfgjson.Emoji.Warning} Watched user {e.Member.Mention} just left the server!", builder);
+                        badMsgLog.SendMessageAsync($"{cfgjson.Emoji.Warning} Watched user {e.Member.Mention} just left the server!", embed);
                     }
                 });
             }

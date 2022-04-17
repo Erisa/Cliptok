@@ -1,6 +1,6 @@
 .env
 *.env
-config.dev.json
+config.*.json
 Lists/rudeWords.txt
 Lists/usernames.txt
 Lists/autoban.txt
