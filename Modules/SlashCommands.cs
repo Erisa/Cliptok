@@ -481,7 +481,7 @@ namespace Cliptok.Modules
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task SlowmodeSlashCommand(
             InteractionContext ctx,
-            [Option("slow_time", "Time to slow the channel down for. 0 for off. A number of seconds or a parseable time argument.")] string timeToParse,
+            [Option("slow_time", "Allowed time between each users messages. 0 for off. A number of seconds or a parseable time.")] string timeToParse,
             [Option("channel", "The channel to slow down, if not the current one.")] DiscordChannel channel = default
         )
         {
