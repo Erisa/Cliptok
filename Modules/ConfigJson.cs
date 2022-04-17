@@ -13,7 +13,7 @@ namespace Cliptok
         public ulong ModUserId { get; set; }
 
         [JsonProperty("warningId")]
-        public ulong WarningId { get; set; }
+        public long WarningId { get; set; }
 
         [JsonProperty("warnReason")]
         public string WarnReason { get; set; }

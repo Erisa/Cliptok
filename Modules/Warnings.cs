@@ -209,7 +209,7 @@ namespace Cliptok.Modules
         public static async Task<UserWarning> GiveWarningAsync(DiscordUser targetUser, DiscordUser modUser, string reason, string contextLink, DiscordChannel channel, string extraWord = " ")
         {
             DiscordGuild guild = channel.Guild;
-            ulong warningId = (ulong)Program.db.StringIncrement("totalWarnings");
+            long warningId = (long)Program.db.StringIncrement("totalWarnings");
 
             UserWarning warning = new()
             {
@@ -356,7 +356,7 @@ namespace Cliptok.Modules
             return (toMuteHours, warnsSinceThreshold);
         }
 
-        public static bool EditWarning(DiscordUser targetUser, ulong warnId, DiscordUser modUser, string reason)
+        public static bool EditWarning(DiscordUser targetUser, long warnId, DiscordUser modUser, string reason)
         {
 
             if (Program.db.HashExists(targetUser.Id.ToString(), warnId))
@@ -440,18 +440,21 @@ namespace Cliptok.Modules
             return output;
         }
 
-        public static string Pad(ulong id)
+        public static string Pad(long id)
         {
-            return id.ToString("D5");
+            if (id < 0)
+                return id.ToString("D4");
+            else
+                return id.ToString("D5");
         }
 
-        public static UserWarning GetWarning(ulong targetUserId, ulong warnId)
+        public static UserWarning GetWarning(ulong targetUserId, long warnId)
         {
             try
             {
                 return JsonConvert.DeserializeObject<UserWarning>(Program.db.HashGet(targetUserId.ToString(), warnId));
             }
-            catch (System.ArgumentNullException)
+            catch (ArgumentNullException)
             {
                 return null;
             }
@@ -571,7 +574,7 @@ namespace Cliptok.Modules
                 x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
             );
 
-            var keys = warningsOutput.Keys.OrderByDescending(warn => Convert.ToUInt64(warn));
+            var keys = warningsOutput.Keys.OrderByDescending(warn => Convert.ToInt64(warn));
             string str = "";
             int count = 1;
             int recentCount = 0;
@@ -657,7 +660,7 @@ namespace Cliptok.Modules
         public async Task DelwarnCmd(
             CommandContext ctx,
             [Description("The user you're removing a warning from. Accepts many formats.")] DiscordUser targetUser,
-            [Description("The ID of the warning you want to delete.")] ulong warnId
+            [Description("The ID of the warning you want to delete.")] long warnId
         )
         {
             UserWarning warning = GetWarning(targetUser.Id, warnId);
@@ -698,7 +701,7 @@ namespace Cliptok.Modules
         public async Task WarnlookupCmd(
             CommandContext ctx,
             [Description("The user you're looking at a warning for. Accepts many formats.")] DiscordUser targetUser,
-            [Description("The ID of the warning you want to see")] ulong warnId
+            [Description("The ID of the warning you want to see")] long warnId
         )
         {
             UserWarning warning = GetWarning(targetUser.Id, warnId);
@@ -718,7 +721,7 @@ namespace Cliptok.Modules
         public async Task WarnDetailsCmd(
             CommandContext ctx,
             [Description("The user you're looking up detailed warn information for. Accepts many formats.")] DiscordUser targetUser,
-            [Description("The ID of the warning you're looking at in detail.")] ulong warnId
+            [Description("The ID of the warning you're looking at in detail.")] long warnId
         )
         {
             UserWarning warning = GetWarning(targetUser.Id, warnId);
@@ -741,7 +744,7 @@ namespace Cliptok.Modules
         public async Task EditwarnCmd(
             CommandContext ctx,
             [Description("The user you're editing a warning for. Accepts many formats.")] DiscordUser targetUser,
-            [Description("The ID of the warning you want to edit.")] ulong warnId,
+            [Description("The ID of the warning you want to edit.")] long warnId,
             [RemainingText, Description("The new reason for the warning.")] string newReason)
         {
             if (string.IsNullOrWhiteSpace(newReason))

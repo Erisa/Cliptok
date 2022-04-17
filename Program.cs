@@ -673,7 +673,7 @@ namespace Cliptok
                 if (e.Exception is CommandNotFoundException && (e.Command == null || e.Command.QualifiedName != "help"))
                     return;
 
-                // avoid conflicts with modmaail
+                // avoid conflicts with modmail
                 if (e.Command.QualifiedName == "edit" || e.Command.QualifiedName == "timestamp")
                     return;
 
