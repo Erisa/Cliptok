@@ -348,6 +348,12 @@ namespace Cliptok
         [JsonProperty("off")]
         public string Off { get; set; }
 
+        [JsonProperty("insider")]
+        public string Insider { get; set; }
+
+        [JsonProperty("windows10")]
+        public string Windows10 { get; set; }
+
     }
 
     public class CoreConfig

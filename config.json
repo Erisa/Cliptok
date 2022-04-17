@@ -119,7 +119,9 @@
     "clockTime": "<:CliptokClock:848246682156138546>",
     "windows11": "<:CliptokWindows11:895420814155993128>",
     "on": "<:CliptokOn:962741121967091772>",
-    "off": "<:CliptokOff:962741121396654130>​"
+    "off": "<:CliptokOff:962741121396654130>​",
+    "insider": "<:WindowsInsider:938875717339459604>",
+    "windows10": "<:Windows10:895975935516495902>"
   },
   "redis": {
     "host": "localhost",

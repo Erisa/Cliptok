@@ -418,7 +418,6 @@ namespace Cliptok.Modules
                 int months = remDays / 30;
                 if (months > 0)
                     sb.AppendFormat(", {0} month{1}", months, months > 1 ? "s" : String.Empty);
-                // sb.AppendFormat(" ago");
             }
             else if (span.Days > 0)
                 sb.AppendFormat("{0} day{1}", span.Days, span.Days > 1 ? "s" : String.Empty);

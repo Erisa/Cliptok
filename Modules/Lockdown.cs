@@ -12,6 +12,27 @@ namespace Cliptok.Modules
     {
         public bool ongoingLockdown = false;
 
+        public static async Task LockChannelAsync(DiscordChannel channel, TimeSpan? duration = null, string reason = "")
+        {
+            await channel.AddOverwriteAsync(channel.Guild.CurrentMember, Permissions.SendMessages, Permissions.None, "Failsafe 1 for Lockdown");
+            await channel.AddOverwriteAsync(channel.Guild.GetRole(Program.cfgjson.ModRole), Permissions.SendMessages, Permissions.None, "Failsafe 2 for Lockdown");
+            await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, "Lockdown command");
+
+            string msg;
+            if (reason == "")
+                msg = $"{Program.cfgjson.Emoji.Locked} This channel has been locked by a Moderator.";
+            else
+                msg = $"{Program.cfgjson.Emoji.Locked} This channel has been locked: **{reason}**";
+
+            if (duration != null)
+            {
+                await Program.db.HashSetAsync("unlocks", channel.Id, ModCmds.ToUnixTimestamp(DateTime.Now + duration));
+                msg += $"\nChannel unlocks: <t:{ModCmds.ToUnixTimestamp(DateTime.Now + duration)}:R>";
+            }
+
+            await channel.SendMessageAsync(msg);
+        }
+
         [Command("lockdown")]
         [Aliases("lock")]
         [Description("Locks the current channel, preventing any new messages. See also: unlock")]
@@ -22,7 +43,7 @@ namespace Cliptok.Modules
         )
         {
             bool timeParsed = false;
-            TimeSpan lockDuration = default;
+            TimeSpan? lockDuration = null;
             string reason = "";
 
             if (timeAndReason != "")
@@ -35,7 +56,7 @@ namespace Cliptok.Modules
                 }
                 catch
                 {
-                    // keep default
+                    // keep null
                 }
 
                 reason = timeAndReason;
@@ -73,10 +94,7 @@ namespace Cliptok.Modules
                     try
                     {
                         var channel = await ctx.Client.GetChannelAsync(chanID);
-                        await channel.AddOverwriteAsync(ctx.Guild.CurrentMember, Permissions.SendMessages, Permissions.None, "Failsafe 1 for Lockdown: ");
-                        await channel.AddOverwriteAsync(ctx.Guild.GetRole(Program.cfgjson.ModRole), Permissions.SendMessages, Permissions.None, "Failsafe 2 for Lockdown");
-                        await channel.AddOverwriteAsync(ctx.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, "Lockdown command");
-                        await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Locked} This channel has been locked by a Moderator.");
+                        await LockChannelAsync(channel: channel, reason: reason);
                     }
                     catch
                     {
@@ -92,23 +110,7 @@ namespace Cliptok.Modules
 
             await ctx.Message.DeleteAsync();
 
-            await currentChannel.AddOverwriteAsync(ctx.Guild.CurrentMember, Permissions.SendMessages, Permissions.None, "Failsafe 1 for Lockdown");
-            await currentChannel.AddOverwriteAsync(ctx.Guild.GetRole(Program.cfgjson.ModRole), Permissions.SendMessages, Permissions.None, "Failsafe 2 for Lockdown");
-            await currentChannel.AddOverwriteAsync(ctx.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, "Lockdown command");
-
-            string msg;
-            if (reason == "")
-                msg = $"{Program.cfgjson.Emoji.Locked} This channel has been locked by a Moderator.";
-            else
-                msg = $"{Program.cfgjson.Emoji.Locked} This channel has been locked: **{reason}**";
-
-            if (timeParsed)
-            {
-                await Program.db.HashSetAsync("unlocks", ctx.Channel.Id, ModCmds.ToUnixTimestamp(DateTime.Now + lockDuration));
-                msg += $"\nChannel unlocks: <t:{ModCmds.ToUnixTimestamp(DateTime.Now + lockDuration)}:R>";
-            }
-
-            await ctx.Channel.SendMessageAsync(msg);
+            await LockChannelAsync(channel: currentChannel, duration: lockDuration, reason: reason);
         }
 
         public static async Task<bool> UnlockChannel(DiscordChannel discordChannel, DiscordMember discordMember)
