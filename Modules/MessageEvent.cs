@@ -208,7 +208,7 @@ namespace Cliptok.Modules
 
                     if (message.Stickers.Count > 0)
                     {
-                        foreach(var sticker in message.Stickers)
+                        foreach (var sticker in message.Stickers)
                         {
                             var url = sticker.StickerUrl;
                             // d#+ is dumb
@@ -236,12 +236,14 @@ namespace Cliptok.Modules
                         embed.WithImageUrl(message.Attachments[0].Url)
                             .AddField($"Attachment", $"[{message.Attachments[0].FileName}]({message.Attachments[0].Url})");
 
-                    List<DiscordEmbed> embeds = new List<DiscordEmbed>();
-                    embeds.Add(embed);
+                    List<DiscordEmbed> embeds = new List<DiscordEmbed>
+                    {
+                        embed
+                    };
 
                     if (message.Attachments.Count > 1)
                     {
-                        foreach(var attachment in message.Attachments.Skip(1))
+                        foreach (var attachment in message.Attachments.Skip(1))
                         {
                             embeds.Add(new DiscordEmbedBuilder()
                                 .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}", null, message.Author.AvatarUrl)

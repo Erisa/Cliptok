@@ -101,7 +101,7 @@ namespace Cliptok
         }
 
         static async Task Main(string[] _)
-        {            
+        {
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var logFormat = "[{Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{Level}] {Message}{NewLine}{Exception}";
 
@@ -674,7 +674,7 @@ namespace Cliptok
                     return;
 
                 // avoid conflicts with modmaail
-                if (e.Command.QualifiedName == "edit" || e.Command.QualifiedName ==  "timestamp")
+                if (e.Command.QualifiedName == "edit" || e.Command.QualifiedName == "timestamp")
                     return;
 
                 e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Exception occurred during {0}'s invocation of '{1}'", e.Context.User.Username, e.Context.Command.QualifiedName);

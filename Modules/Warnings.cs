@@ -111,7 +111,7 @@ namespace Cliptok.Modules
                 return false;
 
             var level = Warnings.GetPermLevel(ctx.Member);
-            if (level >= this.TargetLvl)
+            if (level >= TargetLvl)
                 return true;
             else
                 return false;
@@ -229,7 +229,8 @@ namespace Cliptok.Modules
             {
                 screeningForm = await channel.Guild.GetMembershipScreeningFormAsync();
                 rules = screeningForm.Fields.FirstOrDefault(field => field.Type is MembershipScreeningFieldType.Terms).Values;
-            } catch (DSharpPlus.Exceptions.NotFoundException ex)
+            }
+            catch (DSharpPlus.Exceptions.NotFoundException)
             {
                 // thats fine, community must be disabled
             }
@@ -417,9 +418,9 @@ namespace Cliptok.Modules
             var sb = new StringBuilder();
             if (span.Days > 365)
             {
-                int years = (int)(span.Days / 365);
+                int years = span.Days / 365;
                 sb.AppendFormat("{0} year{1}", years, years > 1 ? "s" : String.Empty);
-                int remDays = (int)(span.Days - (365 * years));
+                int remDays = span.Days - (365 * years);
                 int months = remDays / 30;
                 if (months > 0)
                     sb.AppendFormat(", {0} month{1}", months, months > 1 ? "s" : String.Empty);

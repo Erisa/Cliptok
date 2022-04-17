@@ -190,14 +190,14 @@ namespace Cliptok.Modules
                     success = true;
                 }
                 catch
-                { 
+                {
                     await logChannel.SendMessageAsync(
                         new DiscordMessageBuilder()
                             .WithContent($"{Program.cfgjson.Emoji.Error} Attempt to removed Muted role from {targetUser.Mention} failed because of a Discord API error!" +
                                 $"\nIf the role was removed manually, this error can be disregarded safely.")
                             .WithAllowedMentions(Mentions.None)
                         );
-                    }
+                }
                 try
                 {
                     await member.TimeoutAsync(until: null, reason: reason);

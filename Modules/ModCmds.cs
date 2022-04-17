@@ -1384,7 +1384,8 @@ namespace Cliptok.Modules
             {
                 await channel.TriggerTypingAsync();
                 return true;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Program.discord.Logger.LogError(eventId: Program.CliptokEventID, exception: ex, message: "Error ocurred trying to type in {0}", args: channel.Id);
                 return false;

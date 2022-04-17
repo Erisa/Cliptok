@@ -314,7 +314,8 @@ namespace Cliptok.Modules
             if (flavourText == "" && windowsVersion == 10)
             {
                 flavourText = Program.cfgjson.Emoji.Windows10;
-            } else if (flavourText == "" && windowsVersion == 11)
+            }
+            else if (flavourText == "" && windowsVersion == 11)
             {
                 flavourText = Program.cfgjson.Emoji.Insider;
             }
@@ -323,7 +324,8 @@ namespace Cliptok.Modules
             if (windowsVersion == 10 && insiderChannel1 == "RP")
             {
                 roleKey1 = "rp10";
-            } else
+            }
+            else
             {
                 roleKey1 = insiderChannel1.ToLower();
             }
@@ -350,7 +352,8 @@ namespace Cliptok.Modules
             {
                 string insiderChannel2Pretty = insiderChannel2 == "RP" ? "Release Preview" : insiderChannel2;
                 channelString.Append($"**and **{insiderChannel2Pretty}** Channels");
-            } else
+            }
+            else
             {
                 channelString.Append("Channel**");
             }
@@ -492,10 +495,9 @@ namespace Cliptok.Modules
             if (channel == default)
                 channel = ctx.Channel;
 
-            int seconds;
             TimeSpan slowmodeTime;
 
-            if (int.TryParse(timeToParse, out seconds))
+            if (int.TryParse(timeToParse, out int seconds))
             {
                 await channel.ModifyAsync(ch => ch.PerUserRateLimit = seconds);
                 if (seconds > 0)
@@ -503,7 +505,8 @@ namespace Cliptok.Modules
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.ClockTime} Slowmode has been set in {channel.Mention}!"
                         + $"\nUsers will only be send messages once every **{Warnings.TimeToPrettyFormat(TimeSpan.FromSeconds(seconds), false)}** until the setting is disabled or changed.");
                 }
-            } else
+            }
+            else
             {
                 try
                 {
@@ -517,7 +520,8 @@ namespace Cliptok.Modules
                         await channel.ModifyAsync(ch => ch.PerUserRateLimit = seconds);
                         await ctx.RespondAsync($"{Program.cfgjson.Emoji.ClockTime} Slowmode has been set in {channel.Mention}!"
                             + $"\nUsers will only be send messages once every **{Warnings.TimeToPrettyFormat(TimeSpan.FromSeconds(seconds), false)}** until the setting is disabled or changed.");
-                    } else if (seconds > 21600)
+                    }
+                    else if (seconds > 21600)
                     {
                         await ctx.RespondAsync("Time cannot be longer than 6 hours.", ephemeral: true);
                     }
