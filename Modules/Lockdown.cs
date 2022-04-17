@@ -14,6 +14,11 @@ namespace Cliptok.Modules
 
         public static async Task LockChannelAsync(DiscordChannel channel, TimeSpan? duration = null, string reason = "")
         {
+            if (!Program.cfgjson.LockdownEnabledChannels.Contains(channel.Id))
+            {
+                return;
+            }
+
             await channel.AddOverwriteAsync(channel.Guild.CurrentMember, Permissions.SendMessages, Permissions.None, "Failsafe 1 for Lockdown");
             await channel.AddOverwriteAsync(channel.Guild.GetRole(Program.cfgjson.ModRole), Permissions.SendMessages, Permissions.None, "Failsafe 2 for Lockdown");
             await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, "Lockdown command");
