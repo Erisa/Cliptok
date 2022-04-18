@@ -505,6 +505,14 @@ namespace Cliptok.Modules
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.ClockTime} Slowmode has been set in {channel.Mention}!"
                         + $"\nUsers will only be send messages once every **{Warnings.TimeToPrettyFormat(TimeSpan.FromSeconds(seconds), false)}** until the setting is disabled or changed.");
                 }
+                else if (seconds == 0)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.ClockTime} Slowmode has been disabled in {channel.Mention}!");
+                }
+                else
+                {
+                    await ctx.RespondAsync("I didn't understand your input...", ephemeral: true);
+                }
             }
             else
             {
