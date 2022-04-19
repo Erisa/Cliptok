@@ -1170,6 +1170,7 @@ namespace Cliptok.Modules
         }
 
         [Command("joinwatch")]
+        [Aliases("joinnotify", "leavewatch", "leavenotify")]
         [Description("Watch for joins and leaves of a given user. Output goes to #investigations.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task JoinWatch(
