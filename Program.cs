@@ -794,7 +794,8 @@ namespace Cliptok
                     var text = await Program.db.HashGetAsync("deletedMessageReferences", e.Message.Id);
                     if (text.IsNullOrEmpty)
                     {
-                        webhookOut = new DiscordWebhookBuilder().WithContent("I couldn't find any content for that message! This might be a bug?");
+                        discord.Logger.LogError("Failed to find deleted message content for {0}", e.Message.Id);
+                        webhookOut = new DiscordWebhookBuilder().WithContent("I couldn't find any content for that message! This is most likely a bug, please notify my developer!");
                         await e.Interaction.EditOriginalResponseAsync(webhookOut);
                     }
                     else
@@ -809,7 +810,7 @@ namespace Cliptok
                 }
                 else
                 {
-
+                    await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Unknown interaction. I don't know what you are asking me for."));
                 }
 
             };
