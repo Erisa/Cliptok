@@ -1,23 +1,3 @@
-using Cliptok.Helpers;
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using static Cliptok.Helpers.ShellCommand;
-using static Cliptok.Modules.MessageEvent;
-
 namespace Cliptok.Modules
 {
 

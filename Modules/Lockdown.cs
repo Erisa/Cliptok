@@ -1,11 +1,3 @@
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace Cliptok.Modules
 {
     class Lockdown : BaseCommandModule

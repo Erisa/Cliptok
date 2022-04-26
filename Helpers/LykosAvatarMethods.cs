@@ -1,9 +1,4 @@
-﻿using DSharpPlus.Entities;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Cliptok.Helpers
+﻿namespace Cliptok.Helpers
 {
     public class LykosAvatarMethods
     {

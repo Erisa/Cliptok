@@ -1,16 +1,3 @@
-using Cliptok.Helpers;
-using DSharpPlus;
-using DSharpPlus.Entities;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-
 namespace Cliptok.Modules
 {
     class MessageEvent

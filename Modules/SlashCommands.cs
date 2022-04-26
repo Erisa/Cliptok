@@ -1,11 +1,3 @@
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using System;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Cliptok.Modules
 {
     public static class BaseContextExtensions
@@ -496,7 +488,7 @@ namespace Cliptok.Modules
                     }
 
                     await ctx.RespondAsync(userContent);
-                    
+
                     DiscordMessageBuilder response = new DiscordMessageBuilder()
                         .WithContent(logContent)
                         .WithAllowedMentions(Mentions.None);

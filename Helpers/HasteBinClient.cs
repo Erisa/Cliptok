@@ -2,11 +2,6 @@
 // CODE HERE COMES FROM ABOVE GIST. MAY BE MODIFIED.
 // All rights belong to original creator, and not the author of this software.
 
-using Newtonsoft.Json;
-using System;
-using System.Net.Http;
-using System.Threading.Tasks;
-
 namespace Cliptok.Helpers
 {
     public class HasteBinClient

@@ -1,19 +1,5 @@
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using Newtonsoft.Json;
-using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Cliptok.Modules
 {
-
     public enum ServerPermLevel
     {
         Muted = -1,
@@ -209,7 +195,7 @@ namespace Cliptok.Modules
         public static async Task<UserWarning> GiveWarningAsync(DiscordUser targetUser, DiscordUser modUser, string reason, string contextLink, DiscordChannel channel, string extraWord = " ")
         {
             DiscordGuild guild = channel.Guild;
-            long warningId = (long)Program.db.StringIncrement("totalWarnings");
+            long warningId = Program.db.StringIncrement("totalWarnings");
 
             UserWarning warning = new()
             {
