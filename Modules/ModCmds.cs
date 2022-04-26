@@ -1079,7 +1079,7 @@ namespace Cliptok.Modules
             {
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {
-                    string output = $"{Program.cfgjson.Emoji.Unbanned} Raidmode is currently **enabled**.";
+                    string output = $"{Program.cfgjson.Emoji.On} Raidmode is currently **enabled**.";
                     ulong expirationTimeUnix = (ulong)Program.db.HashGet("raidmode", ctx.Guild.Id);
                     output += $"\nRaidmode ends <t:{expirationTimeUnix}>";
                     await ctx.RespondAsync(output);
@@ -1096,7 +1096,7 @@ namespace Cliptok.Modules
             {
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {
-                    string output = $"{Program.cfgjson.Emoji.Unbanned} Raidmode is already **enabled**.";
+                    string output = $"{Program.cfgjson.Emoji.On} Raidmode is already **enabled**.";
 
                     ulong expirationTimeUnix = (ulong)Program.db.HashGet("raidmode", ctx.Guild.Id);
                     output += $"\nRaidmode ends <t:{expirationTimeUnix}>";
@@ -1114,10 +1114,10 @@ namespace Cliptok.Modules
                     long unixExpiration = ToUnixTimestamp(parsedExpiration);
                     Program.db.HashSet("raidmode", ctx.Guild.Id, unixExpiration);
 
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Raidmode is now **enabled** and will end <t:{unixExpiration}:R>.");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.On} Raidmode is now **enabled** and will end <t:{unixExpiration}:R>.");
                     await Program.logChannel.SendMessageAsync(
                         new DiscordMessageBuilder()
-                            .WithContent($"{Program.cfgjson.Emoji.Unbanned} Raidmode was **enabled** by {ctx.User.Mention} and ends <t:{unixExpiration}:R>.")
+                            .WithContent($"{Program.cfgjson.Emoji.On} Raidmode was **enabled** by {ctx.User.Mention} and ends <t:{unixExpiration}:R>.")
                             .WithAllowedMentions(Mentions.None)
                    );
                 }
@@ -1131,16 +1131,16 @@ namespace Cliptok.Modules
                 {
                     long expirationTimeUnix = (long)Program.db.HashGet("raidmode", ctx.Guild.Id);
                     Program.db.HashDelete("raidmode", ctx.Guild.Id);
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Raidmode is now **disabled**.\nIt was supposed to end <t:{expirationTimeUnix}:R>.");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Off} Raidmode is now **disabled**.\nIt was supposed to end <t:{expirationTimeUnix}:R>.");
                     await Program.logChannel.SendMessageAsync(
                         new DiscordMessageBuilder()
-                           .WithContent($"{Program.cfgjson.Emoji.Banned} Raidmode was **disabled** by {ctx.User.Mention}.\nIt was supposed to end <t:{expirationTimeUnix}:R>.")
+                           .WithContent($"{Program.cfgjson.Emoji.Off} Raidmode was **disabled** by {ctx.User.Mention}.\nIt was supposed to end <t:{expirationTimeUnix}:R>.")
                             .WithAllowedMentions(Mentions.None)
                     );
                 }
                 else
                 {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Raidmode is already **disabled**.");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Off} Raidmode is already **disabled**.");
                 }
             }
         }
@@ -1159,7 +1159,7 @@ namespace Cliptok.Modules
                 {
                     Program.db.HashDelete("raidmode", guildId);
                     Program.db.KeyDelete("raidmode-accountage");
-                    await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Raidmode was **disabled** automatically.");
+                    await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Off} Raidmode was **disabled** automatically.");
                     return true;
                 }
                 else
