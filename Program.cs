@@ -107,7 +107,7 @@ namespace Cliptok
 
             Log.Logger = new LoggerConfiguration()
 #if DEBUG
-                .MinimumLevel.Verbose()
+                .MinimumLevel.Debug()
 #else
                 .Filter.ByExcluding("Contains(@m, 'Unknown event:')")
                 .MinimumLevel.Information()
@@ -419,15 +419,18 @@ namespace Cliptok
 
                     if (db.HashExists("raidmode", e.Guild.Id))
                     {
-                        try
+                        if (!db.KeyExists("raidmode-accountage") || (ModCmds.ToUnixTimestamp(e.Member.CreationTimestamp.DateTime) > (long)db.StringGet("raidmode-accountage")))
                         {
-                            await e.Member.SendMessageAsync($"Hi, you tried to join **{e.Guild.Name}** while it was in lockdown and your join was refused.\nPlease try to join again later.");
+                            try
+                            {
+                                await e.Member.SendMessageAsync($"Hi, you tried to join **{e.Guild.Name}** while it was in lockdown and your join was refused.\nPlease try to join again later.");
+                            }
+                            catch (DSharpPlus.Exceptions.UnauthorizedException)
+                            {
+                                // welp, their DMs are closed. not my problem.
+                            }
+                            await e.Member.RemoveAsync(reason: "Raidmode is enabled, join was rejected.");
                         }
-                        catch (DSharpPlus.Exceptions.UnauthorizedException)
-                        {
-                            // welp, their DMs are closed. not my problem.
-                        }
-                        await e.Member.RemoveAsync(reason: "Raidmode is enabled, join was rejected.");
                     }
 
                     if (await db.HashExistsAsync("mutes", e.Member.Id))

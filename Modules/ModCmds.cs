@@ -1158,6 +1158,7 @@ namespace Cliptok.Modules
                 if (currentUnixTime >= unixExpiration)
                 {
                     Program.db.HashDelete("raidmode", guildId);
+                    Program.db.KeyDelete("raidmode-accountage");
                     await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} Raidmode was **disabled** automatically.");
                     return true;
                 }
