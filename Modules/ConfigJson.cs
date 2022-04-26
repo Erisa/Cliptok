@@ -213,6 +213,9 @@ namespace Cliptok
         [JsonProperty("dmLogChannelId")]
         public ulong DmLogChannelId { get; private set; } = 0;
 
+        [JsonProperty("errorLogChannelId")]
+        public ulong ErrorLogChannelId { get; private set; } = 0;
+
     }
 
     public class WorkflowConfig

@@ -747,7 +747,7 @@ namespace Cliptok.Modules
                     };
                     embed.WithFooter(client.CurrentUser.Username, client.CurrentUser.AvatarUrl)
                         .AddField("Message", ex.Message);
-                    await cliptokChannel.SendMessageAsync(embed: embed.Build()).ConfigureAwait(false);
+                    await Program.errorLogChannel.SendMessageAsync(embed: embed.Build()).ConfigureAwait(false);
                 }
             }
 

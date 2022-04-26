@@ -52,6 +52,7 @@ namespace Cliptok
         public static DiscordChannel logChannel;
         public static DiscordChannel userLogChannel;
         public static DiscordChannel badMsgLog;
+        public static DiscordChannel errorLogChannel;
         public static DiscordGuild homeGuild;
 
         public static Random rand = new();
@@ -262,6 +263,11 @@ namespace Cliptok
                     userLogChannel = await discord.GetChannelAsync(cfgjson.UserLogChannel);
                     badMsgLog = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
                     homeGuild = await discord.GetGuildAsync(cfgjson.ServerID);
+
+                    if (cfgjson.ErrorLogChannelId == 0)
+                        errorLogChannel = await client.GetChannelAsync(cfgjson.HomeChannel);
+                    else
+                        errorLogChannel = await client.GetChannelAsync(cfgjson.ErrorLogChannelId);
 
                     Mutes.CheckMutesAsync();
                     ModCmds.CheckBansAsync();
