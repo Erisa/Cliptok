@@ -12,9 +12,9 @@ services:
         source: ./Lists/Private
         target: /app/Lists/Private
       # Uncomment the below lines to use your own config file.
-      - type: bind
-        source: ./config.json
-        target: /app/config.json
+      #- type: bind
+      #  source: ./config.dev.json
+      # target: /app/config.json
     environment:
       # Overrides your configs Redis options for use with Docker Compose
       #  I don't advise changing this unless you have a strange setup
@@ -33,7 +33,7 @@ services:
     image: ghcr.io/erisa/redis-exposer
     restart: always
     env_file:
-      - .exposer.env
+     - .exposer.env
   cloudflared:
     image: erisamoe/cloudflared
     restart: always

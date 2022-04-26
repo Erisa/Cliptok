@@ -1,4 +1,4 @@
-namespace Cliptok.Modules
+﻿namespace Cliptok.Commands
 {
     class Bans : BaseCommandModule
     {
@@ -45,7 +45,7 @@ namespace Cliptok.Modules
                 }
                 else
                 {
-                    await targetMember.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}** for {Warnings.TimeToPrettyFormat(banDuration, false)}!\nReason: **{reason}**\nBan expires: <t:{ModCmds.ToUnixTimestamp(expireTime)}:R>");
+                    await targetMember.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}** for {TimeHelpers.TimeToPrettyFormat(banDuration, false)}!\nReason: **{reason}**\nBan expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>");
                 }
             }
             catch
@@ -70,7 +70,7 @@ namespace Cliptok.Modules
                 }
                 else
                 {
-                    logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was banned for {Warnings.TimeToPrettyFormat(banDuration, false)} by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**\nBan expires: <t:{ModCmds.ToUnixTimestamp(expireTime)}:R>";
+                    logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was banned for {TimeHelpers.TimeToPrettyFormat(banDuration, false)} by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**\nBan expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>";
                 }
                 _ = logChannel.SendMessageAsync(logOut);
 
@@ -96,6 +96,7 @@ namespace Cliptok.Modules
                 await channel.SendMessageAsync(messageToSend);
         }
 
+
         public static async Task UnbanFromServerAsync(DiscordGuild targetGuild, ulong targetUserId)
         {
             DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
@@ -118,6 +119,24 @@ namespace Cliptok.Modules
             await Program.db.HashDeleteAsync("bans", targetUserId);
         }
 
+        public async static Task<bool> UnbanUserAsync(DiscordGuild guild, DiscordUser target, string reason = "")
+        {
+            DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
+            await Program.db.HashSetAsync("unbanned", target.Id, true);
+            try
+            {
+                await guild.UnbanMemberAsync(user: target, reason: reason);
+            }
+            catch (Exception e)
+            {
+                Program.discord.Logger.LogError(Program.CliptokEventID, e, $"An exception ocurred while unbanning {target.Id}");
+                return false;
+            }
+            await logChannel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned {target.Mention}!").WithAllowedMentions(Mentions.None));
+            await Program.db.HashDeleteAsync("bans", target.Id.ToString());
+            return true;
+        }
+
         public static async Task<bool> BanSilently(DiscordGuild targetGuild, ulong targetUserId, string reason = "Mass ban")
         {
             try
@@ -131,6 +150,7 @@ namespace Cliptok.Modules
             }
 
         }
+
 
         [Command("massban")]
         [Aliases("bigbonk")]
@@ -225,9 +245,9 @@ namespace Cliptok.Modules
             }
             else
             {
-                if (ModCmds.AllowedToMod(ctx.Member, member))
+                if (DiscordHelpers.AllowedToMod(ctx.Member, member))
                 {
-                    if (ModCmds.AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
+                    if (DiscordHelpers.AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
                     {
                         await ctx.Message.DeleteAsync();
                         await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 7, ctx.Channel, banDuration, appealable);
@@ -248,7 +268,7 @@ namespace Cliptok.Modules
             if (banDuration == default)
                 await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned: **{reason}**");
             else
-                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{Warnings.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
+                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{TimeHelpers.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
         }
 
         /// I CANNOT find a way to do this as alias so I made it a separate copy of the command.
@@ -309,9 +329,9 @@ namespace Cliptok.Modules
             }
             else
             {
-                if (ModCmds.AllowedToMod(ctx.Member, member))
+                if (DiscordHelpers.AllowedToMod(ctx.Member, member))
                 {
-                    if (ModCmds.AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
+                    if (DiscordHelpers.AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
                     {
                         await ctx.Message.DeleteAsync();
                         await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 0, ctx.Channel, banDuration, appealable);
@@ -332,7 +352,7 @@ namespace Cliptok.Modules
             if (banDuration == default)
                 await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned: **{reason}**");
             else
-                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{Warnings.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
+                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{TimeHelpers.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
         }
 
         [Command("unban")]
@@ -342,12 +362,12 @@ namespace Cliptok.Modules
         {
             if ((await Program.db.HashExistsAsync("bans", targetUser.Id)))
             {
-                await ModCmds.UnbanUserAsync(ctx.Guild, targetUser, $"[Unban by {ctx.User.Username}#{ctx.User.Discriminator}]: {reason}");
+                await UnbanUserAsync(ctx.Guild, targetUser, $"[Unban by {ctx.User.Username}#{ctx.User.Discriminator}]: {reason}");
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned **{targetUser.Username}#{targetUser.Discriminator}**.");
             }
             else
             {
-                bool banSuccess = await ModCmds.UnbanUserAsync(ctx.Guild, targetUser);
+                bool banSuccess = await UnbanUserAsync(ctx.Guild, targetUser);
                 if (banSuccess)
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned **{targetUser.Username}#{targetUser.Discriminator}**.");
                 else

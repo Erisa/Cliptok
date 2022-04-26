@@ -6,7 +6,7 @@ COPY *.csproj ./
 RUN dotnet restore
 
 # Copy source code and build
-COPY *.cs Helpers Modules *.sln ./
+COPY . ./
 RUN dotnet build -c Release -o out
 
 # We already have this image pulled, its actually quicker to reuse it

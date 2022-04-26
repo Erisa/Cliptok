@@ -1,16 +1,7 @@
-namespace Cliptok.Modules
+namespace Cliptok.Commands
 {
-    public class UserRolesPresentAttribute : CheckBaseAttribute
-    {
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
-        {
-            return Program.cfgjson.UserRoles != null;
-        }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-    }
-
-    public static class UserRoles
+    [UserRolesPresent]
+    public class UserRoleCmds : BaseCommandModule
     {
         public static async Task GiveUserRoleAsync(CommandContext ctx, ulong role)
         {
@@ -78,10 +69,6 @@ namespace Cliptok.Modules
             }
         }
 
-    }
-    [UserRolesPresent]
-    public class UserRoleCmds : BaseCommandModule
-    {
         [
             Command("swap-insider-rp"),
             Aliases("swap-insiders-rp"),
@@ -90,8 +77,8 @@ namespace Cliptok.Modules
         ]
         public async Task SwapInsiderRpCmd(CommandContext ctx)
         {
-            await UserRoles.RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderRP);
-            await UserRoles.GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.Insider10RP);
+            await RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderRP);
+            await GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.Insider10RP);
         }
 
         [
@@ -102,7 +89,7 @@ namespace Cliptok.Modules
         ]
         public async Task JoinInsiderDevCmd(CommandContext ctx)
         {
-            await UserRoles.GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderDev);
+            await GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderDev);
         }
 
         [
@@ -113,7 +100,7 @@ namespace Cliptok.Modules
         ]
         public async Task JoinInsiderBetaCmd(CommandContext ctx)
         {
-            await UserRoles.GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderBeta);
+            await GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderBeta);
         }
 
         [
@@ -124,7 +111,7 @@ namespace Cliptok.Modules
         ]
         public async Task JoinInsiderRPCmd(CommandContext ctx)
         {
-            await UserRoles.GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderRP);
+            await GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderRP);
         }
 
         [
@@ -135,7 +122,7 @@ namespace Cliptok.Modules
         ]
         public async Task JoinInsiders10Cmd(CommandContext ctx)
         {
-            await UserRoles.GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.Insider10RP);
+            await GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.Insider10RP);
         }
 
         [
@@ -145,7 +132,7 @@ namespace Cliptok.Modules
         ]
         public async Task JoinPatchTuesday(CommandContext ctx)
         {
-            await UserRoles.GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.PatchTuesday);
+            await GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.PatchTuesday);
         }
 
         [
@@ -155,7 +142,7 @@ namespace Cliptok.Modules
         ]
         public async Task KeepMeUpdated(CommandContext ctx)
         {
-            await UserRoles.GiveUserRolesAsync(ctx, x => true);
+            await GiveUserRolesAsync(ctx, x => true);
         }
 
         [
@@ -168,7 +155,7 @@ namespace Cliptok.Modules
         {
             foreach (ulong roleId in new ulong[] { Program.cfgjson.UserRoles.InsiderDev, Program.cfgjson.UserRoles.InsiderBeta, Program.cfgjson.UserRoles.InsiderRP })
             {
-                await UserRoles.RemoveUserRoleAsync(ctx, roleId);
+                await RemoveUserRoleAsync(ctx, roleId);
             }
 
             try
@@ -188,7 +175,7 @@ namespace Cliptok.Modules
         ]
         public async Task DontKeepMeUpdated(CommandContext ctx)
         {
-            await UserRoles.RemoveUserRolesAsync(ctx, x => true);
+            await RemoveUserRolesAsync(ctx, x => true);
         }
 
         [
@@ -199,7 +186,7 @@ namespace Cliptok.Modules
         ]
         public async Task LeaveInsiderDevCmd(CommandContext ctx)
         {
-            await UserRoles.RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderDev);
+            await RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderDev);
         }
 
         [
@@ -210,7 +197,7 @@ namespace Cliptok.Modules
         ]
         public async Task LeaveInsiderBetaCmd(CommandContext ctx)
         {
-            await UserRoles.RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderBeta);
+            await RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderBeta);
         }
 
         [
@@ -221,7 +208,7 @@ namespace Cliptok.Modules
         ]
         public async Task LeaveInsiderRPCmd(CommandContext ctx)
         {
-            await UserRoles.RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.Insider10RP);
+            await RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.Insider10RP);
         }
 
         [
@@ -232,7 +219,7 @@ namespace Cliptok.Modules
         ]
         public async Task LeaveInsider10RPCmd(CommandContext ctx)
         {
-            await UserRoles.RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderRP);
+            await RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderRP);
         }
 
         [
@@ -242,7 +229,7 @@ namespace Cliptok.Modules
         ]
         public async Task LeavePatchTuesday(CommandContext ctx)
         {
-            await UserRoles.RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.PatchTuesday);
+            await RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.PatchTuesday);
         }
 
     }

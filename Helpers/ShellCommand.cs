@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace Cliptok.Helpers
+﻿namespace Cliptok.Helpers
 {
     internal class ShellCommand
     {
