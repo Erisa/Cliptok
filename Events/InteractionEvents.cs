@@ -1,5 +1,4 @@
-﻿using Emzi0767.Utilities;
-using static Cliptok.Program;
+﻿using static Cliptok.Program;
 
 namespace Cliptok.Events
 {
