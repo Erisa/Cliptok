@@ -182,6 +182,7 @@ namespace Cliptok.Events
                             DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
                             var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextLink: DiscordHelpers.MessageLink(msg), message.Channel, " automatically ");
                             await InvestigationsHelpers.SendInfringingMessaageAsync(Program.badMsgLog, message, reason, warning.ContextLink);
+                            match = true;
                             return;
                         }
 
@@ -191,6 +192,7 @@ namespace Cliptok.Events
                         {
                             string reason = "Sent too many invites";
                             await DeleteAndWarnAsync(message, reason, client);
+                            match = true;
                             return;
                         }
 
@@ -206,6 +208,7 @@ namespace Cliptok.Events
                             {
                                 string reason = "Sent an unapproved invite";
                                 await DeleteAndWarnAsync(message, reason, client);
+                                match = true;
                                 return;
                             }
 
@@ -225,9 +228,14 @@ namespace Cliptok.Events
                                 disallowedInviteCodes.Add(code);
                                 string reason = "Sent an unapproved invite";
                                 await DeleteAndWarnAsync(message, reason, client);
+                                match = true;
+                                return;
                             }
                         }
                     }
+
+                    if (match)
+                        return;
 
                     // Mass emoji
                     if (!Program.cfgjson.UnrestrictedEmojiChannels.Contains(message.ChannelId) && message.Content.Length >= Program.cfgjson.MassEmojiThreshold)
