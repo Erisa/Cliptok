@@ -64,7 +64,7 @@
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, eout);
         }
 
-        [SlashCommand("transfer_warnings", "Transfer warnings from one user to another.")]
+        [SlashCommand("transfer_warnings", "Transfer warnings from one user to another.", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.Moderator)]
         [SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task TransferWarningsSlashCommand(InteractionContext ctx,
