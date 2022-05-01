@@ -2,15 +2,15 @@
 {
     internal class BanInteractions : ApplicationCommandModule
     {
-        [SlashCommand("ban", "Bans a user from the server, either permanently or temporarily.")]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [SlashCommand("ban", "Bans a user from the server, either permanently or temporarily.", defaultPermission: false)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.BanMembers)]
         public async Task BanSlashCommand(InteractionContext ctx,
-        [Option("user", "The user to ban")] DiscordUser user,
-        [Option("reason", "The reason the user is being banned")] string reason,
-        [Option("keep_messages", "Whether to keep the users messages when banning")] bool keepMessages = false,
-        [Option("time", "The length of time the user is banned for")] string time = null,
-        [Option("appeal_link", "Whether to show the user an appeal URL in the DM")] bool appealable = false
-)
+            [Option("user", "The user to ban")] DiscordUser user,
+            [Option("reason", "The reason the user is being banned")] string reason,
+            [Option("keep_messages", "Whether to keep the users messages when banning")] bool keepMessages = false,
+            [Option("time", "The length of time the user is banned for")] string time = null,
+            [Option("appeal_link", "Whether to show the user an appeal URL in the DM")] bool appealable = false
+        )
         {
             // Initial response to avoid the 3 second timeout, will edit later.
             var eout = new DiscordInteractionResponseBuilder().AsEphemeral(true);

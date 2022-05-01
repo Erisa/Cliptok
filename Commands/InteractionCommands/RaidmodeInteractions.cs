@@ -2,8 +2,9 @@
 {
     internal class RaidmodeInteractions : ApplicationCommandModule
     {
-        [SlashCommandGroup("raidmode", "Commands relating to Raidmode")]
+        [SlashCommandGroup("raidmode", "Commands relating to Raidmode", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [SlashCommandPermissions(Permissions.ModerateMembers)]
         public class RaidmodeSlashCommands : ApplicationCommandModule
         {
             [SlashCommand("status", "Check the current state of raidmode.")]
@@ -31,9 +32,9 @@
 
             [SlashCommand("on", "Enable raidmode. Defaults to 3 hour length if not specified.")]
             public async Task RaidmodeOnSlash(InteractionContext ctx,
-                 [Option("duration", "How long to keep raidmode enabled for.")] string duration = default,
-                 [Option("allowed_account_age", "How old an account can be to be allowed to bypass raidmode. Relative to right now.")] string allowedAccountAge = ""
-                )
+                [Option("duration", "How long to keep raidmode enabled for.")] string duration = default,
+                [Option("allowed_account_age", "How old an account can be to be allowed to bypass raidmode. Relative to right now.")] string allowedAccountAge = ""
+            )
             {
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {
