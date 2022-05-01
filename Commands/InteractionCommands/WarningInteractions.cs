@@ -54,11 +54,11 @@
         [SlashCommand("warnings", "Fetch the warnings for a user.")]
         public async Task WarningsSlashCommand(InteractionContext ctx,
             [Option("user", "The user to find the warnings for.")] DiscordUser user,
-            [Option("private", "Whether to show the warnings to you privately.")] bool privateWarnings = false
+            [Option("public", "Whether to show the warnings in publiic chat. Do not disrupt chat with this.")] bool publicWarnings = false
         )
         {
             var eout = new DiscordInteractionResponseBuilder().AddEmbed(WarningHelpers.GenerateWarningsEmbed(user));
-            if (privateWarnings)
+            if (!publicWarnings)
                 eout.AsEphemeral(true);
 
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, eout);
