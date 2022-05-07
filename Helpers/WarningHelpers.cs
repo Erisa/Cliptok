@@ -121,18 +121,15 @@
             return embed;
         }
 
-        public static async Task<UserWarning> GiveWarningAsync(DiscordUser targetUser, DiscordUser modUser, string reason, DiscordMessage contextMessage, DiscordChannel channel, string extraWord = " ")
+        public static async Task<DiscordMessageBuilder> GenerateWarningDM(DiscordUser targetUser, string reason, DiscordGuild guild, string extraWord = " ")
         {
-            DiscordGuild guild = channel.Guild;
-            long warningId = Program.db.StringIncrement("totalWarnings");
-
             DiscordGuildMembershipScreening screeningForm = default;
             IReadOnlyList<string> rules = default;
             var embeds = new List<DiscordEmbed>();
 
             try
             {
-                screeningForm = await channel.Guild.GetMembershipScreeningFormAsync();
+                screeningForm = await guild.GetMembershipScreeningFormAsync();
                 rules = screeningForm.Fields.FirstOrDefault(field => field.Type is MembershipScreeningFieldType.Terms).Values;
             }
             catch (DSharpPlus.Exceptions.NotFoundException)
@@ -178,11 +175,19 @@
                 }
             }
 
+            return new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Warning} You were{extraWord}warned in **{guild.Name}**, reason: **{reason}**").AddEmbeds(embeds.AsEnumerable());
+        }
+
+        public static async Task<UserWarning> GiveWarningAsync(DiscordUser targetUser, DiscordUser modUser, string reason, DiscordMessage contextMessage, DiscordChannel channel, string extraWord = " ")
+        {
+            DiscordGuild guild = channel.Guild;
+            long warningId = Program.db.StringIncrement("totalWarnings");
+
             DiscordMessage? dmMessage = null;
             try
             {
                 DiscordMember member = await guild.GetMemberAsync(targetUser.Id);
-                dmMessage = await member.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Warning} You were{extraWord}warned in **{guild.Name}**, reason: **{reason}**").AddEmbeds(embeds.AsEnumerable()));
+                dmMessage = await member.SendMessageAsync(await GenerateWarningDM(targetUser, reason, channel.Guild, extraWord));
             }
             catch
             {
@@ -272,7 +277,14 @@
                 {
                     await contextMessage.ModifyAsync(StringHelpers.WarningContextString(targetUser, reason, false));
                 }
-                
+
+                var dmMessage = await DiscordHelpers.GetMessageFromReferenceAsync(warning.DmMessageReference);
+                if (dmMessage is not null)
+                {
+                    var guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
+                    await dmMessage.ModifyAsync(await GenerateWarningDM(targetUser, reason, guild));
+                }
+
                 await Program.db.HashSetAsync(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
                 return true;
             }
@@ -298,7 +310,6 @@
                 {
                     var guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
                     await dmMessage.ModifyAsync($"{Program.cfgjson.Emoji.Success} You were warned in **{guild.Name}**, but the warning was revoked by a Moderator.");
-
                 }
 
                 Program.db.HashDelete(userID.ToString(), warning.WarningId);
