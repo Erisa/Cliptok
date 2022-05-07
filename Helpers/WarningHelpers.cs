@@ -121,20 +121,10 @@
             return embed;
         }
 
-        public static async Task<UserWarning> GiveWarningAsync(DiscordUser targetUser, DiscordUser modUser, string reason, string contextLink, DiscordChannel channel, string extraWord = " ")
+        public static async Task<UserWarning> GiveWarningAsync(DiscordUser targetUser, DiscordUser modUser, string reason, DiscordMessage contextMessage, DiscordChannel channel, string extraWord = " ")
         {
             DiscordGuild guild = channel.Guild;
             long warningId = Program.db.StringIncrement("totalWarnings");
-
-            UserWarning warning = new()
-            {
-                TargetUserId = targetUser.Id,
-                ModUserId = modUser.Id,
-                WarnReason = reason,
-                WarnTimestamp = DateTime.Now,
-                WarningId = warningId,
-                ContextLink = contextLink
-            };
 
             DiscordGuildMembershipScreening screeningForm = default;
             IReadOnlyList<string> rules = default;
@@ -188,16 +178,40 @@
                 }
             }
 
-            Program.db.HashSet(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
+            DiscordMessage? dmMessage = null;
             try
             {
                 DiscordMember member = await guild.GetMemberAsync(targetUser.Id);
-                await member.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Warning} You were{extraWord}warned in **{guild.Name}**, reason: **{reason}**").AddEmbeds(embeds.AsEnumerable()));
+                dmMessage = await member.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Warning} You were{extraWord}warned in **{guild.Name}**, reason: **{reason}**").AddEmbeds(embeds.AsEnumerable()));
             }
             catch
             {
                 // We failed to DM the user, this isn't important to note.
             }
+
+            UserWarning warning = new()
+            {
+                TargetUserId = targetUser.Id,
+                ModUserId = modUser.Id,
+                WarnReason = reason,
+                WarnTimestamp = DateTime.Now,
+                WarningId = warningId,
+                ContextLink = DiscordHelpers.MessageLink(contextMessage),
+                ContextMessageReference = new()
+                {
+                    MessageId = contextMessage.Id,
+                    ChannelId = contextMessage.ChannelId
+                }
+            };
+
+            if (dmMessage is not null)
+                warning.DmMessageReference = new()
+                {
+                    MessageId = dmMessage.Id,
+                    ChannelId = dmMessage.ChannelId
+                };
+
+            Program.db.HashSet(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
 
             await Program.logChannel.SendMessageAsync(
                 new DiscordMessageBuilder()
@@ -239,24 +253,27 @@
             {
                 await MuteHelpers.MuteUserAsync(targetUser, $"Automatic permanent mute after {warnsSinceThreshold} warnings in the past {acceptedThreshold} {thresholdSpan}.", modUser.Id, guild, channel);
             }
+
             return warning;
         }
-        public static bool EditWarning(DiscordUser targetUser, long warnId, DiscordUser modUser, string reason)
+
+        public static async Task<bool> EditWarning(DiscordUser targetUser, long warnId, DiscordUser modUser, string reason)
         {
 
             if (Program.db.HashExists(targetUser.Id.ToString(), warnId))
             {
-                UserWarning oldWarn = GetWarning(targetUser.Id, warnId);
-                UserWarning warning = new()
+                UserWarning warning = GetWarning(targetUser.Id, warnId);
+
+                warning.ModUserId = modUser.Id;
+                warning.WarnReason = reason;
+
+                var contextMessage = await DiscordHelpers.GetMessageFromReferenceAsync(warning.ContextMessageReference);
+                if (contextMessage is not null)
                 {
-                    TargetUserId = targetUser.Id,
-                    ModUserId = modUser.Id,
-                    WarnReason = reason,
-                    WarnTimestamp = oldWarn.WarnTimestamp,
-                    WarningId = warnId,
-                    ContextLink = oldWarn.ContextLink
-                };
-                Program.db.HashSet(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
+                    await contextMessage.ModifyAsync(StringHelpers.WarningContextString(targetUser, reason, false));
+                }
+                
+                await Program.db.HashSetAsync(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
                 return true;
             }
             else
@@ -265,13 +282,25 @@
             }
         }
 
-        public static bool DelWarning(UserWarning warning, ulong userID = default)
+        public static async Task<bool> DelWarningAsync(UserWarning warning, ulong userID = default)
         {
             if (userID == default)
                 userID = warning.TargetUserId;
 
             if (Program.db.HashExists(userID.ToString(), warning.WarningId))
             {
+                var contextMessage = await DiscordHelpers.GetMessageFromReferenceAsync(warning.ContextMessageReference);
+                if (contextMessage is not null)
+                    await contextMessage.DeleteAsync();
+
+                var dmMessage = await DiscordHelpers.GetMessageFromReferenceAsync(warning.DmMessageReference);
+                if (dmMessage is not null)
+                {
+                    var guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
+                    await dmMessage.ModifyAsync($"{Program.cfgjson.Emoji.Success} You were warned in **{guild.Name}**, but the warning was revoked by a Moderator.");
+
+                }
+
                 Program.db.HashDelete(userID.ToString(), warning.WarningId);
                 return true;
             }

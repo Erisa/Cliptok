@@ -48,7 +48,7 @@ namespace Cliptok.Commands
                 messageBuild.WithReply(reply.Id, true, false);
 
             var msg = await ctx.Channel.SendMessageAsync(messageBuild);
-            _ = await GiveWarningAsync(targetUser, ctx.User, reason, DiscordHelpers.MessageLink(msg), ctx.Channel);
+            _ = await GiveWarningAsync(targetUser, ctx.User, reason, msg, ctx.Channel);
         }
 
         [
@@ -87,7 +87,7 @@ namespace Cliptok.Commands
             }
             DiscordMessage msg = await targetChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
             await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned in {targetChannel.Mention}: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
-            _ = await GiveWarningAsync(targetUser, ctx.User, reason, DiscordHelpers.MessageLink(msg), ctx.Channel);
+            _ = await GiveWarningAsync(targetUser, ctx.User, reason, msg, ctx.Channel);
         }
 
         [
@@ -128,7 +128,7 @@ namespace Cliptok.Commands
             }
             else
             {
-                bool success = DelWarning(warning, targetUser.Id);
+                bool success = await DelWarningAsync(warning, targetUser.Id);
                 if (success)
                 {
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Deleted} Successfully deleted warning `{StringHelpers.Pad(warnId)}` (belonging to {targetUser.Mention})");
@@ -219,7 +219,7 @@ namespace Cliptok.Commands
             }
             else
             {
-                EditWarning(targetUser, warnId, ctx.User, newReason);
+                await EditWarning(targetUser, warnId, ctx.User, newReason);
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Information} Successfully edited warning `{StringHelpers.Pad(warnId)}` (belonging to {targetUser.Mention})",
                     await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId), userID: targetUser.Id));
 

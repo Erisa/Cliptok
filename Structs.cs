@@ -19,6 +19,21 @@
 
         [JsonProperty("contextLink")]
         public string ContextLink { get; set; }
+
+        [JsonProperty("contextMessageReference")]
+        public MessageReference ContextMessageReference { get; set; } = default;
+
+        [JsonProperty("dmMessageReference")]
+        public MessageReference DmMessageReference { get; set; } = default;
+    }
+
+    public class MessageReference
+    {
+        [JsonProperty("messageId")]
+        public ulong MessageId { get; set; } = 0;
+
+        [JsonProperty("channelId")]
+        public ulong ChannelId { get; set; } = 0;
     }
 
     public class MemberPunishment
@@ -40,6 +55,12 @@
 
         [JsonProperty("reason")]
         public string Reason { get; set; }
+
+        [JsonProperty("contextMessageReference")]
+        public MessageReference ContextMessageReference { get; set; }
+
+        [JsonProperty("dmMessageReference")]
+        public MessageReference DmMessageReference { get; set; }
     }
 
     public class ConfigJson

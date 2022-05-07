@@ -20,5 +20,13 @@
             else
                 return id.ToString("D5");
         }
+
+        public static string WarningContextString(DiscordUser user, string reason, bool automatic = false)
+        {
+            if (automatic)
+                return $"{Program.cfgjson.Emoji.Denied} {user.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**";
+            else
+                return $"{Program.cfgjson.Emoji.Warning} {user.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**";
+        }
     }
 }
