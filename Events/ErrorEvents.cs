@@ -13,7 +13,7 @@ namespace Cliptok.Events
             if (e.Command.QualifiedName == "edit" || e.Command.QualifiedName == "timestamp")
                 return;
 
-            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Exception occurred during {user}'s invocation of '{command}'", e.Context.User.Username, e.Context.Command.QualifiedName);
+            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Exception occurred during {user}s invocation of {command}", e.Context.User.Username, e.Context.Command.QualifiedName);
 
             var exs = new List<Exception>();
             if (e.Exception is AggregateException ae)
