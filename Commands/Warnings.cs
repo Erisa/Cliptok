@@ -11,7 +11,7 @@ namespace Cliptok.Commands
             Aliases("wam", "warm"),
             HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
-        public static async Task WarnCmd(
+        public async Task WarnCmd(
             CommandContext ctx,
             [Description("The user you are warning. Accepts many formats.")] DiscordUser targetUser,
             [RemainingText, Description("The reason for giving this warning.")] string reason = null
@@ -57,7 +57,7 @@ namespace Cliptok.Commands
             Aliases("anonwam", "anonwarm"),
             HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
-        public static async Task AnonWarnCmd(
+        public async Task AnonWarnCmd(
             CommandContext ctx,
             [Description("The channel you wish for the warning message to appear in.")] DiscordChannel targetChannel,
             [Description("The user you are warning. Accepts many formats.")] DiscordUser targetUser,
@@ -96,7 +96,7 @@ namespace Cliptok.Commands
             Aliases("infractions", "warnfractions", "wammings", "wamfractions"),
             HomeServer
         ]
-        public static async Task WarningCmd(
+        public async Task WarningCmd(
             CommandContext ctx,
             [Description("The user you want to look up warnings for. Accepts many formats.")] DiscordUser targetUser = null
         )
@@ -113,7 +113,7 @@ namespace Cliptok.Commands
             Aliases("delwarm", "delwam", "deletewarn"),
             HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
-        public static async Task DelwarnCmd(
+        public async Task DelwarnCmd(
             CommandContext ctx,
             [Description("The user you're removing a warning from. Accepts many formats.")] DiscordUser targetUser,
             [Description("The ID of the warning you want to delete.")] long warnId
@@ -154,7 +154,7 @@ namespace Cliptok.Commands
             Aliases("warning", "warming", "waming", "wamming", "lookup", "lookylooky", "peek", "investigate", "what-did-i-do-wrong-there", "incident"),
             HomeServer
         ]
-        public static async Task WarnlookupCmd(
+        public async Task WarnlookupCmd(
             CommandContext ctx,
             [Description("The user you're looking at a warning for. Accepts many formats.")] DiscordUser targetUser,
             [Description("The ID of the warning you want to see")] long warnId
@@ -174,7 +174,7 @@ namespace Cliptok.Commands
             HomeServer,
             RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
-        public static async Task WarnDetailsCmd(
+        public async Task WarnDetailsCmd(
             CommandContext ctx,
             [Description("The user you're looking up detailed warn information for. Accepts many formats.")] DiscordUser targetUser,
             [Description("The ID of the warning you're looking at in detail.")] long warnId
@@ -197,7 +197,7 @@ namespace Cliptok.Commands
             HomeServer,
             RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
-        public static async Task EditwarnCmd(
+        public async Task EditwarnCmd(
             CommandContext ctx,
             [Description("The user you're editing a warning for. Accepts many formats.")] DiscordUser targetUser,
             [Description("The ID of the warning you want to edit.")] long warnId,
@@ -234,7 +234,7 @@ namespace Cliptok.Commands
 
         [Command("mostwarnings"), Description("Who has the most warnings???")]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public static async Task MostWarningsCmd(CommandContext ctx)
+        public async Task MostWarningsCmd(CommandContext ctx)
         {
             await DiscordHelpers.SafeTyping(ctx.Channel);
 

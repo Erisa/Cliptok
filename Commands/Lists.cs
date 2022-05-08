@@ -26,7 +26,7 @@
         [Command("listupdate")]
         [Description("Updates the private lists from the GitHub repository, then reloads them into memory.")]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public static async Task ListUpdate(CommandContext ctx)
+        public async Task ListUpdate(CommandContext ctx)
         {
             if (Program.cfgjson.GitListDirectory == null || Program.cfgjson.GitListDirectory == "")
             {
@@ -56,7 +56,7 @@
         [Command("listadd")]
         [Description("Add a piece of text to a public list.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public static async Task ListAdd(
+        public async Task ListAdd(
             CommandContext ctx,
             [Description("The filename of the public list to add to. For example scams.txt")] string fileName,
             [RemainingText, Description("The text to add the list. Can be in a codeblock and across multiple line.")] string content
@@ -135,14 +135,27 @@
         [Command("scamcheck")]
         [Description("Check if a link or message is known to the anti-phishing API.")]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public static async Task ScamCheck(CommandContext ctx, [RemainingText, Description("Domain or message content to scan.")] string content)
+        public async Task ScamCheck(CommandContext ctx, [RemainingText, Description("Domain or message content to scan.")] string content)
         {
             var urlMatches = Constants.RegexConstants.url_rx.Matches(content);
             if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
             {
-                var (match, httpStatus, responseText, _) = await APIs.PhishingAPI.PhishingAPICheckAsync(content);
+                HttpRequestMessage request = new(HttpMethod.Post, Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT"));
+                request.Headers.Add("User-Agent", "Cliptok (https://github.com/Erisa/Cliptok)");
+                MessageEvent.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                string responseToSend;
+                var bodyObject = new PhishingRequestBody()
+                {
+                    Message = content
+                };
+
+                request.Content = new StringContent(JsonConvert.SerializeObject(bodyObject), Encoding.UTF8, "application/json");
+
+                HttpResponseMessage response = await Program.httpClient.SendAsync(request);
+
+                var (match, httpStatus, responseText, phishingResponse) = await APIs.PhishingAPI.PhishingAPICheckAsync(content);
+
+                string responseToSend = "";
                 if (match)
                 {
                     responseToSend = $"Match found:\n```json\n{responseText}\n```";
@@ -180,7 +193,7 @@
         [Aliases("joinnotify", "leavewatch", "leavenotify")]
         [Description("Watch for joins and leaves of a given user. Output goes to #investigations.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public static async Task JoinWatch(
+        public async Task JoinWatch(
             CommandContext ctx,
             [Description("The user to watch for joins and leaves of.")] DiscordUser user
         )

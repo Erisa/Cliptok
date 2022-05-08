@@ -4,7 +4,7 @@ namespace Cliptok.Events
 {
     public class ReactionEvent
     {
-        public static async Task OnReaction(DiscordClient _, MessageReactionAddEventArgs e)
+        public static async Task OnReaction(DiscordClient client, MessageReactionAddEventArgs e)
         {
             Task.Run(async () =>
             {

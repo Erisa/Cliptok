@@ -5,7 +5,7 @@
         [Command("dehoist")]
         [Description("Adds an invisible character to someone's nickname that drops them to the bottom of the member list. Accepts multiple members.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public static async Task DehoistCmd(CommandContext ctx, [Description("List of server members to dehoist")] params DiscordMember[] discordMembers)
+        public async Task DehoistCmd(CommandContext ctx, [Description("List of server members to dehoist")] params DiscordMember[] discordMembers)
         {
             if (discordMembers.Length == 0)
             {
@@ -66,7 +66,7 @@
         [Command("massdehoist")]
         [Description("Dehoist everyone on the server who has a bad name. WARNING: This is a computationally expensive operation.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public static async Task MassDehoist(CommandContext ctx)
+        public async Task MassDehoist(CommandContext ctx)
         {
             var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it. This will take a while.");
             var discordMembers = await ctx.Guild.GetAllMembersAsync();
@@ -84,7 +84,7 @@
         [Command("massundehoist")]
         [Description("Remove the dehoist for users attached via a txt file.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public static async Task MassUndhoist(CommandContext ctx)
+        public async Task MassUndhoist(CommandContext ctx)
         {
             int failedCount = 0;
 

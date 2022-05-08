@@ -28,7 +28,7 @@ namespace Cliptok.Helpers
             }
             string postUrl = $"{fullUrl}documents";
 
-            HttpRequestMessage request = new(HttpMethod.Post, new Uri(postUrl))
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, new Uri(postUrl))
             {
                 Content = new StringContent(content)
             };

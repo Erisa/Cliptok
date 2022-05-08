@@ -4,7 +4,7 @@ namespace Cliptok.Events
 {
     public class ErrorEvents
     {
-        public static async Task CommandsNextServiceCommandErrored(CommandsNextExtension _, CommandErrorEventArgs e)
+        public static async Task CommandsNextService_CommandErrored(CommandsNextExtension cnext, CommandErrorEventArgs e)
         {
             if (e.Exception is CommandNotFoundException && (e.Command == null || e.Command.QualifiedName != "help"))
                 return;
@@ -13,7 +13,7 @@ namespace Cliptok.Events
             if (e.Command.QualifiedName == "edit" || e.Command.QualifiedName == "timestamp")
                 return;
 
-            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Exception occurred during {user}'s invocation of '{command}'", e.Context.User.Username, e.Context.Command.QualifiedName);
+            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Exception occurred during {0}'s invocation of '{1}'", e.Context.User.Username, e.Context.Command.QualifiedName);
 
             var exs = new List<Exception>();
             if (e.Exception is AggregateException ae)

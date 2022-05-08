@@ -8,7 +8,7 @@
         public class RaidmodeSlashCommands : ApplicationCommandModule
         {
             [SlashCommand("status", "Check the current state of raidmode.")]
-            public static async Task RaidmodeStatus(InteractionContext ctx)
+            public async Task RaidmodeStatus(InteractionContext ctx)
             {
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {
@@ -31,7 +31,7 @@
             }
 
             [SlashCommand("on", "Enable raidmode. Defaults to 3 hour length if not specified.")]
-            public static async Task RaidmodeOnSlash(InteractionContext ctx,
+            public async Task RaidmodeOnSlash(InteractionContext ctx,
                 [Option("duration", "How long to keep raidmode enabled for.")] string duration = default,
                 [Option("allowed_account_age", "How old an account can be to be allowed to bypass raidmode. Relative to right now.")] string allowedAccountAge = ""
             )
@@ -97,7 +97,7 @@
             }
 
             [SlashCommand("off", "Disable raidmode immediately.")]
-            public static async Task RaidmodeOffSlash(InteractionContext ctx)
+            public async Task RaidmodeOffSlash(InteractionContext ctx)
             {
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {

@@ -21,7 +21,7 @@
                 return id.ToString("D5");
         }
 
-        public static string WarningContextString(DiscordUser user, string reason, bool automatic = false)
+        public static string WarningContextString(DiscordUser user, string reason, bool automatic = false, bool guild = false)
         {
             if (automatic)
                 return $"{Program.cfgjson.Emoji.Denied} {user.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**";

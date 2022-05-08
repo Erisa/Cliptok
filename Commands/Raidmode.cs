@@ -10,7 +10,7 @@
             [GroupCommand]
             [Description("Check whether raidmode is enabled or not, and when it ends.")]
             [Aliases("status")]
-            public static async Task RaidmodeStatus(CommandContext ctx)
+            public async Task RaidmodeStatus(CommandContext ctx)
             {
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {
@@ -27,7 +27,7 @@
 
             [Command("on")]
             [Description("Enable raidmode.")]
-            public static async Task RaidmodeOn(CommandContext ctx, [Description("The amount of time to keep raidmode enabled for. Default is 3 hours.")] string duration = default)
+            public async Task RaidmodeOn(CommandContext ctx, [Description("The amount of time to keep raidmode enabled for. Default is 3 hours.")] string duration = default)
             {
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {
@@ -60,7 +60,7 @@
 
             [Command("off")]
             [Description("Disable raidmode.")]
-            public static async Task RaidmdodeOff(CommandContext ctx)
+            public async Task RaidmdodeOff(CommandContext ctx)
             {
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {

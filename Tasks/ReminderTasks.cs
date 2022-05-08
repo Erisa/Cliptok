@@ -87,7 +87,7 @@
 
             }
 #if DEBUG
-            Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked reminders at {DateTime.Now} with result: {success}", DateTime.Now, success);
+            Program.discord.Logger.LogDebug(Program.CliptokEventID, $"Checked reminders at {DateTime.Now} with result: {success}");
 #endif
             return success;
         }

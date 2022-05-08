@@ -55,7 +55,7 @@ namespace Cliptok.Events
 
                 if (!isAnEdit && message.Author.Id == Program.cfgjson.ModmailUserId && message.Content == "@here" && message.Embeds[0].Footer.Text.Contains("User ID:"))
                 {
-                    Program.discord.Logger.LogInformation(Program.CliptokEventID, "Processing modmail message {message.Id} in {message.Channel} with {isAnEdit}", message.Id, message.Channel, isAnEdit);
+                    Program.discord.Logger.LogInformation(Program.CliptokEventID, $"Processing modmail message {message.Id} in {message.Channel} with {isAnEdit}");
                     var idString = modmaiL_rx.Match(message.Embeds[0].Footer.Text).Groups[1].Captures[0].Value;
                     DiscordMember modmailMember = default;
                     try
@@ -510,7 +510,7 @@ namespace Cliptok.Events
             }
             catch (Exception e)
             {
-                client.Logger.LogError(eventId: Program.CliptokEventID, message: "{message}", e.ToString());
+                client.Logger.LogError(eventId: Program.CliptokEventID, message: e.ToString());
 
                 var exs = new List<Exception>();
                 if (e is AggregateException ae)

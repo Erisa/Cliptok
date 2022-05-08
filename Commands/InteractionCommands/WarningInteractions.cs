@@ -5,7 +5,7 @@
         [SlashCommand("warn", "Formally warn a user, usually for breaking the server rules.", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         [SlashCommandPermissions(Permissions.ModerateMembers)]
-        public static async Task WarnSlashCommand(InteractionContext ctx,
+        public async Task WarnSlashCommand(InteractionContext ctx,
          [Option("user", "The user to warn.")] DiscordUser user,
          [Option("reason", "The reason they're being warned.")] string reason,
          [Option("channel", "The channel to warn the user in, implied if not supplied.")] DiscordChannel channel = null
@@ -52,7 +52,7 @@
         }
 
         [SlashCommand("warnings", "Fetch the warnings for a user.")]
-        public static async Task WarningsSlashCommand(InteractionContext ctx,
+        public async Task WarningsSlashCommand(InteractionContext ctx,
             [Option("user", "The user to find the warnings for.")] DiscordUser user,
             [Option("public", "Whether to show the warnings in publiic chat. Do not disrupt chat with this.")] bool publicWarnings = false
         )
@@ -67,7 +67,7 @@
         [SlashCommand("transfer_warnings", "Transfer warnings from one user to another.", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.Moderator)]
         [SlashCommandPermissions(Permissions.ModerateMembers)]
-        public static async Task TransferWarningsSlashCommand(InteractionContext ctx,
+        public async Task TransferWarningsSlashCommand(InteractionContext ctx,
             [Option("source_user", "The user currently holding the warnings.")] DiscordUser sourceUser,
             [Option("target_user", "The user recieving the warnings.")] DiscordUser targetUser,
             [Option("merge", "Whether to merge the source user's warnings and the target user's warnings.")] bool merge = false,

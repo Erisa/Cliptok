@@ -11,7 +11,7 @@
             [Command("mutes")]
             [Aliases("mute")]
             [Description("Debug the list of mutes.")]
-            public static async Task MuteDebug(CommandContext ctx, DiscordUser targetUser = default)
+            public async Task MuteDebug(CommandContext ctx, DiscordUser targetUser = default)
             {
 
                 await DiscordHelpers.SafeTyping(ctx.Channel);
@@ -68,7 +68,7 @@
             [Command("bans")]
             [Aliases("ban")]
             [Description("Debug the list of bans.")]
-            public static async Task BanDebug(CommandContext ctx, DiscordUser targetUser = default)
+            public async Task BanDebug(CommandContext ctx, DiscordUser targetUser = default)
             {
                 await DiscordHelpers.SafeTyping(ctx.Channel);
 
@@ -122,7 +122,7 @@
 
             [Command("restart")]
             [RequireHomeserverPerm(ServerPermLevel.Admin), Description("Restart the bot. If not under Docker (Cliptok is, dw) this WILL exit instead.")]
-            public static async Task Restart(CommandContext ctx)
+            public async Task Restart(CommandContext ctx)
             {
                 await ctx.RespondAsync("Now restarting bot.");
                 Environment.Exit(1);
@@ -130,7 +130,7 @@
 
             [Command("shutdown")]
             [RequireHomeserverPerm(ServerPermLevel.Admin), Description("Panics and shuts the bot down. Check the arguments for usage.")]
-            public static async Task Shutdown(CommandContext ctx, [Description("This MUST be set to \"I understand what I am doing\" for the command to work."), RemainingText] string verificationArgument)
+            public async Task Shutdown(CommandContext ctx, [Description("This MUST be set to \"I understand what I am doing\" for the command to work."), RemainingText] string verificationArgument)
             {
                 if (verificationArgument == "I understand what I am doing")
                 {
@@ -147,7 +147,7 @@
             [Command("refresh")]
             [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
             [Description("Manually run all the automatic actions.")]
-            public static async Task Refresh(CommandContext ctx)
+            public async Task Refresh(CommandContext ctx)
             {
                 var msg = await ctx.RespondAsync("Checking for pending scheduled tasks...");
                 bool bans = await Tasks.PunishmentTasks.CheckBansAsync();
@@ -162,7 +162,7 @@
             [Command("sh")]
             [Aliases("cmd")]
             [Description("Run shell commands! Bash for Linux/macOS, batch for Windows!")]
-            public static async Task Shell(CommandContext ctx, [RemainingText] string command)
+            public async Task Shell(CommandContext ctx, [RemainingText] string command)
             {
                 if (ctx.User.Id != 228574821590499329)
                 {
@@ -197,7 +197,7 @@
             }
 
             [Command("logs")]
-            public static async Task Logs(CommandContext ctx)
+            public async Task Logs(CommandContext ctx)
             {
                 await DiscordHelpers.SafeTyping(ctx.Channel);
 

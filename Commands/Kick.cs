@@ -6,7 +6,7 @@
         [Aliases("yeet", "shoo", "goaway")]
         [Description("Kicks a user, removing them from the server until they rejoin. Generally not very useful.")]
         [RequirePermissions(Permissions.KickMembers), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public static async Task KickCmd(CommandContext ctx, DiscordUser target, [RemainingText] string reason = "No reason specified.")
+        public async Task KickCmd(CommandContext ctx, DiscordUser target, [RemainingText] string reason = "No reason specified.")
         {
             reason = reason.Replace("`", "\\`").Replace("*", "\\*");
 

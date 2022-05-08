@@ -5,7 +5,7 @@
         [Command("archive")]
         [Description("Archive the current thread or another thread.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public static async Task ArchiveCommand(CommandContext ctx, DiscordChannel channel = default)
+        public async Task ArchiveCommand(CommandContext ctx, DiscordChannel channel = default)
         {
             if (channel == default)
                 channel = ctx.Channel;
@@ -29,7 +29,7 @@
         [Command("lockthread")]
         [Description("Lock the current thread or another thread.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public static async Task LockThreadCommand(CommandContext ctx, DiscordChannel channel = default)
+        public async Task LockThreadCommand(CommandContext ctx, DiscordChannel channel = default)
         {
             if (channel == default)
                 channel = ctx.Channel;
@@ -53,7 +53,7 @@
         [Command("unarchive")]
         [Description("Unarchive a thread")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public static async Task UnarchiveCommand(CommandContext ctx, DiscordChannel channel = default)
+        public async Task UnarchiveCommand(CommandContext ctx, DiscordChannel channel = default)
         {
             if (channel == default)
                 channel = ctx.Channel;
@@ -76,7 +76,7 @@
         [Command("keepalive")]
         [Description("Toggle whether or not to keep a threed alive permamnently until locked.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public static async Task KeepaliveCommand(CommandContext ctx, DiscordChannel channel = default)
+        public async Task KeepaliveCommand(CommandContext ctx, DiscordChannel channel = default)
         {
             if (channel == default)
                 channel = ctx.Channel;

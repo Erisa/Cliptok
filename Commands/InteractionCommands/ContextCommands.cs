@@ -3,7 +3,7 @@
     internal class ContextCommands : ApplicationCommandModule
     {
         [ContextMenu(ApplicationCommandType.UserContextMenu, "Show Avatar")]
-        public static async Task ContextAvatar(ContextMenuContext ctx)
+        public async Task ContextAvatar(ContextMenuContext ctx)
         {
             string avatarUrl = await LykosAvatarMethods.UserOrMemberAvatarURL(ctx.TargetUser, ctx.Guild);
 
@@ -20,13 +20,13 @@
         }
 
         [ContextMenu(ApplicationCommandType.UserContextMenu, "Show Warnings")]
-        public static async Task ContextWarnings(ContextMenuContext ctx)
+        public async Task ContextWarnings(ContextMenuContext ctx)
         {
             await ctx.RespondAsync(embed: WarningHelpers.GenerateWarningsEmbed(ctx.TargetUser), ephemeral: true);
         }
 
         [ContextMenu(ApplicationCommandType.UserContextMenu, "User Information")]
-        public static async Task ContextUserInformation(ContextMenuContext ctx)
+        public async Task ContextUserInformation(ContextMenuContext ctx)
         {
             var target = ctx.TargetUser;
             DiscordEmbed embed;
@@ -80,7 +80,7 @@
         }
 
         [ContextMenu(ApplicationCommandType.UserContextMenu, "Hug")]
-        public static async Task Hug(ContextMenuContext ctx)
+        public async Task Hug(ContextMenuContext ctx)
         {
             var user = ctx.TargetUser;
 

@@ -129,7 +129,7 @@
             }
             catch (Exception e)
             {
-                Program.discord.Logger.LogError(Program.CliptokEventID, e, "An exception ocurred while unbanning {target.Id}", target.Id);
+                Program.discord.Logger.LogError(Program.CliptokEventID, e, $"An exception ocurred while unbanning {target.Id}");
                 return false;
             }
             await logChannel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned {target.Mention}!").WithAllowedMentions(Mentions.None));
@@ -155,7 +155,7 @@
         [Command("massban")]
         [Aliases("bigbonk")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public static async Task MassBanCmd(CommandContext ctx, [RemainingText] string input)
+        public async Task MassBanCmd(CommandContext ctx, [RemainingText] string input)
         {
 
             List<string> usersString = input.Replace("\n", " ").Replace("\r", "").Split(' ').ToList();
@@ -192,7 +192,7 @@
         [Aliases("tempban", "bonk")]
         [Description("Bans a user that you have permssion to ban, deleting all their messages in the process. See also: bankeep.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(Permissions.BanMembers)]
-        public static async Task BanCmd(CommandContext ctx,
+        public async Task BanCmd(CommandContext ctx,
      [Description("The user you wish to ban. Accepts many formats")] DiscordUser targetMember,
      [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling' NOTE: Add 'appeal' to the start of the reason to include an appeal link")] string timeAndReason = "No reason specified.")
         {
@@ -222,7 +222,7 @@
             if (timeParsed && possibleTime == reason)
                 reason = "No reason specified.";
 
-            if (reason.Length > 6 && reason[..7].ToLower() == "appeal ")
+            if (reason.Length > 6 && reason.Substring(0, 7).ToLower() == "appeal ")
             {
                 appealable = true;
                 reason = reason[7..^0];
@@ -276,7 +276,7 @@
         [Command("bankeep")]
         [Aliases("bansave")]
         [Description("Bans a user but keeps their messages around."), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(Permissions.BanMembers)]
-        public static async Task BankeepCmd(CommandContext ctx,
+        public async Task BankeepCmd(CommandContext ctx,
         [Description("The user you wish to ban. Accepts many formats")] DiscordUser targetMember,
         [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling' NOTE: Add 'appeal' to the start of the reason to include an appeal link")] string timeAndReason = "No reason specified.")
         {
@@ -306,7 +306,7 @@
             if (timeParsed && possibleTime == reason)
                 reason = "No reason specified.";
 
-            if (reason.Length > 6 && reason[..7].ToLower() == "appeal ")
+            if (reason.Length > 6 && reason.Substring(0, 7).ToLower() == "appeal ")
             {
                 appealable = true;
                 reason = reason[7..^0];
@@ -358,7 +358,7 @@
         [Command("unban")]
         [Description("Unbans a user who has been previously banned.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(Permissions.BanMembers)]
-        public static async Task UnmuteCmd(CommandContext ctx, [Description("The user to unban, usually a mention or ID")] DiscordUser targetUser, [Description("Used in audit log only currently")] string reason = "No reason specified.")
+        public async Task UnmuteCmd(CommandContext ctx, [Description("The user to unban, usually a mention or ID")] DiscordUser targetUser, [Description("Used in audit log only currently")] string reason = "No reason specified.")
         {
             if ((await Program.db.HashExistsAsync("bans", targetUser.Id)))
             {

@@ -4,7 +4,7 @@
     {
         [Command("ping")]
         [Description("Pong? This command lets you know whether I'm working well.")]
-        public static async Task Ping(CommandContext ctx)
+        public async Task Ping(CommandContext ctx)
         {
             DiscordMessage return_message = await ctx.Message.RespondAsync("Pinging...");
             ulong ping = (return_message.Id - ctx.Message.Id) >> 22;
@@ -18,7 +18,7 @@
         [Command("edit")]
         [Description("Edit a message.")]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public static async Task Edit(
+        public async Task Edit(
             CommandContext ctx,
             [Description("The ID of the message to edit.")] ulong messageId,
             [RemainingText, Description("New message content.")] string content
@@ -37,7 +37,7 @@
         [Command("editappend")]
         [Description("Append content to an existing bot messsage with a newline.")]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public static async Task EditAppend(
+        public async Task EditAppend(
             CommandContext ctx,
             [Description("The ID of the message to edit")] ulong messageId,
             [RemainingText, Description("Content to append on the end of the message.")] string content
