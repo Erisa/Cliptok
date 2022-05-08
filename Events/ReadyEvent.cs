@@ -4,11 +4,11 @@ namespace Cliptok.Events
 {
     public class ReadyEvent
     {
-        public static async Task OnReady(DiscordClient client, ReadyEventArgs e)
+        public static async Task OnReady(DiscordClient client, ReadyEventArgs _)
         {
             Task.Run(async () =>
             {
-                client.Logger.LogInformation(CliptokEventID, $"Logged in as {client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
+                client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", "{client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
                 logChannel = await discord.GetChannelAsync(cfgjson.LogChannel);
                 userLogChannel = await discord.GetChannelAsync(cfgjson.UserLogChannel);
                 badMsgLog = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
@@ -83,12 +83,12 @@ namespace Cliptok.Events
                     if (finishedShell.proc.ExitCode != 0)
                     {
                         listSuccess = false;
-                        client.Logger.LogError(eventId: CliptokEventID, $"Error updating lists:\n{result}");
+                        client.Logger.LogError(eventId: CliptokEventID, "Error updating lists:\n{result}", result);
                     }
                     else
                     {
                         UpdateLists();
-                        client.Logger.LogInformation(eventId: CliptokEventID, $"Success updating lists:\n{result}");
+                        client.Logger.LogInformation(eventId: CliptokEventID, "Success updating lists:\n{result}", result);
                         listSuccess = true;
                     }
                 }

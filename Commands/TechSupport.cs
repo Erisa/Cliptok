@@ -5,7 +5,7 @@
         [Command("ask")]
         [Description("Outputs information on how and where to ask tech support questions. Replying to a message while triggering the command will mirror the reply in the respnose.")]
         [HomeServer]
-        public async Task AskCmd(CommandContext ctx, [Description("Optional, a user to ping with the information")] DiscordUser user = default)
+        public static async Task AskCmd(CommandContext ctx, [Description("Optional, a user to ping with the information")] DiscordUser user = default)
         {
             await ctx.Message.DeleteAsync();
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()

@@ -232,14 +232,14 @@
                 }
                 catch (Exception ex)
                 {
-                    Program.discord.Logger.LogError(message: "Error ocurred trying to remove Timeout from {0}", args: member.Id, exception: ex, eventId: Program.CliptokEventID);
+                    Program.discord.Logger.LogError(message: "Error ocurred trying to remove Timeout from {user}", args: member.Id, exception: ex, eventId: Program.CliptokEventID);
                 }
 
                 if (success)
                 {
                     await logChannel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Successfully unmuted {targetUser.Mention}!").WithAllowedMentions(Mentions.None));
 
-                    if (muteDetailsJson.HasValue)
+                    if (manual && muteDetailsJson.HasValue)
                     {
                         var muteDetails = JsonConvert.DeserializeObject<MemberPunishment>(muteDetailsJson);
 
@@ -253,7 +253,8 @@
                             if (muteDetails.ExpireTime is null)
                             {
                                 await dmMessage.ModifyAsync($"{Program.cfgjson.Emoji.Success} You were muted in **{guild.Name}**, but the mute was revoked early by a Moderator.");
-                            } else
+                            }
+                            else
                             {
                                 await dmMessage.ModifyAsync($"{Program.cfgjson.Emoji.Success} You were muted in **{guild.Name}**  for **{TimeHelpers.TimeToPrettyFormat((TimeSpan)(muteDetails.ExpireTime - muteDetails.ActionTime), false)}** but the mute was revoked early by a Moderator.");
                             }

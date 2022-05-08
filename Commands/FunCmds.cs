@@ -5,7 +5,7 @@
         [Command("tellraw")]
         [Description("Nothing of interest.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task TellRaw(CommandContext ctx, [Description("???")] DiscordChannel discordChannel, [RemainingText, Description("???")] string output)
+        public static async Task TellRaw(CommandContext ctx, [Description("???")] DiscordChannel discordChannel, [RemainingText, Description("???")] string output)
         {
             try
             {
@@ -24,7 +24,7 @@
         [Description("Makes Cliptok choose something for you. Outputs either Yes or No.")]
         [Aliases("yes")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Tier5)]
-        public async Task No(CommandContext ctx)
+        public static async Task No(CommandContext ctx)
         {
             List<string> noResponses = new()
             {

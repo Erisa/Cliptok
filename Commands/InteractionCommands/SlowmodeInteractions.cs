@@ -5,7 +5,7 @@
         [SlashCommand("slowmode", "Slow down the channel...", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         [SlashCommandPermissions(Permissions.ModerateMembers)]
-        public async Task SlowmodeSlashCommand(
+        public static async Task SlowmodeSlashCommand(
             InteractionContext ctx,
             [Option("slow_time", "Allowed time between each users messages. 0 for off. A number of seconds or a parseable time.")] string timeToParse,
             [Option("channel", "The channel to slow down, if not the current one.")] DiscordChannel channel = default

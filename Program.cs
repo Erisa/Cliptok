@@ -86,7 +86,7 @@ namespace Cliptok
             if (File.Exists("Lists/usernames.txt"))
                 badUsernames = File.ReadAllLines("Lists/usernames.txt");
             else
-                badUsernames = new string[0];
+                badUsernames = Array.Empty<string>();
 
             avatars = File.ReadAllLines("Lists/avatars.txt");
 
@@ -164,7 +164,7 @@ namespace Cliptok
             foreach (var type in commandClasses)
                 commands.RegisterCommands(type);
 
-            commands.CommandErrored += Events.ErrorEvents.CommandsNextService_CommandErrored;
+            commands.CommandErrored += ErrorEvents.CommandsNextServiceCommandErrored;
 
             await discord.ConnectAsync();
 

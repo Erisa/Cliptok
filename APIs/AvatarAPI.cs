@@ -4,7 +4,7 @@ namespace Cliptok.APIs
 {
     public class AvatarAPI
     {
-        static string avatarAPIBaseURL = "https://ravy.org/api/v1/avatars";
+        static readonly string avatarAPIBaseURL = "https://ravy.org/api/v1/avatars";
 
         public static async Task<(HttpStatusCode httpStatus, string responseString, AvatarResponseBody? responseObject)> CheckAvatarUrlAsync(string avatarUrl)
         {

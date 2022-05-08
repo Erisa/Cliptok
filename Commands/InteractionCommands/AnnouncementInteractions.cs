@@ -5,7 +5,7 @@
         [SlashCommand("announcebuild", "Announce a Windows Insider build in the current channel.", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         [SlashCommandPermissions(Permissions.ModerateMembers)]
-        public async Task AnnounceBuildSlashCommand(InteractionContext ctx,
+        public static async Task AnnounceBuildSlashCommand(InteractionContext ctx,
             [Choice("Windows 10", 10)]
             [Choice("Windows 11", 11)]
             [Option("windows_version", "The Windows version to announce a build of. Must be either 10 or 11.")] long windowsVersion,
@@ -59,7 +59,7 @@
             DiscordRole insiderRole1 = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles[roleKey1]);
             DiscordRole insiderRole2 = default;
 
-            StringBuilder channelString = new StringBuilder();
+            StringBuilder channelString = new();
 
             string insiderChannel1Pretty = insiderChannel1 == "RP" ? "Release Preview" : insiderChannel1;
 
@@ -123,7 +123,7 @@
 
             if (lockdownTime != "")
             {
-                TimeSpan lockDuration = default;
+                TimeSpan lockDuration;
                 try
                 {
                     lockDuration = HumanDateParser.HumanDateParser.Parse(lockdownTime).Subtract(DateTime.Now);

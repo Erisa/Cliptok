@@ -40,10 +40,10 @@
                 embed.WithImageUrl(message.Attachments[0].Url)
                     .AddField($"Attachment", $"[{message.Attachments[0].FileName}]({message.Attachments[0].Url})");
 
-            List<DiscordEmbed> embeds = new List<DiscordEmbed>
-                    {
-                        embed
-                    };
+            List<DiscordEmbed> embeds = new()
+            {
+                embed
+            };
 
             if (message.Attachments.Count > 1)
             {

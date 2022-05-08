@@ -11,7 +11,7 @@
             }
             catch (Exception ex)
             {
-                Program.discord.Logger.LogError(eventId: Program.CliptokEventID, exception: ex, message: "Error ocurred trying to type in {0}", args: channel.Id);
+                Program.discord.Logger.LogError(eventId: Program.CliptokEventID, exception: ex, message: "Error ocurred trying to type in {channel}", args: channel.Id);
                 return false;
             }
         }
@@ -41,9 +41,10 @@
             {
                 var channel = await Program.discord.GetChannelAsync(messageReference.ChannelId);
                 return await channel.GetMessageAsync(messageReference.MessageId);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
-                Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, exception: ex, message: "Failed to fetch message {message}-{channel}",  messageReference.ChannelId, messageReference.MessageId);
+                Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, exception: ex, message: "Failed to fetch message {message}-{channel}", messageReference.ChannelId, messageReference.MessageId);
                 return null;
             }
         }

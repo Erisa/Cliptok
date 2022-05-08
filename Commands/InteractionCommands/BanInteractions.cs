@@ -4,7 +4,7 @@
     {
         [SlashCommand("ban", "Bans a user from the server, either permanently or temporarily.", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.BanMembers)]
-        public async Task BanSlashCommand(InteractionContext ctx,
+        public static async Task BanSlashCommand(InteractionContext ctx,
             [Option("user", "The user to ban")] DiscordUser user,
             [Option("reason", "The reason the user is being banned")] string reason,
             [Option("keep_messages", "Whether to keep the users messages when banning")] bool keepMessages = false,

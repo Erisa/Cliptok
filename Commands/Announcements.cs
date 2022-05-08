@@ -6,7 +6,7 @@
         [Command("editannounce")]
         [Description("Edit an announcement, preserving the ping highlight.")]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task EditAnnounce(
+        public static async Task EditAnnounce(
             CommandContext ctx,
             [Description("The ID of the message to edit.")] ulong messageId,
             [Description("The short name for the role to ping.")] string roleName,
@@ -41,7 +41,7 @@
         [Command("announce")]
         [Description("Announces something in the current channel, pinging an Insider role in the process.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task AnnounceCmd(CommandContext ctx, [Description("'dev','beta','rp', 'rp10, 'patch', 'rpbeta', 'betadev'")] string roleName, [RemainingText, Description("The announcement message to send.")] string announcementMessage)
+        public static async Task AnnounceCmd(CommandContext ctx, [Description("'dev','beta','rp', 'rp10, 'patch', 'rpbeta', 'betadev'")] string roleName, [RemainingText, Description("The announcement message to send.")] string announcementMessage)
         {
             DiscordRole discordRole;
 
