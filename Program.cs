@@ -169,11 +169,12 @@ namespace Cliptok
 
             await discord.ConnectAsync();
 
+            await ReadyEvent.OnStartup(discord);
+
             if (cfgjson.ErrorLogChannelId == 0)
                 errorLogChannel = await discord.GetChannelAsync(cfgjson.HomeChannel);
             else
                 errorLogChannel = await discord.GetChannelAsync(cfgjson.ErrorLogChannelId);
-
 
             // Only wait 3 seconds before the first set of tasks.
             await Task.Delay(3000);
