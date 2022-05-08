@@ -73,7 +73,7 @@
                         }
                         catch (Exception e)
                         {
-                            Program.discord.Logger.LogError(e, "Failed to issue timeout");
+                            Program.discord.Logger.LogError(e, "Failed to issue timeout to {user}", naughtyMember.Id);
                         }
 
                         // Remove the member from any Voice Channel they're currently in.
