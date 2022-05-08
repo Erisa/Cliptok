@@ -140,22 +140,9 @@
             var urlMatches = Constants.RegexConstants.url_rx.Matches(content);
             if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
             {
-                HttpRequestMessage request = new(HttpMethod.Post, Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT"));
-                request.Headers.Add("User-Agent", "Cliptok (https://github.com/Erisa/Cliptok)");
-                MessageEvent.httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                var (match, httpStatus, responseText, _) = await APIs.PhishingAPI.PhishingAPICheckAsync(content);
 
-                var bodyObject = new PhishingRequestBody()
-                {
-                    Message = content
-                };
-
-                request.Content = new StringContent(JsonConvert.SerializeObject(bodyObject), Encoding.UTF8, "application/json");
-
-                HttpResponseMessage response = await Program.httpClient.SendAsync(request);
-
-                var (match, httpStatus, responseText, phishingResponse) = await APIs.PhishingAPI.PhishingAPICheckAsync(content);
-
-                string responseToSend = "";
+                string responseToSend;
                 if (match)
                 {
                     responseToSend = $"Match found:\n```json\n{responseText}\n```";

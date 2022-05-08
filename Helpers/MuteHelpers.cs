@@ -232,7 +232,7 @@
                 }
                 catch (Exception ex)
                 {
-                    Program.discord.Logger.LogError(message: "Error ocurred trying to remove Timeout from {0}", args: member.Id, exception: ex, eventId: Program.CliptokEventID);
+                    Program.discord.Logger.LogError(message: "Error ocurred trying to remove Timeout from {user}", args: member.Id, exception: ex, eventId: Program.CliptokEventID);
                 }
 
                 if (success)

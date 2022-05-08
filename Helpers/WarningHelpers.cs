@@ -121,7 +121,7 @@
             return embed;
         }
 
-        public static async Task<DiscordMessageBuilder> GenerateWarningDM(DiscordUser targetUser, string reason, DiscordGuild guild, string extraWord = " ")
+        public static async Task<DiscordMessageBuilder> GenerateWarningDM(string reason, DiscordGuild guild, string extraWord = " ")
         {
             DiscordGuildMembershipScreening screeningForm = default;
             IReadOnlyList<string> rules = default;
@@ -187,7 +187,7 @@
             try
             {
                 DiscordMember member = await guild.GetMemberAsync(targetUser.Id);
-                dmMessage = await member.SendMessageAsync(await GenerateWarningDM(targetUser, reason, channel.Guild, extraWord));
+                dmMessage = await member.SendMessageAsync(await GenerateWarningDM(reason, channel.Guild, extraWord));
             }
             catch
             {
@@ -282,7 +282,7 @@
                 if (dmMessage is not null)
                 {
                     var guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
-                    await dmMessage.ModifyAsync(await GenerateWarningDM(targetUser, reason, guild));
+                    await dmMessage.ModifyAsync(await GenerateWarningDM(reason, guild));
                 }
 
                 await Program.db.HashSetAsync(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));

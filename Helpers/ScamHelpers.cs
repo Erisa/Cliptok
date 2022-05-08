@@ -69,7 +69,7 @@ namespace Cliptok.Helpers
 
             if (db.SetContains("safeavatarstore", usedHash))
             {
-                discord.Logger.LogDebug("Unnecessary avatar check skipped for " + member.Id);
+                discord.Logger.LogDebug("Unnecessary avatar check skipped for {member}", member.Id);
                 return false;
             }
 
@@ -77,7 +77,7 @@ namespace Cliptok.Helpers
 
             if (httpStatus == HttpStatusCode.OK && avatarResponse is not null)
             {
-                discord.Logger.LogDebug($"Avatar check for {member.Id}: {httpStatus} {httpStatus}");
+                discord.Logger.LogDebug("Avatar check for {member}: {status} {response}", member.Id, httpStatus, responseString);
 
                 if (avatarResponse.Matched && avatarResponse.Key != "logo")
                 {
@@ -99,7 +99,7 @@ namespace Cliptok.Helpers
             }
             else
             {
-                discord.Logger.LogError($"Avatar check for {member.Id}: {httpStatus} {responseString}");
+                discord.Logger.LogError("Avatar check for {member}: {status} {response}", member.Id, httpStatus, responseString);
             }
 
             return false;

@@ -26,7 +26,7 @@ namespace Cliptok.Events
 
                 userLogChannel.SendMessageAsync($"{cfgjson.Emoji.UserJoin} **Member joined the server!** - {e.Member.Id}", embed);
 
-                var joinWatchlist = await Program.db.ListRangeAsync("joinWatchedUsers");
+                var joinWatchlist = await db.ListRangeAsync("joinWatchedUsers");
 
                 if (joinWatchlist.Contains(e.Member.Id))
                 {
@@ -70,10 +70,10 @@ namespace Cliptok.Events
                 }
 
                 string banDM = $"You have been automatically banned from **{e.Guild.Name}** for matching patterns of known raiders.\n" +
-                        $"Please send an appeal and you will be unbanned as soon as possible: {Program.cfgjson.AppealLink}\n" +
+                        $"Please send an appeal and you will be unbanned as soon as possible: {cfgjson.AppealLink}\n" +
                         $"The requirements for appeal can be ignored in this case. Sorry for any inconvenience caused.";
 
-                foreach (var IdAutoBanSet in Program.cfgjson.AutoBanIds)
+                foreach (var IdAutoBanSet in cfgjson.AutoBanIds)
                 {
                     if (db.HashExists(IdAutoBanSet.Name, e.Member.Id))
                     {
@@ -86,10 +86,10 @@ namespace Cliptok.Events
 
                         await e.Member.BanAsync(7, "Matching patterns of known raiders, please unban if appealed.");
 
-                        await badMsgLog.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the creation date of the {IdAutoBanSet.Name} DM scam raiders.");
+                        await badMsgLog.SendMessageAsync($"{cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the creation date of the {IdAutoBanSet.Name} DM scam raiders.");
                     }
 
-                    Program.db.HashSet(IdAutoBanSet.Name, e.Member.Id, true);
+                    db.HashSet(IdAutoBanSet.Name, e.Member.Id, true);
                 }
 
             });
@@ -153,7 +153,7 @@ namespace Cliptok.Events
 
                 userLogChannel.SendMessageAsync($"{cfgjson.Emoji.UserLeave} **Member left the server!** - {e.Member.Id}", embed);
 
-                var joinWatchlist = await Program.db.ListRangeAsync("joinWatchedUsers");
+                var joinWatchlist = await db.ListRangeAsync("joinWatchedUsers");
 
                 if (joinWatchlist.Contains(e.Member.Id))
                 {
@@ -162,7 +162,7 @@ namespace Cliptok.Events
             });
         }
 
-        public static async Task GuildMemberUpdated(DiscordClient client, GuildMemberUpdateEventArgs e)
+        public static async Task GuildMemberUpdated(DiscordClient _, GuildMemberUpdateEventArgs e)
         {
             Task.Run(async () =>
             {
@@ -193,7 +193,7 @@ namespace Cliptok.Events
             );
         }
 
-        public static async Task UserUpdated(DiscordClient client, UserUpdateEventArgs e)
+        public static async Task UserUpdated(DiscordClient _, UserUpdateEventArgs e)
         {
             await Task.Run(async () =>
             {

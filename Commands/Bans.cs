@@ -129,7 +129,7 @@
             }
             catch (Exception e)
             {
-                Program.discord.Logger.LogError(Program.CliptokEventID, e, $"An exception ocurred while unbanning {target.Id}");
+                Program.discord.Logger.LogError(Program.CliptokEventID, e, "An exception ocurred while unbanning {user}", target.Id);
                 return false;
             }
             await logChannel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned {target.Mention}!").WithAllowedMentions(Mentions.None));
@@ -222,7 +222,7 @@
             if (timeParsed && possibleTime == reason)
                 reason = "No reason specified.";
 
-            if (reason.Length > 6 && reason.Substring(0, 7).ToLower() == "appeal ")
+            if (reason.Length > 6 && reason[..7].ToLower() == "appeal ")
             {
                 appealable = true;
                 reason = reason[7..^0];
@@ -306,7 +306,7 @@
             if (timeParsed && possibleTime == reason)
                 reason = "No reason specified.";
 
-            if (reason.Length > 6 && reason.Substring(0, 7).ToLower() == "appeal ")
+            if (reason.Length > 6 && reason[..7].ToLower() == "appeal ")
             {
                 appealable = true;
                 reason = reason[7..^0];

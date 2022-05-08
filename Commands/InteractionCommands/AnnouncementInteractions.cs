@@ -59,7 +59,7 @@
             DiscordRole insiderRole1 = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles[roleKey1]);
             DiscordRole insiderRole2 = default;
 
-            StringBuilder channelString = new StringBuilder();
+            StringBuilder channelString = new();
 
             string insiderChannel1Pretty = insiderChannel1 == "RP" ? "Release Preview" : insiderChannel1;
 
@@ -123,7 +123,7 @@
 
             if (lockdownTime != "")
             {
-                TimeSpan lockDuration = default;
+                TimeSpan lockDuration;
                 try
                 {
                     lockDuration = HumanDateParser.HumanDateParser.Parse(lockdownTime).Subtract(DateTime.Now);

@@ -20,7 +20,7 @@ namespace Cliptok.Commands
             }
             catch (DSharpPlus.Exceptions.NotFoundException ex)
             {
-                Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, exception: ex, message: "Failed to unmute {0} in {1} because they weren't in the server.", $"{targetUser.Username}#{targetUser.Discriminator}", ctx.Guild.Name);
+                Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, exception: ex, message: "Failed to unmute {user} in {server} because they weren't in the server.", $"{targetUser.Username}#{targetUser.Discriminator}", ctx.Guild.Name);
             }
 
             if ((await Program.db.HashExistsAsync("mutes", targetUser.Id)) || (member != default && member.Roles.Contains(mutedRole)))
@@ -36,7 +36,7 @@ namespace Cliptok.Commands
                 }
                 catch (Exception e)
                 {
-                    Program.discord.Logger.LogError(e, $"An error ocurred unmuting {targetUser.Id}");
+                    Program.discord.Logger.LogError(e, "An error ocurred unmuting {user}", targetUser.Id);
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be muted, *and* an error ocurred while attempting to unmute them anyway. Please contact the bot owner, the error has been logged.");
                 }
         }

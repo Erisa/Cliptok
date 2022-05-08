@@ -4,7 +4,7 @@ namespace Cliptok.Events
 {
     public class InteractionEvents
     {
-        public static async Task ComponentInteractionCreateEvent(DiscordClient s, ComponentInteractionCreateEventArgs e)
+        public static async Task ComponentInteractionCreateEvent(DiscordClient _, ComponentInteractionCreateEventArgs e)
         {
             // Initial response to avoid the 3 second timeout, will edit later.
             var eout = new DiscordInteractionResponseBuilder().AsEphemeral(true);
@@ -15,7 +15,7 @@ namespace Cliptok.Events
 
             if (e.Id == "line-limit-deleted-message-callback")
             {
-                var text = await Program.db.HashGetAsync("deletedMessageReferences", e.Message.Id);
+                var text = await db.HashGetAsync("deletedMessageReferences", e.Message.Id);
                 if (text.IsNullOrEmpty)
                 {
                     discord.Logger.LogError("Failed to find deleted message content for {id}", e.Message.Id);
@@ -39,7 +39,7 @@ namespace Cliptok.Events
 
         }
 
-        public static async Task SlashCommandErrorEvent(SlashCommandsExtension s, DSharpPlus.SlashCommands.EventArgs.SlashCommandErrorEventArgs e)
+        public static async Task SlashCommandErrorEvent(SlashCommandsExtension _, DSharpPlus.SlashCommands.EventArgs.SlashCommandErrorEventArgs e)
         {
             if (e.Exception is SlashExecutionChecksFailedException slex)
             {
@@ -49,14 +49,14 @@ namespace Cliptok.Events
                         var level = GetPermLevel(e.Context.Member);
                         var levelText = level.ToString();
                         if (level == ServerPermLevel.Nothing && rand.Next(1, 100) == 69)
-                            levelText = $"naught but a thing, my dear human. Congratulations, you win {Program.rand.Next(1, 10)} bonus points.";
+                            levelText = $"naught but a thing, my dear human. Congratulations, you win {rand.Next(1, 10)} bonus points.";
 
                         await e.Context.CreateResponseAsync(
                             InteractionResponseType.ChannelMessageWithSource,
                             new DiscordInteractionResponseBuilder().WithContent(
                                 $"{cfgjson.Emoji.NoPermissions} Invalid permission level to use command **{e.Context.CommandName}**!\n" +
                                 $"Required: `{att.TargetLvl}`\n" +
-                                $"You have: `{GetPermLevel(e.Context.Member)}`")
+                                $"You have: `{levelText}`")
                                 .AsEphemeral(true)
                             );
                     }

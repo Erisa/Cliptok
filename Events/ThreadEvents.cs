@@ -47,14 +47,14 @@ namespace Cliptok.Events
 
         public static Task Discord_ThreadListSynced(DiscordClient client, ThreadListSyncEventArgs e)
         {
-            client.Logger.LogDebug(eventId: CliptokEventID, $"Threads synced in {e.Guild.Name}.");
+            client.Logger.LogDebug(eventId: CliptokEventID, "Threads synced in {guild}.", e.Guild.Name);
             return Task.CompletedTask;
         }
 
         public static Task Discord_ThreadMemberUpdated(DiscordClient client, ThreadMemberUpdateEventArgs e)
         {
-            client.Logger.LogDebug(eventId: CliptokEventID, $"Thread member updated.");
-            client.Logger.LogDebug(CliptokEventID, $"Discord_ThreadMemberUpdated fired for thread {e.ThreadMember.ThreadId}. User ID {e.ThreadMember.Id}.");
+            client.Logger.LogDebug(eventId: CliptokEventID, "Thread member updated.");
+            client.Logger.LogDebug(CliptokEventID, "Discord_ThreadMemberUpdated fired for thread {thread}. User ID {user}.", e.ThreadMember.ThreadId, e.ThreadMember.Id);
             return Task.CompletedTask;
         }
 
