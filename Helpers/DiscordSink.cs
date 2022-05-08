@@ -29,6 +29,11 @@ namespace Cliptok
 
                     dummyWriter.Flush();
 
+                    if (dummyWriter.ToString().ToLower().Contains("Ratelimit"))
+                    {
+                        return;
+                    }
+
                     if (dummyWriter.ToString().Length > 1984 && dummyWriter.ToString().Length < 4096)
                     {
                         Program.errorLogChannel.SendMessageAsync(new DiscordEmbedBuilder().WithDescription($"```cs\n{dummyWriter}\n```"));
