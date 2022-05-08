@@ -106,7 +106,7 @@
                     threadBrackets = $"{insiderChannel1} & {insiderChannel2}";
 
                 string threadName = string.Format(autothreadName, buildNumber, threadBrackets);
-                threadChannel = await ctx.Channel.CreateThreadAsync(threadName, AutoArchiveDuration.Day, ChannelType.PublicThread, "Creating thread for Insider build.");
+                threadChannel = await ctx.Channel.CreateThreadAsync(threadName, AutoArchiveDuration.Week, ChannelType.PublicThread, "Creating thread for Insider build.");
                 var initialMsg = await threadChannel.SendMessageAsync(blogLink);
                 await initialMsg.PinAsync();
             }

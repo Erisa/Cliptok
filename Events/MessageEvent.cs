@@ -84,7 +84,7 @@ namespace Cliptok.Events
                         giveawayTitle = StringHelpers.Truncate(giveawayTitle, 100, false);
                     }
 
-                    await message.CreateThreadAsync(giveawayTitle, AutoArchiveDuration.Day, "Automatically creating giveaway thread.");
+                    await message.CreateThreadAsync(giveawayTitle, AutoArchiveDuration.ThreeDays, "Automatically creating giveaway thread.");
                 }
 
                 // Skip DMs, external guilds, and messages from bots, beyond this point.
@@ -471,11 +471,7 @@ namespace Cliptok.Events
                         if (title.Length > 100)
                             title = StringHelpers.Truncate(title, 100, false);
 
-                        AutoArchiveDuration autoArchiveTime;
-
-                        autoArchiveTime = message.Channel.Guild.Features.Contains("THREE_DAY_THREAD_ARCHIVE") ? AutoArchiveDuration.ThreeDays : AutoArchiveDuration.Day;
-
-                        await message.CreateThreadAsync(title, autoArchiveTime, "Automatically creating feedback hub thread.");
+                        await message.CreateThreadAsync(title, AutoArchiveDuration.ThreeDays, "Automatically creating feedback hub thread.");
 
                         await Task.Delay(2000);
                         await message.ModifyEmbedSuppressionAsync(true);
