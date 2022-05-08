@@ -74,7 +74,6 @@
                 TargetLvl = targetlvl;
             }
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
             public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
             {
                 // If the command is supposed to stay within the server and its being used outside, fail silently
@@ -124,7 +123,6 @@
                 return !ctx.Channel.IsPrivate && ctx.Guild.Id == Program.cfgjson.ServerID;
             }
         }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
         public class SlashRequireHomeserverPermAttribute : SlashCheckBaseAttribute
         {

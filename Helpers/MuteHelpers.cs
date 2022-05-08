@@ -239,7 +239,7 @@
                 {
                     await logChannel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Successfully unmuted {targetUser.Mention}!").WithAllowedMentions(Mentions.None));
 
-                    if (muteDetailsJson.HasValue)
+                    if (manual && muteDetailsJson.HasValue)
                     {
                         var muteDetails = JsonConvert.DeserializeObject<MemberPunishment>(muteDetailsJson);
 
