@@ -233,6 +233,9 @@
         [JsonProperty("errorLogChannelId")]
         public ulong ErrorLogChannelId { get; private set; } = 0;
 
+        [JsonProperty("mysteryLogChannelId")]
+        public ulong MysteryLogChannelId { get; private set; } = 0;
+
     }
 
     public class WorkflowConfig

@@ -31,7 +31,7 @@ namespace Cliptok
 
                         dummyWriter.Flush();
 
-                        if (dummyWriter.ToString().ToLower().Contains("Ratelimit"))
+                        if (dummyWriter.ToString().ToLower().Contains("ratelimit"))
                         {
                             return;
                         }

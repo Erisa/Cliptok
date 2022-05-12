@@ -17,6 +17,15 @@ namespace Cliptok.Events
                 errorLogChannel = await client.GetChannelAsync(cfgjson.ErrorLogChannelId);
                 await errorLogChannel.SendMessageAsync($"{cfgjson.Emoji.Connected} {discord.CurrentUser.Username} has connected to Discord!");
             }
+
+            if (cfgjson.MysteryLogChannelId == 0)
+                mysteryLogChannel = errorLogChannel;
+            else
+            {
+                Console.Write(cfgjson.MysteryLogChannelId);
+                    mysteryLogChannel = await client.GetChannelAsync(cfgjson.MysteryLogChannelId);
+            }
+
         }
 
         public static async Task OnStartup(DiscordClient client)

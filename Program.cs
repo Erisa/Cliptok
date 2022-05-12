@@ -29,6 +29,7 @@ namespace Cliptok
         public static DiscordChannel userLogChannel;
         public static DiscordChannel badMsgLog;
         public static DiscordChannel errorLogChannel;
+        public static DiscordChannel mysteryLogChannel;
         public static DiscordGuild homeGuild;
 
         public static Random rand = new();

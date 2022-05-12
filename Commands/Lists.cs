@@ -150,7 +150,7 @@
                 }
                 else
                 {
-                    responseToSend = $"No valid match found.\nHTTP Status `{httpStatus}, result:\n```json\n{responseText}\n```";
+                    responseToSend = $"No valid match found.\nHTTP Status `{(int)httpStatus}`, result:\n```json\n{responseText}\n```";
                 }
 
                 if (responseToSend.Length > 1940)
