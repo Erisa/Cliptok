@@ -48,14 +48,14 @@
 
         [SlashCommand("tellraw", "You know what you're here for.")]
         [SlashRequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task TellRaw(InteractionContext ctx, [Option("input", "???")] string input, [Option("channel", "Work it out.")] DiscordChannel discordChannel = default)
+        public async Task TellRaw(InteractionContext ctx, [Option("input", "???")] string input, [Option("reply_msg_id", "ID of message to use in a reply context.")] string replyID = "0", [Option("pingreply", "Ping pong.")] bool pingreply = true, [Option("channel", "Work it out.")] DiscordChannel discordChannel = default)
         {
             if (discordChannel == default)
                 discordChannel = ctx.Channel;
 
             try
             {
-                await discordChannel.SendMessageAsync(input);
+                await discordChannel.SendMessageAsync(new DiscordMessageBuilder().WithContent(input).WithReply(Convert.ToUInt64(replyID), pingreply, false));
             }
             catch
             {
