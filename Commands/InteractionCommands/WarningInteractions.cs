@@ -8,6 +8,7 @@
         public async Task WarnSlashCommand(InteractionContext ctx,
          [Option("user", "The user to warn.")] DiscordUser user,
          [Option("reason", "The reason they're being warned.")] string reason,
+         [Option("reply_msg_id", "The ID of a message to reply to, must be in the same channel.")] string replyMsgId = "0",
          [Option("channel", "The channel to warn the user in, implied if not supplied.")] DiscordChannel channel = null
         )
         {
@@ -43,6 +44,9 @@
 
             var messageBuild = new DiscordMessageBuilder()
                 .WithContent($"{Program.cfgjson.Emoji.Warning} {user.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+
+            if (replyMsgId != "0")
+                messageBuild.WithReply(Convert.ToUInt64(replyMsgId), true, false);
 
             var msg = await channel.SendMessageAsync(messageBuild);
 
