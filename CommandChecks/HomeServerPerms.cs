@@ -22,8 +22,22 @@
             Owner = int.MaxValue
         }
 
+        public static List<ServerPermLevel> TierPerms = new List<ServerPermLevel>() { 
+            ServerPermLevel.Tier1,
+            ServerPermLevel.Tier2,
+            ServerPermLevel.Tier3,
+            ServerPermLevel.Tier4,
+            ServerPermLevel.Tier5,
+            ServerPermLevel.Tier6,
+            ServerPermLevel.Tier7,
+            ServerPermLevel.Tier8,
+            ServerPermLevel.TierS,
+            ServerPermLevel.TierX,            
+        };
+        
         public static ServerPermLevel GetPermLevel(DiscordMember target)
         {
+            var tierRolesSize = Program.cfgjson.TierRoles.Count;
             if (target.Guild.Id != Program.cfgjson.ServerID)
                 return ServerPermLevel.Nothing;
 
@@ -38,26 +52,34 @@
                 return ServerPermLevel.Muted;
             else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TrialModRole)))
                 return ServerPermLevel.TrialModerator;
-            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[9])))
-                return ServerPermLevel.TierX;
-            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[8])))
-                return ServerPermLevel.TierS;
-            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[7])))
-                return ServerPermLevel.Tier8;
-            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[6])))
-                return ServerPermLevel.Tier7;
-            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[5])))
-                return ServerPermLevel.Tier6;
-            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[4])))
-                return ServerPermLevel.Tier5;
-            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[3])))
-                return ServerPermLevel.Tier4;
-            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[2])))
-                return ServerPermLevel.Tier3;
-            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[1])))
-                return ServerPermLevel.Tier2;
-            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[0])))
-                return ServerPermLevel.Tier1;
+            else if (tierRolesSize > 0) {
+                foreach (int idx in Enumerable.Range(0, Program.cfgjson.TierRoles.Count).Reverse())
+                {
+                    if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[idx])))
+                        return TierPerms[idx];
+                }
+                return ServerPermLevel.Nothing;
+            }
+            // else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[9])))
+            //     return ServerPermLevel.TierX;
+            // else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[8])))
+            //     return ServerPermLevel.TierS;
+            // else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[7])))
+            //     return ServerPermLevel.Tier8;
+            // else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[6])))
+            //     return ServerPermLevel.Tier7;
+            // else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[5])))
+            //     return ServerPermLevel.Tier6;
+            // else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[4])))
+            //     return ServerPermLevel.Tier5;
+            // else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[3])))
+            //     return ServerPermLevel.Tier4;
+            // else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[2])))
+            //     return ServerPermLevel.Tier3;
+            // else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[1])))
+            //     return ServerPermLevel.Tier2;
+            // else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[0])))
+            //     return ServerPermLevel.Tier1;
             else
                 return ServerPermLevel.Nothing;
         }
