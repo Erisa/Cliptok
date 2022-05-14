@@ -12,9 +12,9 @@ services:
         source: ./Lists/Private
         target: /app/Lists/Private
       # Uncomment the below lines to use your own config file.
-      - type: bind
-        source: ./config.dev.json
-        target: /app/config.json
+      # - type: bind
+      #   source: ./config.dev.json
+      #   target: /app/config.json
     environment:
       # Overrides your configs Redis options for use with Docker Compose
       #  I don't advise changing this unless you have a strange setup
@@ -28,19 +28,19 @@ services:
         target: /data
     command: --appendonly yes
 
-# # You may want to comment out everything below if you're not Erisa.
-#   redis-exposer:
-#     image: ghcr.io/erisa/redis-exposer
-#     restart: always
-#     env_file:
-#      - .exposer.env
-#   cloudflared:
-#     image: erisamoe/cloudflared
-#     restart: always
-#     command: tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN}
-#   watchtower:
-#     image: containrrr/watchtower
-#     volumes:
-#       - /var/run/docker.sock:/var/run/docker.sock
-#     command: --interval 30 --label-enable
-#     restart: always
+# You may want to comment out everything below if you're not Erisa.
+  redis-exposer:
+    image: ghcr.io/erisa/redis-exposer
+    restart: always
+    env_file:
+     - .exposer.env
+  cloudflared:
+    image: erisamoe/cloudflared
+    restart: always
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN}
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 30 --label-enable
+    restart: always
