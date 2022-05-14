@@ -55,7 +55,7 @@
             else if (tierRolesSize > 0) {
                 if (tierRolesSize > TierPerms.Count) {
                     // If the size of the tier roles is over then the size of tier perms then just use the length
-                    // of the tier perms. It will exist as the tier role's list is bigger than the tier perms 
+                    // of the tier perms. It will exist as the tier roles list is bigger than the tier perms 
                     // list.
                     if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[TierPerms.Count])))
                         return TierPerms[TierPerms.Count];                 
