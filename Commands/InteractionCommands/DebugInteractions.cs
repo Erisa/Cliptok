@@ -2,7 +2,7 @@
 {
     internal class DebugInteractions : ApplicationCommandModule
     {
-        [SlashCommand("scamcheck", "Check if a link or message is known to the anti-phishing API.", defaultPermission: true)]
+        [SlashCommand("scamcheck", "Check if a link or message is known to the anti-phishing API.", defaultPermission: false)]
         [Description("Check if a link or message is known to the anti-phishing API.")]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task ScamCheck(InteractionContext ctx, [Option("input", "Domain or message content to scan.")] string content)
@@ -46,8 +46,8 @@
             }
         }
 
-        [SlashCommand("tellraw", "You know what you're here for.")]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [SlashCommand("tellraw", "You know what you're here for.", defaultPermission: true)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task TellRaw(InteractionContext ctx, [Option("input", "???")] string input, [Option("reply_msg_id", "ID of message to use in a reply context.")] string replyID = "0", [Option("pingreply", "Ping pong.")] bool pingreply = true, [Option("channel", "Work it out.")] DiscordChannel discordChannel = default)
         {
             if (discordChannel == default)
