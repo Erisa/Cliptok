@@ -132,7 +132,7 @@
                 screeningForm = await guild.GetMembershipScreeningFormAsync();
                 rules = screeningForm.Fields.FirstOrDefault(field => field.Type is MembershipScreeningFieldType.Terms).Values;
             }
-            catch (DSharpPlus.Exceptions.NotFoundException)
+            catch
             {
                 // thats fine, community must be disabled
             }
