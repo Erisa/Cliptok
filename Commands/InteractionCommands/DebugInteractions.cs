@@ -46,7 +46,7 @@
             }
         }
 
-        [SlashCommand("tellraw", "You know what you're here for.", defaultPermission: true)]
+        [SlashCommand("tellraw", "You know what you're here for.", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task TellRaw(InteractionContext ctx, [Option("input", "???")] string input, [Option("reply_msg_id", "ID of message to use in a reply context.")] string replyID = "0", [Option("pingreply", "Ping pong.")] bool pingreply = true, [Option("channel", "Work it out.")] DiscordChannel discordChannel = default)
         {
