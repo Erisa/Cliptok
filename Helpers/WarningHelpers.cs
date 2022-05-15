@@ -137,6 +137,8 @@
                 // thats fine, community must be disabled
             }
 
+            var msg = new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Warning} You were{extraWord}warned in **{guild.Name}**, reason: **{reason}**");
+
             if (screeningForm != default && rules != default)
             {
                 var rulesBaseStr = reason.ToLower().Replace("rules ", "").Replace("rule ", "");
@@ -173,9 +175,10 @@
 
                     embeds.Add(new DiscordEmbedBuilder().AddField($"Rule {ruleBroken}", ruleText).WithColor(0xFEC13D));
                 }
+                msg.AddEmbeds(embeds.AsEnumerable());
             }
 
-            return new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Warning} You were{extraWord}warned in **{guild.Name}**, reason: **{reason}**").AddEmbeds(embeds.AsEnumerable());
+            return msg;
         }
 
         public static async Task<UserWarning> GiveWarningAsync(DiscordUser targetUser, DiscordUser modUser, string reason, DiscordMessage contextMessage, DiscordChannel channel, string extraWord = " ")
