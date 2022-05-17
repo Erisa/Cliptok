@@ -236,6 +236,9 @@
         [JsonProperty("mysteryLogChannelId")]
         public ulong MysteryLogChannelId { get; private set; } = 0;
 
+        [JsonProperty("everyoneFilter")]
+        public bool EveryoneFilter { get; private set; } = false;
+
     }
 
     public class WorkflowConfig

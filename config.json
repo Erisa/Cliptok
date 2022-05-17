@@ -254,5 +254,6 @@
   "feedbackHubChannelId": 865734819995582464,
   "dmLogChannelId": 963600228286607391,
   "errorLogChannelId": 968463420586336286,
-  "mysteryLogChannelId": 974161605938012160
+  "mysteryLogChannelId": 974161605938012160,
+  "everyoneFilter": true
 }

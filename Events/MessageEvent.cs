@@ -376,7 +376,7 @@ namespace Cliptok.Events
                     }
 
                     // attempted to ping @everyone/@here
-                    if ((Program.cfgjson.EveryoneExcludedChannels == null || !Program.cfgjson.EveryoneExcludedChannels.Contains(message.Channel.Id)) && (message.Content.Contains("@everyone") || message.Content.Contains("@here")))
+                    if (Program.cfgjson.EveryoneFilter && (Program.cfgjson.EveryoneExcludedChannels == null || !Program.cfgjson.EveryoneExcludedChannels.Contains(message.Channel.Id)) && (message.Content.Contains("@everyone") || message.Content.Contains("@here")))
                     {
                         string reason = "Attempted to ping everyone/here";
                         _ = message.DeleteAsync();
