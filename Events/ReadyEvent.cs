@@ -6,26 +6,28 @@ namespace Cliptok.Events
     {
         public static async Task OnReady(DiscordClient client, ReadyEventArgs _)
         {
-            client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
+            Task.Run(async () =>
+            {
+                client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
 
-            if (cfgjson.ErrorLogChannelId == 0)
-            {
-                errorLogChannel = await client.GetChannelAsync(cfgjson.HomeChannel);
-            }
-            else
-            {
-                errorLogChannel = await client.GetChannelAsync(cfgjson.ErrorLogChannelId);
-                await errorLogChannel.SendMessageAsync($"{cfgjson.Emoji.Connected} {discord.CurrentUser.Username} has connected to Discord!");
-            }
+                if (cfgjson.ErrorLogChannelId == 0)
+                {
+                    errorLogChannel = await client.GetChannelAsync(cfgjson.HomeChannel);
+                }
+                else
+                {
+                    errorLogChannel = await client.GetChannelAsync(cfgjson.ErrorLogChannelId);
+                    await errorLogChannel.SendMessageAsync($"{cfgjson.Emoji.Connected} {discord.CurrentUser.Username} has connected to Discord!");
+                }
 
-            if (cfgjson.MysteryLogChannelId == 0)
-                mysteryLogChannel = errorLogChannel;
-            else
-            {
-                Console.Write(cfgjson.MysteryLogChannelId);
+                if (cfgjson.MysteryLogChannelId == 0)
+                    mysteryLogChannel = errorLogChannel;
+                else
+                {
+                    Console.Write(cfgjson.MysteryLogChannelId);
                     mysteryLogChannel = await client.GetChannelAsync(cfgjson.MysteryLogChannelId);
-            }
-
+                }
+            });
         }
 
         public static async Task OnStartup(DiscordClient client)
