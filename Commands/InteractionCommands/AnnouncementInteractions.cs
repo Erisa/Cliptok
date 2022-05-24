@@ -105,6 +105,9 @@
                 if (insiderChannel2 != "")
                     threadBrackets = $"{insiderChannel1} & {insiderChannel2}";
 
+                if (insiderChannel1 == "RP" && insiderChannel2 == "" && windowsVersion == 10)
+                    threadBrackets = "10 RP";
+
                 string threadName = string.Format(autothreadName, buildNumber, threadBrackets);
                 threadChannel = await ctx.Channel.CreateThreadAsync(threadName, AutoArchiveDuration.Week, ChannelType.PublicThread, "Creating thread for Insider build.");
                 var initialMsg = await threadChannel.SendMessageAsync(blogLink);
