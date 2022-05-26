@@ -20,7 +20,7 @@ services:
       #  I don't advise changing this unless you have a strange setup
       - REDIS_DOCKER_OVERRIDE=true
   redis:
-    image: 'redis:alpine'
+    image: 'redis:7.0.0-alpine3.16'
     restart: always
     volumes:
       - type: bind
