@@ -39,7 +39,7 @@ namespace Cliptok.Commands
 
         public static async Task RemoveUserRoleAsync(CommandContext ctx, ulong role)
         {
-            // In case we ever decide to have indivdual commands to remove roles.
+            // In case we ever decide to have individual commands to remove roles.
             await RemoveUserRolesAsync(ctx, x => (ulong)x.GetValue(Program.cfgjson.UserRoles, null) == role);
         }
 

@@ -17,4 +17,4 @@ Please be respectful when submitting changes that optimise the flow of operation
 If we (developer(s)) cannot understand the concepts behind the code, it will be rejected on principle.  
 We are not here to learn how to code perfectly or in the best way, we are here to assist in the moderation of our community.
 
-And finally, this repository is NOT part of Hacktoberfest. Please do not make any contributions expecting points or rewards. We have the upmost respect for Hacktoberfest, but do not wish to take part.
+And finally, this repository is NOT part of Hacktoberfest. Please do not make any contributions expecting points or rewards. We have the utmost respect for Hacktoberfest, but do not wish to take part.

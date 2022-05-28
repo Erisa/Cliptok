@@ -35,7 +35,7 @@
         }
 
         [Command("editappend")]
-        [Description("Append content to an existing bot messsage with a newline.")]
+        [Description("Append content to an existing bot message with a newline.")]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task EditAppend(
             CommandContext ctx,

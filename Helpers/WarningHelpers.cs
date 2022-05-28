@@ -134,7 +134,7 @@
             }
             catch
             {
-                // thats fine, community must be disabled
+                // that's fine, community must be disabled
             }
 
             var msg = new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Warning} You were{extraWord}warned in **{guild.Name}**, reason: **{reason}**");

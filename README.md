@@ -51,7 +51,7 @@ Then:
 That's it! If you ever need to see the logs, `cd` back into the directory and run `docker-compose logs`.
 
 If you want to make a backup of the bot's data, that will be inside the `data` folder, though may be owned by root due to Docker limitations. It's up to the user hosting the bot to maintain their own backups (Or lack thereof).  
-The author(s) of the bot accept(s) no responsiblity for lost data due to negligence.
+The author(s) of the bot accept(s) no responsibility for lost data due to negligence.
 
 To update the bot in the future, `git pull` the repository and then pull and restart the containers:
 - `git pull && docker-compose pull && docker-compose up -d`

@@ -24,7 +24,7 @@ namespace Cliptok
             {
                 try
                 {
-                    if (Program.errorLogChannel != null && logEvent.Level >= LogEventLevel.Warning)
+                    if (Program.errorLogChannel != null)
                     {
                         StringWriter dummyWriter = new();
                         _textFormatter.Format(logEvent, dummyWriter);

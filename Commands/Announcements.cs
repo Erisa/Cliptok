@@ -33,7 +33,7 @@
             }
             else
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That role name isnt recognised!");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That role name isn't recognised!");
                 return;
             }
         }
@@ -105,7 +105,7 @@
             }
             else
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That role name isnt recognised!");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That role name isn't recognised!");
                 return;
             }
 

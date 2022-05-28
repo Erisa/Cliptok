@@ -52,7 +52,7 @@ namespace Cliptok.Helpers
             if (member.GuildAvatarHash == null && member.AvatarHash == null)
                 return false;
 
-            // turns out checking guild avatars isnt important
+            // turns out checking guild avatars isn't important
 
             //               if (member.GuildAvatarHash != null)
             //               {

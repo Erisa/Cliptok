@@ -11,7 +11,7 @@
             }
             catch (Exception ex)
             {
-                Program.discord.Logger.LogError(eventId: Program.CliptokEventID, exception: ex, message: "Error ocurred trying to type in {channel}", args: channel.Id);
+                Program.discord.Logger.LogError(eventId: Program.CliptokEventID, exception: ex, message: "Error occurred trying to type in {channel}", args: channel.Id);
                 return false;
             }
         }

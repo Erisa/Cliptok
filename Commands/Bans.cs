@@ -129,7 +129,7 @@
             }
             catch (Exception e)
             {
-                Program.discord.Logger.LogError(Program.CliptokEventID, e, "An exception ocurred while unbanning {user}", target.Id);
+                Program.discord.Logger.LogError(Program.CliptokEventID, e, "An exception occurred while unbanning {user}", target.Id);
                 return false;
             }
             await logChannel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned {target.Mention}!").WithAllowedMentions(Mentions.None));
@@ -190,7 +190,7 @@
 
         [Command("ban")]
         [Aliases("tempban", "bonk")]
-        [Description("Bans a user that you have permssion to ban, deleting all their messages in the process. See also: bankeep.")]
+        [Description("Bans a user that you have permission to ban, deleting all their messages in the process. See also: bankeep.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(Permissions.BanMembers)]
         public async Task BanCmd(CommandContext ctx,
      [Description("The user you wish to ban. Accepts many formats")] DiscordUser targetMember,
@@ -372,7 +372,7 @@
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned **{targetUser.Username}#{targetUser.Discriminator}**.");
                 else
                 {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.Member.Mention}, that user doesn't appear to be banned, *and* an error ocurred while attempting to unban them anyway.\nPlease contact the bot owner if this wasn't expected, the error has been logged.");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.Member.Mention}, that user doesn't appear to be banned, *and* an error occurred while attempting to unban them anyway.\nPlease contact the bot owner if this wasn't expected, the error has been logged.");
                 }
             }
         }

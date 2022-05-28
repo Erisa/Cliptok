@@ -47,7 +47,7 @@ namespace Cliptok.Events
 
         public static Task Discord_SocketErrored(DiscordClient client, SocketErrorEventArgs e)
         {
-            client.Logger.LogError(eventId: CliptokEventID, e.Exception, "A socket error ocurred!");
+            client.Logger.LogError(eventId: CliptokEventID, e.Exception, "A socket error occurred!");
             return Task.CompletedTask;
         }
 

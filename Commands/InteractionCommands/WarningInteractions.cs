@@ -73,7 +73,7 @@
         [SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task TransferWarningsSlashCommand(InteractionContext ctx,
             [Option("source_user", "The user currently holding the warnings.")] DiscordUser sourceUser,
-            [Option("target_user", "The user recieving the warnings.")] DiscordUser targetUser,
+            [Option("target_user", "The user receiving the warnings.")] DiscordUser targetUser,
             [Option("merge", "Whether to merge the source user's warnings and the target user's warnings.")] bool merge = false,
             [Option("force_override", "DESTRUCTIVE OPERATION: Whether to OVERRIDE and DELETE the target users existing warnings.")] bool forceOverride = false
         )
@@ -116,7 +116,7 @@
                 operationText = "merge ";
             else if (forceOverride)
                 operationText = "force ";
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successully {operationText}transferred warnings from {sourceUser.Mention} to {targetUser.Mention}!");
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully {operationText}transferred warnings from {sourceUser.Mention} to {targetUser.Mention}!");
             await Program.logChannel.SendMessageAsync(
                 new DiscordMessageBuilder()
                     .WithContent($"{Program.cfgjson.Emoji.Information} Warnings from {sourceUser.Mention} were {operationText}transferred to {targetUser.Mention} by `{ctx.User.Username}#{ctx.User.Discriminator}`")

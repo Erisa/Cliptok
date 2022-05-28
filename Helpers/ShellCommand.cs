@@ -31,7 +31,7 @@
             if (GetOSPlatform() == OSPlatform.Windows)
             {
                 fileName = Environment.GetEnvironmentVariable("COMSPEC");
-                // this shouldnt ever fail but so many people have cursed setups
+                // this shouldn't ever fail but so many people have cursed setups
                 if (!File.Exists(fileName))
                 {
                     fileName = "C:\\Windows\\system32\\cmd.exe";

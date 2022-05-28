@@ -196,7 +196,7 @@ namespace Cliptok
                 }
                 catch (Exception e)
                 {
-                    discord.Logger.LogError(CliptokEventID, "An Error ocurred during task runs: {message}", e.ToString());
+                    discord.Logger.LogError(CliptokEventID, "An Error occurred during task runs: {message}", e.ToString());
                 }
                 await Task.Delay(10000);
             }

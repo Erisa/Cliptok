@@ -43,7 +43,7 @@
                         else
                         {
                             Console.WriteLine(strOut);
-                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error ocurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
+                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
                         }
                     }
                     else
@@ -98,7 +98,7 @@
                         else
                         {
                             Console.WriteLine(strOut);
-                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error ocurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
+                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
                         }
                     }
                     else
@@ -186,7 +186,7 @@
                     else
                     {
                         Console.WriteLine(finishedShell.result);
-                        await msg.ModifyAsync($"Error occured during upload to Hastebin.\nAction was executed regardless, shell exit code was `{finishedShell.proc.ExitCode}`. Hastebin status code is `{hasteURL.StatusCode}`.\nPlease check the console/log for the command output.");
+                        await msg.ModifyAsync($"Error occurred during upload to Hastebin.\nAction was executed regardless, shell exit code was `{finishedShell.proc.ExitCode}`. Hastebin status code is `{hasteURL.StatusCode}`.\nPlease check the console/log for the command output.");
                     }
                 }
                 else
@@ -212,7 +212,7 @@
                     }
                     else
                     {
-                        await ctx.RespondAsync($"Error occured during upload to Hastebin. Hastebin status code is `{hasteURL.StatusCode}`.\n");
+                        await ctx.RespondAsync($"Error occurred during upload to Hastebin. Hastebin status code is `{hasteURL.StatusCode}`.\n");
                     }
                 }
                 else

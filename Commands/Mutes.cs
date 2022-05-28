@@ -36,8 +36,8 @@ namespace Cliptok.Commands
                 }
                 catch (Exception e)
                 {
-                    Program.discord.Logger.LogError(e, "An error ocurred unmuting {user}", targetUser.Id);
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be muted, *and* an error ocurred while attempting to unmute them anyway. Please contact the bot owner, the error has been logged.");
+                    Program.discord.Logger.LogError(e, "An error occurred unmuting {user}", targetUser.Id);
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be muted, *and* an error occurred while attempting to unmute them anyway. Please contact the bot owner, the error has been logged.");
                 }
         }
 

@@ -74,7 +74,7 @@
         }
 
         [Command("keepalive")]
-        [Description("Toggle whether or not to keep a threed alive permamnently until locked.")]
+        [Description("Toggle whether or not to keep a thread alive permanently until locked.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task KeepaliveCommand(CommandContext ctx, DiscordChannel channel = default)
         {

@@ -43,7 +43,7 @@
 
             if (finishedShell.proc.ExitCode != 0)
             {
-                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} An error ocurred trying to update private lists!\n```\n{result}\n```");
+                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} An error occurred trying to update private lists!\n```\n{result}\n```");
             }
             else
             {
