@@ -13,6 +13,19 @@ namespace Cliptok.Commands
             [RemainingText, Description("The time and reason for the lockdown. For example '3h' or '3h spam'. Default is permanent with no reason.")] string timeAndReason = ""
         )
         {
+            if (ctx.Channel.Type is ChannelType.PublicThread or ChannelType.PrivateThread or ChannelType.NewsThread)
+            {
+                var thread = (DiscordThreadChannel)ctx.Channel;
+                await Program.db.SetRemoveAsync("openthreads", thread.Id);
+
+                await thread.ModifyAsync(a =>
+                {
+                    a.IsArchived = true;
+                    a.Locked = true;
+                });
+                return;
+            }
+
             bool timeParsed = false;
             TimeSpan? lockDuration = null;
             string reason = "";

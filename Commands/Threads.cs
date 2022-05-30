@@ -10,7 +10,7 @@
             if (channel == default)
                 channel = ctx.Channel;
 
-            if (channel.Type is not ChannelType.PrivateThread && channel.Type is not ChannelType.PublicThread)
+            if (channel.Type is not ChannelType.PrivateThread && channel.Type is not ChannelType.PublicThread && channel.Type is not ChannelType.NewsThread)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {channel.Mention} is not a thread!");
                 return;
