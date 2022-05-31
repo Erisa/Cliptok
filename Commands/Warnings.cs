@@ -262,5 +262,73 @@ namespace Cliptok.Commands
             var user = await ctx.Client.GetUserAsync(Convert.ToUInt64(myList.Last().Key));
             await ctx.RespondAsync($":thinking: The user with the most warnings is **{user.Username}#{user.Discriminator}** with a total of **{myList.Last().Value} warnings!**\nThis includes users who have left or been banned.");
         }
+
+        [Command("mostwarningsday"), Description("Which day has the most warnings???")]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        public async Task MostWarningsDayCmd(CommandContext ctx)
+        {
+            await DiscordHelpers.SafeTyping(ctx.Channel);
+
+            var server = Program.redis.GetServer(Program.redis.GetEndPoints()[0]);
+            var keys = server.Keys();
+
+            Dictionary<string, int> counts = new();
+            Dictionary<string, int> noAutoCounts = new();
+
+            foreach (var key in keys)
+            {
+                if (ulong.TryParse(key.ToString(), out ulong number))
+                {
+                    var warningsOutput = Program.db.HashGetAll(key.ToString()).ToDictionary(
+                        x => x.Name.ToString(),
+                        x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
+                    );
+                    
+                    foreach(var warning in warningsOutput)
+                    {
+                        var day = warning.Value.WarnTimestamp.ToString("yyyy-MM-dd");
+                        if (!counts.ContainsKey(day))
+                        {
+                            counts[day] = 1;
+                        } else
+                        {
+                            counts[day] += 1;
+                        }
+                        if (warning.Value.ModUserId != 159985870458322944 && warning.Value.ModUserId != Program.discord.CurrentUser.Id)
+                        {
+                            if (!noAutoCounts.ContainsKey(day))
+                            {
+                                noAutoCounts[day] = 1;
+                            }
+                            else
+                            {
+                                noAutoCounts[day] += 1;
+                            }
+                        }
+                    }
+                }
+            }
+
+            List<KeyValuePair<string, int>> countList = counts.ToList();
+            countList.Sort(
+                delegate (KeyValuePair<string, int> pair1,
+                KeyValuePair<string, int> pair2)
+                {
+                    return pair1.Value.CompareTo(pair2.Value);
+                }
+            );
+
+            List<KeyValuePair<string, int>> noAutoCountList = noAutoCounts.ToList();
+            noAutoCountList.Sort(
+                delegate (KeyValuePair<string, int> pair1,
+                KeyValuePair<string, int> pair2)
+                {
+                    return pair1.Value.CompareTo(pair2.Value);
+                }
+            );
+
+            await ctx.RespondAsync($":thinking: As far as I can tell, the day with the most warnings issued was **{countList.Last().Key}** with a total of **{countList.Last().Value} warnings!**" +
+                $"\nExcluding automatic warnings, the most was on **{noAutoCountList.Last().Key}** with a total of **{noAutoCountList.Last().Value}** warnings!");
+        }
     }
 }
