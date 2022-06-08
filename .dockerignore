@@ -11,3 +11,4 @@ Dockerfile
 Dockerfile.*
 .github/*
 Lists/Private/*
+data/*
