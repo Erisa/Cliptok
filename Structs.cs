@@ -239,6 +239,8 @@
         [JsonProperty("everyoneFilter")]
         public bool EveryoneFilter { get; private set; } = false;
 
+        [JsonProperty("usernameAPILogChannel")]
+        public ulong UsernameAPILogChannel { get; private set; } = 0;
     }
 
     public class WorkflowConfig
@@ -450,5 +452,21 @@
         [JsonProperty("trust_rating")]
         public float TrustRating { get; set; }
     }
+
+    public class UsernameScamApiRequestJson
+    {
+        [JsonProperty("username")]
+        public string Username { get; set; }
+    }
+
+    public class UsernameScamApiResponseJson
+    {
+        [JsonProperty("match")]
+        public bool Match { get; set; }
+
+        [JsonProperty("reason")]
+        public string Reason { get; set; }
+    }
+
 
 }

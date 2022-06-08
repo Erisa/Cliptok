@@ -30,6 +30,7 @@ namespace Cliptok
         public static DiscordChannel badMsgLog;
         public static DiscordChannel errorLogChannel;
         public static DiscordChannel mysteryLogChannel;
+        public static DiscordChannel usernameAPILogChannel;
         public static DiscordGuild homeGuild;
 
         public static Random rand = new();
@@ -56,6 +57,7 @@ namespace Cliptok
             Log.Logger = new LoggerConfiguration()
 #if DEBUG
                 .MinimumLevel.Debug()
+                .Filter.ByExcluding("Contains(@m, 'Unknown event:')")
 #else
                 .Filter.ByExcluding("Contains(@m, 'Unknown event:')")
                 .MinimumLevel.Information()
@@ -124,7 +126,7 @@ namespace Cliptok
                 MinimumLogLevel = LogLevel.Information,
 #endif
                 LoggerFactory = logFactory,
-                Intents = DiscordIntents.All
+                Intents = DiscordIntents.All + 3145728
             });
 
             if (Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == null || Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == "githubtokenhere")

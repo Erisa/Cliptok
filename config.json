@@ -256,5 +256,6 @@
   "errorLogChannelId": 968463420586336286,
   "mysteryLogChannelId": 974161605938012160,
   "everyoneFilter": true,
-  "botLogsWebhookEnvVariable": "CLIPTOK_BOTLOGS_WEBHOOK_URL"
+  "botLogsWebhookEnvVariable": "CLIPTOK_BOTLOGS_WEBHOOK_URL",
+  "usernameAPILogChannel": 984230829343535105
 }
