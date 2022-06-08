@@ -16,36 +16,39 @@ namespace Cliptok.Helpers
                 if (db.SetContains("safeusernamestore", member.Username))
                 {
                     discord.Logger.LogDebug("Unnecessary username check skipped for {member}", member.Username);
-                    return false;
-                }
-
-                var apiResult = await APIs.UsernameAPI.UsernameAPICheckAsync(member.Username);
-
-                if (apiResult.statusCode == HttpStatusCode.OK)
-                {
-                    if (apiResult.match)
-                    {
-                        discord.Logger.LogDebug("Experimental Username check for {member}: {status} {response}", member.Username, apiResult.statusCode, apiResult.responseString);
-                        var embed = new DiscordEmbedBuilder()
-                            .WithTimestamp(DateTime.Now)
-                            .WithFooter($"User ID: {member.Id}", null)
-                            .WithAuthor($"{member.Username}#{member.Discriminator}", null, member.AvatarUrl)
-                            .AddField("Infringing name", member.Username)
-                            .AddField("API Response", $"```json\n{apiResult.responseString}\n```")
-                            .WithColor(new DiscordColor(0xf03916));
-                        var investigations = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
-                        await usernameAPILogChannel.SendMessageAsync($"{cfgjson.Emoji.Warning} {member.Mention} was flagged by the experimental username API.", embed);
-                    } else
-                    {
-                        discord.Logger.LogDebug("Experimental Username check for {member}: {status} {response}", member.Username, apiResult.statusCode, apiResult.responseString);
-                        await db.SetAddAsync("safeusernamestore", member.Username);
-                    }
-                } else if (apiResult.statusCode != HttpStatusCode.OK)
-                {
-                    discord.Logger.LogError("Experimental username check for {member}: {status} {response}", member.Username, (int)apiResult.statusCode, apiResult.responseString);
                 } else
                 {
-                    discord.Logger.LogDebug("Experimental Username check for {member}: {status} {response}", member.Username, apiResult.statusCode, apiResult.responseString);
+                    var apiResult = await APIs.UsernameAPI.UsernameAPICheckAsync(member.Username);
+
+                    if (apiResult.statusCode == HttpStatusCode.OK)
+                    {
+                        if (apiResult.match)
+                        {
+                            discord.Logger.LogDebug("Experimental Username check for {member}: {status} {response}", member.Username, apiResult.statusCode, apiResult.responseString);
+                            var embed = new DiscordEmbedBuilder()
+                                .WithTimestamp(DateTime.Now)
+                                .WithFooter($"User ID: {member.Id}", null)
+                                .WithAuthor($"{member.Username}#{member.Discriminator}", null, member.AvatarUrl)
+                                .AddField("Infringing name", member.Username)
+                                .AddField("API Response", $"```json\n{apiResult.responseString}\n```")
+                                .WithColor(new DiscordColor(0xf03916));
+                            var investigations = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
+                            await usernameAPILogChannel.SendMessageAsync($"{cfgjson.Emoji.Warning} {member.Mention} was flagged by the experimental username API.", embed);
+                        }
+                        else
+                        {
+                            discord.Logger.LogDebug("Experimental Username check for {member}: {status} {response}", member.Username, apiResult.statusCode, apiResult.responseString);
+                            await db.SetAddAsync("safeusernamestore", member.Username);
+                        }
+                    }
+                    else if (apiResult.statusCode != HttpStatusCode.OK)
+                    {
+                        discord.Logger.LogError("Experimental username check for {member}: {status} {response}", member.Username, (int)apiResult.statusCode, apiResult.responseString);
+                    }
+                    else
+                    {
+                        discord.Logger.LogDebug("Experimental Username check for {member}: {status} {response}", member.Username, apiResult.statusCode, apiResult.responseString);
+                    }
                 }
             }
 
