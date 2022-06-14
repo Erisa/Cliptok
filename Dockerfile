@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0.300 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:6.0.301 AS build-env
 WORKDIR /app
 
 # Copy csproj and restore as distinct layers
@@ -10,7 +10,7 @@ COPY . ./
 RUN dotnet build -c Release -o out
 
 # We already have this image pulled, its actually quicker to reuse it
-FROM mcr.microsoft.com/dotnet/sdk:6.0.300 AS git-collector
+FROM mcr.microsoft.com/dotnet/sdk:6.0.301 AS git-collector
 WORKDIR /out
 COPY . .
 RUN touch dummy.txt && \
@@ -21,7 +21,7 @@ RUN touch dummy.txt && \
     fi
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/runtime:6.0.5-alpine3.15
+FROM mcr.microsoft.com/dotnet/runtime:6.0.6-alpine3.15
 LABEL com.centurylinklabs.watchtower.enable true
 WORKDIR /app
 RUN apk add --no-cache git redis
