@@ -13,7 +13,6 @@
 
             await channel.AddOverwriteAsync(channel.Guild.CurrentMember, Permissions.SendMessages, Permissions.None, "Failsafe 1 for Lockdown");
             await channel.AddOverwriteAsync(channel.Guild.GetRole(Program.cfgjson.ModRole), Permissions.SendMessages, Permissions.None, "Failsafe 2 for Lockdown");
-            await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, "Lockdown command");
 
             foreach (DiscordOverwrite overwrite in existingOverwrites)
             {
@@ -21,6 +20,15 @@
                 {
                     if (await overwrite.GetRoleAsync() == channel.Guild.EveryoneRole)
                     {
+                        if (overwrite.Denied.HasPermission(Permissions.AccessChannels))
+                        {
+                            await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.AccessChannels, "Lockdown command");
+                        }
+                        else
+                        {
+                            await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, "Lockdown command");
+                        }
+
                         if (overwrite.Allowed.HasPermission(Permissions.SendMessages))
                         {
                             await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), (Permissions)(overwrite.Allowed - Permissions.SendMessages), Permissions.SendMessages | overwrite.Denied);
