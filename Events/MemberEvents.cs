@@ -166,6 +166,10 @@ namespace Cliptok.Events
         {
             Task.Run(async () =>
             {
+                // dont check bots
+                if (e.Member.IsBot)
+                    return;
+
                 // in case we end up in random guilds
                 if (e.Guild.Id != cfgjson.ServerID)
                     return;
@@ -197,6 +201,10 @@ namespace Cliptok.Events
         {
             await Task.Run(async () =>
             {
+                // dont check bots
+                if (e.UserAfter.IsBot)
+                    return;
+
                 var member = await homeGuild.GetMemberAsync(e.UserAfter.Id);
 
                 DehoistHelpers.CheckAndDehoistMemberAsync(member);
