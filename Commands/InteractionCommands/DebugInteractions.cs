@@ -7,42 +7,15 @@
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task ScamCheck(InteractionContext ctx, [Option("input", "Domain or message content to scan.")] string content)
         {
-            var urlMatches = Constants.RegexConstants.url_rx.Matches(content);
-            if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
+            var result = await Program.PhishChecker.IsPhishing(content);
+
+            if (result)
             {
-                var (match, httpStatus, responseText, _) = await APIs.PhishingAPI.PhishingAPICheckAsync(content);
-
-                string responseToSend;
-                if (match)
-                {
-                    responseToSend = $"Match found:\n```json\n{responseText}\n```";
-
-                }
-                else
-                {
-                    responseToSend = $"No valid match found.\nHTTP Status `{(int)httpStatus}`, result:\n```json\n{responseText}\n```";
-                }
-
-                if (responseToSend.Length > 1940)
-                {
-                    try
-                    {
-                        HasteBinResult hasteURL = await Program.hasteUploader.Post(responseText);
-                        if (hasteURL.IsSuccess)
-                            responseToSend = hasteURL.FullUrl + ".json";
-                        else
-                            responseToSend = "Response was too big and Hastebin failed, sorry.";
-                    }
-                    catch
-                    {
-                        responseToSend = "Response was too big and Hastebin failed, sorry.";
-                    }
-                }
-                await ctx.RespondAsync(responseToSend);
+                await ctx.RespondAsync("A phishing domain match was found in this message!");
             }
             else
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Anti-phishing API is not configured, nothing for me to do.");
+                await ctx.RespondAsync("There was no match...");
             }
         }
 

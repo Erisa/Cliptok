@@ -51,7 +51,8 @@ namespace Cliptok
                             Program.errorLogChannel.SendMessageAsync(new DiscordMessageBuilder().WithFile("error.txt", stream));
                         }
                     }
-                } catch (Exception ex)
+                }
+                catch (Exception)
                 {
                     // well we cant log an error that happened while reporting an error, can we?
                 }

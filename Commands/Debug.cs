@@ -144,6 +144,23 @@
                 };
             }
 
+            [Command("phishing")]
+            [RequireHomeserverPerm(ServerPermLevel.Moderator)]
+            [Description("Debug the scam list. See also: scamcheck command.")]
+            public async Task DebugScams(CommandContext ctx)
+            {
+                int size = await Program.PhishChecker.DatabaseSize();
+                string[] phishingDatabase = await Program.PhishChecker.GetPhishingDomains();
+
+                var stream = new MemoryStream(Encoding.UTF8.GetBytes(string.Join("\n", phishingDatabase)));
+                await ctx.RespondAsync(
+                    new DiscordMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Information} The phishing database contains `{size}` domains!")
+                        .WithFile("phishes.txt", stream
+                    )
+                );
+            }
+
             [Command("refresh")]
             [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
             [Description("Manually run all the automatic actions.")]

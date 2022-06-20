@@ -24,9 +24,11 @@ namespace Cliptok.Events
                 }
                 else
                 {
-                    DiscordEmbedBuilder embed = new();
-                    embed.Description = text;
-                    embed.Title = "Deleted message content";
+                    DiscordEmbedBuilder embed = new()
+                    {
+                        Description = text,
+                        Title = "Deleted message content"
+                    };
                     webhookOut = new DiscordWebhookBuilder().AddEmbed(embed);
                     await e.Interaction.EditOriginalResponseAsync(webhookOut);
                 }

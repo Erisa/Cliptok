@@ -8,20 +8,20 @@ namespace Cliptok.Events
         {
             Task.Run(async () =>
             {
-            client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
+                client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
 
-            if (cfgjson.ErrorLogChannelId == 0)
-            {
-                errorLogChannel = await client.GetChannelAsync(cfgjson.HomeChannel);
-            }
-            else
-            {
-                errorLogChannel = await client.GetChannelAsync(cfgjson.ErrorLogChannelId);
-                await errorLogChannel.SendMessageAsync($"{cfgjson.Emoji.Connected} {discord.CurrentUser.Username} has connected to Discord!");
-            }
+                if (cfgjson.ErrorLogChannelId == 0)
+                {
+                    errorLogChannel = await client.GetChannelAsync(cfgjson.HomeChannel);
+                }
+                else
+                {
+                    errorLogChannel = await client.GetChannelAsync(cfgjson.ErrorLogChannelId);
+                    await errorLogChannel.SendMessageAsync($"{cfgjson.Emoji.Connected} {discord.CurrentUser.Username} has connected to Discord!");
+                }
 
-            if (cfgjson.UsernameAPILogChannel != 0)
-                usernameAPILogChannel = await client.GetChannelAsync(cfgjson.UsernameAPILogChannel);
+                if (cfgjson.UsernameAPILogChannel != 0)
+                    usernameAPILogChannel = await client.GetChannelAsync(cfgjson.UsernameAPILogChannel);
 
                 if (cfgjson.MysteryLogChannelId == 0)
                     mysteryLogChannel = errorLogChannel;

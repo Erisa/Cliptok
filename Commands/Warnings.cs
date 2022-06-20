@@ -283,14 +283,15 @@ namespace Cliptok.Commands
                         x => x.Name.ToString(),
                         x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
                     );
-                    
-                    foreach(var warning in warningsOutput)
+
+                    foreach (var warning in warningsOutput)
                     {
                         var day = warning.Value.WarnTimestamp.ToString("yyyy-MM-dd");
                         if (!counts.ContainsKey(day))
                         {
                             counts[day] = 1;
-                        } else
+                        }
+                        else
                         {
                             counts[day] += 1;
                         }

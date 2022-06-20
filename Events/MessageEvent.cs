@@ -337,42 +337,14 @@ namespace Cliptok.Events
                     }
 
                     // phishing API
-                    var urlMatches = url_rx.Matches(message.Content);
-                    if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
+                    if (await Program.PhishChecker.IsPhishing(message.Content))
                     {
-                        var (phishingMatch, httpStatus, responseText, phishingResponse) = await APIs.PhishingAPI.PhishingAPICheckAsync(message.Content);
-
-                        if (httpStatus == HttpStatusCode.OK)
-                        {
-                            if (phishingMatch)
-                            {
-                                _ = message.DeleteAsync();
-                                string reason = "Sending phishing URL(s)";
-                                DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
-                                var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, message.Channel, " automatically ");
-
-                                string responseToSend = $"```json\n{responseText}\n```";
-                                if (responseToSend.Length > 1940)
-                                {
-                                    try
-                                    {
-                                        HasteBinResult hasteURL = await Program.hasteUploader.Post(responseText);
-                                        if (hasteURL.IsSuccess)
-                                            responseToSend = hasteURL.FullUrl + ".json";
-                                        else
-                                            responseToSend = "Response was too big and Hastebin failed, sorry.";
-                                    }
-                                    catch
-                                    {
-                                        responseToSend = "Response was too big and Hastebin failed, sorry.";
-                                    }
-                                }
-
-                                (string name, string value, bool inline) extraField = new("API Response", responseToSend, false);
-                                await InvestigationsHelpers.SendInfringingMessaageAsync(Program.badMsgLog, message, reason, warning.ContextLink, extraField);
-                                return;
-                            }
-                        }
+                        string reason = "Sending phishing URL(s)";
+                        _ = message.DeleteAsync();
+                        DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                        var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, message.Channel, " automatically ");
+                        await InvestigationsHelpers.SendInfringingMessaageAsync(Program.badMsgLog, message, reason, warning.ContextLink);
+                        return;
                     }
 
                     // attempted to ping @everyone/@here
