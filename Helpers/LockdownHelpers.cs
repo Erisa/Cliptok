@@ -9,9 +9,46 @@
                 return;
             }
 
+            DiscordOverwrite[] existingOverwrites = channel.PermissionOverwrites.ToArray();
+
             await channel.AddOverwriteAsync(channel.Guild.CurrentMember, Permissions.SendMessages, Permissions.None, "Failsafe 1 for Lockdown");
             await channel.AddOverwriteAsync(channel.Guild.GetRole(Program.cfgjson.ModRole), Permissions.SendMessages, Permissions.None, "Failsafe 2 for Lockdown");
-            await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, "Lockdown command");
+
+            foreach (DiscordOverwrite overwrite in existingOverwrites)
+            {
+                if (overwrite.Type == OverwriteType.Role)
+                {
+                    if (await overwrite.GetRoleAsync() == channel.Guild.EveryoneRole)
+                    {
+                        if (overwrite.Denied.HasPermission(Permissions.AccessChannels))
+                        {
+                            await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.AccessChannels, "Lockdown command");
+                        }
+                        else
+                        {
+                            await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, "Lockdown command");
+                        }
+
+                        if (overwrite.Allowed.HasPermission(Permissions.SendMessages))
+                        {
+                            await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), (Permissions)(overwrite.Allowed - Permissions.SendMessages), Permissions.SendMessages | overwrite.Denied);
+                        }
+                        else
+                        {
+                            await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed, Permissions.SendMessages | overwrite.Denied);
+                        }
+                    }
+                    else
+                    {
+                        await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed, overwrite.Denied);
+
+                    }
+                }
+                else
+                {
+                    await channel.AddOverwriteAsync(await overwrite.GetMemberAsync(), overwrite.Allowed, overwrite.Denied);
+                }
+            }
 
             string msg;
             if (reason == "")
@@ -36,19 +73,39 @@
             {
                 if (permission.Type == OverwriteType.Role)
                 {
-                    var role = await permission.GetRoleAsync();
+                    DiscordOverwriteBuilder newOverwrite;
                     if (
-                        (role == discordChannel.Guild.EveryoneRole
-                        && permission.Denied == Permissions.SendMessages)
-                        ||
-                        (role == discordChannel.Guild.GetRole(Program.cfgjson.ModRole)
-                        && permission.Allowed == Permissions.SendMessages
-                        )
+                        (await permission.GetRoleAsync() == discordChannel.Guild.EveryoneRole
+                        && permission.Denied.HasPermission(Permissions.SendMessages))
                         )
                     {
+                        if (permission.Denied.HasPermission(Permissions.SendMessages))
+                        {
+                            newOverwrite = new(discordChannel.Guild.EveryoneRole)
+                            {
+                                Allowed = permission.Allowed,
+                                Denied = (Permissions)(permission.Denied - Permissions.SendMessages)
+                            };
+                        }
+                        else
+                        {
+                            newOverwrite = new(discordChannel.Guild.EveryoneRole)
+                            {
+                                Allowed = permission.Allowed,
+                                Denied = permission.Denied,
+                            };
+                        }
+
                         success = true;
+                        await discordChannel.AddOverwriteAsync(discordChannel.Guild.EveryoneRole, newOverwrite.Allowed, newOverwrite.Denied);
+                    }
+
+                    if (await permission.GetRoleAsync() == discordChannel.Guild.GetRole(Program.cfgjson.ModRole)
+                        && permission.Allowed == Permissions.SendMessages)
+                    {
                         await permission.DeleteAsync();
                     }
+                    
                 }
                 else
                 {
