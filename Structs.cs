@@ -420,39 +420,6 @@
         public ulong PatchTuesday { get; private set; }
     }
 
-    public class PhishingRequestBody
-    {
-        [JsonProperty("message")]
-        public string Message { get; set; }
-    }
-
-    public class PhishingResponseBody
-    {
-        [JsonProperty("match")]
-        public bool Match { get; set; }
-
-        [JsonProperty("matches")]
-        public List<PhishingMatch> Matches { get; set; }
-    }
-
-    public class PhishingMatch
-    {
-        [JsonProperty("followed")]
-        public bool Followed { get; set; }
-
-        [JsonProperty("domain")]
-        public string Domain { get; set; }
-
-        [JsonProperty("source")]
-        public string Source { get; set; }
-
-        [JsonProperty("type")]
-        public string Type { get; set; }
-
-        [JsonProperty("trust_rating")]
-        public float TrustRating { get; set; }
-    }
-
     public class UsernameScamApiRequestJson
     {
         [JsonProperty("username")]
@@ -468,5 +435,25 @@
         public string Reason { get; set; }
     }
 
+    public class GitHubDispatchBody
+    {
+        [JsonProperty("ref")]
+        public string Ref { get; set; }
+
+        [JsonProperty("inputs")]
+        public GitHubDispatchInputs Inputs { get; set; }
+    }
+
+    public class GitHubDispatchInputs
+    {
+        [JsonProperty("file")]
+        public string File { get; set; }
+
+        [JsonProperty("text")]
+        public string Text { get; set; }
+
+        [JsonProperty("user")]
+        public string User { get; set; }
+    }
 
 }

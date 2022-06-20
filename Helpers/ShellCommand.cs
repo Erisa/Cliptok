@@ -2,25 +2,6 @@
 {
     internal class ShellCommand
     {
-        public static OSPlatform GetOSPlatform()
-        {
-            // Default to "Unknown" platform.
-            OSPlatform osPlatform = OSPlatform.Create("Unknown");
-
-            // Check if it's windows 
-            bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-            osPlatform = isWindows ? OSPlatform.Windows : osPlatform;
-            // Check if it's osx 
-            bool isOSX = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
-            osPlatform = isOSX ? OSPlatform.OSX : osPlatform;
-            // Check if it's Linux 
-            bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
-            osPlatform = isLinux ? OSPlatform.Linux : osPlatform;
-            // Check if it's FreeBSD
-            bool isBSD = RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD);
-            osPlatform = isBSD ? OSPlatform.FreeBSD : osPlatform;
-            return osPlatform;
-        }
 
         public static ShellResult RunShellCommand(String command)
         {
@@ -28,7 +9,7 @@
             string arguments;
 
             string escapedArgs = command.Replace("\"", "\\\"");
-            if (GetOSPlatform() == OSPlatform.Windows)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 fileName = Environment.GetEnvironmentVariable("COMSPEC");
                 // this shouldn't ever fail but so many people have cursed setups

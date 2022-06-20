@@ -139,6 +139,5 @@
                 await LockdownHelpers.LockChannelAsync(channel: ctx.Channel, duration: lockDuration);
             }
         }
-
     }
 }

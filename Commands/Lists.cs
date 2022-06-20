@@ -2,27 +2,6 @@
 {
     internal class Lists : BaseCommandModule
     {
-        public class GitHubDispatchBody
-        {
-            [JsonProperty("ref")]
-            public string Ref { get; set; }
-
-            [JsonProperty("inputs")]
-            public GitHubDispatchInputs Inputs { get; set; }
-        }
-
-        public class GitHubDispatchInputs
-        {
-            [JsonProperty("file")]
-            public string File { get; set; }
-
-            [JsonProperty("text")]
-            public string Text { get; set; }
-
-            [JsonProperty("user")]
-            public string User { get; set; }
-        }
-
         [Command("listupdate")]
         [Description("Updates the private lists from the GitHub repository, then reloads them into memory.")]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
