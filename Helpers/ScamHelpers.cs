@@ -16,8 +16,7 @@ namespace Cliptok.Helpers
                 if (db.SetContains("safeusernamestore", member.Username))
                 {
                     discord.Logger.LogDebug("Unnecessary username check skipped for {member}", member.Username);
-                }
-                else
+                } else
                 {
                     var apiResult = await APIs.UsernameAPI.UsernameAPICheckAsync(member.Username);
 

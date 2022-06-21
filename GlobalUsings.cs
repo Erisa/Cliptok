@@ -13,7 +13,6 @@ global using Microsoft.Extensions.Logging;
 global using Newtonsoft.Json;
 global using Serilog;
 global using Serilog.Sinks.SystemConsole.Themes;
-global using SinkingYachts;
 global using StackExchange.Redis;
 global using System;
 global using System.Collections.Generic;

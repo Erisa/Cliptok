@@ -13,9 +13,7 @@ GitHub Issues will only be accepted if they are reproducible on the production b
 
 ## Note about scam domains
 Cliptok no longer includes scam domains in its public source code. If you are using Cliptok or its lists to assist with your moderation, **don't**.  
-There are many projects better suited to this.
-
-The phishing domain checking in Cliptok currently uses the [SinkingYachts](https://github.com/actually-akac/SinkingYachts) C# library.
+There are many projects better suited to this, and Cliptok now uses new methods of detecting phishing links that we do not wish to make public.
 
 Scam message parts continue to be available at [Lists/scams.txt](Lists/scams.txt) and you are free to contribute to those. Do not contribute scam domains, we don't need them.
 

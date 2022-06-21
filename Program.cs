@@ -40,8 +40,6 @@ namespace Cliptok
 
         static public readonly HttpClient httpClient = new();
 
-        public static readonly YachtsClient PhishChecker = new(mode: StorageMode.LocalWS, identity: "Cliptok (https://github.com/Erisa/Cliptok)");
-
         public static void UpdateLists()
         {
             foreach (var list in cfgjson.WordListList)
@@ -53,7 +51,6 @@ namespace Cliptok
 
         static async Task Main(string[] _)
         {
-
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var logFormat = "[{Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{Level}] {Message}{NewLine}{Exception}";
 
@@ -142,7 +139,7 @@ namespace Cliptok
             slash.SlashCommandErrored += InteractionEvents.SlashCommandErrorEvent;
             var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands" && !t.IsNested);
             foreach (var type in slashCommandClasses)
-                slash.RegisterCommands(type, cfgjson.ServerID);
+                slash.RegisterCommands(type, cfgjson.ServerID); ;
 
             discord.ComponentInteractionCreated += InteractionEvents.ComponentInteractionCreateEvent;
             discord.Ready += ReadyEvent.OnReady;
@@ -188,14 +185,12 @@ namespace Cliptok
             {
                 try
                 {
-                    List<Task<bool>> taskList = new()
-                    {
-                        Tasks.PunishmentTasks.CheckMutesAsync(),
-                        Tasks.PunishmentTasks.CheckBansAsync(),
-                        Tasks.ReminderTasks.CheckRemindersAsync(),
-                        Tasks.RaidmodeTasks.CheckRaidmodeAsync(cfgjson.ServerID),
-                        Tasks.LockdownTasks.CheckUnlocksAsync()
-                    };
+                    List<Task<bool>> taskList = new();
+                    taskList.Add(Tasks.PunishmentTasks.CheckMutesAsync());
+                    taskList.Add(Tasks.PunishmentTasks.CheckBansAsync());
+                    taskList.Add(Tasks.ReminderTasks.CheckRemindersAsync());
+                    taskList.Add(Tasks.RaidmodeTasks.CheckRaidmodeAsync(cfgjson.ServerID));
+                    taskList.Add(Tasks.LockdownTasks.CheckUnlocksAsync());
 
                     // To prevent a future issue if checks take longer than 10 seconds,
                     // we only start the 10 second counter after all tasks have concluded.

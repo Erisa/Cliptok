@@ -253,8 +253,7 @@
                             if (muteDetails.ExpireTime is null)
                             {
                                 await dmMessage.ModifyAsync($"{Program.cfgjson.Emoji.Success} You were muted in **{guild.Name}**, but the mute was revoked early by a Moderator.");
-                            }
-                            else
+                            } else
                             {
                                 await dmMessage.ModifyAsync($"{Program.cfgjson.Emoji.Success} You were muted in **{guild.Name}**  for **{TimeHelpers.TimeToPrettyFormat((TimeSpan)(muteDetails.ExpireTime - muteDetails.ActionTime), false)}** but the mute was revoked early by a Moderator.");
                             }
