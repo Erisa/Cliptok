@@ -2,11 +2,11 @@
 {
     public class LockdownHelpers
     {
-        public static async Task LockChannelAsync(DiscordChannel channel, TimeSpan? duration = null, string reason = "")
+        public static async Task<bool> LockChannelAsync(DiscordChannel channel, TimeSpan? duration = null, string reason = "", bool lockThreads = false)
         {
             if (!Program.cfgjson.LockdownEnabledChannels.Contains(channel.Id))
             {
-                return;
+                return false;
             }
 
             DiscordOverwrite[] existingOverwrites = channel.PermissionOverwrites.ToArray();
@@ -20,22 +20,27 @@
                 {
                     if (await overwrite.GetRoleAsync() == channel.Guild.EveryoneRole)
                     {
-                        if (overwrite.Denied.HasPermission(Permissions.AccessChannels))
+                        if (lockThreads)
                         {
-                            await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.AccessChannels, "Lockdown command");
+                            if (overwrite.Denied.HasPermission(Permissions.AccessChannels))
+                            {
+                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.AccessChannels | Permissions.SendMessagesInThreads, "Lockdown command");
+                            }
+                            else
+                            {
+                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.SendMessagesInThreads, "Lockdown command");
+                            }
                         }
                         else
                         {
-                            await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, "Lockdown command");
-                        }
-
-                        if (overwrite.Allowed.HasPermission(Permissions.SendMessages))
-                        {
-                            await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), (Permissions)(overwrite.Allowed - Permissions.SendMessages), Permissions.SendMessages | overwrite.Denied);
-                        }
-                        else
-                        {
-                            await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed, Permissions.SendMessages | overwrite.Denied);
+                            if (overwrite.Denied.HasPermission(Permissions.AccessChannels))
+                            {
+                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.AccessChannels, "Lockdown command");
+                            }
+                            else
+                            {
+                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, "Lockdown command");
+                            }
                         }
                     }
                     else
@@ -63,9 +68,10 @@
             }
 
             await channel.SendMessageAsync(msg);
+            return true;
         }
 
-        public static async Task<bool> UnlockChannel(DiscordChannel discordChannel, DiscordMember discordMember)
+        public static async Task<bool> UnlockChannel(DiscordChannel discordChannel, DiscordMember discordMember, bool isMassUnlock = false)
         {
             bool success = false;
             var permissions = discordChannel.PermissionOverwrites.ToArray();
@@ -79,12 +85,12 @@
                         && permission.Denied.HasPermission(Permissions.SendMessages))
                         )
                     {
-                        if (permission.Denied.HasPermission(Permissions.SendMessages))
+                        if (permission.Denied.HasPermission(Permissions.SendMessagesInThreads))
                         {
                             newOverwrite = new(discordChannel.Guild.EveryoneRole)
                             {
                                 Allowed = permission.Allowed,
-                                Denied = (Permissions)(permission.Denied - Permissions.SendMessages)
+                                Denied = permission.Denied - Permissions.SendMessages - Permissions.SendMessagesInThreads
                             };
                         }
                         else
@@ -92,7 +98,7 @@
                             newOverwrite = new(discordChannel.Guild.EveryoneRole)
                             {
                                 Allowed = permission.Allowed,
-                                Denied = permission.Denied,
+                                Denied = (Permissions)(permission.Denied - Permissions.SendMessages)
                             };
                         }
 
@@ -125,7 +131,8 @@
             }
             else
             {
-                await discordChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} This channel is not locked, or unlock failed.");
+                if (!isMassUnlock)
+                    await discordChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} This channel is not locked, or unlock failed.");
             }
             return success;
         }

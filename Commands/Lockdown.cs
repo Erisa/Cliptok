@@ -78,7 +78,7 @@ namespace Cliptok.Commands
                     try
                     {
                         var channel = await ctx.Client.GetChannelAsync(chanID);
-                        await LockdownHelpers.LockChannelAsync(channel: channel, reason: reason);
+                        await LockdownHelpers.LockChannelAsync(channel: channel);
                     }
                     catch
                     {
