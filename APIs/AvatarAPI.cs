@@ -11,6 +11,7 @@ namespace Cliptok.APIs
             var builder = new UriBuilder(avatarAPIBaseURL);
             var query = HttpUtility.ParseQueryString(builder.Query);
             query["avatar"] = avatarUrl;
+            query["threshold"] = "0.95";
             builder.Query = query.ToString();
             string url = builder.ToString();
 
