@@ -136,7 +136,7 @@
                     lockDuration = TimeSpan.FromHours(2);
                 }
 
-                await LockdownHelpers.LockChannelAsync(channel: ctx.Channel, duration: lockDuration);
+                await LockdownHelpers.LockChannelAsync(user: ctx.User, channel: ctx.Channel, duration: lockDuration);
             }
         }
 

@@ -2,7 +2,7 @@
 {
     public class LockdownHelpers
     {
-        public static async Task<bool> LockChannelAsync(DiscordChannel channel, TimeSpan? duration = null, string reason = "", bool lockThreads = false)
+        public static async Task<bool> LockChannelAsync(DiscordUser user, DiscordChannel channel, TimeSpan? duration = null, string reason = "No reason specified.", bool lockThreads = false)
         {
             if (!Program.cfgjson.LockdownEnabledChannels.Contains(channel.Id))
             {
@@ -24,22 +24,22 @@
                         {
                             if (overwrite.Denied.HasPermission(Permissions.AccessChannels))
                             {
-                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.AccessChannels | Permissions.SendMessagesInThreads, "Lockdown command");
+                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.AccessChannels | Permissions.SendMessagesInThreads, $"[Lockdown by {user.Username}#{user.Discriminator}]: {reason}");
                             }
                             else
                             {
-                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.SendMessagesInThreads, "Lockdown command");
+                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.SendMessagesInThreads, $"[Lockdown by {user.Username}#{user.Discriminator}]: {reason}");
                             }
                         }
                         else
                         {
                             if (overwrite.Denied.HasPermission(Permissions.AccessChannels))
                             {
-                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.AccessChannels, "Lockdown command");
+                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.AccessChannels, $"[Lockdown by {user.Username}#{user.Discriminator}]: {reason}");
                             }
                             else
                             {
-                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, "Lockdown command");
+                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, $"[Lockdown by {user.Username}#{user.Discriminator}]: {reason}");
                             }
                         }
                     }
@@ -56,7 +56,7 @@
             }
 
             string msg;
-            if (reason == "")
+            if (reason == "" || reason == "No reason specified.")
                 msg = $"{Program.cfgjson.Emoji.Locked} This channel has been locked by a Moderator.";
             else
                 msg = $"{Program.cfgjson.Emoji.Locked} This channel has been locked: **{reason}**";
@@ -71,7 +71,7 @@
             return true;
         }
 
-        public static async Task<bool> UnlockChannel(DiscordChannel discordChannel, DiscordMember discordMember, bool isMassUnlock = false)
+        public static async Task<bool> UnlockChannel(DiscordChannel discordChannel, DiscordMember discordMember, string reason = "No reason specified.", bool isMassUnlock = false)
         {
             bool success = false;
             var permissions = discordChannel.PermissionOverwrites.ToArray();
@@ -103,7 +103,7 @@
                         }
 
                         success = true;
-                        await discordChannel.AddOverwriteAsync(discordChannel.Guild.EveryoneRole, newOverwrite.Allowed, newOverwrite.Denied);
+                        await discordChannel.AddOverwriteAsync(discordChannel.Guild.EveryoneRole, newOverwrite.Allowed, newOverwrite.Denied, $"[Unlock by {discordMember.Username}#{discordMember.Discriminator}]: {reason}");
                     }
 
                     if (await permission.GetRoleAsync() == discordChannel.Guild.GetRole(Program.cfgjson.ModRole)

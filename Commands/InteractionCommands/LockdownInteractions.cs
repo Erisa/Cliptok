@@ -11,7 +11,7 @@ namespace Cliptok.Commands.InteractionCommands
             [SlashCommand("channel", "Lock the current channel. See also: unlock channel")]
             public async Task LockdownChannelCommand(
                 InteractionContext ctx,
-                [Option("reason", "The reason for the lockdown.")] string reason = "",
+                [Option("reason", "The reason for the lockdown.")] string reason = "No reason specified.",
                 [Option("time", "The length of time to lock the channel for.")] string time = null,
                 [Option("lockthreads", "Whether to lock this channel's threads. Disables sending messages, but does not archive them.")] bool lockThreads = false)
             {
@@ -58,7 +58,7 @@ namespace Cliptok.Commands.InteractionCommands
                     return;
                 }
 
-                bool success = await LockdownHelpers.LockChannelAsync(channel: currentChannel, duration: lockDuration, reason: reason, lockThreads: lockThreads);
+                bool success = await LockdownHelpers.LockChannelAsync(user: ctx.User, channel: currentChannel, duration: lockDuration, reason: reason, lockThreads: lockThreads);
                 if (success)
                     await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Channel locked successfully.").AsEphemeral(true));
                 else
@@ -89,7 +89,7 @@ namespace Cliptok.Commands.InteractionCommands
                     try
                     {
                         var channel = await ctx.Client.GetChannelAsync(chanID);
-                        await LockdownHelpers.LockChannelAsync(channel: channel, duration: lockDuration, reason: reason, lockThreads: lockThreads);
+                        await LockdownHelpers.LockChannelAsync(user: ctx.User, channel: channel, duration: lockDuration, reason: reason, lockThreads: lockThreads);
                     }
                     catch
                     {
@@ -143,7 +143,7 @@ namespace Cliptok.Commands.InteractionCommands
                     try
                     {
                         var currentChannel = await ctx.Client.GetChannelAsync(chanID);
-                        await LockdownHelpers.UnlockChannel(currentChannel, ctx.Member, true);
+                        await LockdownHelpers.UnlockChannel(currentChannel, ctx.Member, reason, true);
                     }
                     catch
                     {
