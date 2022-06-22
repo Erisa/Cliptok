@@ -78,7 +78,7 @@ namespace Cliptok.Commands
                     try
                     {
                         var channel = await ctx.Client.GetChannelAsync(chanID);
-                        await LockdownHelpers.LockChannelAsync(channel: channel, reason: reason);
+                        await LockdownHelpers.LockChannelAsync(user: ctx.User, channel: channel);
                     }
                     catch
                     {
@@ -94,7 +94,7 @@ namespace Cliptok.Commands
 
             await ctx.Message.DeleteAsync();
 
-            await LockdownHelpers.LockChannelAsync(channel: currentChannel, duration: lockDuration, reason: reason);
+            await LockdownHelpers.LockChannelAsync(user: ctx.User, channel: currentChannel, duration: lockDuration, reason: reason);
         }
 
         [Command("unlock")]
@@ -135,7 +135,7 @@ namespace Cliptok.Commands
                 ongoingLockdown = false;
                 return;
             }
-            await LockdownHelpers.UnlockChannel(currentChannel, ctx.Member);
+            await LockdownHelpers.UnlockChannel(currentChannel, ctx.Member, reason);
         }
 
     }
