@@ -14,6 +14,7 @@
             await channel.AddOverwriteAsync(channel.Guild.CurrentMember, Permissions.SendMessages, Permissions.None, "Failsafe 1 for Lockdown");
             await channel.AddOverwriteAsync(channel.Guild.GetRole(Program.cfgjson.ModRole), Permissions.SendMessages, Permissions.None, "Failsafe 2 for Lockdown");
 
+            bool everyoneRoleChanged = false;
             foreach (DiscordOverwrite overwrite in existingOverwrites)
             {
                 if (overwrite.Type == OverwriteType.Role)
@@ -42,16 +43,29 @@
                                 await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, $"[Lockdown by {user.Username}#{user.Discriminator}]: {reason}");
                             }
                         }
+
+                        everyoneRoleChanged = true;
                     }
                     else
                     {
                         await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed, overwrite.Denied);
-
                     }
                 }
                 else
                 {
                     await channel.AddOverwriteAsync(await overwrite.GetMemberAsync(), overwrite.Allowed, overwrite.Denied);
+                }
+            }
+
+            if (!everyoneRoleChanged)
+            {
+                if (lockThreads)
+                {
+                    await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.SendMessagesInThreads, $"[Lockdown by {user.Username}#{user.Discriminator}]: {reason}");
+                }
+                else
+                {
+                    await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, $"[Lockdown by {user.Username}#{user.Discriminator}]: {reason}");
                 }
             }
 
