@@ -195,7 +195,7 @@
             else
             {
                 await Program.db.ListRightPushAsync("joinWatchedUsers", user.Id);
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Now watching for joins/leaves of {user.Mention} to send to {Program.badMsgLog.Mention}!");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Now watching for joins/leaves of {user.Mention} to send to the investigations channel!");
             }
         }
 

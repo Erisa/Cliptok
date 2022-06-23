@@ -5,7 +5,6 @@
         public static async Task<bool> CheckBansAsync()
         {
             DiscordGuild targetGuild = Program.homeGuild;
-            DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
             Dictionary<string, MemberPunishment> banList = Program.db.HashGetAll("bans").ToDictionary(
                 x => x.Name.ToString(),
                 x => JsonConvert.DeserializeObject<MemberPunishment>(x.Value)

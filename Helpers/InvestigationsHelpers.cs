@@ -2,7 +2,7 @@
 {
     public class InvestigationsHelpers
     {
-        public static async Task SendInfringingMessaageAsync(DiscordChannel channel, DiscordMessage infringingMessage, string reason, string messageURL, (string name, string value, bool inline) extraField = default, string content = default, DiscordColor? colour = null, string jumpText = "Jump to warning")
+        public static async Task SendInfringingMessaageAsync(string logChannelKey, DiscordMessage infringingMessage, string reason, string messageURL, (string name, string value, bool inline) extraField = default, string content = default, DiscordColor? colour = null, string jumpText = "Jump to warning", DiscordChannel channelOverride = default )
         {
             if (colour == null)
                 colour = new DiscordColor(0xf03916);
@@ -33,7 +33,10 @@
             if (content == default)
                 content = $"{Program.cfgjson.Emoji.Denied} Deleted infringing message by {infringingMessage.Author.Mention} in {infringingMessage.Channel.Mention}:";
 
-            await channel.SendMessageAsync(content, embed);
+            if (channelOverride == default)
+                await LogChannelHelper.LogMessageAsync(logChannelKey, content, embed);
+            else
+                await channelOverride.SendMessageAsync(content, embed);
         }
 
     }

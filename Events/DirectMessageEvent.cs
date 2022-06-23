@@ -4,7 +4,6 @@
     {
         public static async void DirectMessageEventHandler(DiscordMessage message)
         {
-            var dmLog = await Program.discord.GetChannelAsync(Program.cfgjson.DmLogChannelId);
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}", null, message.Author.AvatarUrl)
                 .WithDescription(message.Content)
@@ -56,7 +55,7 @@
                 }
             }
 
-            await dmLog.SendMessageAsync(new DiscordMessageBuilder().AddEmbeds(embeds.AsEnumerable()));
+            await LogChannelHelper.LogMessageAsync("dms", new DiscordMessageBuilder().AddEmbeds(embeds.AsEnumerable()));
 
         }
     }

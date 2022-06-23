@@ -92,7 +92,7 @@
                     DiscordMessageBuilder response = new DiscordMessageBuilder()
                         .WithContent(logContent)
                         .WithAllowedMentions(Mentions.None);
-                    await Program.logChannel.SendMessageAsync(response);
+                    await LogChannelHelper.LogMessageAsync("mod", response);
                 }
             }
 
@@ -115,7 +115,7 @@
                     DiscordMessageBuilder response = new DiscordMessageBuilder()
                         .WithContent($"{Program.cfgjson.Emoji.Off} Raidmode was **disabled** by {ctx.User.Mention}.\nIt was supposed to end <t:{expirationTimeUnix}:R>.")
                         .WithAllowedMentions(Mentions.None);
-                    await Program.logChannel.SendMessageAsync(response);
+                    await LogChannelHelper.LogMessageAsync("mod", response);
                 }
                 else
                 {

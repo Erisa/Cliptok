@@ -133,7 +133,7 @@ namespace Cliptok.Commands
                 {
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Deleted} Successfully deleted warning `{StringHelpers.Pad(warnId)}` (belonging to {targetUser.Mention})");
 
-                    await Program.logChannel.SendMessageAsync(
+                    await LogChannelHelper.LogMessageAsync("mod",
                         new DiscordMessageBuilder()
                             .WithContent($"{Program.cfgjson.Emoji.Deleted} Warning deleted:" +
                             $"`{StringHelpers.Pad(warnId)}` (belonging to {targetUser.Mention}, deleted by {ctx.Member.Username}#{ctx.Member.Discriminator})")
@@ -223,7 +223,7 @@ namespace Cliptok.Commands
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Information} Successfully edited warning `{StringHelpers.Pad(warnId)}` (belonging to {targetUser.Mention})",
                     await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId), userID: targetUser.Id));
 
-                await Program.logChannel.SendMessageAsync(
+                await LogChannelHelper.LogMessageAsync("mod",
                     new DiscordMessageBuilder()
                         .WithContent($"{Program.cfgjson.Emoji.Information} Warning edited:" +
                         $"`{StringHelpers.Pad(warnId)}` (belonging to {targetUser.Mention})")

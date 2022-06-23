@@ -7,7 +7,6 @@
         {
             bool permaBan = false;
             DateTime? actionTime = DateTime.Now;
-            DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
             DateTime? expireTime = actionTime + banDuration;
             DiscordMember moderator = await guild.GetMemberAsync(moderatorId);
 
@@ -72,7 +71,7 @@
                 {
                     logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was banned for {TimeHelpers.TimeToPrettyFormat(banDuration, false)} by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**\nBan expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>";
                 }
-                _ = logChannel.SendMessageAsync(logOut);
+                _ = LogChannelHelper.LogMessageAsync("mod", logOut);
 
                 if (channel != null)
                     logOut += $"\nChannel: {channel.Mention}";
@@ -99,8 +98,6 @@
 
         public static async Task UnbanFromServerAsync(DiscordGuild targetGuild, ulong targetUserId)
         {
-            DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
-
             try
             {
                 DiscordUser user = await Program.discord.GetUserAsync(targetUserId);
@@ -108,7 +105,7 @@
             }
             catch
             {
-                await logChannel.SendMessageAsync(
+                await LogChannelHelper.LogMessageAsync("mod",
                     new DiscordMessageBuilder()
                         .WithContent($"{Program.cfgjson.Emoji.Denied} Attempt to unban <@{targetUserId}> failed!\nMaybe they were already unbanned?")
                         .WithAllowedMentions(Mentions.None)
@@ -121,7 +118,6 @@
 
         public async static Task<bool> UnbanUserAsync(DiscordGuild guild, DiscordUser target, string reason = "")
         {
-            DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
             await Program.db.HashSetAsync("unbanned", target.Id, true);
             try
             {
@@ -132,7 +128,7 @@
                 Program.discord.Logger.LogError(Program.CliptokEventID, e, "An exception occurred while unbanning {user}", target.Id);
                 return false;
             }
-            await logChannel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned {target.Mention}!").WithAllowedMentions(Mentions.None));
+            await LogChannelHelper.LogMessageAsync("mod",new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned {target.Mention}!").WithAllowedMentions(Mentions.None));
             await Program.db.HashDeleteAsync("bans", target.Id.ToString());
             return true;
         }
@@ -150,7 +146,6 @@
             }
 
         }
-
 
         [Command("massban")]
         [Aliases("bigbonk")]

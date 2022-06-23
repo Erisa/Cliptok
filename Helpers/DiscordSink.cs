@@ -24,34 +24,31 @@ namespace Cliptok
             {
                 try
                 {
-                    if (Program.errorLogChannel != null)
+                    StringWriter dummyWriter = new();
+                    _textFormatter.Format(logEvent, dummyWriter);
+
+                    dummyWriter.Flush();
+
+                    if (dummyWriter.ToString().ToLower().Contains("ratelimit"))
                     {
-                        StringWriter dummyWriter = new();
-                        _textFormatter.Format(logEvent, dummyWriter);
-
-                        dummyWriter.Flush();
-
-                        if (dummyWriter.ToString().ToLower().Contains("ratelimit"))
-                        {
-                            return;
-                        }
-
-                        if (dummyWriter.ToString().Length > 1984 && dummyWriter.ToString().Length < 4096)
-                        {
-                            Program.errorLogChannel.SendMessageAsync(new DiscordEmbedBuilder().WithDescription($"```cs\n{dummyWriter}\n```"));
-
-                        }
-                        else if (dummyWriter.ToString().Length < 1984)
-                        {
-                            Program.errorLogChannel.SendMessageAsync($"```cs\n{dummyWriter}\n```");
-                        }
-                        else
-                        {
-                            var stream = new MemoryStream(Encoding.UTF8.GetBytes(dummyWriter.ToString()));
-                            Program.errorLogChannel.SendMessageAsync(new DiscordMessageBuilder().WithFile("error.txt", stream));
-                        }
+                        return;
                     }
-                } catch (Exception ex)
+
+                    if (dummyWriter.ToString().Length > 1984 && dummyWriter.ToString().Length < 4096)
+                    {
+                        LogChannelHelper.LogMessageAsync("errors", new DiscordEmbedBuilder().WithDescription($"```cs\n{dummyWriter}\n```"));
+
+                    }
+                    else if (dummyWriter.ToString().Length < 1984)
+                    {
+                        LogChannelHelper.LogMessageAsync("errors", $"```cs\n{dummyWriter}\n```");
+                    }
+                    else
+                    {
+                        var stream = new MemoryStream(Encoding.UTF8.GetBytes(dummyWriter.ToString()));
+                        LogChannelHelper.LogMessageAsync("errors", new DiscordMessageBuilder().WithFile("error.txt", stream));
+                    }
+                } catch
                 {
                     // well we cant log an error that happened while reporting an error, can we?
                 }

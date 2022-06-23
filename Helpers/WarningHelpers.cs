@@ -221,7 +221,7 @@
 
             Program.db.HashSet(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
 
-            await Program.logChannel.SendMessageAsync(
+            LogChannelHelper.LogMessageAsync("mod",
                 new DiscordMessageBuilder()
                     .WithContent($"{Program.cfgjson.Emoji.Warning} New warning for {targetUser.Mention}!")
                     .WithEmbed(await FancyWarnEmbedAsync(warning, true, 0xFEC13D, false, targetUser.Id))

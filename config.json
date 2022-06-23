@@ -9,13 +9,9 @@
   "modRole": 150878439220576256,
   "adminRole": 286639672606720000,
   "mutedRole": 426386061220904960,
-  "logChannel": 584908576980729876,
-  "userLogChannel": 870053642500182046,
   "serverID": 150662382874525696,
   "homeChannel": 793285213823172628,
-  "investigationsChannel": 745276933767430255,
   "techSupportChannel": 150909451270881280,
-  "supportLogChannel": 843181924687806484,
   "communityTechSupportRoleID": 787033266225938472,
   "modmailUserId": 459322015044730903,
   "supportRatelimitMinutes": 15,
@@ -94,33 +90,33 @@
     812031871834783814
   ],
   "emoji": {
-    "noPermissions": "<:CliptokShieldUAC:843582723885105202>",
-    "warning": "<:CliptokWarning:843582724069392405>",
-    "error": "<:CliptokCritical:843582724652793896>",
-    "deleted": "<:CliptokRecycleBin:843582723251634197>",
-    "information": "<:CliptokInformation:843582724769054740>",
-    "muted": "<:CliptokShieldWarning:843582724064149544>",
-    "denied": "<:CliptokDenied:843582722940993556>",
-    "banned": "<:CliptokShieldNotOK:843582723532914708>",
-    "unbanned": "<:CliptokShieldOK:843582723641835540>",
-    "ejected": "<:CliptokEject:843582723003514930>",
-    "success": "<:CliptokSuccess:843582724744806420>",
-    "loading": "<a:CliptokBusy:791471510757179422>",
-    "connected": "<:CliptokRDP:843583776843104257>",
-    "locked": "<:CliptokLock:843582722940993559>",
-    "help": "<:CliptokHelp:843586173742219294>",
-    "shieldHelp": "<:CliptokShieldHelp:843586173204693032>",
-    "shieldMicrosoft": "<:CliptokShieldMS:843586173129850930>",
-    "unlock": "<:CliptokUnlock:846045637686591498>",
-    "bsod": "<:CliptokBSOD:868677510844522546>",
-    "userJoin": "<:CliptokUserJoin:870011255958675496>",
-    "userLeave": "<:CliptokUserLeave:870011211750719558>",
+    "noPermissions": "<:WindowsShieldUAC:824380489409626126>",
+    "warning": "<:WindowsWarning:824380489313943593>",
+    "error": "<:WindowsCritical:824380490051747840>",
+    "deleted": "<:WindowsRecycleBin:824380487920910348>",
+    "information": "<:WindowsInformation:824380490206281753>",
+    "muted": "<:WindowsShieldWarning:824380489271738401>",
+    "denied": "<:CliptokDenied:989678961640476703>",
+    "banned": "<:WindowsShieldNotOK:824380489623928852>",
+    "unbanned": "<:WindowsShieldOK:824380489845571624>",
+    "ejected": "<:WindowsEject:824380486934986792>",
+    "success": "<:WindowsSuccess:824380489712140359>",
+    "loading": "<a:WindowsLoading:883414701218873376>",
+    "connected": "<:CliptokRDP:989678959711125525>",
+    "locked": "<:WindowsLock:824380487463075860>",
+    "help": "<:CliptokHelp:989678958255673384>",
+    "shieldHelp": "<:CliptokHelpShield:989678956468928542>",
+    "shieldMicrosoft": "<:CliptokMSShield:989678954921230396>",
+    "unlock": "<:WindowsUnlock:846072560029532210>",
+    "bsod": "<:CliptokBSOD:989678953138647090>",
+    "userJoin": "<:CliptokUserAdd:989678951783878687>",
+    "userLeave": "<:CliptokUserLeave:989678950529790012>",
     "userUpdate": "<:CliptokUserUpdate:870011211620708372>",
     "messageEdit": "<:CliptokEdit:870011211125751888>",
     "clockTime": "<:CliptokClock:965280030458515496>",
-    "windows11": "<:CliptokWindows11:895420814155993128>",
-    "on": "<:CliptokOn:962741121967091772>",
-    "off": "<:CliptokOff:962741121396654130>​",
+    "windows11": "<:Windows11:854706007854546944>",
+    "on": "<:CliptokOn:989678948927537212>",
+    "off": "<:CliptokOff:989678947677655080>​",
     "insider": "<:WindowsInsider:938875717339459604>",
     "windows10": "<:Windows10:895975935516495902>"
   },
@@ -251,14 +247,37 @@
   "giveawayTriggerMessage": "<:msparty:517199105458569216>   **GIVEAWAY**   <:msparty:517199105458569216>",
   "githubWorkflow": {
     "repo": "Erisa/Cliptok",
-    "ref": "main",
+    "ref": "mod",
     "workflowId": "append-lists-txt.yml"
   },
   "feedbackHubChannelId": 865734819995582464,
-  "dmLogChannelId": 963600228286607391,
-  "errorLogChannelId": 968463420586336286,
-  "mysteryLogChannelId": 974161605938012160,
   "everyoneFilter": true,
-  "botLogsWebhookEnvVariable": "CLIPTOK_BOTLOGS_WEBHOOK_URL",
-  "usernameAPILogChannel": 984230829343535105
+  "logChannels": {
+    "mod": {
+      "channelId": 584908576980729876
+    },
+    "investigations": {
+      "channelId": 745276933767430255
+    },
+    "errors": {
+      "webhookEnvVar": "CLIPTALK_WEBHOOK",
+      "channelId": 968463420586336286
+    },
+    "support": {
+      "channelId": 843181924687806484
+    },
+    "dms": {
+      "webhookEnvVar": "CLIPTALK_WEBHOOK",
+      "channelId": 963600228286607391
+    },
+    "secret": {
+      "channelId": 974161605938012160
+    },
+    "users": {
+      "channelId": 870053642500182046
+    },
+    "username": {
+      "channelId": 984230829343535105
+    }
+  }
 }

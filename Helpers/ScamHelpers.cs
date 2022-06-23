@@ -33,7 +33,7 @@ namespace Cliptok.Helpers
                                 .AddField("API Response", $"```json\n{apiResult.responseString}\n```")
                                 .WithColor(new DiscordColor(0xf03916));
                             var investigations = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
-                            await usernameAPILogChannel.SendMessageAsync($"{cfgjson.Emoji.Warning} {member.Mention} was flagged by the experimental username API.", embed);
+                            await LogChannelHelper.LogMessageAsync("username", $"{cfgjson.Emoji.Warning} {member.Mention} was flagged by the experimental username API.", embed);
                         }
                         else
                         {
@@ -130,7 +130,7 @@ namespace Cliptok.Helpers
                         .WithFooter($"User ID: {member.Id}")
                         .WithImageUrl(await LykosAvatarMethods.UserOrMemberAvatarURL(member, member.Guild, "default", 256));
 
-                    await badMsgLog.SendMessageAsync($"{cfgjson.Emoji.Banned} {member.Mention} has been appeal-banned for an infringing avatar.", embed);
+                    await LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Banned} {member.Mention} has been appeal-banned for an infringing avatar.", embed);
                     await Bans.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot/compromised accounts. Please appeal if you are human.", discord.CurrentUser.Id, member.Guild, 7, appealable: true);
                     return true;
                 }

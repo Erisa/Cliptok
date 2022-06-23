@@ -25,12 +25,6 @@ namespace Cliptok
 
         public static string[] badUsernames;
         public static List<ulong> autoBannedUsersCache = new();
-        public static DiscordChannel logChannel;
-        public static DiscordChannel userLogChannel;
-        public static DiscordChannel badMsgLog;
-        public static DiscordChannel errorLogChannel;
-        public static DiscordChannel mysteryLogChannel;
-        public static DiscordChannel usernameAPILogChannel;
         public static DiscordGuild homeGuild;
 
         public static Random rand = new();
@@ -64,7 +58,7 @@ namespace Cliptok
 #endif
                 .WriteTo.Console(outputTemplate: logFormat, theme: AnsiConsoleTheme.Literate)
                 .WriteTo.TextWriter(outputCapture, outputTemplate: logFormat)
-                .WriteTo.DiscordSink(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning, outputTemplate: logFormat)
+                .WriteTo.DiscordSink(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information, outputTemplate: logFormat)
                 .CreateLogger();
 
             var logFactory = new LoggerFactory().AddSerilog();
@@ -129,12 +123,6 @@ namespace Cliptok
                 Intents = DiscordIntents.All + 3145728
             });
 
-            if (Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == null || Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == "githubtokenhere")
-                discord.Logger.LogWarning(CliptokEventID, "GitHub API features disabled due to missing access token.");
-
-            if (Environment.GetEnvironmentVariable("RAVY_API_TOKEN") == null || Environment.GetEnvironmentVariable("RAVY_API_TOKEN") == "goodluckfindingone")
-                discord.Logger.LogWarning(CliptokEventID, "Ravy API features disabled due to missing API token.");
-
             var slash = discord.UseSlashCommands();
             slash.SlashCommandErrored += InteractionEvents.SlashCommandErrorEvent;
             var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands" && !t.IsNested);
@@ -173,11 +161,6 @@ namespace Cliptok
             await discord.ConnectAsync();
 
             await ReadyEvent.OnStartup(discord);
-
-            if (cfgjson.ErrorLogChannelId == 0)
-                errorLogChannel = await discord.GetChannelAsync(cfgjson.HomeChannel);
-            else
-                errorLogChannel = await discord.GetChannelAsync(cfgjson.ErrorLogChannelId);
 
             // Only wait 3 seconds before the first set of tasks.
             await Task.Delay(3000);

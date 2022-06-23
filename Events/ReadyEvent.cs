@@ -8,36 +8,19 @@ namespace Cliptok.Events
         {
             Task.Run(async () =>
             {
-            client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
-
-            if (cfgjson.ErrorLogChannelId == 0)
-            {
-                errorLogChannel = await client.GetChannelAsync(cfgjson.HomeChannel);
-            }
-            else
-            {
-                errorLogChannel = await client.GetChannelAsync(cfgjson.ErrorLogChannelId);
-                await errorLogChannel.SendMessageAsync($"{cfgjson.Emoji.Connected} {discord.CurrentUser.Username} has connected to Discord!");
-            }
-
-            if (cfgjson.UsernameAPILogChannel != 0)
-                usernameAPILogChannel = await client.GetChannelAsync(cfgjson.UsernameAPILogChannel);
-
-                if (cfgjson.MysteryLogChannelId == 0)
-                    mysteryLogChannel = errorLogChannel;
-                else
-                {
-                    Console.Write(cfgjson.MysteryLogChannelId);
-                    mysteryLogChannel = await client.GetChannelAsync(cfgjson.MysteryLogChannelId);
-                }
+                await LogChannelHelper.UnpackLogConfigAsync(cfgjson);
+                client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
             });
         }
 
         public static async Task OnStartup(DiscordClient client)
         {
-            logChannel = await discord.GetChannelAsync(cfgjson.LogChannel);
-            userLogChannel = await discord.GetChannelAsync(cfgjson.UserLogChannel);
-            badMsgLog = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
+            if (Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == null || Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == "githubtokenhere")
+                discord.Logger.LogWarning(CliptokEventID, "GitHub API features disabled due to missing access token.");
+
+            if (Environment.GetEnvironmentVariable("RAVY_API_TOKEN") == null || Environment.GetEnvironmentVariable("RAVY_API_TOKEN") == "goodluckfindingone")
+                discord.Logger.LogWarning(CliptokEventID, "Ravy API features disabled due to missing API token.");
+
             homeGuild = await discord.GetGuildAsync(cfgjson.ServerID);
 
             Tasks.PunishmentTasks.CheckMutesAsync();
@@ -114,8 +97,7 @@ namespace Cliptok.Events
                 }
             }
 
-            var cliptokChannel = await client.GetChannelAsync(cfgjson.HomeChannel);
-            cliptokChannel.SendMessageAsync($"{cfgjson.Emoji.On} {discord.CurrentUser.Username} started successfully!\n\n" +
+            LogChannelHelper.LogMessageAsync("home", $"{cfgjson.Emoji.On} {discord.CurrentUser.Username} started successfully!\n\n" +
                 $"**Version**: `{commitHash.Trim()}`\n" +
                 $"**Version timestamp**: `{commitTime}`\n**Framework**: `{RuntimeInformation.FrameworkDescription}`\n" +
                 $"**Platform**: `{RuntimeInformation.OSDescription}`\n" +
@@ -125,7 +107,6 @@ namespace Cliptok.Events
                 $"```\n" +
                 $"{commitMessage}\n" +
                 $"```");
-
         }
 
     }

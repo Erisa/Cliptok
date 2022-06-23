@@ -50,7 +50,7 @@
                     Program.db.HashSet("raidmode", ctx.Guild.Id, unixExpiration);
 
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.On} Raidmode is now **enabled** and will end <t:{unixExpiration}:R>.");
-                    await Program.logChannel.SendMessageAsync(
+                    await LogChannelHelper.LogMessageAsync("mod",
                         new DiscordMessageBuilder()
                             .WithContent($"{Program.cfgjson.Emoji.On} Raidmode was **enabled** by {ctx.User.Mention} and ends <t:{unixExpiration}:R>.")
                             .WithAllowedMentions(Mentions.None)
@@ -67,7 +67,7 @@
                     long expirationTimeUnix = (long)Program.db.HashGet("raidmode", ctx.Guild.Id);
                     Program.db.HashDelete("raidmode", ctx.Guild.Id);
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Off} Raidmode is now **disabled**.\nIt was supposed to end <t:{expirationTimeUnix}:R>.");
-                    await Program.logChannel.SendMessageAsync(
+                    await LogChannelHelper.LogMessageAsync("mod",
                         new DiscordMessageBuilder()
                            .WithContent($"{Program.cfgjson.Emoji.Off} Raidmode was **disabled** by {ctx.User.Mention}.\nIt was supposed to end <t:{expirationTimeUnix}:R>.")
                             .WithAllowedMentions(Mentions.None)

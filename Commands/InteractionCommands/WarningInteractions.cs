@@ -117,7 +117,7 @@
             else if (forceOverride)
                 operationText = "force ";
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully {operationText}transferred warnings from {sourceUser.Mention} to {targetUser.Mention}!");
-            await Program.logChannel.SendMessageAsync(
+            await LogChannelHelper.LogMessageAsync("mod",
                 new DiscordMessageBuilder()
                     .WithContent($"{Program.cfgjson.Emoji.Information} Warnings from {sourceUser.Mention} were {operationText}transferred to {targetUser.Mention} by `{ctx.User.Username}#{ctx.User.Discriminator}`")
                     .WithEmbed(WarningHelpers.GenerateWarningsEmbed(targetUser))

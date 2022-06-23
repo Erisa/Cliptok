@@ -45,9 +45,8 @@
 
         public async static Task KickAndLogAsync(DiscordMember target, string reason, DiscordMember moderator)
         {
-            DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
             await target.RemoveAsync(reason);
-            await logChannel.SendMessageAsync(
+            await LogChannelHelper.LogMessageAsync("mod",
                 new DiscordMessageBuilder()
                     .WithContent($"{Program.cfgjson.Emoji.Ejected} {target.Mention} was kicked by `{moderator.Username}#{moderator.Discriminator}` (`{moderator.Id}`).\nReason: **{reason}**")
                     .WithAllowedMentions(Mentions.None)

@@ -36,7 +36,6 @@
         {
             bool permaMute = false;
             DateTime? actionTime = DateTime.Now;
-            DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
             DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
             DateTime? expireTime = actionTime + muteDuration;
             DiscordMember moderator = await guild.GetMemberAsync(moderatorId);
@@ -95,38 +94,52 @@
             {
                 if (permaMute)
                 {
-                    await logChannel.SendMessageAsync(new DiscordMessageBuilder()
+                    await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder()
                         .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted by {moderator.Mention} (`{moderatorId}`).\nReason: **{reason}**")
                         .WithAllowedMentions(Mentions.None)
                     );
-                    if (naughtyMember != default)
-                        output.dmMessage = await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}**!\nReason: **{reason}**");
                 }
-
                 else
                 {
-                    await logChannel.SendMessageAsync(new DiscordMessageBuilder()
+                    await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder()
                         .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** by {moderator.Mention} (`{moderatorId}`)." +
                             $"\nReason: **{reason}**" +
                             $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>")
                         .WithAllowedMentions(Mentions.None)
                     );
+                }
+            } catch (Exception ex)
+            {
+                Program.discord.Logger.LogError(ex, "thing");
+            }
 
-                    if (naughtyMember != default)
+
+            if (naughtyMember != default)
+            {
+                try
+                {
+                    if (permaMute)
+                    {
+                        output.dmMessage = await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}**!\nReason: **{reason}**");
+                    }
+
+                    else
+                    {
                         output.dmMessage = await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}** for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}**!" +
                             $"\nReason: **{reason}**" +
                             $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>");
+                    }
                 }
-            }
-            catch
-            {
-                // A DM failing to send isn't important, but let's put it in chat just so it's somewhere.
-                if (channel is not null)
+                catch (DSharpPlus.Exceptions.UnauthorizedException)
                 {
-                    if (muteDuration == default)
-                        output.chatMessage = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} has been muted: **{reason}**");
-                    else
-                        output.chatMessage = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} has been muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}**: **{reason}**");
+                    // A DM failing to send isn't important, but let's put it in chat just so it's somewhere.
+                    if (channel is not null)
+                    {
+                        if (muteDuration == default)
+                            output.chatMessage = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} has been muted: **{reason}**");
+                        else
+                            output.chatMessage = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} has been muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}**: **{reason}**");
+                    }
                 }
             }
 
@@ -173,7 +186,6 @@
             var muteDetailsJson = await Program.db.HashGetAsync("mutes", targetUser.Id);
             bool success = false;
             DiscordGuild guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
-            DiscordChannel logChannel = await Program.discord.GetChannelAsync(Program.cfgjson.LogChannel);
 
             // todo: store per-guild
             DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
@@ -189,7 +201,7 @@
 
             if (member == default)
             {
-                await logChannel.SendMessageAsync(
+                await LogChannelHelper.LogMessageAsync("mod",
                     new DiscordMessageBuilder()
                         .WithContent($"{Program.cfgjson.Emoji.Information} Attempt to remove Muted role from {targetUser.Mention} failed because the user could not be found.\nThis is expected if the user was banned or left.")
                         .WithAllowedMentions(Mentions.None)
@@ -219,7 +231,7 @@
                 }
                 catch
                 {
-                    await logChannel.SendMessageAsync(
+                    await LogChannelHelper.LogMessageAsync("mod",
                         new DiscordMessageBuilder()
                             .WithContent($"{Program.cfgjson.Emoji.Error} Attempt to removed Muted role from {targetUser.Mention} failed because of a Discord API error!" +
                                 $"\nIf the role was removed manually, this error can be disregarded safely.")
@@ -237,7 +249,7 @@
 
                 if (success)
                 {
-                    await logChannel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Successfully unmuted {targetUser.Mention}!").WithAllowedMentions(Mentions.None));
+                    await LogChannelHelper.LogMessageAsync("mod",new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Successfully unmuted {targetUser.Mention}!").WithAllowedMentions(Mentions.None));
 
                     if (manual && muteDetailsJson.HasValue)
                     {

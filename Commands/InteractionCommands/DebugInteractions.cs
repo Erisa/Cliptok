@@ -63,7 +63,7 @@
                 return;
             }
             await ctx.RespondAsync($"I sent your stupid message to {discordChannel.Mention}.", ephemeral: true);
-            await Program.mysteryLogChannel.SendMessageAsync(
+            await LogChannelHelper.LogMessageAsync("secret",
                 new DiscordMessageBuilder()
                 .WithContent($"{ctx.User.Mention} used tellraw in {discordChannel.Mention}:")
                 .WithAllowedMentions(Mentions.None)

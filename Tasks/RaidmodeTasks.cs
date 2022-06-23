@@ -16,7 +16,7 @@
                 {
                     Program.db.HashDelete("raidmode", guildId);
                     Program.db.KeyDelete("raidmode-accountage");
-                    await Program.logChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Off} Raidmode was **disabled** automatically.");
+                    LogChannelHelper.LogMessageAsync("mod", $"{Program.cfgjson.Emoji.Off} Raidmode was **disabled** automatically.");
                     return true;
                 }
                 else

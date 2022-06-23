@@ -24,13 +24,13 @@ namespace Cliptok.Events
                    .AddField("Action", "Joined the server", false)
                    .WithFooter($"{client.CurrentUser.Username}JoinEvent");
 
-                userLogChannel.SendMessageAsync($"{cfgjson.Emoji.UserJoin} **Member joined the server!** - {e.Member.Id}", embed);
+                LogChannelHelper.LogMessageAsync("users", $"{cfgjson.Emoji.UserJoin} **Member joined the server!** - {e.Member.Id}", embed);
 
                 var joinWatchlist = await db.ListRangeAsync("joinWatchedUsers");
 
                 if (joinWatchlist.Contains(e.Member.Id))
                 {
-                    badMsgLog.SendMessageAsync($"{cfgjson.Emoji.Warning} Watched user {e.Member.Mention} just joined the server!", embed);
+                    LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Warning} Watched user {e.Member.Mention} just joined the server!", embed);
                 }
 
                 if (db.HashExists("raidmode", e.Guild.Id))
@@ -66,7 +66,7 @@ namespace Cliptok.Events
                 if (avatars.Contains(e.Member.AvatarHash))
                 {
                     var _ = Bans.BanSilently(e.Guild, e.Member.Id, "Secret sauce");
-                    await badMsgLog.SendMessageAsync($"{cfgjson.Emoji.Banned} Raid-banned {e.Member.Mention} for matching avatar: {e.Member.AvatarUrl.Replace("1024", "128")}");
+                    await LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Banned} Raid-banned {e.Member.Mention} for matching avatar: {e.Member.AvatarUrl.Replace("1024", "128")}");
                 }
 
                 string banDM = $"You have been automatically banned from **{e.Guild.Name}** for matching patterns of known raiders.\n" +
@@ -86,7 +86,7 @@ namespace Cliptok.Events
 
                         await e.Member.BanAsync(7, "Matching patterns of known raiders, please unban if appealed.");
 
-                        await badMsgLog.SendMessageAsync($"{cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the creation date of the {IdAutoBanSet.Name} DM scam raiders.");
+                        await LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the creation date of the {IdAutoBanSet.Name} DM scam raiders.");
                     }
 
                     db.HashSet(IdAutoBanSet.Name, e.Member.Id, true);
@@ -151,13 +151,13 @@ namespace Cliptok.Events
                     .AddField("Roles", rolesStr)
                     .WithFooter($"{client.CurrentUser.Username}LeaveEvent");
 
-                userLogChannel.SendMessageAsync($"{cfgjson.Emoji.UserLeave} **Member left the server!** - {e.Member.Id}", embed);
+                LogChannelHelper.LogMessageAsync("users", $"{cfgjson.Emoji.UserLeave} **Member left the server!** - {e.Member.Id}", embed);
 
                 var joinWatchlist = await db.ListRangeAsync("joinWatchedUsers");
 
                 if (joinWatchlist.Contains(e.Member.Id))
                 {
-                    badMsgLog.SendMessageAsync($"{cfgjson.Emoji.Warning} Watched user {e.Member.Mention} just left the server!", embed);
+                    LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Warning} Watched user {e.Member.Mention} just left the server!", embed);
                 }
             });
         }

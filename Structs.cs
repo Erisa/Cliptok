@@ -81,16 +81,16 @@
         public ulong AdminRole { get; private set; }
 
         [JsonProperty("logChannel")]
-        public ulong LogChannel { get; private set; }
+        public ulong LogChannel { get; private set; } = 0;
 
         [JsonProperty("userLogChannel")]
-        public ulong UserLogChannel { get; private set; }
+        public ulong UserLogChannel { get; private set; } = 0;
 
         [JsonProperty("serverID")]
         public ulong ServerID { get; private set; }
 
         [JsonProperty("homeChannel")]
-        public ulong HomeChannel { get; private set; }
+        public ulong HomeChannel { get; private set; } = 0;
 
         [JsonProperty("emoji")]
         public EmojiJson Emoji { get; private set; }
@@ -165,10 +165,10 @@
         public ulong CommunityTechSupportRoleID { get; private set; }
 
         [JsonProperty("techSupportChannel")]
-        public ulong TechSupportChannel { get; private set; }
+        public ulong TechSupportChannel { get; private set; } = 0;
 
         [JsonProperty("supportLogChannel")]
-        public ulong SupportLogChannel { get; private set; }
+        public ulong SupportLogChannel { get; private set; } = 0;
 
         [JsonProperty("supportRatelimitMinutes")]
         public int SupportRatelimitMinutes { get; private set; }
@@ -207,7 +207,7 @@
         public List<ulong> LineLimitExcludedChannels { get; private set; }
 
         [JsonProperty("giveawaysChannel")]
-        public ulong GiveawaysChannel { get; private set; }
+        public ulong GiveawaysChannel { get; private set; } = 0;
 
         [JsonProperty("giveawayBot")]
         public ulong GiveawayBot { get; private set; }
@@ -225,7 +225,7 @@
         public string GitListDirectory { get; private set; }
 
         [JsonProperty("feedbackHubChannelId")]
-        public ulong FeedbackHubChannelId { get; private set; }
+        public ulong FeedbackHubChannelId { get; private set; } = 0;
 
         [JsonProperty("dmLogChannelId")]
         public ulong DmLogChannelId { get; private set; } = 0;
@@ -241,6 +241,21 @@
 
         [JsonProperty("usernameAPILogChannel")]
         public ulong UsernameAPILogChannel { get; private set; } = 0;
+
+        [JsonProperty("logChannels")]
+        public Dictionary<string, LogChannelConfig> LogChannels { get; private set; }
+    }
+
+    public class LogChannelConfig
+    {
+        [JsonProperty("channelId")]
+        public ulong ChannelId { get; private set; } = 0;
+
+        [JsonProperty("webhookUrl")]
+        public string WebhookUrl { get; private set; } = "";
+
+        [JsonProperty("webhookEnVar")]
+        public string WebhookEnvVar { get; private set; } = "";
     }
 
     public class WorkflowConfig
