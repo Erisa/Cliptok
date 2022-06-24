@@ -31,6 +31,15 @@
                             {
                                 await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.SendMessagesInThreads, $"[Lockdown by {user.Username}#{user.Discriminator}]: {reason}");
                             }
+
+                            if (overwrite.Allowed.HasPermission(Permissions.SendMessages))
+                            {
+                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), (Permissions)(overwrite.Allowed - Permissions.SendMessages), Permissions.SendMessages | overwrite.Denied, "Reinstating existing overrides for lockdown.");
+                            }
+                            else
+                            {
+                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed, Permissions.SendMessages | overwrite.Denied, "Reinstating existing overrides for lockdown.");
+                            }
                         }
                         else
                         {
@@ -41,6 +50,15 @@
                             else
                             {
                                 await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, $"[Lockdown by {user.Username}#{user.Discriminator}]: {reason}");
+                            }
+
+                            if (overwrite.Allowed.HasPermission(Permissions.SendMessages))
+                            {
+                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), (Permissions)(overwrite.Allowed - Permissions.SendMessages), Permissions.SendMessages | overwrite.Denied, "Reinstating existing overrides for lockdown.");
+                            }
+                            else
+                            {
+                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed, Permissions.SendMessages | overwrite.Denied, "Reinstating existing overrides for lockdown.");
                             }
                         }
 
