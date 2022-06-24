@@ -244,6 +244,9 @@
 
         [JsonProperty("logChannels")]
         public Dictionary<string, LogChannelConfig> LogChannels { get; private set; }
+
+        [JsonProperty("botOwners")]
+        public List<ulong> BotOwners { get; private set; } = new();
     }
 
     public class LogChannelConfig

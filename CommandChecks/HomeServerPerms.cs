@@ -68,9 +68,12 @@
             public ServerPermLevel TargetLvl { get; set; }
             public bool WorkOutside { get; set; }
 
-            public RequireHomeserverPermAttribute(ServerPermLevel targetlvl, bool workOutside = false)
+            public bool OwnerOverride { get; set; }
+
+            public RequireHomeserverPermAttribute(ServerPermLevel targetlvl, bool workOutside = false, bool ownerOverride = false)
             {
                 WorkOutside = workOutside;
+                OwnerOverride = ownerOverride;
                 TargetLvl = targetlvl;
             }
 
@@ -79,6 +82,10 @@
                 // If the command is supposed to stay within the server and its being used outside, fail silently
                 if (!WorkOutside && (ctx.Channel.IsPrivate || ctx.Guild.Id != Program.cfgjson.ServerID))
                     return false;
+
+                // bot owners can bypass perm checks ONLY if the command allows it.
+                if (OwnerOverride && Program.cfgjson.BotOwners.Contains(ctx.User.Id))
+                    return true;
 
                 DiscordMember member;
                 if (ctx.Channel.IsPrivate || ctx.Guild.Id != Program.cfgjson.ServerID)

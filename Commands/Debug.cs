@@ -121,20 +121,20 @@
             }
 
             [Command("restart")]
-            [RequireHomeserverPerm(ServerPermLevel.Admin), Description("Restart the bot. If not under Docker (Cliptok is, dw) this WILL exit instead.")]
+            [RequireHomeserverPerm(ServerPermLevel.Admin, ownerOverride: true), Description("Restart the bot. If not under Docker (Cliptok is, dw) this WILL exit instead.")]
             public async Task Restart(CommandContext ctx)
             {
-                await ctx.RespondAsync("Now restarting bot.");
+                await ctx.RespondAsync("Bot is restarting. Please hold.");
                 Environment.Exit(1);
             }
 
             [Command("shutdown")]
-            [RequireHomeserverPerm(ServerPermLevel.Admin), Description("Panics and shuts the bot down. Check the arguments for usage.")]
+            [RequireHomeserverPerm(ServerPermLevel.Admin, ownerOverride: true), Description("Panics and shuts the bot down. Check the arguments for usage.")]
             public async Task Shutdown(CommandContext ctx, [Description("This MUST be set to \"I understand what I am doing\" for the command to work."), RemainingText] string verificationArgument)
             {
                 if (verificationArgument == "I understand what I am doing")
                 {
-                    await ctx.RespondAsync("WARNING: The bot is now shutting down. This action is permanent.");
+                    await ctx.RespondAsync("**The bot is now shutting down. This action is permanent. You will have to start it up again manually.**");
                     Environment.Exit(0);
                 }
                 else
@@ -161,19 +161,20 @@
 
             [Command("sh")]
             [Aliases("cmd")]
+            [IsBotOwner]
             [Description("Run shell commands! Bash for Linux/macOS, batch for Windows!")]
             public async Task Shell(CommandContext ctx, [RemainingText] string command)
             {
-                if (ctx.User.Id != 228574821590499329)
+                if (string.IsNullOrWhiteSpace(command))
                 {
-                    await ctx.RespondAsync("Nope, you're not Erisa.");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Please try actually giving a command.");
                     return;
                 }
 
                 DiscordMessage msg = await ctx.RespondAsync("executing..");
 
                 ShellResult finishedShell = RunShellCommand(command);
-                string result = Regex.Replace(finishedShell.result, "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT"), "REDACTED");
+                string result = Regex.Replace(finishedShell.result, "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") ?? "DUMMYVALUE", "REDACTED");
 
                 if (result.Length > 1947)
                 {
