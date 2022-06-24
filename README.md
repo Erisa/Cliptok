@@ -104,6 +104,7 @@ If you have a change to make that follows the contribution guidelines, send a Pu
 
 ### ⚙️ Code contributor(s)
 - [TorchGM](https://github.com/TorchGM)
+- [FloatingMilkshake](https://github.com/FloatingMilkshake)
 
 ### 💗 Significant sponsor(s) 
 - [FloatingMilkshake](https://github.com/FloatingMilkshake)
