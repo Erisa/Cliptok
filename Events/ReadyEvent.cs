@@ -6,15 +6,20 @@ namespace Cliptok.Events
     {
         public static async Task OnReady(DiscordClient client, ReadyEventArgs _)
         {
-            Task.Run(async () =>
-            {
-                await LogChannelHelper.UnpackLogConfigAsync(cfgjson);
-                client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
-            });
+            await LogChannelHelper.UnpackLogConfigAsync(cfgjson);
+            client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
         }
 
         public static async Task OnStartup(DiscordClient client)
         {
+            // wait until the log helper is ready
+            while (true)
+            {
+                await Task.Delay(100);
+                if (LogChannelHelper.ready)
+                    break;
+            }
+
             if (Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == null || Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == "githubtokenhere")
                 discord.Logger.LogWarning(CliptokEventID, "GitHub API features disabled due to missing access token.");
 

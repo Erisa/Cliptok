@@ -11,7 +11,7 @@
     {        
         internal static Dictionary<string, DiscordChannel> ChannelCache = new();
         internal static Dictionary<string, DiscordWebhookClient> WebhookCache = new();
-        internal static bool ready = false;
+        public static bool ready = false;
 
         public static async Task UnpackLogConfigAsync(ConfigJson config)
         {
