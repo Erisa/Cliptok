@@ -6,8 +6,11 @@ namespace Cliptok.Events
     {
         public static async Task OnReady(DiscordClient client, ReadyEventArgs _)
         {
-            await LogChannelHelper.UnpackLogConfigAsync(cfgjson);
-            client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
+            Task.Run(async () =>
+            {
+                await LogChannelHelper.UnpackLogConfigAsync(cfgjson);
+                client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
+            });
         }
 
         public static async Task OnStartup(DiscordClient client)
