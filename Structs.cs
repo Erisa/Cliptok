@@ -254,7 +254,7 @@
         [JsonProperty("webhookUrl")]
         public string WebhookUrl { get; private set; } = "";
 
-        [JsonProperty("webhookEnVar")]
+        [JsonProperty("webhookEnvVar")]
         public string WebhookEnvVar { get; private set; } = "";
     }
 
