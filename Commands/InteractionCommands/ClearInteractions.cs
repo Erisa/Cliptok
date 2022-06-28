@@ -27,6 +27,12 @@
                 return;
             }
 
+            if (count == 0 && upTo == "")
+            {
+                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I need to know how many messages to delete! Please provide a value for `count` or `up_to`.").AsEphemeral(true));
+                return;
+            }
+
             // If count is too low or too high, refuse the request
 
             if (count < 0)
