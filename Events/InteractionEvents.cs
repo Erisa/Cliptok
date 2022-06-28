@@ -36,9 +36,15 @@ namespace Cliptok.Events
                 
                 List<DiscordMessage> messages = messagesToClear.GetValueOrDefault(e.Message.Id);
 
-                await e.Channel.DeleteMessagesAsync(messages);
+                await e.Channel.DeleteMessagesAsync(messages, $"[Clear by {e.User.Username}#{e.User.Discriminator}]");
 
                 DiscordButtonComponent disabledButton = new(ButtonStyle.Danger, "clear-confirm-callback", "Delete Messages", true);
+                await e.Channel.SendMessageAsync($"{cfgjson.Emoji.Deleted} Cleared **{messagesToClear.Count}** messages from {e.Channel.Mention}!");
+                await LogChannelHelper.LogMessageAsync("mod",
+                    new DiscordMessageBuilder()
+                        .WithContent($"{cfgjson.Emoji.Deleted} **{messagesToClear.Count}** messages were cleared in {e.Channel.Mention} by {e.User.Mention}.")
+                        .WithAllowedMentions(Mentions.None)
+                );
                 e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent($"{cfgjson.Emoji.Success} Done!").AddComponents(disabledButton).AsEphemeral(true));
             }
             else

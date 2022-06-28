@@ -73,16 +73,15 @@
                 }
                 else
                 {
-                    // Extract all IDs from URL. This will leave you with something like "guild_id/channel_id/message_id".
-                    Regex extractIds = new(@".*.discord.com\/channels\/");
-                    Match selectionToRemove = extractIds.Match(upTo);
-                    upTo = upTo.Replace(selectionToRemove.ToString(), "");
-
-                    // Parse message ID, set to variable
-                    Regex getMessageId = new(@"[a-zA-Z0-9]*\/[a-zA-Z0-9]*\/");
-                    Match idsToRemove = getMessageId.Match(upTo);
-                    string targetMsgId = upTo.Replace(idsToRemove.ToString(), "");
-                    messageId = Convert.ToUInt64(targetMsgId.ToString());
+                    if (Constants.RegexConstants.discord_link_rx.Match(upTo).Groups[2].Value == ctx.Channel.Id.ToString())
+                    {
+                        messageId = Convert.ToUInt64(Constants.RegexConstants.discord_link_rx.Match(upTo).Groups[3].Value);
+                    }
+                    else
+                    {
+                        await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Please provide a link to a message in this channel!").AsEphemeral(true));
+                        return;
+                    }
                 }
 
                 // This is the message we will delete up to. This message will not be deleted.
@@ -217,8 +216,13 @@
             {
                 if (messagesToClear.Count >= 1)
                 {
-                    await ctx.Channel.DeleteMessagesAsync(messagesToClear);
-
+                    await ctx.Channel.DeleteMessagesAsync(messagesToClear, $"[Clear by {ctx.User.Username}#{ctx.User.Discriminator}]");
+                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Cleared **{messagesToClear.Count}** messages from {ctx.Channel.Mention}!");
+                    await LogChannelHelper.LogMessageAsync("mod",
+                        new DiscordMessageBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.Deleted} **{messagesToClear.Count}** messages were cleared in {ctx.Channel.Mention} by {ctx.User.Mention}.")
+                            .WithAllowedMentions(Mentions.None)
+                    );
                     await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Done!").AsEphemeral(true));
                 }
                 else
