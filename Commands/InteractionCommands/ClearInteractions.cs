@@ -205,9 +205,9 @@
             // All filters checked. 'messages' is now our final list of messages to delete.
 
             // Warn the mod if we're going to be deleting 50 or more messages.
-            if (messagesToClear.Count >= 1)
+            if (messagesToClear.Count >= 50)
             {
-                DiscordButtonComponent confirmButton = new(ButtonStyle.Danger, "button with weird id", "button with weird id");
+                DiscordButtonComponent confirmButton = new(ButtonStyle.Danger, "clear-confirm-callback", "Delete Messages");
                 DiscordMessage confirmationMessage = await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Muted} You're about to delete {messagesToClear.Count} messages. Are you sure?").AddComponents(confirmButton).AsEphemeral(true));
 
                 MessagesToClear.Add(confirmationMessage.Id, messagesToClear);
