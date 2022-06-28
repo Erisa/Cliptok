@@ -6,15 +6,13 @@ namespace Cliptok.Events
     {
         public static async Task ComponentInteractionCreateEvent(DiscordClient _, ComponentInteractionCreateEventArgs e)
         {
-            // Initial response to avoid the 3 second timeout, will edit later.
-            var eout = new DiscordInteractionResponseBuilder().AsEphemeral(true);
-            await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, eout);
-
             // Edits need a webhook rather than interaction..?
             DiscordWebhookBuilder webhookOut;
 
             if (e.Id == "line-limit-deleted-message-callback")
             {
+                await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+
                 var text = await db.HashGetAsync("deletedMessageReferences", e.Message.Id);
                 if (text.IsNullOrEmpty)
                 {
@@ -32,9 +30,20 @@ namespace Cliptok.Events
                 }
 
             }
+            else if (e.Id == "clear-confirm-callback")
+            {
+                Dictionary<ulong, List<DiscordMessage>> messagesToClear = Commands.InteractionCommands.ClearInteractions.MessagesToClear;
+                
+                List<DiscordMessage> messages = messagesToClear.GetValueOrDefault(e.Message.Id);
+
+                await e.Channel.DeleteMessagesAsync(messages);
+
+                DiscordButtonComponent disabledButton = new(ButtonStyle.Danger, "clear-confirm-callback", "Delete Messages", true);
+                e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent($"{cfgjson.Emoji.Success} Done!").AddComponents(disabledButton).AsEphemeral(true));
+            }
             else
             {
-                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Unknown interaction. I don't know what you are asking me for."));
+                await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Unknown interaction. I don't know what you are asking me for.").AsEphemeral(true));
             }
 
         }
