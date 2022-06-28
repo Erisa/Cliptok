@@ -208,6 +208,22 @@
                 }
             }
 
+            bool skipped = false;
+            foreach (var message in messagesToClear.ToList())
+            {
+                if (message.CreationTimestamp.ToUniversalTime() < DateTime.UtcNow.AddDays(-14))
+                {
+                    messagesToClear.Remove(message);
+                    skipped = true;
+                }
+            }
+
+            if (messagesToClear.Count == 0 && skipped)
+            {
+                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} All of the messages to delete are older than 2 weeks, so I can't delete them!").AsEphemeral(true));
+                return;
+            }
+
             // All filters checked. 'messages' is now our final list of messages to delete.
 
             // Warn the mod if we're going to be deleting 50 or more messages.
@@ -223,7 +239,14 @@
                 if (messagesToClear.Count >= 1)
                 {
                     await ctx.Channel.DeleteMessagesAsync(messagesToClear, $"[Clear by {ctx.User.Username}#{ctx.User.Discriminator}]");
-                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Cleared **{messagesToClear.Count}** messages from {ctx.Channel.Mention}!");
+                    if (skipped)
+                    {
+                        await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Cleared **{messagesToClear.Count}** messages from {ctx.Channel.Mention}!\n\nSome messages were not deleted because they are older than 2 weeks.");
+                    }
+                    else
+                    {
+                        await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Cleared **{messagesToClear.Count}** messages from {ctx.Channel.Mention}!");
+                    }
                     await LogChannelHelper.LogMessageAsync("mod",
                         new DiscordMessageBuilder()
                             .WithContent($"{Program.cfgjson.Emoji.Deleted} **{messagesToClear.Count}** messages were cleared in {ctx.Channel.Mention} by {ctx.User.Mention}.")
