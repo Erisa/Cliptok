@@ -8,14 +8,14 @@
         [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequireBotPermissions(Permissions.ManageMessages), SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task ClearSlashCommand(InteractionContext ctx,
             [Option("count", "The number of messages to delete. Required if you don't use the 'upto' argument.")] long count = 0,
-            [Option("upto", "Optionally delete messages up to (not including) this one. Accepts IDs and links.")] string upTo = "",
+            [Option("up_to", "Optionally delete messages up to (not including) this one. Accepts IDs and links.")] string upTo = "",
             [Option("user", "Optionally filter the deletion to a specific user.")] DiscordUser user = default,
-            [Option("ignoremods", "Optionally filter the deletion to only messages sent by users who are not Moderators.")] bool ignoreMods = false,
+            [Option("ignore_mods", "Optionally filter the deletion to only messages sent by users who are not Moderators.")] bool ignoreMods = false,
             [Option("match", "Optionally filter the deletion to only messages containing certain text.")] string match = "",
-            [Option("botsonly", "Optionally filter the deletion to only bots.")] bool botsOnly = false,
-            [Option("humansonly", "Optionally filter the deletion to only humans.")] bool humansOnly = false,
-            [Option("imagesonly", "Optionally filter the deletion to only messages containing images.")] bool imagesOnly = false,
-            [Option("linksonly", "Optionally filter the deletion to only messages containing links.")] bool linksOnly = false
+            [Option("bots_only", "Optionally filter the deletion to only bots.")] bool botsOnly = false,
+            [Option("humans_only", "Optionally filter the deletion to only humans.")] bool humansOnly = false,
+            [Option("images_only", "Optionally filter the deletion to only messages containing images.")] bool imagesOnly = false,
+            [Option("links_only", "Optionally filter the deletion to only messages containing links.")] bool linksOnly = false
         )
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
