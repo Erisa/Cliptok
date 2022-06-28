@@ -153,7 +153,7 @@
             {
                 if (humansOnly)
                 {
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You can't use `botsonly` and `humansonly` together! Pick one or the other please.").AsEphemeral(true));
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You can't use `bots_only` and `humans_only` together! Pick one or the other please.").AsEphemeral(true));
                     return;
                 }
 
@@ -183,7 +183,7 @@
             {
                 if (linksOnly)
                 {
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You can't use `imagesonly` and `linksonly` together! Pick one or the other please.").AsEphemeral(true));
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You can't use `images_only` and `links_only` together! Pick one or the other please.").AsEphemeral(true));
                     return;
                 }
 
