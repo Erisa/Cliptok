@@ -32,6 +32,7 @@
             if (count < 0)
             {
                 await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I can't delete a negative number of messages! Try setting `count` to a positive number.").AsEphemeral(true));
+                return;
             }
 
             if (count >= 1000)
