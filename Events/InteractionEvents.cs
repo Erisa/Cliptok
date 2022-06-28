@@ -76,8 +76,8 @@ namespace Cliptok.Events
                             );
                     }
             }
+            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of interaction command {command} by {user}", e.Context.CommandName, $"{e.Context.User.Username}#{e.Context.User.Discriminator}");
         }
-
 
     }
 }
