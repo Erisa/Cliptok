@@ -7,21 +7,21 @@
         [SlashCommand("clear", "Delete many messages from the current channel.", defaultPermission: false)]
         [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequireBotPermissions(Permissions.ManageMessages), SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task ClearSlashCommand(InteractionContext ctx,
-            [Option("count", "The number of messages to delete. Required if you don't use the 'upto' argument.")] long count = 0,
+            [Option("count", "The number of messages to consider for deletion. Required if you don't use the 'upto' argument.")] long count = 0,
             [Option("up_to", "Optionally delete messages up to (not including) this one. Accepts IDs and links.")] string upTo = "",
             [Option("user", "Optionally filter the deletion to a specific user.")] DiscordUser user = default,
             [Option("ignore_mods", "Optionally filter the deletion to only messages sent by users who are not Moderators.")] bool ignoreMods = false,
             [Option("match", "Optionally filter the deletion to only messages containing certain text.")] string match = "",
             [Option("bots_only", "Optionally filter the deletion to only bots.")] bool botsOnly = false,
             [Option("humans_only", "Optionally filter the deletion to only humans.")] bool humansOnly = false,
-            [Option("images_only", "Optionally filter the deletion to only messages containing images.")] bool imagesOnly = false,
+            [Option("attachments_only", "Optionally filter the deletion to only messages with attachments.")] bool attachmentsOnly = false,
             [Option("links_only", "Optionally filter the deletion to only messages containing links.")] bool linksOnly = false
         )
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
             // If all args are unset
-            if (count == 0 && upTo == "" && user == default && ignoreMods == false && match == "" && botsOnly == false && humansOnly == false && imagesOnly == false && linksOnly == false)
+            if (count == 0 && upTo == "" && user == default && ignoreMods == false && match == "" && botsOnly == false && humansOnly == false && attachmentsOnly == false && linksOnly == false)
             {
                 await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You must provide at least one argument! I need to know which messages to delete.").AsEphemeral(true));
                 return;
@@ -79,7 +79,6 @@
                         Constants.RegexConstants.discord_link_rx.Match(upTo).Groups[2].Value != ctx.Channel.Id.ToString()
                         || !ulong.TryParse(Constants.RegexConstants.discord_link_rx.Match(upTo).Groups[3].Value, out messageId)
                     )
-                    {
                     {
                         await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Please provide a valid link to a message in this channel!").AsEphemeral(true));
                         return;
@@ -174,8 +173,8 @@
                 }
             }
 
-            // Images only
-            if (imagesOnly)
+            // Attachments only
+            if (attachmentsOnly)
             {
                 if (linksOnly)
                 {
@@ -204,7 +203,7 @@
                 }
             }
 
-           // Skip messages older than 2 weeks, since Discord won't let us delete them anyway
+            // Skip messages older than 2 weeks, since Discord won't let us delete them anyway
 
             bool skipped = false;
             foreach (var message in messagesToClear.ToList())
