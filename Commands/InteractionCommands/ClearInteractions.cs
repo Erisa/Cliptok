@@ -67,25 +67,21 @@
                 ulong messageId;
                 if (!upTo.Contains("discord.com"))
                 {
-                    try
+                    if (!ulong.TryParse(upTo, out messageId))
                     {
-                        messageId = Convert.ToUInt64(upTo);
-                    }
-                    catch
-                    {
-                        await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} That doesn't look like a valid message ID or link! Try again."));
+                        await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} That doesn't look like a valid message ID or link! Please try again."));
                         return;
                     }
                 }
                 else
                 {
-                    if (Constants.RegexConstants.discord_link_rx.Match(upTo).Groups[2].Value == ctx.Channel.Id.ToString())
+                    if (
+                        Constants.RegexConstants.discord_link_rx.Match(upTo).Groups[2].Value != ctx.Channel.Id.ToString()
+                        || !ulong.TryParse(Constants.RegexConstants.discord_link_rx.Match(upTo).Groups[3].Value, out messageId)
+                    )
                     {
-                        messageId = Convert.ToUInt64(Constants.RegexConstants.discord_link_rx.Match(upTo).Groups[3].Value);
-                    }
-                    else
                     {
-                        await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Please provide a link to a message in this channel!").AsEphemeral(true));
+                        await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Please provide a valid link to a message in this channel!").AsEphemeral(true));
                         return;
                     }
                 }
@@ -125,7 +121,7 @@
                     }
                     catch (DSharpPlus.Exceptions.NotFoundException)
                     {
-                        // User is not in the server, assume not mod
+                        // User is not in the server, so they can't be a current mod
                         continue;
                     }
 
@@ -208,6 +204,8 @@
                 }
             }
 
+           // Skip messages older than 2 weeks, since Discord won't let us delete them anyway
+
             bool skipped = false;
             foreach (var message in messagesToClear.ToList())
             {
@@ -241,7 +239,7 @@
                     await ctx.Channel.DeleteMessagesAsync(messagesToClear, $"[Clear by {ctx.User.Username}#{ctx.User.Discriminator}]");
                     if (skipped)
                     {
-                        await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Cleared **{messagesToClear.Count}** messages from {ctx.Channel.Mention}!\n\nSome messages were not deleted because they are older than 2 weeks.");
+                        await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Cleared **{messagesToClear.Count}** messages from {ctx.Channel.Mention}!\nSome messages were not deleted because they are older than 2 weeks.");
                     }
                     else
                     {
