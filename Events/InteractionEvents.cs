@@ -6,15 +6,13 @@ namespace Cliptok.Events
     {
         public static async Task ComponentInteractionCreateEvent(DiscordClient _, ComponentInteractionCreateEventArgs e)
         {
-            // Initial response to avoid the 3 second timeout, will edit later.
-            var eout = new DiscordInteractionResponseBuilder().AsEphemeral(true);
-            await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, eout);
-
             // Edits need a webhook rather than interaction..?
             DiscordWebhookBuilder webhookOut;
 
             if (e.Id == "line-limit-deleted-message-callback")
             {
+                await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+
                 var text = await db.HashGetAsync("deletedMessageReferences", e.Message.Id);
                 if (text.IsNullOrEmpty)
                 {
@@ -32,9 +30,26 @@ namespace Cliptok.Events
                 }
 
             }
+            else if (e.Id == "clear-confirm-callback")
+            {
+                Dictionary<ulong, List<DiscordMessage>> messagesToClear = Commands.InteractionCommands.ClearInteractions.MessagesToClear;
+                
+                List<DiscordMessage> messages = messagesToClear.GetValueOrDefault(e.Message.Id);
+
+                await e.Channel.DeleteMessagesAsync(messages, $"[Clear by {e.User.Username}#{e.User.Discriminator}]");
+
+                DiscordButtonComponent disabledButton = new(ButtonStyle.Danger, "clear-confirm-callback", "Delete Messages", true);
+                await e.Channel.SendMessageAsync($"{cfgjson.Emoji.Deleted} Cleared **{messagesToClear.Count}** messages from {e.Channel.Mention}!");
+                await LogChannelHelper.LogMessageAsync("mod",
+                    new DiscordMessageBuilder()
+                        .WithContent($"{cfgjson.Emoji.Deleted} **{messagesToClear.Count}** messages were cleared in {e.Channel.Mention} by {e.User.Mention}.")
+                        .WithAllowedMentions(Mentions.None)
+                );
+                e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent($"{cfgjson.Emoji.Success} Done!").AddComponents(disabledButton).AsEphemeral(true));
+            }
             else
             {
-                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Unknown interaction. I don't know what you are asking me for."));
+                await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Unknown interaction. I don't know what you are asking me for.").AsEphemeral(true));
             }
 
         }
@@ -61,8 +76,8 @@ namespace Cliptok.Events
                             );
                     }
             }
+            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of interaction command {command} by {user}", e.Context.CommandName, $"{e.Context.User.Username}#{e.Context.User.Discriminator}");
         }
-
 
     }
 }
