@@ -72,16 +72,16 @@
                 channelString.Append("the ");
             }
 
-            channelString.Append($"**{insiderChannel1Pretty} ");
+            channelString.Append($"**{insiderChannel1Pretty}");
 
             if (insiderChannel2 != "")
             {
                 string insiderChannel2Pretty = insiderChannel2 == "RP" ? "Release Preview" : insiderChannel2;
-                channelString.Append($"**and **{insiderChannel2Pretty}** Channels");
+                channelString.Append($" **and **{insiderChannel2Pretty}** Channels");
             }
             else
             {
-                channelString.Append("Channel**");
+                channelString.Append("** Channel");
             }
 
             if (insiderChannel2 != "")
