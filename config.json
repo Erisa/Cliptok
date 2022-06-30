@@ -247,7 +247,7 @@
   "giveawayTriggerMessage": "<:msparty:517199105458569216>   **GIVEAWAY**   <:msparty:517199105458569216>",
   "githubWorkflow": {
     "repo": "Erisa/Cliptok",
-    "ref": "mod",
+    "ref": "main",
     "workflowId": "append-lists-txt.yml"
   },
   "feedbackHubChannelId": 865734819995582464,
