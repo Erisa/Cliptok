@@ -249,7 +249,7 @@ namespace Cliptok.Events
                             {
                                 tempArray[pos] = ' ';
                             }
-                            if (c == '\u200d')
+                            if (c == '\u200d' && pos + 1 < tempArray.Length)
                             {
                                 tempArray[pos] = ' ';
                                 tempArray[pos + 1] = ' ';
