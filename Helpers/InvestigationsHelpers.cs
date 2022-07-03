@@ -18,7 +18,7 @@
             .WithAuthor(
                 $"{infringingMessage.Author.Username}#{infringingMessage.Author.Discriminator} in #{infringingMessage.Channel.Name}",
                 null,
-                infringingMessage.Author.AvatarUrl
+                await LykosAvatarMethods.UserOrMemberAvatarURL(infringingMessage.Author, infringingMessage.Channel.Guild, "png")
             );
 
             if (reason != null && reason != "")
@@ -36,7 +36,7 @@
             if (channelOverride == default)
                 await LogChannelHelper.LogMessageAsync(logChannelKey, content, embed);
             else
-                await channelOverride.SendMessageAsync(content, embed);
+                await channelOverride.SendMessageAsync(new DiscordMessageBuilder().WithContent(content).WithEmbed(embed).WithAllowedMentions(Mentions.None));
         }
 
     }
