@@ -2,7 +2,7 @@
 {
     public class WarningHelpers
     {
-        public static DiscordEmbed GenerateWarningsEmbed(DiscordUser targetUser)
+        public static async Task<DiscordEmbed> GenerateWarningsEmbedAsync(DiscordUser targetUser)
         {
             var warningsOutput = Program.db.HashGetAll(targetUser.Id.ToString()).ToDictionary(
                 x => x.Name.ToString(),
@@ -25,7 +25,7 @@
                 .WithAuthor(
                     $"Warnings for {targetUser.Username}#{targetUser.Discriminator}",
                     null,
-                    targetUser.AvatarUrl
+                    await LykosAvatarMethods.UserOrMemberAvatarURL(targetUser, Program.homeGuild, "png")
                 );
 
             if (warningsOutput.Count == 0)
@@ -107,7 +107,7 @@
             .WithAuthor(
                 $"Warning for {targetUser.Username}#{targetUser.Discriminator}",
                 null,
-                targetUser.AvatarUrl
+                await LykosAvatarMethods.UserOrMemberAvatarURL(targetUser, Program.homeGuild, "png")
             )
             .AddField("Warning ID", StringHelpers.Pad(warning.WarningId), true);
             if (detailed)

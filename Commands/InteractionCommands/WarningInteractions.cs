@@ -61,7 +61,7 @@
             [Option("public", "Whether to show the warnings in public chat. Do not disrupt chat with this.")] bool publicWarnings = false
         )
         {
-            var eout = new DiscordInteractionResponseBuilder().AddEmbed(WarningHelpers.GenerateWarningsEmbed(user));
+            var eout = new DiscordInteractionResponseBuilder().AddEmbed(await WarningHelpers.GenerateWarningsEmbedAsync(user));
             if (!publicWarnings)
                 eout.AsEphemeral(true);
 
@@ -83,7 +83,7 @@
 
             if (sourceWarnings.Length == 0)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} The source user has no warnings to transfer.", WarningHelpers.GenerateWarningsEmbed(sourceUser));
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} The source user has no warnings to transfer.", await WarningHelpers.GenerateWarningsEmbedAsync(sourceUser));
                 return;
             }
             else if (merge)
@@ -98,7 +98,7 @@
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} **CAUTION**: The target user has warnings.\n\n" +
                     $"If you are sure you want to **OVERRIDE** and **DELETE** these warnings, please consider the consequences before adding `force_override: True` to the command.\nIf you wish to **NOT** override the target's warnings, please use `merge: True` instead.",
-                    WarningHelpers.GenerateWarningsEmbed(targetUser));
+                    await WarningHelpers.GenerateWarningsEmbedAsync(targetUser));
                 return;
             }
             else if (targetWarnings.Length > 0 && forceOverride)
@@ -120,7 +120,7 @@
             await LogChannelHelper.LogMessageAsync("mod",
                 new DiscordMessageBuilder()
                     .WithContent($"{Program.cfgjson.Emoji.Information} Warnings from {sourceUser.Mention} were {operationText}transferred to {targetUser.Mention} by `{ctx.User.Username}#{ctx.User.Discriminator}`")
-                    .WithEmbed(WarningHelpers.GenerateWarningsEmbed(targetUser))
+                    .WithEmbed(await WarningHelpers.GenerateWarningsEmbedAsync(targetUser))
            );
         }
 

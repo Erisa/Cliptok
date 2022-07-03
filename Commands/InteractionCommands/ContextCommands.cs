@@ -22,7 +22,7 @@
         [ContextMenu(ApplicationCommandType.UserContextMenu, "Show Warnings")]
         public async Task ContextWarnings(ContextMenuContext ctx)
         {
-            await ctx.RespondAsync(embed: WarningHelpers.GenerateWarningsEmbed(ctx.TargetUser), ephemeral: true);
+            await ctx.RespondAsync(embed: await WarningHelpers.GenerateWarningsEmbedAsync(ctx.TargetUser), ephemeral: true);
         }
 
         [ContextMenu(ApplicationCommandType.UserContextMenu, "User Information")]

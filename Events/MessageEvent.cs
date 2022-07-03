@@ -70,7 +70,7 @@ namespace Cliptok.Events
                     DiscordRole muted = message.Channel.Guild.GetRole(Program.cfgjson.MutedRole);
                     if (modmailMember.Roles.Contains(muted))
                     {
-                        await channel.SendMessageAsync(null, WarningHelpers.GenerateWarningsEmbed(modmailMember));
+                        await channel.SendMessageAsync(null, await WarningHelpers.GenerateWarningsEmbedAsync(modmailMember));
                     }
                 }
 

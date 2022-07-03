@@ -8,6 +8,7 @@ namespace Cliptok.Events
         {
             Task.Run(async () =>
             {
+                homeGuild = await discord.GetGuildAsync(cfgjson.ServerID);
                 await LogChannelHelper.UnpackLogConfigAsync(cfgjson);
                 client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
             });
@@ -28,8 +29,6 @@ namespace Cliptok.Events
 
             if (Environment.GetEnvironmentVariable("RAVY_API_TOKEN") == null || Environment.GetEnvironmentVariable("RAVY_API_TOKEN") == "goodluckfindingone")
                 discord.Logger.LogWarning(CliptokEventID, "Ravy API features disabled due to missing API token.");
-
-            homeGuild = await discord.GetGuildAsync(cfgjson.ServerID);
 
             Tasks.PunishmentTasks.CheckMutesAsync();
             Tasks.PunishmentTasks.CheckBansAsync();

@@ -104,7 +104,7 @@ namespace Cliptok.Commands
             if (targetUser == null)
                 targetUser = ctx.User;
 
-            await ctx.RespondAsync(null, GenerateWarningsEmbed(targetUser));
+            await ctx.RespondAsync(null, await GenerateWarningsEmbedAsync(targetUser));
         }
 
         [
