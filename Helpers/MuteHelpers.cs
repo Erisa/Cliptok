@@ -95,14 +95,14 @@
                 if (permaMute)
                 {
                     await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder()
-                        .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted by {moderator.Mention} (`{moderatorId}`).\nReason: **{reason}**")
+                        .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted by {moderator.Mention}.\nReason: **{reason}**")
                         .WithAllowedMentions(Mentions.None)
                     );
                 }
                 else
                 {
                     await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder()
-                        .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** by {moderator.Mention} (`{moderatorId}`)." +
+                        .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** by {moderator.Mention}." +
                             $"\nReason: **{reason}**" +
                             $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>")
                         .WithAllowedMentions(Mentions.None)

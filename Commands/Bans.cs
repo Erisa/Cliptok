@@ -60,16 +60,16 @@
                 {
                     if (appealable)
                     {
-                        logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was permanently banned (with appeal) by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**";
+                        logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was permanently banned (with appeal) by {moderator.Mention}.\nReason: **{reason}**";
                     }
                     else
                     {
-                        logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was permanently banned by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**";
+                        logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was permanently banned by `{moderator.Mention}.\nReason: **{reason}**";
                     }
                 }
                 else
                 {
-                    logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was banned for {TimeHelpers.TimeToPrettyFormat(banDuration, false)} by `{moderator.Username}#{moderator.Discriminator}` (`{moderatorId}`).\nReason: **{reason}**\nBan expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>";
+                    logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was banned for {TimeHelpers.TimeToPrettyFormat(banDuration, false)} by {moderator.Mention}.\nReason: **{reason}**\nBan expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>";
                 }
                 _ = LogChannelHelper.LogMessageAsync("mod", logOut);
 

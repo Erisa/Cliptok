@@ -136,7 +136,7 @@ namespace Cliptok.Commands
                     await LogChannelHelper.LogMessageAsync("mod",
                         new DiscordMessageBuilder()
                             .WithContent($"{Program.cfgjson.Emoji.Deleted} Warning deleted:" +
-                            $"`{StringHelpers.Pad(warnId)}` (belonging to {targetUser.Mention}, deleted by {ctx.Member.Username}#{ctx.Member.Discriminator})")
+                            $"`{StringHelpers.Pad(warnId)}` (belonging to {targetUser.Mention}, deleted by {ctx.Member.Mention})")
                             .WithEmbed(await FancyWarnEmbedAsync(warning, true, 0xf03916, true, targetUser.Id))
                             .WithAllowedMentions(Mentions.None)
                         );

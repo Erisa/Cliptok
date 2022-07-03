@@ -48,7 +48,7 @@
             await target.RemoveAsync(reason);
             await LogChannelHelper.LogMessageAsync("mod",
                 new DiscordMessageBuilder()
-                    .WithContent($"{Program.cfgjson.Emoji.Ejected} {target.Mention} was kicked by `{moderator.Username}#{moderator.Discriminator}` (`{moderator.Id}`).\nReason: **{reason}**")
+                    .WithContent($"{Program.cfgjson.Emoji.Ejected} {target.Mention} was kicked by {moderator.Mention}.\nReason: **{reason}**")
                     .WithAllowedMentions(Mentions.None)
            );
         }
