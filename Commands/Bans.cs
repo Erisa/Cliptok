@@ -64,7 +64,7 @@
                     }
                     else
                     {
-                        logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was permanently banned by `{moderator.Mention}.\nReason: **{reason}**";
+                        logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was permanently banned by {moderator.Mention}.\nReason: **{reason}**";
                     }
                 }
                 else
