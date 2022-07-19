@@ -124,7 +124,7 @@
             if (insiderChannel2 != "")
                 await insiderRole2.ModifyAsync(mentionable: false);
 
-            if (lockdownTime != "")
+            if (lockdownTime != "0")
             {
                 TimeSpan lockDuration;
                 try
