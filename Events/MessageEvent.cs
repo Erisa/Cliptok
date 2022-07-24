@@ -127,34 +127,38 @@ namespace Cliptok.Events
                         {
                             continue;
                         }
-                        else if (Checks.ListChecks.CheckForNaughtyWords(message.Content.ToLower(), listItem))
+                        else
                         {
-                            string reason = listItem.Reason;
-                            try
+                            (bool success, string flaggedWord) = Checks.ListChecks.CheckForNaughtyWords(message.Content.ToLower(), listItem);
+                            if (success)
                             {
-                                _ = message.DeleteAsync();
-                                await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null);
-                            }
-                            catch
-                            {
-                                // still warn anyway
-                            }
+                                string reason = listItem.Reason;
+                                try
+                                {
+                                    _ = message.DeleteAsync();
+                                    await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null);
+                                }
+                                catch
+                                {
+                                    // still warn anyway
+                                }
 
-                            if (listItem.Name == "autoban.txt" && GetPermLevel(member) < ServerPermLevel.Tier4)
-                            {
-                                _ = message.DeleteAsync();
-                                await Bans.BanFromServerAsync(message.Author.Id, reason, client.CurrentUser.Id, message.Channel.Guild, 0, message.Channel, default, true);
+                                if (listItem.Name == "autoban.txt" && GetPermLevel(member) < ServerPermLevel.Tier4)
+                                {
+                                    _ = message.DeleteAsync();
+                                    await Bans.BanFromServerAsync(message.Author.Id, reason, client.CurrentUser.Id, message.Channel.Guild, 0, message.Channel, default, true);
+                                    return;
+                                }
+
+                                //var tmp = message.Channel.Type;
+
+                                match = true;
+
+                                DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                                var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, message.Channel, " automatically ");
+                                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField: ("Match", flaggedWord, true));
                                 return;
                             }
-
-                            //var tmp = message.Channel.Type;
-
-                            match = true;
-
-                            DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
-                            var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, message.Channel, " automatically ");
-                            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink);
-                            return;
                         }
                         if (match)
                             return;
@@ -492,17 +496,33 @@ namespace Cliptok.Events
                     {
                         continue;
                     }
-                    else if (Checks.ListChecks.CheckForNaughtyWords(message.Content.ToLower(), listItem))
+                    else
                     {
-                        DiscordChannel logChannel = default;
-                        if (listItem.ChannelId != null)
+                        (bool success, string flaggedWord) = Checks.ListChecks.CheckForNaughtyWords(message.Content.ToLower(), listItem);
+                        if (success)
                         {
-                            logChannel = await Program.discord.GetChannelAsync((ulong)listItem.ChannelId);
+                            DiscordChannel logChannel = default;
+                            if (listItem.ChannelId != null)
+                            {
+                                logChannel = await Program.discord.GetChannelAsync((ulong)listItem.ChannelId);
+                            }
+
+                            string content = $"{Program.cfgjson.Emoji.Warning} Detected potentially suspicious message by {message.Author.Mention} in {message.Channel.Mention}:";
+
+                            (string name, string value, bool inline) extraField = new("Match", flaggedWord, true);
+
+                            await InvestigationsHelpers.SendInfringingMessaageAsync(
+                                "investigations",
+                                message,
+                                listItem.Reason,
+                                DiscordHelpers.MessageLink(message),
+                                content: content,
+                                colour: new DiscordColor(0xFEC13D),
+                                jumpText: "Jump to message",
+                                channelOverride: logChannel,
+                                extraField: extraField
+                            );
                         }
-
-                        string content = $"{Program.cfgjson.Emoji.Warning} Detected potentially suspicious message by {message.Author.Mention} in {message.Channel.Mention}:";
-
-                        await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, listItem.Reason, DiscordHelpers.MessageLink(message), content: content, colour: new DiscordColor(0xFEC13D), jumpText: "Jump to message", channelOverride: logChannel);
                     }
                 }
             }
