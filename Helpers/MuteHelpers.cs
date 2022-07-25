@@ -143,7 +143,7 @@
                 }
             }
 
-            if (channel is not null && alwaysRespond)
+            if (output.chatMessage is null && channel is not null && alwaysRespond)
             {
                 reason = reason.Replace("`", "\\`").Replace("*", "\\*");
                 if (muteDuration == default)
