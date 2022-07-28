@@ -92,7 +92,14 @@
             var channel = matchPair.Value;
 
             if (channel != default)
-                await channel.SendMessageAsync(messageToSend);
+            {
+                DiscordMessageBuilder message = new()
+                {
+                    Content = messageToSend
+                };
+                await channel.SendMessageAsync(message.WithAllowedMentions(Mentions.None));
+
+            }
         }
 
 
