@@ -28,7 +28,7 @@
             [Option("flavour_text", "Extra text appended on the end of the main line, replacing :WindowsInsider: or :Windows10:")] string flavourText = "",
             [Option("autothread_name", "If no thread is given, create a thread with this name.")] string autothreadName = "Build {0} ({1})",
 
-            [Option("lockdown", "If supplied, lock the channel for a certain period of time after announcing the build.")] string lockdownTime = ""
+            [Option("lockdown", "Set 0 to not lock. Lock the channel for a certain period of time after announcing the build.")] string lockdownTime = "1h"
         )
         {
             if (windowsVersion == 10 && insiderChannel1 != "RP")
@@ -124,7 +124,7 @@
             if (insiderChannel2 != "")
                 await insiderRole2.ModifyAsync(mentionable: false);
 
-            if (lockdownTime != "")
+            if (lockdownTime != "0")
             {
                 TimeSpan lockDuration;
                 try

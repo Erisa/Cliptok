@@ -4,7 +4,7 @@ namespace Cliptok.Checks
 {
     public class ListChecks
     {
-        public static bool CheckForNaughtyWords(string input, WordListJson naughtyWordList)
+        public static (bool success, string? flaggedWord) CheckForNaughtyWords(string input, WordListJson naughtyWordList)
         {
             string[] naughtyWords = naughtyWordList.Words;
             input = input.Replace("\0", "");
@@ -27,6 +27,7 @@ namespace Cliptok.Checks
 
                 for (int i = 0; i < arrayOfWords.Length; i++)
                 {
+                    string naughtyWord = "";
                     bool isNaughty = false;
                     foreach (string naughty in naughtyWords)
                     {
@@ -50,13 +51,13 @@ namespace Cliptok.Checks
                         {
                             isNaughty = false;
                         }
-                    }
-                    if (isNaughty)
-                    {
-                        return true;
+                        if (isNaughty)
+                        {
+                            return (true, naughty);
+                        }
                     }
                 }
-                return false;
+                return (false, null);
             }
             else if (naughtyWordList.Url)
             {
@@ -64,19 +65,19 @@ namespace Cliptok.Checks
                 foreach (Match match in urlMatches)
                 {
                     if (naughtyWords.Contains(match.Value))
-                        return true;
+                        return (true, match.Value);
                 }
-                return false;
+                return (false, null);
             }
             {
                 foreach (string word in naughtyWords)
                 {
                     if (!string.IsNullOrWhiteSpace(word) && input.Contains(word))
                     {
-                        return true;
+                        return (true, word);
                     }
                 }
-                return false;
+                return (false, null);
             }
 
         }

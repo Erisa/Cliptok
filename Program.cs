@@ -53,9 +53,7 @@ namespace Cliptok
             Log.Logger = new LoggerConfiguration()
 #if DEBUG
                 .MinimumLevel.Debug()
-                .Filter.ByExcluding("Contains(@m, 'Unknown event:')")
 #else
-                .Filter.ByExcluding("Contains(@m, 'Unknown event:')")
                 .MinimumLevel.Information()
 #endif
                 .WriteTo.Console(outputTemplate: logFormat, theme: AnsiConsoleTheme.Literate)
@@ -122,7 +120,8 @@ namespace Cliptok
                 MinimumLogLevel = LogLevel.Information,
 #endif
                 LoggerFactory = logFactory,
-                Intents = DiscordIntents.All + 3145728
+                Intents = DiscordIntents.All + 3145728,
+                LogUnknownEvents = false
             });
 
             var slash = discord.UseSlashCommands();

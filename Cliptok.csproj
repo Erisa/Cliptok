@@ -9,9 +9,9 @@
 
 	<ItemGroup>
 		<PackageReference Include="Abyssal.HumanDateParser" Version="2.0.0-20191113.1" />
-		<PackageReference Include="DSharpPlus" Version="4.3.0-nightly-01146" />
-		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.3.0-nightly-01146" />
-		<PackageReference Include="DSharpPlus.SlashCommands" Version="4.3.0-nightly-01146" />
+		<PackageReference Include="DSharpPlus" Version="4.3.0-nightly-01155" />
+		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.3.0-nightly-01155" />
+		<PackageReference Include="DSharpPlus.SlashCommands" Version="4.3.0-nightly-01155" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="Serilog" Version="2.11.0" />
 		<PackageReference Include="Serilog.Expressions" Version="3.4.0" />
