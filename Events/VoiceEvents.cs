@@ -2,8 +2,10 @@
 {
     public class VoiceEvents
     {
+        private static List<ulong> PendingOverWrites = new();
+
         public static async Task VoiceStateUpdate(DiscordClient client, VoiceStateUpdateEventArgs e)
-        { 
+        {
             if (e.After.Channel is null)
             {
                 client.Logger.LogDebug($"{e.User.Username} left {e.Before.Channel.Name}");
@@ -15,7 +17,7 @@
                 client.Logger.LogDebug($"{e.User.Username} joined {e.After.Channel.Name}");
 
                 UserJoined(client, e);
-            } 
+            }
             else if (e.Before.Channel.Id != e.After.Channel.Id)
             {
                 client.Logger.LogDebug($"{e.User.Username} moved from {e.Before.Channel.Name} to {e.After.Channel.Name}");
@@ -35,6 +37,18 @@
 
         public static async Task UserJoined(DiscordClient _, VoiceStateUpdateEventArgs e)
         {
+
+            while (PendingOverWrites.Contains(e.User.Id))
+            {
+                Console.WriteLine("spinning");
+                await Task.Delay(5);
+            }
+
+            //if (PendingOverWriteAdds.GetValueOrDefault(e.User.Id) == 0)
+            PendingOverWrites.Add(e.User.Id);
+            //else
+            //    PendingOverWriteAdds[e.User.Id] = PendingOverWriteAdds[e.User.Id] + 1;
+
             DiscordOverwrite[] existingOverwrites = e.After.Channel.PermissionOverwrites.ToArray();
 
             if (!e.After.Member.Roles.Any(role => role.Id == Program.cfgjson.MutedRole))
@@ -56,6 +70,8 @@
                 }
             }
 
+            PendingOverWrites.Remove(e.User.Id);
+
             DiscordMessageBuilder message = new()
             {
                 Content = $"{e.After.Member.Mention} has joined."
@@ -67,13 +83,21 @@
         {
             Task.Run(async () =>
             {
-                DiscordOverwrite[] existingOverwrites = e.Before.Channel.PermissionOverwrites.ToArray();
-
                 DiscordMember member;
                 if (e.After.Channel is null)
                     member = e.Before.Member;
                 else
                     member = e.After.Member;
+
+                while (PendingOverWrites.Contains(e.User.Id));
+                {
+                    Console.WriteLine("spinning");
+                    await Task.Delay(5);
+                }
+
+                PendingOverWrites.Add(e.User.Id);
+
+                DiscordOverwrite[] existingOverwrites = e.Before.Channel.PermissionOverwrites.ToArray();
 
                 foreach (DiscordOverwrite overwrite in existingOverwrites)
                 {
@@ -103,6 +127,8 @@
                         break;
                     }
                 }
+
+                PendingOverWrites.Remove(e.User.Id);
 
                 DiscordMessageBuilder message = new()
                 {
