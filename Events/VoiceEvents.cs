@@ -118,11 +118,7 @@
 
             PendingOverWrites.Remove(e.User.Id);
 
-            DiscordMessageBuilder message = new()
-            {
-                Content = $"{e.After.Member.Mention} has joined."
-            };
-            await e.After.Channel.SendMessageAsync(message.WithAllowedMentions(Mentions.None));
+            await e.After.Channel.SendMessageAsync($"{e.After.Member.Mention} has joined.");
         }
 
         public static async Task UserLeft(DiscordClient _, VoiceStateUpdateEventArgs e)
