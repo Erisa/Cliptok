@@ -45,6 +45,8 @@ namespace Cliptok
 
         static async Task Main(string[] _)
         {
+            Console.OutputEncoding = Encoding.UTF8;
+            
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var logFormat = "[{Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{Level}] {Message}{NewLine}{Exception}";
 
