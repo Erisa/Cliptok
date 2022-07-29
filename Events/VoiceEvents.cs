@@ -3,25 +3,25 @@
     public class VoiceEvents
     {
         public static async Task VoiceStateUpdate(DiscordClient client, VoiceStateUpdateEventArgs e)
-        {        
+        { 
             if (e.After.Channel is null)
             {
                 client.Logger.LogDebug($"{e.User.Username} left {e.Before.Channel.Name}");
 
-                await UserLeft(client, e);
+                UserLeft(client, e);
             }
             else if (e.Before is null)
             {
                 client.Logger.LogDebug($"{e.User.Username} joined {e.After.Channel.Name}");
 
-                await UserJoined(client, e);
+                UserJoined(client, e);
             } 
             else if (e.Before.Channel.Id != e.After.Channel.Id)
             {
                 client.Logger.LogDebug($"{e.User.Username} moved from {e.Before.Channel.Name} to {e.After.Channel.Name}");
 
-                await UserLeft(client, e);
-                await UserJoined(client, e);
+                UserLeft(client, e);
+                UserJoined(client, e);
             }
 
             if (e.Before is not null && e.Before.Channel.Users.Count == 0)
@@ -35,36 +35,32 @@
 
         public static async Task UserJoined(DiscordClient _, VoiceStateUpdateEventArgs e)
         {
-            Task.Run(async () =>
+            DiscordOverwrite[] existingOverwrites = e.After.Channel.PermissionOverwrites.ToArray();
+
+            if (!e.After.Member.Roles.Any(role => role.Id == Program.cfgjson.MutedRole))
             {
-                DiscordOverwrite[] existingOverwrites = e.After.Channel.PermissionOverwrites.ToArray();
-                DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
-
-                if (!member.Roles.Any(role => role.Id == Program.cfgjson.MutedRole))
+                bool userOverrideSet = false;
+                foreach (DiscordOverwrite overwrite in existingOverwrites)
                 {
-                    bool userOverrideSet = false;
-                    foreach (DiscordOverwrite overwrite in existingOverwrites)
+                    if (overwrite.Type == OverwriteType.Member && overwrite.Id == e.After.Member.Id)
                     {
-                        if (overwrite.Type == OverwriteType.Member && overwrite.Id == member.Id)
-                        {
-                            await e.After.Channel.AddOverwriteAsync(member, overwrite.Allowed | Permissions.SendMessages, overwrite.Denied, "User joined voice channel.");
-                            userOverrideSet = true;
-                            break;
-                        }
-                    }
-
-                    if (!userOverrideSet)
-                    {
-                        await e.After.Channel.AddOverwriteAsync(member, Permissions.SendMessages, Permissions.None, "User joined voice channel.");
+                        await e.After.Channel.AddOverwriteAsync(e.After.Member, overwrite.Allowed | Permissions.SendMessages, overwrite.Denied, "User joined voice channel.");
+                        userOverrideSet = true;
+                        break;
                     }
                 }
 
-                DiscordMessageBuilder message = new()
+                if (!userOverrideSet)
                 {
-                    Content = $"{member.Mention} has joined."
-                };
-                await e.After.Channel.SendMessageAsync(message.WithAllowedMentions(Mentions.None));
-            });
+                    await e.After.Channel.AddOverwriteAsync(e.After.Member, Permissions.SendMessages, Permissions.None, "User joined voice channel.");
+                }
+            }
+
+            DiscordMessageBuilder message = new()
+            {
+                Content = $"{e.After.Member.Mention} has joined."
+            };
+            await e.After.Channel.SendMessageAsync(message.WithAllowedMentions(Mentions.None));
         }
 
         public static async Task UserLeft(DiscordClient _, VoiceStateUpdateEventArgs e)
@@ -72,7 +68,12 @@
             Task.Run(async () =>
             {
                 DiscordOverwrite[] existingOverwrites = e.Before.Channel.PermissionOverwrites.ToArray();
-                DiscordMember member = await e.Guild.GetMemberAsync(e.User.Id);
+
+                DiscordMember member;
+                if (e.After.Channel is null)
+                    member = e.Before.Member;
+                else
+                    member = e.After.Member;
 
                 foreach (DiscordOverwrite overwrite in existingOverwrites)
                 {
