@@ -30,7 +30,7 @@
                     UserJoined(client, e);
                 }
 
-                if (e.Before is not null && e.Before.Channel.Users.Count == 0)
+                if (e.Before is not null && e.Before.Channel.Users.Count == 0 && !Program.cfgjson.IgnoredVoiceChannels.Contains(e.Before.Channel.Id))
                 {
                     client.Logger.LogDebug("{channel} is now empty!", e.Before.Channel.Name);
 
@@ -100,6 +100,9 @@
         public static async Task UserJoined(DiscordClient _, VoiceStateUpdateEventArgs e)
         {
 
+            if (Program.cfgjson.IgnoredVoiceChannels.Contains(e.After.Channel.Id))
+                return;
+
             while (PendingOverWrites.Contains(e.User.Id))
             {
                 Console.WriteLine("spinning");
@@ -134,7 +137,7 @@
             catch (Exception ex)
             {
                 PendingOverWrites.Remove(e.User.Id);
-                Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error ocurred trying to remove voice overwrites for {user} in {channel}", e.User.Username, e.After.Channel.Name);
+                Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error ocurred trying to add voice overwrites for {user} in {channel}", e.User.Username, e.After.Channel.Name);
             }
 
             PendingOverWrites.Remove(e.User.Id);
@@ -151,6 +154,9 @@
 
         public static async Task UserLeft(DiscordClient _, VoiceStateUpdateEventArgs e)
         {
+            if (Program.cfgjson.IgnoredVoiceChannels.Contains(e.Before.Channel.Id))
+                return;
+
             DiscordMember member = e.After.Member;
 
             while (PendingOverWrites.Contains(e.User.Id)) ;

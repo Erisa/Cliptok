@@ -247,6 +247,9 @@
 
         [JsonProperty("botOwners")]
         public List<ulong> BotOwners { get; private set; } = new();
+
+        [JsonProperty("ignoredVoiceChannels")]
+        public List<ulong> IgnoredVoiceChannels { get; private set; } = new();
     }
 
     public class LogChannelConfig
