@@ -42,7 +42,7 @@
 
                         PendingPurge.Add(e.Before.Channel.Id);
 
-                        for (int i = 0; i <= 1; i++)
+                        for (int i = 0; i <= 12; i++)
                         {
                             if (e.Guild.Channels[e.Before.Channel.Id].Users.Count != 0)
                             {
@@ -89,7 +89,7 @@
 
                             LogChannelHelper.LogMessageAsync("messages", msg);
 
-                            //await e.Before.Channel.DeleteMessagesAsync(messages);
+                            await e.Before.Channel.DeleteMessagesAsync(messages);
                         }
                     });
                 }
