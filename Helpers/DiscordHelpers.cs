@@ -75,6 +75,14 @@
                         output.AppendLine($"{attachment.Url}");
                     }
                 }
+
+                if (message.Stickers.Count != 0)
+                {
+                    foreach (var sticker in message.Stickers)
+                    {
+                        output.AppendLine($"[Sticker: {sticker.Name}] ({sticker.StickerUrl})");
+                    }
+                }
             }
 
             return output.ToString();
