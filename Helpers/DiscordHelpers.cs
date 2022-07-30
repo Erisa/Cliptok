@@ -41,11 +41,43 @@
             {
                 var channel = await Program.discord.GetChannelAsync(messageReference.ChannelId);
                 return await channel.GetMessageAsync(messageReference.MessageId);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
-                Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, exception: ex, message: "Failed to fetch message {message}-{channel}",  messageReference.ChannelId, messageReference.MessageId);
+                Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, exception: ex, message: "Failed to fetch message {message}-{channel}", messageReference.ChannelId, messageReference.MessageId);
                 return null;
             }
+        }
+
+        public static async Task<string> CompileMessagesAsync(List<DiscordMessage> messages, DiscordChannel channel)
+        {
+            var output = new StringBuilder().Append($"-- Messages in #{channel.Name} ({channel.Id}) -- {channel.Guild.Name} ({channel.Guild.Id}) --\n");
+
+            foreach (DiscordMessage message in messages)
+            {
+                output.AppendLine();
+                output.AppendLine($"{message.Author.Username}#{message.Author.Discriminator} [{message.Timestamp.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss zzz")}] (User: {message.Author.Id}) (Message: {message.Id})");
+
+                if (message.ReferencedMessage is not null)
+                {
+                    output.AppendLine($"[Replying to {message.ReferencedMessage.Author.Username}#{message.ReferencedMessage.Author.Discriminator} (User: {message.ReferencedMessage.Author.Id}) (Message: {message.ReferencedMessage.Id})]");
+                }
+
+                if (message.Content is not null && message.Content != "")
+                {
+                    output.AppendLine($"{message.Content}");
+                }
+
+                if (message.Attachments.Count != 0)
+                {
+                    foreach (DiscordAttachment attachment in message.Attachments)
+                    {
+                        output.AppendLine($"{attachment.Url}");
+                    }
+                }
+            }
+
+            return output.ToString();
         }
 
     }

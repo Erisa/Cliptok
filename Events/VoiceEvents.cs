@@ -42,7 +42,7 @@
 
                         PendingPurge.Add(e.Before.Channel.Id);
 
-                        for (int i = 0; i <= 12; i++)
+                        for (int i = 0; i <= 1; i++)
                         {
                             if (e.Guild.Channels[e.Before.Channel.Id].Users.Count != 0)
                             {
@@ -74,7 +74,22 @@
                             }
                             messages.RemoveAll(message => message.CreationTimestamp.ToUniversalTime() < DateTime.UtcNow.AddDays(-14));
                             PendingPurge.Remove(e.Before.Channel.Id);
-                            await e.Before.Channel.DeleteMessagesAsync(messages);
+
+                            string messageLog = await DiscordHelpers.CompileMessagesAsync(messages.AsEnumerable().Reverse().ToList(), e.Before.Channel);
+
+                            var stream = new MemoryStream(Encoding.UTF8.GetBytes(messageLog));
+                            var msg = new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Deleted} Automatically purged **{messages.Count}** messages from {e.Before.Channel.Mention}.").WithFile("messages.txt", stream);
+
+                            var hasteResult = await Program.hasteUploader.Post(messageLog);
+
+                            if (hasteResult.IsSuccess)
+                            {
+                                msg.WithEmbed(new DiscordEmbedBuilder().WithDescription($"[`📄 View online`]({Program.cfgjson.HastebinEndpoint}/raw/{hasteResult.Key})"));
+                            }
+
+                            LogChannelHelper.LogMessageAsync("messages", msg);
+
+                            //await e.Before.Channel.DeleteMessagesAsync(messages);
                         }
                     });
                 }
