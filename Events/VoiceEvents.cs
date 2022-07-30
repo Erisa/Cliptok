@@ -12,19 +12,19 @@
             {
                 if (e.After.Channel is null)
                 {
-                    client.Logger.LogDebug($"{e.User.Username} left {e.Before.Channel.Name}");
+                    client.Logger.LogDebug("{user} left {channel}", e.User.Username, e.Before.Channel.Name);
 
                     UserLeft(client, e);
                 }
                 else if (e.Before is null)
                 {
-                    client.Logger.LogDebug($"{e.User.Username} joined {e.After.Channel.Name}");
+                    client.Logger.LogDebug("{user} joined {channel}", e.User.Username, e.After.Channel.Name);
 
                     UserJoined(client, e);
                 }
                 else if (e.Before.Channel.Id != e.After.Channel.Id)
                 {
-                    client.Logger.LogDebug($"{e.User.Username} moved from {e.Before.Channel.Name} to {e.After.Channel.Name}");
+                    client.Logger.LogDebug("{user} moved from {before} to {after}", e.User.Username, e.Before.Channel.Name, e.After.Channel.Name);
 
                     UserLeft(client, e);
                     UserJoined(client, e);
@@ -32,7 +32,7 @@
 
                 if (e.Before is not null && e.Before.Channel.Users.Count == 0)
                 {
-                    client.Logger.LogDebug($"{e.Before.Channel.Name} is now empty!");
+                    client.Logger.LogDebug("{channel} is now empty!", e.Before.Channel.Name);
 
                     Task.Run(async () =>
                     {
@@ -105,10 +105,7 @@
                 await Task.Delay(5);
             }
 
-            //if (PendingOverWriteAdds.GetValueOrDefault(e.User.Id) == 0)
             PendingOverWrites.Add(e.User.Id);
-            //else
-            //    PendingOverWriteAdds[e.User.Id] = PendingOverWriteAdds[e.User.Id] + 1;
 
             DiscordOverwrite[] existingOverwrites = e.After.Channel.PermissionOverwrites.ToArray();
 
