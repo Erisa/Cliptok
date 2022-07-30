@@ -61,30 +61,32 @@
                         if (e.Guild.Channels[e.Before.Channel.Id].Users.Count == 0)
                         {
                             List<DiscordMessage> messages = new();
-                            var firstMsg = (await e.Before.Channel.GetMessagesAsync(1)).First();
-                            messages.Add(firstMsg);
-                            var lastMsgId = firstMsg.Id;
-                            // delete all the messages from the channel
-                            while (true)
-                            {
-                                var newmsgs = (await e.Before.Channel.GetMessagesBeforeAsync(lastMsgId, 100)).ToList();
-                                messages.AddRange(newmsgs);
-                                lastMsgId = newmsgs.Last().Id;
-                                if (newmsgs.Count < 100)
-                                {
-                                    break;
-                                }
-                            }
-                            messages.RemoveAll(message => message.CreationTimestamp.ToUniversalTime() < DateTime.UtcNow.AddDays(-14));
-                            PendingPurge.Remove(e.Before.Channel.Id);
-
                             try
                             {
+                                var firstMsg = (await e.Before.Channel.GetMessagesAsync(1)).First();
+                                messages.Add(firstMsg);
+                                var lastMsgId = firstMsg.Id;
+                                // delete all the messages from the channel
+                                while (true)
+                                {
+                                    var newmsgs = (await e.Before.Channel.GetMessagesBeforeAsync(lastMsgId, 100)).ToList();
+                                    messages.AddRange(newmsgs);
+                                    lastMsgId = newmsgs.Last().Id;
+                                    if (newmsgs.Count < 100)
+                                    {
+                                        break;
+                                    }
+                                }
+                                messages.RemoveAll(message => message.CreationTimestamp.ToUniversalTime() < DateTime.UtcNow.AddDays(-14));
+                                PendingPurge.Remove(e.Before.Channel.Id);
+                                
                                 await e.Before.Channel.DeleteMessagesAsync(messages);
                             }
                             catch (Exception ex)
                             {
+                                PendingPurge.Remove(e.Before.Channel.Id);
                                 Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error ocurred trying to purge messages from {channel}", e.Before.Channel.Name);
+                                return;
                             }
 
                             await LogChannelHelper.LogDeletedMessagesAsync(
