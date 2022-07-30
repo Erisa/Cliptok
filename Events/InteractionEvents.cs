@@ -33,7 +33,7 @@ namespace Cliptok.Events
             else if (e.Id == "clear-confirm-callback")
             {
                 Dictionary<ulong, List<DiscordMessage>> messagesToClear = Commands.InteractionCommands.ClearInteractions.MessagesToClear;
-                
+
                 List<DiscordMessage> messages = messagesToClear.GetValueOrDefault(e.Message.Id);
 
                 await e.Channel.DeleteMessagesAsync(messages, $"[Clear by {e.User.Username}#{e.User.Discriminator}]");

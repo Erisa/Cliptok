@@ -163,7 +163,7 @@
                     {
                         await discordChannel.AddOverwriteAsync(discordChannel.Guild.GetRole(Program.cfgjson.ModRole), (Permissions)(permission.Allowed - Permissions.SendMessages), Permissions.None);
                     }
-                    
+
                 }
                 else
                 {
