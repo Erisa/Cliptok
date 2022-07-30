@@ -75,21 +75,22 @@
                             messages.RemoveAll(message => message.CreationTimestamp.ToUniversalTime() < DateTime.UtcNow.AddDays(-14));
                             PendingPurge.Remove(e.Before.Channel.Id);
 
-                            string messageLog = await DiscordHelpers.CompileMessagesAsync(messages.AsEnumerable().Reverse().ToList(), e.Before.Channel);
-
-                            var stream = new MemoryStream(Encoding.UTF8.GetBytes(messageLog));
-                            var msg = new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Deleted} Automatically purged **{messages.Count}** messages from {e.Before.Channel.Mention}.").WithFile("messages.txt", stream);
-
-                            var hasteResult = await Program.hasteUploader.Post(messageLog);
-
-                            if (hasteResult.IsSuccess)
+                            try
                             {
-                                msg.WithEmbed(new DiscordEmbedBuilder().WithDescription($"[`📄 View online`]({Program.cfgjson.HastebinEndpoint}/raw/{hasteResult.Key})"));
+                                await e.Before.Channel.DeleteMessagesAsync(messages);
+                            }
+                            catch (Exception ex)
+                            {
+                                Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error ocurred trying to purge messages from {channel}", e.Before.Channel.Name);
                             }
 
-                            LogChannelHelper.LogMessageAsync("messages", msg);
+                            await LogChannelHelper.LogDeletedMessagesAsync(
+                                "messages",
+                                $"{Program.cfgjson.Emoji.Deleted} Automatically purged **{messages.Count}** messages from {e.Before.Channel.Mention}.",
+                                messages,
+                                e.Before.Channel
+                            );
 
-                            await e.Before.Channel.DeleteMessagesAsync(messages);
                         }
                     });
                 }

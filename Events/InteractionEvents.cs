@@ -45,6 +45,14 @@ namespace Cliptok.Events
                         .WithContent($"{cfgjson.Emoji.Deleted} **{messagesToClear.Count}** messages were cleared in {e.Channel.Mention} by {e.User.Mention}.")
                         .WithAllowedMentions(Mentions.None)
                 );
+
+                await LogChannelHelper.LogDeletedMessagesAsync(
+                    "messages",
+                    $"{cfgjson.Emoji.Deleted} **{messages.Count}** messages were cleared from {e.Channel.Mention} by {e.User.Mention}.",
+                    messages,
+                    e.Channel
+                );
+
                 e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent($"{cfgjson.Emoji.Success} Done!").AddComponents(disabledButton).AsEphemeral(true));
             }
             else

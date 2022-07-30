@@ -112,6 +112,22 @@
             }
         }
 
+        public static async Task<DiscordMessage> LogDeletedMessagesAsync(string key, string content, List<DiscordMessage> messages, DiscordChannel channel)
+        {
+            string messageLog = await DiscordHelpers.CompileMessagesAsync(messages.AsEnumerable().Reverse().ToList(), channel);
+
+            var stream = new MemoryStream(Encoding.UTF8.GetBytes(messageLog));
+            var msg = new DiscordMessageBuilder().WithContent(content).WithFile("messages.txt", stream);
+
+            var hasteResult = await Program.hasteUploader.Post(messageLog);
+
+            if (hasteResult.IsSuccess)
+            {
+                msg.WithEmbed(new DiscordEmbedBuilder().WithDescription($"[`📄 View online`]({Program.cfgjson.HastebinEndpoint}/raw/{hasteResult.Key})"));
+            }
+
+            return await LogMessageAsync(key, msg);
+        }
 
         internal static async Task<DiscordMessage> FireWebhookFromMessageAsync(DiscordWebhookClient webhook, DiscordMessageBuilder message, string key)
         {
