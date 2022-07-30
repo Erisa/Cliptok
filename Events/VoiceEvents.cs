@@ -109,28 +109,43 @@
 
             DiscordOverwrite[] existingOverwrites = e.After.Channel.PermissionOverwrites.ToArray();
 
-            if (!e.After.Member.Roles.Any(role => role.Id == Program.cfgjson.MutedRole))
+            try
             {
-                bool userOverrideSet = false;
-                foreach (DiscordOverwrite overwrite in existingOverwrites)
+                if (!e.After.Member.Roles.Any(role => role.Id == Program.cfgjson.MutedRole))
                 {
-                    if (overwrite.Type == OverwriteType.Member && overwrite.Id == e.After.Member.Id)
+                    bool userOverrideSet = false;
+                    foreach (DiscordOverwrite overwrite in existingOverwrites)
                     {
-                        await e.After.Channel.AddOverwriteAsync(e.After.Member, overwrite.Allowed | Permissions.SendMessages, overwrite.Denied, "User joined voice channel.");
-                        userOverrideSet = true;
-                        break;
+                        if (overwrite.Type == OverwriteType.Member && overwrite.Id == e.After.Member.Id)
+                        {
+                            await e.After.Channel.AddOverwriteAsync(e.After.Member, overwrite.Allowed | Permissions.SendMessages, overwrite.Denied, "User joined voice channel.");
+                            userOverrideSet = true;
+                            break;
+                        }
+                    }
+
+                    if (!userOverrideSet)
+                    {
+                        await e.After.Channel.AddOverwriteAsync(e.After.Member, Permissions.SendMessages, Permissions.None, "User joined voice channel.");
                     }
                 }
-
-                if (!userOverrideSet)
-                {
-                    await e.After.Channel.AddOverwriteAsync(e.After.Member, Permissions.SendMessages, Permissions.None, "User joined voice channel.");
-                }
+            }
+            catch (Exception ex)
+            {
+                PendingOverWrites.Remove(e.User.Id);
+                Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error ocurred trying to remove voice overwrites for {user} in {channel}", e.User.Username, e.After.Channel.Name);
             }
 
             PendingOverWrites.Remove(e.User.Id);
 
-            await e.After.Channel.SendMessageAsync($"{e.After.Member.Mention} has joined.");
+            try
+            {
+                await e.After.Channel.SendMessageAsync($"{e.After.Member.Mention} has joined.");
+            }
+            catch (Exception ex)
+            {
+                Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error ocurred trying to send join message for {user} in {channel}", e.User.Username, e.After.Channel.Name);
+            }
         }
 
         public static async Task UserLeft(DiscordClient _, VoiceStateUpdateEventArgs e)
@@ -139,7 +154,6 @@
 
             while (PendingOverWrites.Contains(e.User.Id)) ;
             {
-                Console.WriteLine("spinning");
                 await Task.Delay(5);
             }
 
@@ -147,33 +161,41 @@
 
             DiscordOverwrite[] existingOverwrites = e.Before.Channel.PermissionOverwrites.ToArray();
 
-            foreach (DiscordOverwrite overwrite in existingOverwrites)
+            try
             {
-                if (overwrite.Type == OverwriteType.Member && overwrite.Id == member.Id)
+                foreach (DiscordOverwrite overwrite in existingOverwrites)
                 {
-                    if (overwrite.Allowed == Permissions.SendMessages && overwrite.Denied == Permissions.None)
+                    if (overwrite.Type == OverwriteType.Member && overwrite.Id == member.Id)
                     {
-                        // User only has allow for Send Messages, so we can delete the entire override
-                        await overwrite.DeleteAsync("User left voice channel.");
-                    }
-                    else
-                    {
-                        // User has other overrides set, so we should only remove the Send Messages override
-                        if (overwrite.Allowed.HasPermission(Permissions.SendMessages))
+                        if (overwrite.Allowed == Permissions.SendMessages && overwrite.Denied == Permissions.None)
                         {
-                            await e.Before.Channel.AddOverwriteAsync(member, (Permissions)(overwrite.Allowed - Permissions.SendMessages), overwrite.Denied, "User left voice channel.");
+                            // User only has allow for Send Messages, so we can delete the entire override
+                            await overwrite.DeleteAsync("User left voice channel.");
                         }
                         else
                         {
-                            // Check if the overwrite has no permissions set - if so, delete it to keep the list clean.
-                            if (overwrite.Allowed == Permissions.None && overwrite.Denied == Permissions.None)
+                            // User has other overrides set, so we should only remove the Send Messages override
+                            if (overwrite.Allowed.HasPermission(Permissions.SendMessages))
                             {
-                                await overwrite.DeleteAsync("User left voice channel.");
+                                await e.Before.Channel.AddOverwriteAsync(member, (Permissions)(overwrite.Allowed - Permissions.SendMessages), overwrite.Denied, "User left voice channel.");
+                            }
+                            else
+                            {
+                                // Check if the overwrite has no permissions set - if so, delete it to keep the list clean.
+                                if (overwrite.Allowed == Permissions.None && overwrite.Denied == Permissions.None)
+                                {
+                                    await overwrite.DeleteAsync("User left voice channel.");
+                                }
                             }
                         }
+                        break;
                     }
-                    break;
                 }
+            }
+            catch (Exception ex)
+            {
+                PendingOverWrites.Remove(e.User.Id);
+                Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error ocurred trying to remove voice overwrites for {user} in {channel}", e.User.Username, e.Before.Channel.Name);
             }
 
             PendingOverWrites.Remove(e.User.Id);
@@ -182,7 +204,14 @@
             {
                 Content = $"{member.Mention} has left."
             };
-            await e.Before.Channel.SendMessageAsync(message.WithAllowedMentions(Mentions.None));
+            try
+            {
+                await e.Before.Channel.SendMessageAsync(message.WithAllowedMentions(Mentions.None));
+            }
+            catch (Exception ex)
+            {
+                Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error ocurred trying to send leave message for {user} in {channel}", e.User.Username, e.Before.Channel.Name);
+            }
         }
     }
 }
