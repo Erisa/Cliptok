@@ -8,6 +8,9 @@
 
         public static async Task VoiceStateUpdate(DiscordClient client, VoiceStateUpdateEventArgs e)
         {
+            if (!Program.cfgjson.EnableTextInVoice)
+                return;
+
             Task.Run(async () =>
             {
                 if (e.After.Channel is null)

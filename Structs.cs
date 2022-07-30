@@ -250,6 +250,9 @@
 
         [JsonProperty("ignoredVoiceChannels")]
         public List<ulong> IgnoredVoiceChannels { get; private set; } = new();
+
+        [JsonProperty("enableTextInVoice")]
+        public bool EnableTextInVoice { get; private set; } = false;
     }
 
     public class LogChannelConfig

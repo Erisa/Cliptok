@@ -291,5 +291,6 @@
   ],
   "ignoredVoiceChannels": [
     922260379470548992
-  ]
+  ],
+  "enableTextInVoice": true
 }
