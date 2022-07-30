@@ -279,6 +279,9 @@
     },
     "username": {
       "channelId": 984230829343535105
+    },
+    "messages": {
+      "channelId": 1002631072179294218
     }
   },
   "botOwners": [

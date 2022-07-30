@@ -48,7 +48,8 @@ namespace Cliptok
                         var stream = new MemoryStream(Encoding.UTF8.GetBytes(dummyWriter.ToString()));
                         LogChannelHelper.LogMessageAsync("errors", new DiscordMessageBuilder().WithFile("error.txt", stream));
                     }
-                } catch
+                }
+                catch
                 {
                     // well we cant log an error that happened while reporting an error, can we?
                 }

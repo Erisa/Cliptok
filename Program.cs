@@ -46,7 +46,7 @@ namespace Cliptok
         static async Task Main(string[] _)
         {
             Console.OutputEncoding = Encoding.UTF8;
-            
+
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var logFormat = "[{Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{Level}] {Message}{NewLine}{Exception}";
 
@@ -147,6 +147,8 @@ namespace Cliptok
             discord.ThreadListSynced += ThreadEvents.Discord_ThreadListSynced;
             discord.ThreadMemberUpdated += ThreadEvents.Discord_ThreadMemberUpdated;
             discord.ThreadMembersUpdated += ThreadEvents.Discord_ThreadMembersUpdated;
+
+            discord.VoiceStateUpdated += VoiceEvents.VoiceStateUpdate;
 
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {

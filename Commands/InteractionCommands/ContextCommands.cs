@@ -63,7 +63,7 @@
 
                 foreach (DiscordRole role in member.Roles.OrderBy(x => x.Position).Reverse())
                 {
-                    if (rolesStr.Length + (role.Mention.Length +1) > (1024 - truncatedComment.Length))
+                    if (rolesStr.Length + (role.Mention.Length + 1) > (1024 - truncatedComment.Length))
                     {
                         rolesStr += truncatedComment;
                         break;
