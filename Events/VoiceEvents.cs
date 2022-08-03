@@ -164,7 +164,7 @@
 
             DiscordMember member = e.After.Member;
 
-            while (PendingOverWrites.Contains(e.User.Id)) ;
+            while (PendingOverWrites.Contains(e.User.Id))
             {
                 await Task.Delay(5);
             }

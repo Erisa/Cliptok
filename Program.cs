@@ -34,6 +34,8 @@ namespace Cliptok
 
         static public readonly HttpClient httpClient = new();
 
+        public static List<ServerApiResponseJson> serverApiList = new();
+        
         public static void UpdateLists()
         {
             foreach (var list in cfgjson.WordListList)

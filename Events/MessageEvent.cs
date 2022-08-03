@@ -168,60 +168,64 @@ namespace Cliptok.Events
                         return;
 
                     // Unapproved invites
-                    if (GetPermLevel(member) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement)
+                    string checkedMessage = message.Content.Replace('\\', '/');
+
+                    if (GetPermLevel(member) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && checkedMessage.Contains("dsc.gg/") ||
+                        checkedMessage.Contains("invite.gg/")
+                        )
                     {
-
-                        string checkedMessage = message.Content.Replace('\\', '/');
-
-                        if (checkedMessage.Contains("dsc.gg/") ||
-                            checkedMessage.Contains("invite.gg/")
-                           )
+                        string reason = "Sent an unapproved invite";
+                        _ = message.DeleteAsync();
+                        try
                         {
-                            string reason = "Sent an unapproved invite";
-                            _ = message.DeleteAsync();
-                            try
-                            {
-                                _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null);
-                            }
-                            catch
-                            {
-                                // still warn anyway
-                            }
-
-                            DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
-                            var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, message.Channel, " automatically ");
-                            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink);
-                            match = true;
-                            return;
+                            _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null);
+                        }
+                        catch
+                        {
+                            // still warn anyway
                         }
 
-                        var matches = invite_rx.Matches(checkedMessage);
+                        DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                        var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, message.Channel, " automatically ");
+                        await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink);
+                        match = true;
+                        return;
+                    }
 
-                        if (matches.Count > 3)
+                    var inviteMatches = invite_rx.Matches(checkedMessage);
+
+                    if (GetPermLevel(member) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && inviteMatches.Count > 3)
+                    {
+                        string reason = "Sent too many invites";
+                        await DeleteAndWarnAsync(message, reason, client);
+                        match = true;
+                        return;
+                    }
+
+                    foreach (Match currentMatch in inviteMatches)
+                    {
+                        string code = currentMatch.Groups[1].Value;
+
+                        if (allowedInviteCodes.Contains(code) || Program.cfgjson.InviteExclusion.Contains(code))
                         {
-                            string reason = "Sent too many invites";
+                            continue;
+                        }
+                        else if (GetPermLevel(member) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && inviteMatches.Count > 3
+                            && disallowedInviteCodes.Contains(code))
+                        {
+                            string reason = "Sent an unapproved invite";
                             await DeleteAndWarnAsync(message, reason, client);
                             match = true;
                             return;
                         }
 
-                        foreach (Match currentMatch in matches)
+                        ServerApiResponseJson maliciousCache = default;
+
+                        maliciousCache = Program.serverApiList.FirstOrDefault(x => x.Vanity == code || x.Invite == code);
+
+                        DiscordInvite invite = default;
+                        if (maliciousCache == default)
                         {
-                            string code = currentMatch.Groups[1].Value;
-
-                            if (allowedInviteCodes.Contains(code) || Program.cfgjson.InviteExclusion.Contains(code))
-                            {
-                                continue;
-                            }
-                            else if (disallowedInviteCodes.Contains(code))
-                            {
-                                string reason = "Sent an unapproved invite";
-                                await DeleteAndWarnAsync(message, reason, client);
-                                match = true;
-                                return;
-                            }
-
-                            DiscordInvite invite;
                             try
                             {
                                 invite = await client.GetInviteByCodeAsync(code);
@@ -231,17 +235,94 @@ namespace Cliptok.Events
                                 allowedInviteCodes.Add(code);
                                 continue;
                             }
+                        }
 
-                            if (invite.Channel.Type == ChannelType.Group || (!Program.cfgjson.InviteExclusion.Contains(code) && !Program.cfgjson.InviteIDExclusion.Contains(invite.Guild.Id)))
+                        if (invite != default && Program.cfgjson.InviteIDExclusion.Contains(invite.Guild.Id))
+                            continue;
+
+                        if (maliciousCache == default && invite != default)
+                            maliciousCache = Program.serverApiList.FirstOrDefault(x => x.ServerID == invite.Guild.Id.ToString());
+
+                        if (maliciousCache != default)
+                        {
+                            _ = message.DeleteAsync();
+                            string reason = "Sent a malicious Discord invite";
+
+                            DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                            var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, message.Channel, " automatically ");
+
+                            string responseToSend = $"```json\n{JsonConvert.SerializeObject(maliciousCache)}\n```";
+
+                            (string name, string value, bool inline) extraField = new("Cached API response", responseToSend, false);
+                            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField);
+                            return;
+
+                            await DeleteAndWarnAsync(message, reason, client);
+                            match = true;
+                            return;
+                        }
+
+                        if (invite == default)
+                        {
+                            continue;
+                        }
+                        
+
+                        if (
+                        GetPermLevel(member) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement
+                        && (
+                            invite.Channel.Type == ChannelType.Group
+                            || (
+                                !Program.cfgjson.InviteExclusion.Contains(code)
+                                && !Program.cfgjson.InviteIDExclusion.Contains(invite.Guild.Id)
+                            )
+                        )
+                        )
+                        {
+                            disallowedInviteCodes.Add(code);
+                            string reason = "Sent an unapproved invite";
+                            await DeleteAndWarnAsync(message, reason, client);
+                            match = true;
+                            return;
+                        }
+
+                        (bool serverMatch, HttpStatusCode httpStatus, string responseString, ServerApiResponseJson? serverResponse) = await APIs.ServerAPI.ServerAPICheckAsynnc(invite.Guild.Id);
+
+                        if (httpStatus != HttpStatusCode.OK)
+                        {
+                            Program.discord.Logger.LogError("Error checking if server {id} posted by {member} is malicious: {code}\n{response}", invite.Guild.Id, message.Author.Id, httpStatus, responseString);
+                        }
+                        else
+                        {
+                            if (serverMatch)
                             {
-                                disallowedInviteCodes.Add(code);
-                                string reason = "Sent an unapproved invite";
+                                _ = message.DeleteAsync();
+                                string reason = "Sent a malicious Discord invite";
+
+                                DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                                var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, message.Channel, " automatically ");
+
+                                string responseToSend = $"```json\n{responseString}\n```";
+
+                                (string name, string value, bool inline) extraField = new("API Response", responseToSend, false);
+                                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField);
+                                return;
+
+
                                 await DeleteAndWarnAsync(message, reason, client);
+
+                                var newEntry = JsonConvert.DeserializeObject<ServerApiResponseJson>(responseString);
+                                newEntry.ServerID = invite.Guild.Id.ToString();
+                                Program.serverApiList.Add(newEntry);
+
                                 match = true;
                                 return;
                             }
                         }
+
+
                     }
+
 
                     if (match)
                         return;

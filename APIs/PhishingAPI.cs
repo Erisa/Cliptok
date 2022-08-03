@@ -3,7 +3,7 @@
 namespace Cliptok.APIs
 {
     public class PhishingAPI
-    {
+    {  
         public static async Task<(bool match, HttpStatusCode httpStatus, string responseString, PhishingResponseBody? phishingResponseBody)> PhishingAPICheckAsync(string input)
         {
             HttpRequestMessage request = new(HttpMethod.Post, Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT"));

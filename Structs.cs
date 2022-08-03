@@ -492,5 +492,29 @@
         public string Reason { get; set; }
     }
 
+    [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
+    public class ServerApiResponseJson
+    {
+        [JsonProperty("serverID")]
+        public string ServerID { get; set; }
+
+        [JsonProperty("match")]
+        public bool Match { get; set; }
+
+        [JsonProperty("reason")]
+        public string Reason { get; set; }
+
+        [JsonProperty("key")]
+        public string Key { get; set; }
+
+        [JsonProperty("vanity")]
+        public string Vanity { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("invite")]
+        public string Invite { get; set; }
+    }
 
 }
