@@ -499,7 +499,7 @@
         public string ServerID { get; set; }
 
         [JsonProperty("match")]
-        public bool Match { get; set; }
+        public bool Match { get; set; } = true;
 
         [JsonProperty("reason")]
         public string Reason { get; set; }
