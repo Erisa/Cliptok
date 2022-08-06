@@ -32,28 +32,31 @@ namespace Cliptok.Events
             }
             else if (e.Id == "clear-confirm-callback")
             {
-                Dictionary<ulong, List<DiscordMessage>> messagesToClear = Commands.InteractionCommands.ClearInteractions.MessagesToClear;
+                Task.Run(async () =>
+                {
+                    Dictionary<ulong, List<DiscordMessage>> messagesToClear = Commands.InteractionCommands.ClearInteractions.MessagesToClear;
 
-                List<DiscordMessage> messages = messagesToClear.GetValueOrDefault(e.Message.Id);
+                    List<DiscordMessage> messages = messagesToClear.GetValueOrDefault(e.Message.Id);
 
-                await e.Channel.DeleteMessagesAsync(messages, $"[Clear by {e.User.Username}#{e.User.Discriminator}]");
+                    await e.Channel.DeleteMessagesAsync(messages, $"[Clear by {e.User.Username}#{e.User.Discriminator}]");
 
-                DiscordButtonComponent disabledButton = new(ButtonStyle.Danger, "clear-confirm-callback", "Delete Messages", true);
-                await e.Channel.SendMessageAsync($"{cfgjson.Emoji.Deleted} Cleared **{messagesToClear.Count}** messages from {e.Channel.Mention}!");
-                await LogChannelHelper.LogMessageAsync("mod",
-                    new DiscordMessageBuilder()
-                        .WithContent($"{cfgjson.Emoji.Deleted} **{messagesToClear.Count}** messages were cleared in {e.Channel.Mention} by {e.User.Mention}.")
-                        .WithAllowedMentions(Mentions.None)
-                );
+                    DiscordButtonComponent disabledButton = new(ButtonStyle.Danger, "clear-confirm-callback", "Delete Messages", true);
+                    await e.Channel.SendMessageAsync($"{cfgjson.Emoji.Deleted} Cleared **{messages.Count}** messages from {e.Channel.Mention}!");
+                    await LogChannelHelper.LogMessageAsync("mod",
+                        new DiscordMessageBuilder()
+                            .WithContent($"{cfgjson.Emoji.Deleted} **{messages.Count}** messages were cleared in {e.Channel.Mention} by {e.User.Mention}.")
+                            .WithAllowedMentions(Mentions.None)
+                    );
 
-                await LogChannelHelper.LogDeletedMessagesAsync(
-                    "messages",
-                    $"{cfgjson.Emoji.Deleted} **{messages.Count}** messages were cleared from {e.Channel.Mention} by {e.User.Mention}.",
-                    messages,
-                    e.Channel
-                );
+                    await LogChannelHelper.LogDeletedMessagesAsync(
+                        "messages",
+                        $"{cfgjson.Emoji.Deleted} **{messages.Count}** messages were cleared from {e.Channel.Mention} by {e.User.Mention}.",
+                        messages,
+                        e.Channel
+                    );
 
-                e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent($"{cfgjson.Emoji.Success} Done!").AddComponents(disabledButton).AsEphemeral(true));
+                    e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().WithContent($"{cfgjson.Emoji.Success} Done!").AddComponents(disabledButton).AsEphemeral(true));
+                });
             }
             else
             {
