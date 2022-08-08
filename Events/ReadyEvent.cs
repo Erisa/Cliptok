@@ -15,7 +15,7 @@ namespace Cliptok.Events
                 {
                     serverApiList = fetchResult;
                 }
-                
+
                 client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
             });
         }
