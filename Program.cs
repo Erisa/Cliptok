@@ -169,6 +169,7 @@ namespace Cliptok
 
             // Only wait 3 seconds before the first set of tasks.
             await Task.Delay(3000);
+            int loopCount = 0;
             while (true)
             {
                 try
@@ -187,6 +188,18 @@ namespace Cliptok
                 catch (Exception e)
                 {
                     discord.Logger.LogError(CliptokEventID, "An Error occurred during task runs: {message}", e.ToString());
+                }
+                
+                // after 180 cycles, roughly 30 minutes has passed
+                if (loopCount == 180)
+                {
+                    var fetchResult = await APIs.ServerAPI.FetchMaliciousServersList();
+                    if (fetchResult is not null)
+                    {
+                        serverApiList = fetchResult;
+                        discord.Logger.LogDebug("Successfully updated malicious invite list with {count} servers.", fetchResult.Count);
+                    }
+                    loopCount = 0;
                 }
                 await Task.Delay(10000);
             }
