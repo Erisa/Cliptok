@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0.303 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:6.0.400 AS build-env
 WORKDIR /app
 
 # Copy csproj and restore as distinct layers
@@ -10,7 +10,7 @@ COPY . ./
 RUN dotnet build -c Release -o out
 
 # We already have this image pulled, its actually quicker to reuse it
-FROM mcr.microsoft.com/dotnet/sdk:6.0.303 AS git-collector
+FROM mcr.microsoft.com/dotnet/sdk:6.0.400 AS git-collector
 WORKDIR /out
 COPY . .
 RUN touch dummy.txt && \
