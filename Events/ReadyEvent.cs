@@ -14,8 +14,9 @@ namespace Cliptok.Events
                 if (fetchResult is not null)
                 {
                     serverApiList = fetchResult;
+                    client.Logger.LogDebug("Successfully initalised malicious invite list with {count} servers.", fetchResult.Count);
                 }
-                
+
                 client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
             });
         }

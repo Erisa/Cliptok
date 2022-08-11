@@ -64,7 +64,7 @@ If you want to run the bot as a standalone application rather than a Docker cont
     - It may be in your best interests to configure Redis to use AOF persistence. This will dramatically decrease the risk of losing data due to power failure or similar issues. You can find more information about that on the [Redis website](https://redis.io/topics/persistence).
     - If running on Windows, [tporadowski/redis](https://github.com/tporadowski/redis) is preferred over WSL or other methods of running Redis.
         - Do **not** use `microsoftarchive/redis`.
-        - If using WSL, you may need to `sudo service redis-server start` or `redis-server` manually.
+        - If using WSL, you may need to run `sudo service redis-server start` or `redis-server` manually.
 
 Once you have everything installed:
 1. Clone this repository and `cd` into the directory.
@@ -95,22 +95,24 @@ Once you have everything installed:
     - This is the most difficult part by far. Please try to replicate the required roles/channels/etc as closely as possible.
 5. Edit, run, debug, etc.
 
-If you have a change to make that follows the contribution guidelines, send a Pull Request like any other project. I assume you are a developer if you got this far, so no specific instructions for sending Pull Requests will be given.
+If you have a change to make that follows the contribution guidelines, send a Pull Request.
 
 ## Credits
 
-### 🖥️ Developer(s)
+### 🖥️ Developer
 - [Erisa](https://github.com/Erisa)
 
-### ⚙️ Code contributor(s)
+### ⚙️ Code contributors
 - [TorchGM](https://github.com/TorchGM)
 - [FloatingMilkshake](https://github.com/FloatingMilkshake)
 
-### 💗 Significant sponsor(s) 
+### 💗 Significant sponsors
 - [FloatingMilkshake](https://github.com/FloatingMilkshake)
+- [PirateWill](https://github.com/PirateWill)
+- [TorchGM](https://github.com/TorchGM)
 
 ### 🙏Special thanks
-- [TorchGM](https://github.com/TorchGM) for testing and providing design feedback. Seriously, thank you Torch.
+- [TorchGM](https://github.com/TorchGM) for initial testing and providing core design feedback. Seriously, thank you Torch.
 - [PrincessRavy](https://github.com/PrincessRavy) for providing [an API](https://docs.ravy.org/share/5bc92059-64ef-4d6d-816e-144b78e97d89) used by Cliptok.
 - All of my [GitHub Sponsors](https://github.com/sponsors/Erisa) 💝
 - The developers of [DSharpPlus](https://github.com/DSharpPlus/DSharpPlus), without their library none of this would  be possible.

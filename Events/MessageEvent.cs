@@ -210,14 +210,6 @@ namespace Cliptok.Events
                         {
                             continue;
                         }
-                        else if (GetPermLevel(member) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && inviteMatches.Count > 3
-                            && disallowedInviteCodes.Contains(code))
-                        {
-                            string reason = "Sent an unapproved invite";
-                            await DeleteAndWarnAsync(message, reason, client);
-                            match = true;
-                            return;
-                        }
 
                         ServerApiResponseJson maliciousCache = default;
 
@@ -226,6 +218,18 @@ namespace Cliptok.Events
                         DiscordInvite invite = default;
                         if (maliciousCache == default)
                         {
+                            if (GetPermLevel(member) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && disallowedInviteCodes.Contains(code))
+                            {
+                                _ = message.DeleteAsync();
+                                match = await InviteCheck(invite, message, client);
+                                if (!match)
+                                {
+                                    string reason = "Sent an unapproved invite";
+                                    await DeleteAndWarnAsync(message, reason, client);
+                                }
+                                break;
+                            }
+
                             try
                             {
                                 invite = await client.GetInviteByCodeAsync(code);
@@ -237,8 +241,8 @@ namespace Cliptok.Events
                             }
                         }
 
-                        if (invite != default && Program.cfgjson.InviteIDExclusion.Contains(invite.Guild.Id))
-                            continue;
+                        if (invite != default && (Program.cfgjson.InviteIDExclusion.Contains(invite.Guild.Id) || invite.Guild.Id == message.Channel.Guild.Id))
+                            continue; 
 
                         if (maliciousCache == default && invite != default)
                             maliciousCache = Program.serverApiList.FirstOrDefault(x => x.ServerID == invite.Guild.Id.ToString());
@@ -255,11 +259,9 @@ namespace Cliptok.Events
 
                             (string name, string value, bool inline) extraField = new("Cached API response", responseToSend, false);
                             await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField);
-                            return;
 
-                            await DeleteAndWarnAsync(message, reason, client);
                             match = true;
-                            return;
+                            break;
                         }
 
                         if (invite == default)
@@ -279,47 +281,20 @@ namespace Cliptok.Events
                         )
                         )
                         {
+                            _ = message.DeleteAsync();
                             disallowedInviteCodes.Add(code);
-                            string reason = "Sent an unapproved invite";
-                            await DeleteAndWarnAsync(message, reason, client);
-                            match = true;
+                            match = await InviteCheck(invite, message, client);
+                            if (!match)
+                            {
+                                string reason = "Sent an unapproved invite";
+                                await DeleteAndWarnAsync(message, reason, client);
+                            }
                             return;
-                        }
-
-                        (bool serverMatch, HttpStatusCode httpStatus, string responseString, ServerApiResponseJson? serverResponse) = await APIs.ServerAPI.ServerAPICheckAsynnc(invite.Guild.Id);
-
-                        if (httpStatus != HttpStatusCode.OK)
-                        {
-                            Program.discord.Logger.LogError("Error checking if server {id} posted by {member} is malicious: {code}\n{response}", invite.Guild.Id, message.Author.Id, httpStatus, responseString);
                         }
                         else
                         {
-                            if (serverMatch)
-                            {
-                                _ = message.DeleteAsync();
-                                string reason = "Sent a malicious Discord invite";
-
-                                DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
-                                var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, message.Channel, " automatically ");
-
-                                string responseToSend = $"```json\n{responseString}\n```";
-
-                                (string name, string value, bool inline) extraField = new("API Response", responseToSend, false);
-                                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField);
-                                return;
-
-
-                                await DeleteAndWarnAsync(message, reason, client);
-
-                                var newEntry = JsonConvert.DeserializeObject<ServerApiResponseJson>(responseString);
-                                newEntry.ServerID = invite.Guild.Id.ToString();
-                                Program.serverApiList.Add(newEntry);
-
-                                match = true;
-                                return;
-                            }
+                            match = await InviteCheck(invite, message, client);
                         }
-
 
                     }
 
@@ -654,6 +629,39 @@ namespace Cliptok.Events
                         break;
                 }
             return count;
+        }
+
+        public static async Task<bool> InviteCheck(DiscordInvite invite, DiscordMessage message, DiscordClient client)
+        {
+            (bool serverMatch, HttpStatusCode httpStatus, string responseString, ServerApiResponseJson? serverResponse) = await APIs.ServerAPI.ServerAPICheckAsynnc(invite.Guild.Id);
+
+            if (httpStatus != HttpStatusCode.OK)
+            {
+                Program.discord.Logger.LogError("Error checking if server {id} posted by {member} is malicious: {code}\n{response}", invite.Guild.Id, message.Author.Id, httpStatus, responseString);
+                return false;
+            }
+            else if (serverMatch)
+            {
+                _ = message.DeleteAsync();
+                string reason = "Sent a malicious Discord invite";
+
+                DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, message.Channel, " automatically ");
+
+                string responseToSend = $"```json\n{responseString}\n```";
+
+                (string name, string value, bool inline) extraField = new("API Response", responseToSend, false);
+                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField);
+
+                var newEntry = JsonConvert.DeserializeObject<ServerApiResponseJson>(responseString);
+                newEntry.Invite = invite.Code;
+                newEntry.ServerID = invite.Guild.Id.ToString();
+                Program.serverApiList.Add(newEntry);
+                return true;
+            } else
+            {
+                return false;
+            }
         }
 
     }
