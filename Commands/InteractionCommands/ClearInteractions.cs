@@ -55,7 +55,7 @@
                 return;
             }
 
-            List<DiscordMessage> messagesToClear;
+            List<DiscordMessage> messagesToClear = new();
             if (upTo == "")
             {
                 var messages = await ctx.Channel.GetMessagesAsync((int)count);
@@ -89,8 +89,17 @@
                 message = await ctx.Channel.GetMessageAsync(messageId);
 
                 // List of messages to delete, up to (not including) the one we just got.
-                var messages = await ctx.Channel.GetMessagesAfterAsync(message.Id);
-                messagesToClear = messages.ToList();
+                var firstMsg = (await ctx.Channel.GetMessagesAfterAsync(message.Id, 1))[0];
+                var firstMsgId = firstMsg.Id;
+                messagesToClear.Add(firstMsg);
+                while (true)
+                {
+                    var newMessages = (await ctx.Channel.GetMessagesAfterAsync(firstMsgId, 100)).ToList();
+                    messagesToClear.AddRange(newMessages);
+                    firstMsgId = newMessages.First().Id;
+                    if (newMessages.Count < 100)
+                        break;
+                }
             }
 
             // Now we know how many messages we'll be looking through and we won't be refusing the request. Time to check filters.
