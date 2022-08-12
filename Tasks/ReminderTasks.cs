@@ -57,7 +57,7 @@
 
                     var msg = new DiscordMessageBuilder()
                         .WithEmbed(embed)
-                        .WithContent($"<@!{reminderObject.UserID}>, you asked to be reminded of something:");
+                        .WithContent($"<@{reminderObject.UserID}>, you asked to be reminded of something:");
 
                     if (DmFallback)
                     {
@@ -74,7 +74,7 @@
                         }
                         catch (DSharpPlus.Exceptions.BadRequestException)
                         {
-                            msg.WithContent($"<@!{reminderObject.UserID}>, you asked to be reminded of something:");
+                            msg.WithContent($"<@{reminderObject.UserID}>, you asked to be reminded of something:");
                             msg.WithReply(null, false, false);
                             await channel.SendMessageAsync(msg);
                         }
