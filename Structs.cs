@@ -259,6 +259,10 @@
 
         [JsonProperty("supportForumIntroThreadId")]
         public ulong SupportForumIntroThreadId { get; private set; } = 0;
+
+
+        [JsonProperty("supportForumId")]
+        public ulong SupportForumId { get; private set; } = 0;
     }
 
     public class LogChannelConfig
