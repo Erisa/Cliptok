@@ -253,6 +253,12 @@
 
         [JsonProperty("enableTextInVoice")]
         public bool EnableTextInVoice { get; private set; } = false;
+
+        [JsonProperty("tqsRoleId")]
+        public ulong TqsRoleId { get; private set; } = 0;
+
+        [JsonProperty("supportForumIntroThreadId")]
+        public ulong SupportForumIntroThreadId { get; private set; } = 0;
     }
 
     public class LogChannelConfig

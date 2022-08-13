@@ -292,5 +292,7 @@
   "ignoredVoiceChannels": [
     922260379470548992
   ],
-  "enableTextInVoice": true
+  "enableTextInVoice": true,
+  "tqsRoleId": 513434929280057354,
+  "supportForumIntroThreadId": 1007802643856510996
 }

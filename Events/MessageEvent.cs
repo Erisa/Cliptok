@@ -107,6 +107,14 @@ namespace Cliptok.Events
                 // Skip messages from moderators beyond this point.
                 if (GetPermLevel(member) < ServerPermLevel.TrialModerator)
                 {
+                    if (channel.Id == Program.cfgjson.SupportForumIntroThreadId && !member.Roles.Any(role =>  role.Id == Program.cfgjson.TqsRoleId)){
+                        await message.DeleteAsync();
+                        var msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {message.Author.Mention}, you can't send messages in this thread!\nTry creating a post on the Forum Channel instead.");
+                        await Task.Delay(2000);
+                        await msg.DeleteAsync();
+                        return;
+                    }
+                    
                     if (message.MentionedUsers.Count > Program.cfgjson.MassMentionBanThreshold)
                     {
                         _ = message.DeleteAsync();
