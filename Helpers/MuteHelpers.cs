@@ -32,7 +32,7 @@
 
                 if (mute.Reason is null && mute.ModId == Program.discord.CurrentUser.Id)
                 {
-                    embedBuilder.WithDescription("User was muted without using Cliptok, so no information is available.")
+                    embedBuilder.WithDescription($"User was muted without using {Program.discord.CurrentUser.Username}, so no information is available.")
                         .WithColor(new DiscordColor(0xFEC13D));
                 } else
                 {
@@ -57,7 +57,7 @@
             {
                 if (member is not null && member.Roles.Any(role => role.Id == Program.cfgjson.MutedRole))
                 {
-                    embedBuilder.WithDescription("User was muted without using Cliptok, so no information is available.")
+                    embedBuilder.WithDescription($"User was muted without using {Program.discord.CurrentUser.Username}, so no information is available.")
                         .WithColor(new DiscordColor(0xFEC13D));
                 } else
                 {
