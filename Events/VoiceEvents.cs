@@ -79,7 +79,7 @@
                                 }
                                 messages.RemoveAll(message => message.CreationTimestamp.ToUniversalTime() < DateTime.UtcNow.AddDays(-14));
                                 PendingPurge.Remove(e.Before.Channel.Id);
-                                
+
                                 await e.Before.Channel.DeleteMessagesAsync(messages);
                             }
                             catch (Exception ex)

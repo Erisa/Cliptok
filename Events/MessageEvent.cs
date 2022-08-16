@@ -70,7 +70,7 @@ namespace Cliptok.Events
                     DiscordRole muted = message.Channel.Guild.GetRole(Program.cfgjson.MutedRole);
                     if (modmailMember.Roles.Contains(muted))
                     {
-                        await channel.SendMessageAsync(null, await WarningHelpers.GenerateWarningsEmbedAsync(modmailMember));
+                        await channel.SendMessageAsync(new DiscordMessageBuilder().AddEmbed(await WarningHelpers.GenerateWarningsEmbedAsync(modmailMember)).AddEmbed(await MuteHelpers.MuteStatusEmbed(modmailMember, message.Channel.Guild)));
                     }
                 }
 
@@ -107,14 +107,15 @@ namespace Cliptok.Events
                 // Skip messages from moderators beyond this point.
                 if (GetPermLevel(member) < ServerPermLevel.TrialModerator)
                 {
-                    if (channel.Id == Program.cfgjson.SupportForumIntroThreadId && !member.Roles.Any(role =>  role.Id == Program.cfgjson.TqsRoleId)){
+                    if (channel.Id == Program.cfgjson.SupportForumIntroThreadId && !member.Roles.Any(role => role.Id == Program.cfgjson.TqsRoleId))
+                    {
                         await message.DeleteAsync();
                         var msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {message.Author.Mention}, you can't send messages in this thread!\nTry creating a post on the Forum Channel instead.");
                         await Task.Delay(2000);
                         await msg.DeleteAsync();
                         return;
                     }
-                    
+
                     if (message.MentionedUsers.Count > Program.cfgjson.MassMentionBanThreshold)
                     {
                         _ = message.DeleteAsync();
@@ -250,7 +251,7 @@ namespace Cliptok.Events
                         }
 
                         if (invite != default && (Program.cfgjson.InviteIDExclusion.Contains(invite.Guild.Id) || invite.Guild.Id == message.Channel.Guild.Id))
-                            continue; 
+                            continue;
 
                         if (maliciousCache == default && invite != default)
                             maliciousCache = Program.serverApiList.FirstOrDefault(x => x.ServerID == invite.Guild.Id.ToString());
@@ -276,7 +277,7 @@ namespace Cliptok.Events
                         {
                             continue;
                         }
-                        
+
 
                         if (
                         GetPermLevel(member) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement
@@ -666,7 +667,8 @@ namespace Cliptok.Events
                 newEntry.ServerID = invite.Guild.Id.ToString();
                 Program.serverApiList.Add(newEntry);
                 return true;
-            } else
+            }
+            else
             {
                 return false;
             }

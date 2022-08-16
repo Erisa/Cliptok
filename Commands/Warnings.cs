@@ -42,7 +42,7 @@ namespace Cliptok.Commands
             }
 
             var messageBuild = new DiscordMessageBuilder()
-                .WithContent($"{Program.cfgjson.Emoji.Warning} {targetUser.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                .WithContent($"{Program.cfgjson.Emoji.Warning} <@{targetUser.Id}> was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
 
             if (reply != null)
                 messageBuild.WithReply(reply.Id, true, false);

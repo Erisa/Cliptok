@@ -8,6 +8,15 @@
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         class DebugCmds : BaseCommandModule
         {
+            [Command("mutestatus")]
+            public async Task MuteStatus(CommandContext ctx, DiscordUser targetUser = default)
+            {
+                if (targetUser == default)
+                    targetUser = ctx.User;
+
+                await ctx.RespondAsync(await MuteHelpers.MuteStatusEmbed(targetUser, ctx.Guild));
+            }
+
             [Command("mutes")]
             [Aliases("mute")]
             [Description("Debug the list of mutes.")]

@@ -35,7 +35,7 @@ namespace Cliptok
         static public readonly HttpClient httpClient = new();
 
         public static List<ServerApiResponseJson> serverApiList = new();
-        
+
         public static void UpdateLists()
         {
             foreach (var list in cfgjson.WordListList)
@@ -189,7 +189,7 @@ namespace Cliptok
                 {
                     discord.Logger.LogError(CliptokEventID, "An Error occurred during task runs: {message}", e.ToString());
                 }
-                
+
                 // after 180 cycles, roughly 30 minutes has passed
                 if (loopCount == 180)
                 {

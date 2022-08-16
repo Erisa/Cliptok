@@ -45,7 +45,8 @@
             {
                 Program.discord.Logger.LogError("Failed to fetch malicious server list: {code}\n{response}", (int)httpStatus, responseText);
                 return null;
-            } else
+            }
+            else
             {
                 return JsonConvert.DeserializeObject<List<ServerApiResponseJson>>(responseText);
             }

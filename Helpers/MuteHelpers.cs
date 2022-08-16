@@ -2,6 +2,73 @@
 {
     public class MuteHelpers
     {
+        public static async Task<DiscordEmbed> MuteStatusEmbed(DiscordUser user, DiscordGuild guild)
+        {
+            DiscordMember member = default;
+            DiscordEmbedBuilder embedBuilder = new();
+
+            embedBuilder.WithFooter(
+                    $"User ID: {user.Id}",
+                    null
+                )
+                .WithAuthor(
+                    $"Mute status for {user.Username}#{user.Discriminator}",
+                    null,
+                    await LykosAvatarMethods.UserOrMemberAvatarURL(user, Program.homeGuild, "png")
+                );
+
+            try
+            {
+                member = await guild.GetMemberAsync(user.Id);
+            }
+            catch (DSharpPlus.Exceptions.NotFoundException)
+            {
+                // nothing
+            }
+
+            if (await Program.db.HashExistsAsync("mutes", user.Id))
+            {
+                MemberPunishment mute = JsonConvert.DeserializeObject<MemberPunishment>(Program.db.HashGet("mutes", user.Id));
+
+                if (mute.Reason is null && mute.ModId == Program.discord.CurrentUser.Id)
+                {
+                    embedBuilder.WithDescription("User was muted without using Cliptok, so no information is available.")
+                        .WithColor(new DiscordColor(0xFEC13D));
+                } else
+                {
+                    embedBuilder.WithDescription("User is muted.")
+                        .AddField("Muted", $"<t:{TimeHelpers.ToUnixTimestamp(mute.ActionTime)}:R>", true)
+                        .WithColor(new DiscordColor(0xFEC13D));
+
+                    if (mute.ExpireTime is null)
+                        embedBuilder.AddField("Mute expires", "Never", true);
+                    else
+                        embedBuilder.AddField("Mute expires", $"<t:{TimeHelpers.ToUnixTimestamp(mute.ExpireTime)}:R>", true);
+
+                    embedBuilder.AddField("Muted by", $"<@{mute.ModId}>", true);
+
+                    if (mute.Reason is null && mute.ModId == Program.discord.CurrentUser.Id)
+                        embedBuilder.AddField("Reason", "Mute record created when user left server while manually muted.", false);
+                    else
+                        embedBuilder.AddField("Reason", mute.Reason is null ? "No reason provided" : mute.Reason, false);
+                }
+            }
+            else
+            {
+                if (member is not null && member.Roles.Any(role => role.Id == Program.cfgjson.MutedRole))
+                {
+                    embedBuilder.WithDescription("User was muted without using Cliptok, so no information is available.")
+                        .WithColor(new DiscordColor(0xFEC13D));
+                } else
+                {
+                    embedBuilder.WithDescription("User is not muted.")
+                        .WithColor(color: DiscordColor.DarkGreen);
+                }
+            }
+
+            return embedBuilder.Build();
+        }
+
         public static (int MuteHours, int WarnsSinceThreshold) GetHoursToMuteFor(Dictionary<string, UserWarning> warningDictionary, TimeSpan timeToCheck, Dictionary<string, int> autoMuteThresholds)
         {
             // Realistically this wouldn't ever be 0, but we'll set it below.
