@@ -63,7 +63,10 @@
                             List<DiscordMessage> messages = new();
                             try
                             {
-                                var firstMsg = (await e.Before.Channel.GetMessagesAsync(1)).First();
+                                var firstMsg = (await e.Before.Channel.GetMessagesAsync(1)).FirstOrDefault();
+                                if (firstMsg == default)
+                                    return;
+
                                 messages.Add(firstMsg);
                                 var lastMsgId = firstMsg.Id;
                                 // delete all the messages from the channel
@@ -71,11 +74,10 @@
                                 {
                                     var newmsgs = (await e.Before.Channel.GetMessagesBeforeAsync(lastMsgId, 100)).ToList();
                                     messages.AddRange(newmsgs);
-                                    lastMsgId = newmsgs.Last().Id;
                                     if (newmsgs.Count < 100)
-                                    {
                                         break;
-                                    }
+                                    else
+                                        lastMsgId = newmsgs.Last().Id;
                                 }
                                 messages.RemoveAll(message => message.CreationTimestamp.ToUniversalTime() < DateTime.UtcNow.AddDays(-14));
                                 PendingPurge.Remove(e.Before.Channel.Id);
