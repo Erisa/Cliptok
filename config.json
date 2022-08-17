@@ -295,5 +295,8 @@
   "enableTextInVoice": true,
   "tqsRoleId": 513434929280057354,
   "supportForumIntroThreadId": 1007802643856510996,
-  "supportForumId": 1006577277313744996
+  "supportForumId": 1006577277313744996,
+  "everyoneExcludedRoles": [
+    707996864317751321
+  ]
 }

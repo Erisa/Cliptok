@@ -219,7 +219,7 @@
         public WorkflowConfig GitHubWorkFlow { get; private set; }
 
         [JsonProperty("everyoneExcludedChannels")]
-        public List<ulong> EveryoneExcludedChannels { get; private set; }
+        public List<ulong> EveryoneExcludedChannels { get; private set; } = new();
 
         [JsonProperty("gitListDirectory")]
         public string GitListDirectory { get; private set; }
@@ -263,6 +263,9 @@
 
         [JsonProperty("supportForumId")]
         public ulong SupportForumId { get; private set; } = 0;
+
+        [JsonProperty("everyoneExcludedRoles")]
+        public List<ulong> EveryoneExcludedRoles { get; private set; } = new();
     }
 
     public class LogChannelConfig
