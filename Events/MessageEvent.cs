@@ -483,6 +483,7 @@ namespace Cliptok.Events
                     var lineCount = CountNewlines(message.Content);
 
                     if (!Program.cfgjson.LineLimitExcludedChannels.Contains(channel.Id)
+                        && (channel.ParentId is null || !Program.cfgjson.LineLimitExcludedChannels.Contains((ulong)channel.ParentId))
                         && (lineCount >= Program.cfgjson.IncreasedLineLimit
                         || (lineCount >= Program.cfgjson.LineLimit && GetPermLevel(member) < (ServerPermLevel)Program.cfgjson.LineLimitTier)))
                     {
