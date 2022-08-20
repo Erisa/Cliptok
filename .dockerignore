@@ -12,3 +12,4 @@ Dockerfile.*
 .github/*
 Lists/Private/*
 data/*
+Properties/launchSettings.json

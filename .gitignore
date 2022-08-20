@@ -1,3 +1,4 @@
+Properties/launchSettings.json
 config.*.json
 .env
 *.env
