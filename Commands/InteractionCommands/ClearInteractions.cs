@@ -7,7 +7,7 @@
         [SlashCommand("clear", "Delete many messages from the current channel.", defaultPermission: false)]
         [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequireBotPermissions(Permissions.ManageMessages), SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task ClearSlashCommand(InteractionContext ctx,
-            [Option("count", "The number of messages to consider for deletion. Required if you don't use the 'upto' argument.")] long count = 0,
+            [Option("count", "The number of messages to consider for deletion. Required if you don't use the 'up_to' argument.")] long count = 0,
             [Option("up_to", "Optionally delete messages up to (not including) this one. Accepts IDs and links.")] string upTo = "",
             [Option("user", "Optionally filter the deletion to a specific user.")] DiscordUser user = default,
             [Option("ignore_mods", "Optionally filter the deletion to only messages sent by users who are not Moderators.")] bool ignoreMods = false,
