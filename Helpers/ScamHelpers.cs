@@ -123,7 +123,7 @@ namespace Cliptok.Helpers
             {
                 discord.Logger.LogDebug("Avatar check for {member}: {status} {response}", member.Id, httpStatus, responseString);
 
-                if (avatarResponse.Matched && avatarResponse.Key != "logo")
+                if (avatarResponse.Matched && avatarResponse.Key != "logo" && avatarResponse.Key != "clyde")
                 {
                     var embed = new DiscordEmbedBuilder()
                         .WithDescription($"API Response:\n```json\n{responseString}\n```")
