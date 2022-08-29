@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using System.Reflection;
 
 namespace Cliptok

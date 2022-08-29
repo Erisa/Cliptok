@@ -34,7 +34,8 @@
                 {
                     embedBuilder.WithDescription($"User was muted without using {Program.discord.CurrentUser.Username}, so no information is available.")
                         .WithColor(new DiscordColor(0xFEC13D));
-                } else
+                }
+                else
                 {
                     embedBuilder.WithDescription("User is muted.")
                         .AddField("Muted", $"<t:{TimeHelpers.ToUnixTimestamp(mute.ActionTime)}:R>", true)
@@ -59,7 +60,8 @@
                 {
                     embedBuilder.WithDescription($"User was muted without using {Program.discord.CurrentUser.Username}, so no information is available.")
                         .WithColor(new DiscordColor(0xFEC13D));
-                } else
+                }
+                else
                 {
                     embedBuilder.WithDescription("User is not muted.")
                         .WithColor(color: DiscordColor.DarkGreen);
