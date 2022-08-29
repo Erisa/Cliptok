@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using System.Reflection;
 
 namespace Cliptok
@@ -149,6 +150,8 @@ namespace Cliptok
             discord.ThreadListSynced += ThreadEvents.Discord_ThreadListSynced;
             discord.ThreadMemberUpdated += ThreadEvents.Discord_ThreadMemberUpdated;
             discord.ThreadMembersUpdated += ThreadEvents.Discord_ThreadMembersUpdated;
+
+            discord.GuildBanRemoved += UnbanEvent.OnUnban;
 
             discord.VoiceStateUpdated += VoiceEvents.VoiceStateUpdate;
 
