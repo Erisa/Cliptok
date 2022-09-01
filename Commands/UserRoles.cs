@@ -158,14 +158,9 @@ namespace Cliptok.Commands
                 await RemoveUserRoleAsync(ctx, roleId);
             }
 
-            try
-            {
-                await ctx.Member.SendMessageAsync("Sad to see you go but if you ever want to rejoin Insiders and continue getting notifications type `!join-insider-dev` in <#740272437719072808> channel");
-            }
-            catch (DSharpPlus.Exceptions.UnauthorizedException)
-            {
-                // do nothing, not important if DMs are closed
-            }
+            var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Insider} {ctx.User.Mention} You are no longer receiving Windows Insider notifications. If you ever wish to receive Insider notifications again, you can check the <#740272437719072808> description for the commands.");
+            await Task.Delay(10000);
+            await msg.DeleteAsync();
         }
 
         [
