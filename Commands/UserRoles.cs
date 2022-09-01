@@ -59,14 +59,7 @@ namespace Cliptok.Commands
                 await ctx.Member.RevokeRoleAsync(roleToGrant);
             }
 
-            try
-            {
-                await ctx.Message.DeleteAsync();
-            }
-            catch
-            {
-                // Not an important exception to note.
-            }
+            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":CliptokSuccess:"));
         }
 
         [
