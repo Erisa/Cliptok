@@ -151,7 +151,7 @@ namespace Cliptok.Commands
                 await RemoveUserRoleAsync(ctx, roleId);
             }
 
-            var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Insider} {ctx.User.Mention} You are no longer receiving Windows Insider notifications. If you ever wish to receive Insider notifications again, you can check the <#740272437719072808> description for the commands.");
+            var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Insider} You are no longer receiving Windows Insider notifications. If you ever wish to receive Insider notifications again, you can check the <#740272437719072808> description for the commands.");
             await Task.Delay(10000);
             await msg.DeleteAsync();
         }
