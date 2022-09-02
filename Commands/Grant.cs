@@ -6,8 +6,19 @@
         [Description("Grant a user access to the server, by giving them the Tier 1 role.")]
         [Aliases("clipgrant", "verify")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public async Task GrantCommand(CommandContext ctx, [Description("The member to grant Tier 1 role to.")] DiscordMember member)
+        public async Task GrantCommand(CommandContext ctx, [Description("The member to grant Tier 1 role to.")] DiscordUser user)
         {
+            DiscordMember member = default;
+            try
+            {
+                member = await ctx.Guild.GetMemberAsync(user.Id);
+            }
+            catch (Exception)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user does not appear to be in the server!");
+                return;
+            }
+
             var tierOne = ctx.Guild.GetRole(Program.cfgjson.TierRoles[0]);
             await member.GrantRoleAsync(tierOne, $"!grant used by {ctx.User.Username}#{ctx.User.Discriminator}");
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {member.Mention} can now access the server!");
