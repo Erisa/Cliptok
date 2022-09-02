@@ -34,7 +34,15 @@
                 {
                     if (logChannel.Value.ChannelId != 0)
                     {
-                        var channel = await Program.discord.GetChannelAsync(logChannel.Value.ChannelId);
+                        DiscordChannel channel = default;
+                        try
+                        {
+                            channel = await Program.discord.GetChannelAsync(logChannel.Value.ChannelId);
+                        } catch (Exception e)
+                        {
+                            Program.discord.Logger.LogError(Program.CliptokEventID, e, "Error getting channel {id} for log channel {key}", logChannel.Value.ChannelId, logChannel.Key);
+                            Environment.Exit(1);
+                        }
                         ChannelCache.Add(logChannel.Key, channel);
                     }
 
