@@ -105,7 +105,7 @@ namespace Cliptok.Commands.InteractionCommands
             await ctx.EditResponseAsync(webhookOut);
         }
 
-        [SlashCommand("unban", "Unbans a user who has been previously banned.")]
+        [SlashCommand("unban", "Unbans a user who has been previously banned.", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.BanMembers)]
         public async Task SlashUnbanCommand(InteractionContext ctx, [Option("user", "The ID or mention of the user to unban. Ignore the suggestions, IDs work.")] SnowflakeObject userId, [Option("reason", "Used in audit log only currently")] string reason = "No reason specified.")
         {
@@ -136,7 +136,7 @@ namespace Cliptok.Commands.InteractionCommands
             }
         }
 
-        [SlashCommand("kick", "Kicks a user, removing them from the server until they rejoin.")]
+        [SlashCommand("kick", "Kicks a user, removing them from the server until they rejoin.", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.KickMembers)]
         public async Task KickCmd(InteractionContext ctx, [Option("user", "The user you want to kick from the server.")] DiscordUser target, [Option("reason", "The reason for kicking this user.")] string reason = "No reason specified.")
         {

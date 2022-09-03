@@ -161,7 +161,7 @@ namespace Cliptok.Commands.InteractionCommands
             }
         }
 
-        [SlashCommand("warndetails", "Search for a warning and return its details.")]
+        [SlashCommand("warndetails", "Search for a warning and return its details.", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task WarndetailsSlashCommand(InteractionContext ctx,
             [Option("user", "The user to fetch a warning for.")] DiscordUser user,
@@ -189,7 +189,7 @@ namespace Cliptok.Commands.InteractionCommands
                 await ctx.RespondAsync(null, await FancyWarnEmbedAsync(warningObject, true, userID: user.Id), ephemeral: !publicWarnings);
         }
 
-        [SlashCommand("delwarn", "Search for a warning and delete it!")]
+        [SlashCommand("delwarn", "Search for a warning and delete it!", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task DelwarnSlashCommand(InteractionContext ctx,
             [Option("user", "The user to delete a warning for.")] DiscordUser targetUser,
@@ -236,7 +236,7 @@ namespace Cliptok.Commands.InteractionCommands
             }
         }
 
-        [SlashCommand("editwarn", "Search for a warning and edit it!")]
+        [SlashCommand("editwarn", "Search for a warning and edit it!", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task EditWarnSlashCommand(InteractionContext ctx,
         [Option("user", "The user to fetch a warning for.")] DiscordUser user,

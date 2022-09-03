@@ -2,7 +2,7 @@
 {
     internal class RoleInteractions : ApplicationCommandModule
     {
-        [SlashCommand("grant", "Grant a user Tier 1, bypassing any verification requirements.")]
+        [SlashCommand("grant", "Grant a user Tier 1, bypassing any verification requirements.", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task SlashGrant(InteractionContext ctx, [Option("user", "THe user to grant Tier 1 to.")] DiscordUser user)
         {
