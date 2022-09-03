@@ -88,5 +88,60 @@
             return output.ToString();
         }
 
+        public static async Task<DiscordEmbed> GenerateUserEmbed(DiscordUser user, DiscordGuild guild)
+        {
+            DiscordMember member = default;
+            DiscordEmbed embed = default;
+            string avatarUrl = await LykosAvatarMethods.UserOrMemberAvatarURL(user, guild, "default", 256);
+
+            try
+            {
+                member = await guild.GetMemberAsync(user.Id);
+            }
+            catch (DSharpPlus.Exceptions.NotFoundException)
+            {
+                embed = new DiscordEmbedBuilder()
+                    .WithThumbnail(avatarUrl)
+                    .WithTitle($"User information for {user.Username}#{user.Discriminator}")
+                    .AddField("User", user.Mention, true)
+                    .AddField("User ID", user.Id.ToString(), true)
+                    .AddField($"{Program.discord.CurrentUser.Username} permission level", "N/A (not in server)", true)
+                    .AddField("Roles", "N/A (not in server)", false)
+                    .AddField("Last joined server", "N/A (not in server)", true)
+                    .AddField("Account created", $"<t:{TimeHelpers.ToUnixTimestamp(user.CreationTimestamp.DateTime)}:F>", true);
+                return embed;
+            }
+
+            string rolesStr = "None";
+
+            if (member.Roles.Any())
+            {
+                rolesStr = "";
+
+                string truncatedComment = "\n(Truncated. User has an obscene amount of roles.)";
+
+                foreach (DiscordRole role in member.Roles.OrderBy(x => x.Position).Reverse())
+                {
+                    if (rolesStr.Length + (role.Mention.Length + 1) > (1024 - truncatedComment.Length))
+                    {
+                        rolesStr += truncatedComment;
+                        break;
+                    }
+                    rolesStr += role.Mention + " ";
+                }
+            }
+
+            embed = new DiscordEmbedBuilder()
+                .WithThumbnail(avatarUrl)
+                .WithTitle($"User information for {user.Username}#{user.Discriminator}")
+                .AddField("User", member.Mention, true)
+                .AddField("User ID", member.Id.ToString(), true)
+                .AddField($"{Program.discord.CurrentUser.Username} permission level", GetPermLevel(member).ToString(), false)
+                .AddField("Roles", rolesStr, false)
+                .AddField("Last joined server", $"<t:{TimeHelpers.ToUnixTimestamp(member.JoinedAt.DateTime)}:F>", true)
+                .AddField("Account created", $"<t:{TimeHelpers.ToUnixTimestamp(member.CreationTimestamp.DateTime)}:F>", true);
+            return embed;
+        }
+
     }
 }

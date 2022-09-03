@@ -1,6 +1,5 @@
-﻿using System.Linq;
-using static Cliptok.Helpers.WarningHelpers;
-    
+﻿using static Cliptok.Helpers.WarningHelpers;
+
 namespace Cliptok.Commands.InteractionCommands
 {
     internal class WarningInteractions : ApplicationCommandModule
@@ -138,7 +137,7 @@ namespace Cliptok.Commands.InteractionCommands
                 {
                     return list;
                 }
-                
+
                 var user = await ctx.Client.GetUserAsync((ulong)useroption.Value);
 
                 var warnings = Program.db.HashGetAll(user.Id.ToString()).ToDictionary(
@@ -244,11 +243,12 @@ namespace Cliptok.Commands.InteractionCommands
          [Autocomplete(typeof(WarningsAutocompleteProvider))][Option("warning", "Type to search! Find the warning you want to edit.")] string warning, [Option("new_reason", "The new reason for the warning")] string reason)
         {
             long warnId = default;
-            
+
             try
             {
                 warnId = Convert.ToInt64(warning);
-            } catch
+            }
+            catch
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Looks like your warning option was invalid! Give it another go?", ephemeral: true);
                 return;

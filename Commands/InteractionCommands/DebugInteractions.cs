@@ -70,5 +70,11 @@
                 .WithEmbed(new DiscordEmbedBuilder().WithDescription(input))
             );
         }
+
+        [SlashCommand("userinfo", "Retrieve information about a given user.")]
+        public async Task UserInfoSlashCommand(InteractionContext ctx, [Option("user", "The user to retrieve information about.")] DiscordUser user)
+        {
+            await ctx.RespondAsync(embed: await DiscordHelpers.GenerateUserEmbed(user, ctx.Guild), ephemeral: true);
+        }
     }
 }
