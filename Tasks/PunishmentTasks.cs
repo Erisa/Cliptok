@@ -22,7 +22,7 @@
                     {
                         targetGuild = await Program.discord.GetGuildAsync(banEntry.ServerId);
                         var user = await Program.discord.GetUserAsync(banEntry.MemberId);
-                        await Bans.UnbanUserAsync(targetGuild, user, reason: "Ban naturally expired.");
+                        await BanHelpers.UnbanUserAsync(targetGuild, user, reason: "Ban naturally expired.");
                         success = true;
 
                     }

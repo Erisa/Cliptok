@@ -155,7 +155,7 @@ namespace Cliptok.Events
                                 if (listItem.Name == "autoban.txt" && GetPermLevel(member) < ServerPermLevel.Tier4)
                                 {
                                     _ = message.DeleteAsync();
-                                    await Bans.BanFromServerAsync(message.Author.Id, reason, client.CurrentUser.Id, message.Channel.Guild, 0, message.Channel, default, true);
+                                    await BanHelpers.BanFromServerAsync(message.Author.Id, reason, client.CurrentUser.Id, message.Channel.Guild, 0, message.Channel, default, true);
                                     return;
                                 }
 

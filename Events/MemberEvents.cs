@@ -65,7 +65,7 @@ namespace Cliptok.Events
 
                 if (avatars.Contains(e.Member.AvatarHash))
                 {
-                    var _ = Bans.BanSilently(e.Guild, e.Member.Id, "Secret sauce");
+                    var _ = BanHelpers.BanSilently(e.Guild, e.Member.Id, "Secret sauce");
                     await LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Banned} Raid-banned {e.Member.Mention} for matching avatar: {e.Member.AvatarUrl.Replace("1024", "128")}");
                 }
 

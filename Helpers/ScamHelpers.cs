@@ -67,7 +67,7 @@ namespace Cliptok.Helpers
                     if (autoBannedUsersCache.Contains(member.Id))
                         break;
                     IEnumerable<ulong> enumerable = autoBannedUsersCache.Append(member.Id);
-                    await Bans.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot accounts. Please appeal if you are a human.", discord.CurrentUser.Id, guild, 7, null, default, true);
+                    await BanHelpers.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot accounts. Please appeal if you are a human.", discord.CurrentUser.Id, guild, 7, null, default, true);
                     var embed = new DiscordEmbedBuilder()
                         .WithTimestamp(DateTime.Now)
                         .WithFooter($"User ID: {member.Id}", null)
@@ -132,7 +132,7 @@ namespace Cliptok.Helpers
                         .WithImageUrl(await LykosAvatarMethods.UserOrMemberAvatarURL(member, member.Guild, "default", 256));
 
                     await LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Banned} {member.Mention} has been appeal-banned for an infringing avatar.", embed);
-                    await Bans.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot/compromised accounts. Please appeal if you are human.", discord.CurrentUser.Id, member.Guild, 7, appealable: true);
+                    await BanHelpers.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot/compromised accounts. Please appeal if you are human.", discord.CurrentUser.Id, member.Guild, 7, appealable: true);
                     return true;
                 }
                 else if (!avatarResponse.Matched)
