@@ -324,7 +324,7 @@
             }
         }
 
-        public static UserWarning GetWarning(ulong targetUserId, long warnId)
+        public static UserWarning GetWarning(ulong targetUserId, long warnId = default)
         {
             try
             {

@@ -1,4 +1,7 @@
-﻿namespace Cliptok.Commands.InteractionCommands
+﻿using System.Linq;
+using static Cliptok.Helpers.WarningHelpers;
+    
+namespace Cliptok.Commands.InteractionCommands
 {
     internal class WarningInteractions : ApplicationCommandModule
     {
@@ -124,6 +127,159 @@
            );
         }
 
+        internal partial class WarningsAutocompleteProvider : IAutocompleteProvider
+        {
+            public async Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext ctx)
+            {
+                var list = new List<DiscordAutoCompleteChoice>();
 
+                var useroption = ctx.Options.FirstOrDefault(x => x.Name == "user");
+                if (useroption == default)
+                {
+                    return list;
+                }
+                
+                var user = await ctx.Client.GetUserAsync((ulong)useroption.Value);
+
+                var warnings = Program.db.HashGetAll(user.Id.ToString()).ToDictionary(
+                   x => x.Name.ToString(),
+                  x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
+                 ).OrderByDescending(x => x.Value.WarningId);
+
+                foreach (var warning in warnings)
+                {
+                    if (list.Count >= 25)
+                        break;
+
+                    string warningString = $"{StringHelpers.Pad(warning.Value.WarningId)} - {StringHelpers.Truncate(warning.Value.WarnReason, 29, true)} - {TimeHelpers.TimeToPrettyFormat(DateTime.Now - warning.Value.WarnTimestamp, true)}";
+
+                    if (ctx.FocusedOption.Value.ToString() == "" || warning.Value.WarnReason.Contains((string)ctx.FocusedOption.Value) || warningString.ToLower().Contains(ctx.FocusedOption.Value.ToString().ToLower()))
+                        list.Add(new DiscordAutoCompleteChoice(warningString, StringHelpers.Pad(warning.Value.WarningId)));
+                }
+
+                return list;
+                //return Task.FromResult((IEnumerable<DiscordAutoCompleteChoice>)list);
+            }
+        }
+
+        [SlashCommand("warndetails", "Search for a warning and return its details.")]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.ModerateMembers)]
+        public async Task WarndetailsSlashCommand(InteractionContext ctx,
+            [Option("user", "The user to fetch a warning for.")] DiscordUser user,
+             [Autocomplete(typeof(WarningsAutocompleteProvider)), Option("warning", "Type to search! Find the warning you want to fetch.")] string warning
+             , [Option("public", "Whether to show the output publicly.")] bool publicWarnings = false
+            )
+        {
+            long warnId = default;
+
+            try
+            {
+                warnId = Convert.ToInt64(warning);
+            }
+            catch
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Looks like your warning option was invalid! Give it another go?", ephemeral: true);
+                return;
+            }
+
+            UserWarning warningObject = GetWarning(user.Id, warnId);
+
+            if (warningObject == null)
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.", ephemeral: true);
+            else
+                await ctx.RespondAsync(null, await FancyWarnEmbedAsync(warningObject, true, userID: user.Id), ephemeral: !publicWarnings);
+        }
+
+        [SlashCommand("delwarn", "Search for a warning and delete it!")]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.ModerateMembers)]
+        public async Task DelwarnSlashCommand(InteractionContext ctx,
+            [Option("user", "The user to delete a warning for.")] DiscordUser targetUser,
+             [Autocomplete(typeof(WarningsAutocompleteProvider))][Option("warning", "Type to search! Find the warning you want to delete.")] string warningId)
+        {
+            long warnId = default;
+
+            try
+            {
+                warnId = Convert.ToInt64(warningId);
+            }
+            catch
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Looks like your warning option was invalid! Give it another go?", ephemeral: true);
+                return;
+            }
+
+            UserWarning warning = GetWarning(targetUser.Id, warnId);
+            if (warning == null)
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
+            else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!", ephemeral: true);
+            }
+            else
+            {
+                bool success = await DelWarningAsync(warning, targetUser.Id);
+                if (success)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Deleted} Successfully deleted warning `{StringHelpers.Pad(warnId)}` (belonging to {targetUser.Mention})");
+
+                    await LogChannelHelper.LogMessageAsync("mod",
+                        new DiscordMessageBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.Deleted} Warning deleted:" +
+                            $"`{StringHelpers.Pad(warnId)}` (belonging to {targetUser.Mention}, deleted by {ctx.Member.Mention})")
+                            .WithEmbed(await FancyWarnEmbedAsync(warning, true, 0xf03916, true, targetUser.Id))
+                            .WithAllowedMentions(Mentions.None)
+                        );
+                }
+                else
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Failed to delete warning `{StringHelpers.Pad(warnId)}` from {targetUser.Mention}!\nPlease contact the bot author.");
+                }
+            }
+        }
+
+        [SlashCommand("editwarn", "Search for a warning and edit it!")]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.ModerateMembers)]
+        public async Task EditWarnSlashCommand(InteractionContext ctx,
+        [Option("user", "The user to fetch a warning for.")] DiscordUser user,
+         [Autocomplete(typeof(WarningsAutocompleteProvider))][Option("warning", "Type to search! Find the warning you want to edit.")] string warning, [Option("new_reason", "The new reason for the warning")] string reason)
+        {
+            long warnId = default;
+            
+            try
+            {
+                warnId = Convert.ToInt64(warning);
+            } catch
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Looks like your warning option was invalid! Give it another go?", ephemeral: true);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} You haven't given a new reason to set for the warning!", ephemeral: true);
+                return;
+            }
+
+            var warningObject = GetWarning(user.Id, warnId);
+            if (warningObject == null)
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
+            else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && warningObject.ModUserId != ctx.User.Id && warningObject.ModUserId != ctx.Client.CurrentUser.Id)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!", ephemeral: true);
+            }
+            else
+            {
+                await EditWarning(user, warnId, ctx.User, reason);
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Information} Successfully edited warning `{StringHelpers.Pad(warnId)}` (belonging to {user.Mention})",
+                    await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), userID: user.Id));
+
+                await LogChannelHelper.LogMessageAsync("mod",
+                    new DiscordMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Information} Warning edited:" +
+                        $"`{StringHelpers.Pad(warnId)}` (belonging to {user.Mention})")
+                        .WithEmbed(await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), true, userID: user.Id))
+                    );
+            }
+        }
     }
 }
