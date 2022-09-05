@@ -59,5 +59,19 @@
                 await msg.ModifyAsync(newContent);
             }
         }
+
+        [Command("userinfo")]
+        [Description("Show info about a user.")]
+        [Aliases("user-info", "whois")]
+        public async Task UserInfoCommand(
+            CommandContext ctx,
+            DiscordUser user = null)
+        {
+            if (user is null)
+                user = ctx.User;
+
+            
+            await ctx.RespondAsync(embed: await DiscordHelpers.GenerateUserEmbed(user, ctx.Guild));
+        }
     }
 }

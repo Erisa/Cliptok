@@ -72,9 +72,9 @@
         }
 
         [SlashCommand("userinfo", "Retrieve information about a given user.")]
-        public async Task UserInfoSlashCommand(InteractionContext ctx, [Option("user", "The user to retrieve information about.")] DiscordUser user)
+        public async Task UserInfoSlashCommand(InteractionContext ctx, [Option("user", "The user to retrieve information about.")] DiscordUser user, [Option("public", "Whether to show the output publicly.")] bool publicMessage = false)
         {
-            await ctx.RespondAsync(embed: await DiscordHelpers.GenerateUserEmbed(user, ctx.Guild), ephemeral: true);
+            await ctx.RespondAsync(embed: await DiscordHelpers.GenerateUserEmbed(user, ctx.Guild), ephemeral: !publicMessage);
         }
     }
 }
