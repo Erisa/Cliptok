@@ -545,7 +545,7 @@ namespace Cliptok.Events
                         if (title.Length > 100)
                             title = StringHelpers.Truncate(title, 100, false);
 
-                        await message.CreateThreadAsync(title, AutoArchiveDuration.ThreeDays, "Automatically creating feedback hub thread.");
+                        await message.CreateThreadAsync(title, AutoArchiveDuration.Week, "Automatically creating feedback hub thread.");
 
                         await Task.Delay(2000);
                         await message.ModifyEmbedSuppressionAsync(true);
