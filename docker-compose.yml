@@ -37,7 +37,9 @@ services:
   cloudflared:
     image: erisamoe/cloudflared
     restart: always
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARED_TOKEN}
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARED_TOKEN}
   watchtower:
     image: containrrr/watchtower
     volumes:
