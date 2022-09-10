@@ -283,6 +283,9 @@
     },
     "messages": {
       "channelId": 1002631072179294218
+    },
+    "mentions": {
+      "channelId": 1018252827254063224
     }
   },
   "botOwners": [
