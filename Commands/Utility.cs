@@ -70,7 +70,6 @@
             if (user is null)
                 user = ctx.User;
 
-            
             await ctx.RespondAsync(embed: await DiscordHelpers.GenerateUserEmbed(user, ctx.Guild));
         }
     }

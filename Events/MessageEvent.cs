@@ -91,6 +91,9 @@ namespace Cliptok.Events
                 if (message.Channel.IsPrivate || message.Channel.Guild.Id != Program.cfgjson.ServerID || message.Author.IsBot)
                     return;
 
+                if (message.MentionedUsers.Any(x => x.Id == Program.discord.CurrentUser.Id))
+                    await LogChannelHelper.LogMessageAsync("mentions", await DiscordHelpers.GenerateMessageRelay(message, true, true));
+
                 DiscordMember member;
                 try
                 {
