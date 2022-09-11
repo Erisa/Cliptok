@@ -143,25 +143,18 @@
             return embed;
         }
 
-        public static async Task<DiscordMessageBuilder> GenerateMessageRelay(DiscordMessage message, bool jumplink = false, bool channelRef = false)
+        public static async Task<DiscordMessageBuilder> GenerateMessageRelay(DiscordMessage message, bool jumplink = false, bool channelRef = false, bool showChannelId = true)
         {
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}{(channelRef ? $" in #{message.Channel.Name}" : "")}", null, message.Author.AvatarUrl)
                 .WithDescription(message.Content)
-                .WithFooter($"User ID: {message.Author.Id}");
+                .WithFooter($"{(showChannelId ? $"Channel ID: {message.Channel.Id} | " : "")}User ID: {message.Author.Id}");
 
             if (message.Stickers.Count > 0)
             {
                 foreach (var sticker in message.Stickers)
                 {
-                    var url = sticker.StickerUrl;
-                    // d#+ is dumb
-                    if (sticker.FormatType is StickerFormat.APNG)
-                    {
-                        url = url.Replace(".apng", ".png");
-                    }
-
-                    string fieldValue = $"[{sticker.Name}]({url})";
+                    string fieldValue = $"[{sticker.Name}]({sticker.StickerUrl})";
                     if (sticker.FormatType is StickerFormat.APNG or StickerFormat.LOTTIE)
                     {
                         fieldValue += " (Animated)";
@@ -171,7 +164,7 @@
 
                     if (message.Attachments.Count == 0 && message.Stickers.Count == 1)
                     {
-                        embed.WithImageUrl(url);
+                        embed.WithImageUrl(sticker.StickerUrl);
                     }
                 }
             }

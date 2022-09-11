@@ -57,7 +57,7 @@
             [Option("reason", "The reason for the unmute.")] string reason = "No reason specified."
             )
         {
-            await ctx.DeferAsync();
+            await ctx.RespondAsync("Working..");
             reason = $"[Manual unmute by {ctx.User.Username}#{ctx.User.Discriminator}]: {reason}";
 
             // todo: store per-guild
