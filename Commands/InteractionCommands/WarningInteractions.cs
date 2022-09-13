@@ -162,7 +162,7 @@ namespace Cliptok.Commands.InteractionCommands
         }
 
         [SlashCommand("warndetails", "Search for a warning and return its details.", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.ModerateMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task WarndetailsSlashCommand(InteractionContext ctx,
             [Option("user", "The user to fetch a warning for.")] DiscordUser user,
              [Autocomplete(typeof(WarningsAutocompleteProvider)), Option("warning", "Type to search! Find the warning you want to fetch.")] string warning
@@ -190,7 +190,7 @@ namespace Cliptok.Commands.InteractionCommands
         }
 
         [SlashCommand("delwarn", "Search for a warning and delete it!", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.ModerateMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task DelwarnSlashCommand(InteractionContext ctx,
             [Option("user", "The user to delete a warning for.")] DiscordUser targetUser,
              [Autocomplete(typeof(WarningsAutocompleteProvider))][Option("warning", "Type to search! Find the warning you want to delete.")] string warningId)
@@ -237,7 +237,7 @@ namespace Cliptok.Commands.InteractionCommands
         }
 
         [SlashCommand("editwarn", "Search for a warning and edit it!", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.ModerateMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task EditWarnSlashCommand(InteractionContext ctx,
         [Option("user", "The user to fetch a warning for.")] DiscordUser user,
          [Autocomplete(typeof(WarningsAutocompleteProvider))][Option("warning", "Type to search! Find the warning you want to edit.")] string warning, [Option("new_reason", "The new reason for the warning")] string reason)
