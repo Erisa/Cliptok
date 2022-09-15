@@ -1,4 +1,7 @@
-﻿namespace Cliptok.Commands.InteractionCommands
+﻿using Cliptok.Constants;
+using Newtonsoft.Json.Linq;
+
+namespace Cliptok.Commands.InteractionCommands
 {
     internal class DebugInteractions : ApplicationCommandModule
     {
@@ -48,24 +51,53 @@
 
         [SlashCommand("tellraw", "You know what you're here for.", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.ModerateMembers)]
-        public async Task TellRaw(InteractionContext ctx, [Option("input", "???")] string input, [Option("reply_msg_id", "ID of message to use in a reply context.")] string replyID = "0", [Option("pingreply", "Ping pong.")] bool pingreply = true, [Option("channel", "Work it out.")] DiscordChannel discordChannel = default)
+        public async Task TellRaw(InteractionContext ctx, [Option("input", "???")] string input, [Option("reply_msg_id", "ID of message to use in a reply context.")] string replyID = "0", [Option("pingreply", "Ping pong.")] bool pingreply = true, [Option("channel", "Either mention or ID. Not a name.")] string discordChannel = default)
         {
+            DiscordChannel channelObj = default;
+            
             if (discordChannel == default)
-                discordChannel = ctx.Channel;
+                channelObj = ctx.Channel;
+            else
+            {
+                ulong channelId;
+                if (!ulong.TryParse(discordChannel, out channelId))
+                {
+                    var captures = RegexConstants.channel_rx.Match(discordChannel).Groups[1].Captures;
+                    if (captures.Count > 0)
+                        channelId = Convert.ToUInt64(captures[0].Value);
+                    else
+                    {
+                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} The channel you gave can't be parsed. Please give either an ID or a mention of a channel.", ephemeral: true);
+                        return;
+                    }
+                }
+                try
+                {
+                    channelObj = await ctx.Client.GetChannelAsync(channelId);
+                } catch
+                {
+                    // caught immediately after
+                }
+                if (channelObj == default)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I can't find a channel with the provided ID!", ephemeral: true);
+                    return;
+                }
+            }
 
             try
             {
-                await discordChannel.SendMessageAsync(new DiscordMessageBuilder().WithContent(input).WithReply(Convert.ToUInt64(replyID), pingreply, false));
+                await channelObj.SendMessageAsync(new DiscordMessageBuilder().WithContent(input).WithReply(Convert.ToUInt64(replyID), pingreply, false));
             }
             catch
             {
                 await ctx.RespondAsync($"Your dumb message didn't want to send. Congrats, I'm proud of you.", ephemeral: true);
                 return;
             }
-            await ctx.RespondAsync($"I sent your stupid message to {discordChannel.Mention}.", ephemeral: true);
+            await ctx.RespondAsync($"I sent your stupid message to {channelObj.Mention}.", ephemeral: true);
             await LogChannelHelper.LogMessageAsync("secret",
                 new DiscordMessageBuilder()
-                .WithContent($"{ctx.User.Mention} used tellraw in {discordChannel.Mention}:")
+                .WithContent($"{ctx.User.Mention} used tellraw in {channelObj.Mention}:")
                 .WithAllowedMentions(Mentions.None)
                 .WithEmbed(new DiscordEmbedBuilder().WithDescription(input))
             );
