@@ -88,10 +88,19 @@
             return output.ToString();
         }
 
-        public static async Task<DiscordEmbed> GenerateUserEmbed(DiscordUser user, DiscordGuild guild)
+        public static async Task<DiscordEmbed> GenerateUserEmbed(DiscordUser user, DiscordGuild? guild)
         {
             DiscordMember member = default;
-            DiscordEmbed embed = default;
+            DiscordEmbedBuilder embed = default;
+
+            bool guildNull = false;
+
+            if (guild is null)
+            {
+                guild = Program.homeGuild;
+                guildNull = true;
+            }
+
             string avatarUrl = await LykosAvatarMethods.UserOrMemberAvatarURL(user, guild, "default", 256);
 
             try
@@ -105,11 +114,14 @@
                     .WithTitle($"User information for {user.Username}#{user.Discriminator}")
                     .AddField("User", user.Mention, true)
                     .AddField("User ID", user.Id.ToString(), true)
-                    .AddField($"{Program.discord.CurrentUser.Username} permission level", "N/A (not in server)", true)
-                    .AddField("Roles", "N/A (not in server)", false)
-                    .AddField("Last joined server", "N/A (not in server)", true)
-                    .AddField("Account created", $"<t:{TimeHelpers.ToUnixTimestamp(user.CreationTimestamp.DateTime)}:F>", true);
-                return embed;
+                    .AddField($"{Program.discord.CurrentUser.Username} permission level", "N/A (not in server)", true);
+
+                if (!guildNull)
+                    embed.AddField("Roles", "N/A (not in server)", false);
+
+                embed.AddField("Last joined server", "N/A (not in server)", true)
+                   .AddField("Account created", $"<t:{TimeHelpers.ToUnixTimestamp(user.CreationTimestamp.DateTime)}:F>", true);
+                return embed.Build();
             }
 
             string rolesStr = "None";
@@ -136,11 +148,14 @@
                 .WithTitle($"User information for {user.Username}#{user.Discriminator}")
                 .AddField("User", member.Mention, true)
                 .AddField("User ID", member.Id.ToString(), true)
-                .AddField($"{Program.discord.CurrentUser.Username} permission level", GetPermLevel(member).ToString(), false)
-                .AddField("Roles", rolesStr, false)
-                .AddField("Last joined server", $"<t:{TimeHelpers.ToUnixTimestamp(member.JoinedAt.DateTime)}:F>", true)
+                .AddField($"{Program.discord.CurrentUser.Username} permission level", GetPermLevel(member).ToString(), false);
+
+            if (!guildNull)
+                embed.AddField("Roles", rolesStr, false);
+
+            embed.AddField("Last joined server", $"<t:{TimeHelpers.ToUnixTimestamp(member.JoinedAt.DateTime)}:F>", true)
                 .AddField("Account created", $"<t:{TimeHelpers.ToUnixTimestamp(member.CreationTimestamp.DateTime)}:F>", true);
-            return embed;
+            return embed.Build();
         }
 
         public static async Task<DiscordMessageBuilder> GenerateMessageRelay(DiscordMessage message, bool jumplink = false, bool channelRef = false, bool showChannelId = true)
