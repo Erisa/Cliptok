@@ -231,10 +231,11 @@ namespace Cliptok.Events
                         DiscordInvite invite = default;
                         if (maliciousCache == default)
                         {
+
                             if (GetPermLevel(member) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && disallowedInviteCodes.Contains(code))
                             {
                                 _ = message.DeleteAsync();
-                                match = await InviteCheck(invite, message, client);
+                                //match = await InviteCheck(invite, message, client);
                                 if (!match)
                                 {
                                     string reason = "Sent an unapproved invite";
@@ -254,7 +255,7 @@ namespace Cliptok.Events
                             }
                         }
 
-                        if (invite != default && (Program.cfgjson.InviteIDExclusion.Contains(invite.Guild.Id) || invite.Guild.Id == message.Channel.Guild.Id))
+                        if (invite != default && invite.Guild is not null && (Program.cfgjson.InviteIDExclusion.Contains(invite.Guild.Id) || invite.Guild.Id == message.Channel.Guild.Id))
                             continue;
 
                         if (maliciousCache == default && invite != default)
@@ -645,8 +646,11 @@ namespace Cliptok.Events
             return count;
         }
 
-        public static async Task<bool> InviteCheck(DiscordInvite invite, DiscordMessage message, DiscordClient client)
+        public static async Task<bool> InviteCheck(DiscordInvite? invite, DiscordMessage message, DiscordClient client)
         {
+            if (invite is null || invite.Guild is null)
+                return false;
+
             (bool serverMatch, HttpStatusCode httpStatus, string responseString, ServerApiResponseJson? serverResponse) = await APIs.ServerAPI.ServerAPICheckAsynnc(invite.Guild.Id);
 
             if (httpStatus != HttpStatusCode.OK)
