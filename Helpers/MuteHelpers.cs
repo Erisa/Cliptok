@@ -38,7 +38,7 @@
                 else
                 {
                     embedBuilder.WithDescription("User is muted.")
-                        .AddField("Muted", $"<t:{TimeHelpers.ToUnixTimestamp(mute.ActionTime)}:R>", true)
+                        .AddField("Muted", mute.ActionTime is null ? "Unknown time (Mute is too old)" : $"<t:{TimeHelpers.ToUnixTimestamp(mute.ActionTime)}:R>", true)
                         .WithColor(new DiscordColor(0xFEC13D));
 
                     if (mute.ExpireTime is null)
