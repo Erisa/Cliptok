@@ -24,7 +24,7 @@ RUN touch dummy.txt && \
 FROM mcr.microsoft.com/dotnet/runtime:6.0.9-alpine3.16
 LABEL com.centurylinklabs.watchtower.enable true
 WORKDIR /app
-RUN apk add --no-cache git redis
+RUN apk add --no-cache git redis openssh
 RUN git config --global --add safe.directory /app/Lists/Private
 COPY --from=build-env /app/out .
 ADD Lists ./Lists

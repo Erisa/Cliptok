@@ -13,3 +13,4 @@ Dockerfile.*
 Lists/Private/*
 data/*
 Properties/launchSettings.json
+ssh_key

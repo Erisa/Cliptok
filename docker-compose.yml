@@ -11,6 +11,13 @@ services:
       - type: bind
         source: ./Lists/Private
         target: /app/Lists/Private
+      # Comment out the following (And I guess the above?) if you won't use SSH to pull Lists/Private
+      - type: bind
+        source: ${HOME}/.ssh/known_hosts
+        target: /root/.ssh/known_hosts
+      - type: bind
+        source: ./ssh_key
+        target: /root/.ssh/id_ed25519
       # Uncomment the below lines to use your own config file.
       #- type: bind
       #  source: ./config.dev.json
