@@ -1,4 +1,4 @@
-{
+﻿{
   "core": {
     "prefixes": [
       "!",
@@ -9,13 +9,9 @@
   "modRole": 150878439220576256,
   "adminRole": 286639672606720000,
   "mutedRole": 426386061220904960,
-  "logChannel": 584908576980729876,
-  "userLogChannel": 870053642500182046,
   "serverID": 150662382874525696,
   "homeChannel": 793285213823172628,
-  "investigationsChannel": 745276933767430255,
   "techSupportChannel": 150909451270881280,
-  "supportLogChannel": 843181924687806484,
   "communityTechSupportRoleID": 787033266225938472,
   "modmailUserId": 459322015044730903,
   "supportRatelimitMinutes": 15,
@@ -26,7 +22,7 @@
     "rp10": 910319453491839069,
     "patch": 445773142233710594
   },
-  "appealLink": "https://msft.chat/member/#ban-appeal-process",
+  "appealLink": "https://appeal.msft.chat",
   "inviteExclusion": [
     "microsoft",
     "xbox",
@@ -37,10 +33,7 @@
     "iphone",
     "directx",
     "winadmins",
-    "5W9mr96h4V",
-    "5gFr29XZ",
-    "minecraft",
-    "yQ6PFyUqXC"
+    "minecraft"
   ],
   "inviteIDExclusion": [
     150662382874525696,
@@ -64,8 +57,8 @@
     133980319010258944,
     568863120609640463,
     675491639804035089,
-    210900612231987200,
-    844992738171682896
+    114211522384756737,
+    834949385535750214
   ],
   "warningDaysThreshold": 30,
   "autoMuteThresholds": {
@@ -75,7 +68,6 @@
     "8": 24,
     "10": -1
   },
-
   "recentWarningsPeriodHours": 48,
   "recentWarningsAutoMuteThresholds": {
     "2": 3,
@@ -122,64 +114,72 @@
     "userUpdate": "<:CliptokUserUpdate:870011211620708372>",
     "messageEdit": "<:CliptokEdit:870011211125751888>",
     "clockTime": "<:CliptokClock:848246682156138546>",
-    "windows11": "<:CliptokWindows11:895420814155993128>"
+    "windows11": "<:CliptokWindows11:895420814155993128>",
+    "on": "<:CliptokOn:962741121967091772>",
+    "off": "<:CliptokOff:962741121396654130>​",
+    "insider": "<:WindowsInsider:938875717339459604>",
+    "windows10": "<:Windows10:895975935516495902>"
   },
   "redis": {
     "host": "localhost",
     "port": 6379
   },
-  "wordLists": {
-    "scams.txt": {
+  "wordLists": [
+    {
+      "name": "scams.txt",
       "wholeWord": false,
       "reason": "Attempted scam message"
     },
-    "naughtyURLs.txt": {
+    {
+      "name": "naughtyURLs.txt",
       "wholeWord": false,
       "reason": "Sent malicious URL(s)"
     },
-    "rudeWords.txt": {
+    {
+      "name": "Private/rudeWords.txt",
       "wholeWord": true,
       "reason": "Use of restricted word(s)"
     },
-    "autoban.txt": {
+    {
+      "name": "Private/phishing.txt",
       "wholeWord": false,
-      "reason": "[Automatic] Suspected to be following the patterns of known raiders."
+      "url": true,
+      "reason": "Sending phishing URL(s)"
     },
-    "everyone.txt": {
-      "wholeWord": false,
-      "reason": "Attempted to ping everyone/here",
-      "excludedChannels": [
-        316600283503394817,
-        726511089461755974
-      ]
-    },
-    "malware.txt": {
+    {
+      "name": "malware.txt",
       "wholeWord": false,
       "url": false,
       "reason": "Attempted to send malware"
     },
-    "scamlinks.txt": {
-      "wholeWord": false,
-      "url": true,
-      "reason": "Sent scam link(s)"
-    },
-    "exploits.txt": {
+    {
+      "name": "exploits.txt",
       "wholeWord": false,
       "url": false,
       "reason": "Using a text-rendering exploit to mask URL(s) and/or mentions"
     },
-    "phishing.txt": {
-      "wholeWord": false,
-      "url": true,
-      "reason": "Sending phishing URL(s)"
+    {
+      "name": "Private/passive.txt",
+      "wholeWord": true,
+      "url": false,
+      "reason": "",
+      "passive": true,
+      "channelId": 963070640292782160
     }
-  },
+  ],
+  "gitListDirectory": "Private",
+  "everyoneExcludedChannels": [
+    316600283503394817,
+    726511089461755974
+  ],
   "massEmojiThreshold": 6,
   "unrestrictedEmojiChannels": [
     150909911952392193,
     740272437719072808,
     240528256292356096,
-    812412803104768111
+    812412803104768111,
+    939441229157007380,
+    947775206141870111
   ],
   "lockdownEnabledChannels": [
     150662382874525696,
@@ -206,7 +206,11 @@
     667438432615792653,
     812191602440798259,
     857320003693969418,
-    894699119195619379
+    894699119195619379,
+    960568397475749888,
+    717423310308376596,
+    468197326750744596,
+    984622268904779826
   ],
   "heartosoftId": 413429915187281940,
   "noHeartosoftId": 642508756189446165,
@@ -237,7 +241,8 @@
     240528256292356096,
     173743310878277634,
     667438432615792653,
-    438383036422422529
+    438383036422422529,
+    1006577277313744996
   ],
   "giveawaysChannel": 280002642602622986,
   "giveawayBot": 517176766226235404,
@@ -246,5 +251,56 @@
     "repo": "Erisa/Cliptok",
     "ref": "main",
     "workflowId": "append-lists-txt.yml"
-  }
+  },
+  "feedbackHubChannelId": 865734819995582464,
+  "everyoneFilter": true,
+  "logChannels": {
+    "mod": {
+      "channelId": 584908576980729876
+    },
+    "investigations": {
+      "channelId": 745276933767430255
+    },
+    "errors": {
+      "webhookEnvVar": "CLIPTALK_WEBHOOK",
+      "channelId": 968463420586336286
+    },
+    "support": {
+      "channelId": 843181924687806484
+    },
+    "dms": {
+      "webhookEnvVar": "CLIPTALK_WEBHOOK",
+      "channelId": 963600228286607391
+    },
+    "secret": {
+      "channelId": 974161605938012160
+    },
+    "users": {
+      "channelId": 870053642500182046
+    },
+    "username": {
+      "channelId": 984230829343535105
+    },
+    "messages": {
+      "channelId": 1002631072179294218
+    },
+    "mentions": {
+      "channelId": 1018252827254063224
+    }
+  },
+  "botOwners": [
+    228574821590499329,
+    455432936339144705,
+    159016432498114560
+  ],
+  "ignoredVoiceChannels": [
+    922260379470548992
+  ],
+  "enableTextInVoice": true,
+  "tqsRoleId": 513434929280057354,
+  "supportForumIntroThreadId": 1007802643856510996,
+  "supportForumId": 1006577277313744996,
+  "everyoneExcludedRoles": [
+    707996864317751321
+  ]
 }

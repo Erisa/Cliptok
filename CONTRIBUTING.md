@@ -8,7 +8,7 @@ Therefore, the following contribution rules apply to PRs against this repository
 - Do not attempt to significantly alter the bot in a way that results in the installation instructions on the README becoming invalid. 
 - Do not bump a version of a dependency.
 - Do not propose any significant code or building changes without testing them first.
-- Do not alter the GitHub Action files (/.github/workflows) in ANY way. Open an Issue if there is a problem with them.
+- Do not alter the GitHub Action files (`/.github/workflows`) in ANY way. Open an Issue if there is a problem with them.
 - Do not alter the Docker configuration (`Dockerfile` or `docker-compose.yml`) without consulting first. Open an Issue if there is a problem.
 - Do not introduce code changes that alter the bot in the interest of making it work in multiple servers. This includes global slash commands or changing the permission system. At this time, the bot is not intended to support more than one server.
 
@@ -17,4 +17,4 @@ Please be respectful when submitting changes that optimise the flow of operation
 If we (developer(s)) cannot understand the concepts behind the code, it will be rejected on principle.  
 We are not here to learn how to code perfectly or in the best way, we are here to assist in the moderation of our community.
 
-And finally, this repository is NOT part of Hacktoberfest. Please do not make any contributions expecting points or rewards. We have the upmost respect for Hacktoberfest, but do not wish to take part.
+And finally, this repository is NOT part of Hacktoberfest. Please do not make any contributions expecting points or rewards. We have the utmost respect for Hacktoberfest, but do not wish to take part.

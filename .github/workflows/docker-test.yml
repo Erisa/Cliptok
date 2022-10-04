@@ -25,12 +25,12 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-iteration2-${{ github.sha }}
+          key: ${{ runner.os }}-buildx-iteration3-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-buildx-iteration2-
+            ${{ runner.os }}-buildx-iteration3-
       -
         name: Build and push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           file: ./Dockerfile.multiarch

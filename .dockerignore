@@ -5,3 +5,11 @@ Lists/autoban.txt
 Lists/usernames.txt
 .vscode/*
 .github/*
+README.md
+LICENSE
+Dockerfile
+Dockerfile.*
+.github/*
+Lists/Private/*
+data/*
+Properties/launchSettings.json
