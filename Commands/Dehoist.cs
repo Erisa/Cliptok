@@ -78,7 +78,9 @@
                 if (!success)
                     failedCount++;
             }
-            await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {discordMembers.Count - failedCount} of {discordMembers.Count} member(s)! (Check Audit Log for details)");
+
+            _= msg.DeleteAsync();
+            await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {discordMembers.Count - failedCount} of {discordMembers.Count} member(s)! (Check Audit Log for details)").WithReply(ctx.Message.Id, true, false));
         }
 
         [Command("massundehoist")]
