@@ -1,5 +1,4 @@
 ﻿using Cliptok.Constants;
-using Newtonsoft.Json.Linq;
 
 namespace Cliptok.Commands.InteractionCommands
 {
@@ -54,7 +53,7 @@ namespace Cliptok.Commands.InteractionCommands
         public async Task TellRaw(InteractionContext ctx, [Option("input", "???")] string input, [Option("reply_msg_id", "ID of message to use in a reply context.")] string replyID = "0", [Option("pingreply", "Ping pong.")] bool pingreply = true, [Option("channel", "Either mention or ID. Not a name.")] string discordChannel = default)
         {
             DiscordChannel channelObj = default;
-            
+
             if (discordChannel == default)
                 channelObj = ctx.Channel;
             else
@@ -74,7 +73,8 @@ namespace Cliptok.Commands.InteractionCommands
                 try
                 {
                     channelObj = await ctx.Client.GetChannelAsync(channelId);
-                } catch
+                }
+                catch
                 {
                     // caught immediately after
                 }
