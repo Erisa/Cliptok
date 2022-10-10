@@ -191,6 +191,13 @@
             if (jumplink)
                 embed.AddField("Message Link", $"[`Jump to message`]({message.JumpLink})");
 
+
+            if (message.ReferencedMessage != null)
+            {
+                embed.WithTitle($"Replying to {message.ReferencedMessage.Author.Username}")
+                    .WithUrl($"https://discord.com/channels/{message.Channel.Guild.Id}/{message.Channel.Id}/{message.ReferencedMessage.Id}");
+            }
+
             List<DiscordEmbed> embeds = new()
             {
                 embed
