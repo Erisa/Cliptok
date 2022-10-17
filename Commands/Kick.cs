@@ -3,7 +3,7 @@
     internal class Kick : BaseCommandModule
     {
         [Command("kick")]
-        [Aliases("yeet", "shoo", "goaway")]
+        [Aliases("yeet", "shoo", "goaway", "defenestrate")]
         [Description("Kicks a user, removing them from the server until they rejoin. Generally not very useful.")]
         [RequirePermissions(Permissions.KickMembers), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task KickCmd(CommandContext ctx, DiscordUser target, [RemainingText] string reason = "No reason specified.")
