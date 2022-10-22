@@ -111,11 +111,11 @@ namespace Cliptok.Events
                 // Skip messages from moderators beyond this point.
                 if (GetPermLevel(member) < ServerPermLevel.TrialModerator)
                 {
-                    if (channel.Id == Program.cfgjson.SupportForumIntroThreadId && !member.Roles.Any(role => role.Id == Program.cfgjson.TqsRoleId))
+                    if ((channel.Id == Program.cfgjson.SupportForumIntroThreadId || Program.cfgjson.ForumIntroPosts.Contains(channel.Id)) && !member.Roles.Any(role => role.Id == Program.cfgjson.TqsRoleId))
                     {
                         await message.DeleteAsync();
-                        var msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {message.Author.Mention}, you can't send messages in this thread!\nTry creating a post on the Forum Channel instead.");
-                        await Task.Delay(2000);
+                        var msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {message.Author.Mention}, you can't send messages in this thread!\nTry creating a post on {message.Channel.Parent.Mention} instead.");
+                        await Task.Delay(5000);
                         await msg.DeleteAsync();
                         return;
                     }
@@ -528,7 +528,7 @@ namespace Cliptok.Events
                 }
 
                 // feedback hub forum
-                if (!isAnEdit && message.Channel.IsThread && message.Channel.ParentId == Program.cfgjson.FeedbackHubForum && !Program.db.SetContains("processedFeedbackHubThreads", message.Channel.Id))
+                if (GetPermLevel(member) < ServerPermLevel.TrialModerator && !isAnEdit && message.Channel.IsThread && message.Channel.ParentId == Program.cfgjson.FeedbackHubForum && !Program.db.SetContains("processedFeedbackHubThreads", message.Channel.Id))
                 {
                     var thread = (DiscordThreadChannel)message.Channel;
                     Program.db.SetAdd("processedFeedbackHubThreads", thread.Id);
