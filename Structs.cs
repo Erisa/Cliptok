@@ -266,6 +266,9 @@
 
         [JsonProperty("everyoneExcludedRoles")]
         public List<ulong> EveryoneExcludedRoles { get; private set; } = new();
+
+        [JsonProperty("feedbackHubForum")]
+        public ulong FeedbackHubForum { get; private set; } = 0;
     }
 
     public class LogChannelConfig

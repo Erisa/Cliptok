@@ -527,6 +527,33 @@ namespace Cliptok.Events
                     }
                 }
 
+                // feedback hub forum
+                if (!isAnEdit && message.Channel.IsThread && message.Channel.ParentId == Program.cfgjson.FeedbackHubForum && !Program.db.SetContains("processedFeedbackHubThreads", message.Channel.Id))
+                {
+                    var thread = (DiscordThreadChannel)message.Channel;
+                    Program.db.SetAdd("processedFeedbackHubThreads", thread.Id);
+
+                    // we need to make sure this is the first message in the channel
+                    if ((await thread.GetMessagesBeforeAsync(message.Id)).Count == 0)
+                    {
+                        // lock thread if there is no possible feedback hub link
+                        if (!message.Content.Contains("aka.ms/") && !message.Content.Contains("feedback-hub:"))
+                        {
+                            await message.RespondAsync($"{Program.cfgjson.Emoji.Error} Your {message.Channel.Parent.Mention} submission must include a Feedback Hub link!\nThis thread has been locked.");
+                            await thread.ModifyAsync(thread =>
+                            {
+                                thread.IsArchived = true;
+                                thread.Locked = true;
+                            });
+                        } else
+                        {
+                            await Task.Delay(2000);
+                            await message.ModifyEmbedSuppressionAsync(true);
+                        }
+                    }
+                }
+
+                // feedback hub text channel
                 if (!isAnEdit && message.Channel.Id == Program.cfgjson.FeedbackHubChannelId)
                 {
                     var captures = bold_rx.Match(message.Content).Groups[1].Captures;
