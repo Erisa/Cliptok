@@ -97,9 +97,9 @@
             else
             {
                 string strList;
-                using (WebClient client = new())
+                using(HttpClient client = new())
                 {
-                    strList = client.DownloadString(ctx.Message.Attachments[0].Url);
+                    strList = await client.GetStringAsync(ctx.Message.Attachments[0].Url);
                 }
 
                 var list = strList.Split(' ');
