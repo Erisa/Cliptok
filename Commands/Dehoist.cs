@@ -97,7 +97,7 @@
             else
             {
                 string strList;
-                using(HttpClient client = new())
+                using (HttpClient client = new())
                 {
                     strList = await client.GetStringAsync(ctx.Message.Attachments[0].Url);
                 }
