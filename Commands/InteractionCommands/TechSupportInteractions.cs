@@ -2,7 +2,7 @@
 
 namespace Cliptok.Commands.InteractionCommands
 {
-    internal class TechSupportInteractions : ApplicationCommandModule
+    public class TechSupportInteractions : ApplicationCommandModule
     {
         [SlashCommand("vcredist", "Outputs download URLs for the specified Visual C++ Redistributables version")]
         public async Task RedistsCommand(

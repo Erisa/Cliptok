@@ -1,6 +1,6 @@
 ﻿namespace Cliptok.Constants
 {
-    internal class VcRedistConstants
+    public class VcRedistConstants
     {
         public static readonly VcRedist[] VcRedists =
         {
