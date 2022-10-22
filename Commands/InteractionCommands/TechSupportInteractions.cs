@@ -7,38 +7,30 @@ namespace Cliptok.Commands.InteractionCommands
         [SlashCommand("vcredist", "Outputs download URLs for the specified Visual C++ Redistributables version")]
         public async Task RedistsCommand(
             InteractionContext ctx,
+
+            [Choice("Visual Studio 2015+ - v140", 140)]
+            [Choice("Visual Studio 2013 - v120", 120)]
+            [Choice("Visual Studio 2012 - v110", 110)]
+            [Choice("Visual Studio 2010 - v100", 100)]
+            [Choice("Visual Studio 2008 - v90", 90)]
+            [Choice("Visual Studio 2005 - v80", 80)]
             [Option("version", "Visual Studio version number or year")] long version
             )
         {
             VcRedist redist = VcRedistConstants.VcRedists
-                .Where((e) =>
+                .First((e) =>
                 {
-                    if (version is (>= 2015 or 140))
-                    {
-                        return e.Year == 2015;
-                    }
-                    else
-                    {
-                        return version == e.Year || version == e.Version;
-                    }
-                })
-                .FirstOrDefault();
+                    return version == e.Version;
+                });
 
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                .WithTitle($"Visual C++ {redist.Year}{(redist.Year == 2015 ? "+" : "")} Redistributables (version {redist.Version})")
+                .WithFooter("The above links are official and safe to download.")
                 .WithColor(new("7160e8"));
 
-            if (redist.Year != 0)
+            foreach (var url in redist.DownloadUrls)
             {
-                foreach (var url in redist.DownloadUrls)
-                {
-                    embed.AddField($"{url.Key.ToString("G")}", $"{url.Value}");
-                }
-                embed.WithTitle($"Visual C++ {redist.Year}{(redist.Year == 2015 ? "+" : "")} Redistributables (version {redist.Version})")
-                    .WithFooter("The above links are official and safe to download.");
-            }
-            else
-            {
-                embed.WithDescription("No results were found for the specified version or year.");
+                embed.AddField($"{url.Key.ToString("G")}", $"{url.Value}");
             }
 
             await ctx.RespondAsync(null, embed.Build(), false);
