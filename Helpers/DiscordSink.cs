@@ -13,13 +13,13 @@ namespace Cliptok
 
         public DiscordSink(ITextFormatter textFormatter)
         {
-            if (textFormatter == null) throw new ArgumentNullException(nameof(textFormatter));
+            if (textFormatter is null) throw new ArgumentNullException(nameof(textFormatter));
             _textFormatter = textFormatter;
         }
 
         public async void Emit(LogEvent logEvent)
         {
-            if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
+            if (logEvent is null) throw new ArgumentNullException(nameof(logEvent));
             lock (_syncRoot)
             {
                 try
@@ -69,7 +69,7 @@ namespace Cliptok
             IFormatProvider formatProvider = null,
             LoggingLevelSwitch levelSwitch = null)
         {
-            if (outputTemplate == null) throw new ArgumentNullException(nameof(outputTemplate));
+            if (outputTemplate is null) throw new ArgumentNullException(nameof(outputTemplate));
 
             var formatter = new MessageTemplateTextFormatter(outputTemplate, formatProvider);
             var sink = new DiscordSink(formatter);
@@ -82,7 +82,7 @@ namespace Cliptok
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             LoggingLevelSwitch levelSwitch = null)
         {
-            if (formatter == null) throw new ArgumentNullException(nameof(formatter));
+            if (formatter is null) throw new ArgumentNullException(nameof(formatter));
 
             var sink = new DiscordSink(formatter);
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel, levelSwitch);

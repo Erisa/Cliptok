@@ -31,10 +31,10 @@ namespace Cliptok.Events
                     break;
             }
 
-            if (Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == null || Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == "githubtokenhere")
+            if (Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") is null || Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == "githubtokenhere")
                 discord.Logger.LogWarning(CliptokEventID, "GitHub API features disabled due to missing access token.");
 
-            if (Environment.GetEnvironmentVariable("RAVY_API_TOKEN") == null || Environment.GetEnvironmentVariable("RAVY_API_TOKEN") == "goodluckfindingone")
+            if (Environment.GetEnvironmentVariable("RAVY_API_TOKEN") is null || Environment.GetEnvironmentVariable("RAVY_API_TOKEN") == "goodluckfindingone")
                 discord.Logger.LogWarning(CliptokEventID, "Ravy API features disabled due to missing API token.");
 
             Tasks.PunishmentTasks.CheckMutesAsync();

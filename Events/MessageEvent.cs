@@ -44,7 +44,7 @@ namespace Cliptok.Events
                 if (message.Timestamp.Year < (DateTime.Now.Year - 2))
                     return;
 
-                if (message.Author == null || message.Author.Id == client.CurrentUser.Id)
+                if (message.Author is null || message.Author.Id == client.CurrentUser.Id)
                     return;
 
                 if (!isAnEdit && channel.IsPrivate && Program.cfgjson.LogChannels.ContainsKey("dms"))
@@ -111,11 +111,11 @@ namespace Cliptok.Events
                 // Skip messages from moderators beyond this point.
                 if (GetPermLevel(member) < ServerPermLevel.TrialModerator)
                 {
-                    if (channel.Id == Program.cfgjson.SupportForumIntroThreadId && !member.Roles.Any(role => role.Id == Program.cfgjson.TqsRoleId))
+                    if ((channel.Id == Program.cfgjson.SupportForumIntroThreadId || Program.cfgjson.ForumIntroPosts.Contains(channel.Id)) && !member.Roles.Any(role => role.Id == Program.cfgjson.TqsRoleId))
                     {
                         await message.DeleteAsync();
-                        var msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {message.Author.Mention}, you can't send messages in this thread!\nTry creating a post on the Forum Channel instead.");
-                        await Task.Delay(2000);
+                        var msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {message.Author.Mention}, you can't send messages in this thread!\nTry creating a post on {message.Channel.Parent.Mention} instead.");
+                        await Task.Delay(5000);
                         await msg.DeleteAsync();
                         return;
                     }
@@ -402,7 +402,7 @@ namespace Cliptok.Events
                             embed.AddField("Current message", messageContent);
                             if (message.Attachments.Count != 0)
                             {
-                                if (embed.ImageUrl == null)
+                                if (embed.ImageUrl is null)
                                     embed.WithImageUrl(message.Attachments[0].Url);
                                 else
                                     embed.ImageUrl = message.Attachments[0].Url;
@@ -527,11 +527,54 @@ namespace Cliptok.Events
                     }
                 }
 
+                // feedback hub forum
+                if (GetPermLevel(member) < ServerPermLevel.TrialModerator && !isAnEdit && message.Channel.IsThread && message.Channel.ParentId == Program.cfgjson.FeedbackHubForum && !Program.db.SetContains("processedFeedbackHubThreads", message.Channel.Id))
+                {
+                    var thread = (DiscordThreadChannel)message.Channel;
+                    Program.db.SetAdd("processedFeedbackHubThreads", thread.Id);
+
+                    // we need to make sure this is the first message in the channel
+                    if ((await thread.GetMessagesBeforeAsync(message.Id)).Count == 0)
+                    {
+                        // lock thread if there is no possible feedback hub link
+                        if (!message.Content.Contains("aka.ms/") && !message.Content.Contains("feedback-hub:"))
+                        {
+                            await message.RespondAsync($"{Program.cfgjson.Emoji.Error} Your {message.Channel.Parent.Mention} submission must include a Feedback Hub link!\nThis post will be automatically deleted shortly.");
+                            await thread.ModifyAsync(thread =>
+                            {
+                                thread.IsArchived = true;
+                                thread.Locked = true;
+                            });
+                            await Task.Delay(30000);
+                            await LogChannelHelper.LogMessageAsync("messages",
+                                new DiscordMessageBuilder()
+                                    .WithContent($"{Program.cfgjson.Emoji.Deleted} Deleted non-feedback post from {message.Author.Mention} in {message.Channel.Parent.Mention}:")
+                                    .WithEmbed(new DiscordEmbedBuilder()
+                                        .WithAuthor(
+                                            $"{message.Author.Username}#{message.Author.Discriminator} in #{message.Channel.Parent.Name}",
+                                            null, await LykosAvatarMethods.UserOrMemberAvatarURL(message.Author, message.Channel.Guild))
+                                        .WithTitle(thread.Name)
+                                        .WithDescription(message.Content)
+                                        .WithColor(DiscordColor.Red)
+                                    )
+
+                                );
+                            await thread.DeleteAsync();
+                            return;
+                        } else
+                        {
+                            await Task.Delay(2000);
+                            await message.ModifyEmbedSuppressionAsync(true);
+                        }
+                    }
+                }
+
+                // feedback hub text channel
                 if (!isAnEdit && message.Channel.Id == Program.cfgjson.FeedbackHubChannelId)
                 {
                     var captures = bold_rx.Match(message.Content).Groups[1].Captures;
 
-                    if (captures == null || captures.Count == 0 || (!message.Content.Contains("aka.ms/") && !message.Content.Contains("feedback-hub:")))
+                    if (captures is null || captures.Count == 0 || (!message.Content.Contains("aka.ms/") && !message.Content.Contains("feedback-hub:")))
                     {
                         if (GetPermLevel(member) >= ServerPermLevel.TrialModerator)
                         {

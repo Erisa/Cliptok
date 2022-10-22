@@ -9,7 +9,7 @@
                 x => x.Name.ToString(),
                 x => JsonConvert.DeserializeObject<MemberPunishment>(x.Value)
             );
-            if (banList == null | banList.Keys.Count == 0)
+            if (banList is null | banList.Keys.Count == 0)
                 return false;
             else
             {
@@ -40,7 +40,7 @@
                 x => x.Name.ToString(),
                 x => JsonConvert.DeserializeObject<MemberPunishment>(x.Value)
             );
-            if (muteList == null | muteList.Keys.Count == 0)
+            if (muteList is null | muteList.Keys.Count == 0)
                 return false;
             else
             {

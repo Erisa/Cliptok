@@ -21,7 +21,7 @@
                     {
                         // channel likely doesnt exist
                     }
-                    if (channel == null)
+                    if (channel is null)
                     {
                         var guild = Program.homeGuild;
                         var member = await guild.GetMemberAsync(reminderObject.UserID);

@@ -113,7 +113,7 @@
             if (detailed)
             {
                 embed.AddField("Responsible moderator", $"<@{warning.ModUserId}>")
-                .AddField("Message link", warning.ContextLink == null ? "N/A" : $"[`Jump to warning`]({warning.ContextLink})");
+                .AddField("Message link", warning.ContextLink is null ? "N/A" : $"[`Jump to warning`]({warning.ContextLink})");
             }
             if (showTime)
                 embed.AddField("Time", detailed ? $"<t:{TimeHelpers.ToUnixTimestamp(warning.WarnTimestamp)}:f>" : $"<t:{TimeHelpers.ToUnixTimestamp(warning.WarnTimestamp)}:R>", true);

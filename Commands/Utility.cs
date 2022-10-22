@@ -26,7 +26,7 @@
         {
             var msg = await ctx.Channel.GetMessageAsync(messageId);
 
-            if (msg == null || msg.Author.Id != ctx.Client.CurrentUser.Id)
+            if (msg is null || msg.Author.Id != ctx.Client.CurrentUser.Id)
                 return;
 
             await ctx.Message.DeleteAsync();
@@ -45,7 +45,7 @@
         {
             var msg = await ctx.Channel.GetMessageAsync(messageId);
 
-            if (msg == null || msg.Author.Id != ctx.Client.CurrentUser.Id)
+            if (msg is null || msg.Author.Id != ctx.Client.CurrentUser.Id)
                 return;
 
             var newContent = msg.Content + "\n" + content;

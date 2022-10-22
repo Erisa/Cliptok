@@ -6,7 +6,7 @@ namespace Cliptok.Events
     {
         public static async Task CommandsNextService_CommandErrored(CommandsNextExtension _, CommandErrorEventArgs e)
         {
-            if (e.Exception is CommandNotFoundException && (e.Command == null || e.Command.QualifiedName != "help"))
+            if (e.Exception is CommandNotFoundException && (e.Command is null || e.Command.QualifiedName != "help"))
                 return;
 
             // avoid conflicts with modmail
@@ -23,7 +23,7 @@ namespace Cliptok.Events
 
             foreach (var ex in exs)
             {
-                if (ex is CommandNotFoundException && (e.Command == null || e.Command.QualifiedName != "help"))
+                if (ex is CommandNotFoundException && (e.Command is null || e.Command.QualifiedName != "help"))
                     return;
 
                 if (ex is ChecksFailedException && (e.Command.Name != "help"))

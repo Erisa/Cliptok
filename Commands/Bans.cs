@@ -90,7 +90,7 @@ namespace Cliptok.Commands
                 member = null;
             }
 
-            if (member == null)
+            if (member is null)
             {
                 await ctx.Message.DeleteAsync();
                 await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 7, ctx.Channel, banDuration, appealable);
@@ -174,7 +174,7 @@ namespace Cliptok.Commands
                 member = null;
             }
 
-            if (member == null)
+            if (member is null)
             {
                 await ctx.Message.DeleteAsync();
                 await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 0, ctx.Channel, banDuration, appealable);
