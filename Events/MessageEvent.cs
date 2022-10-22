@@ -539,12 +539,28 @@ namespace Cliptok.Events
                         // lock thread if there is no possible feedback hub link
                         if (!message.Content.Contains("aka.ms/") && !message.Content.Contains("feedback-hub:"))
                         {
-                            await message.RespondAsync($"{Program.cfgjson.Emoji.Error} Your {message.Channel.Parent.Mention} submission must include a Feedback Hub link!\nThis thread has been locked.");
+                            await message.RespondAsync($"{Program.cfgjson.Emoji.Error} Your {message.Channel.Parent.Mention} submission must include a Feedback Hub link!\nThis post will be automatically deleted shortly.");
                             await thread.ModifyAsync(thread =>
                             {
                                 thread.IsArchived = true;
                                 thread.Locked = true;
                             });
+                            await Task.Delay(30000);
+                            await LogChannelHelper.LogMessageAsync("messages",
+                                new DiscordMessageBuilder()
+                                    .WithContent($"{Program.cfgjson.Emoji.Deleted} Deleted non-feedback post from {message.Author.Mention} in {message.Channel.Parent.Mention}:")
+                                    .WithEmbed(new DiscordEmbedBuilder()
+                                        .WithAuthor(
+                                            $"{message.Author.Username}#{message.Author.Discriminator} in #{message.Channel.Parent.Name}",
+                                            null, await LykosAvatarMethods.UserOrMemberAvatarURL(message.Author, message.Channel.Guild))
+                                        .WithTitle(thread.Name)
+                                        .WithDescription(message.Content)
+                                        .WithColor(DiscordColor.Red)
+                                    )
+
+                                );
+                            await thread.DeleteAsync();
+                            return;
                         } else
                         {
                             await Task.Delay(2000);
