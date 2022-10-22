@@ -42,7 +42,7 @@ namespace Cliptok.Commands.InteractionCommands
             }
 
             TimeSpan banDuration;
-            if (time == null)
+            if (time is null)
                 banDuration = default;
             else
             {
@@ -69,7 +69,7 @@ namespace Cliptok.Commands.InteractionCommands
                 member = null;
             }
 
-            if (member == null)
+            if (member is null)
             {
                 await BanHelpers.BanFromServerAsync(user.Id, reason, ctx.User.Id, ctx.Guild, messageDeleteDays, ctx.Channel, banDuration, appealable);
             }

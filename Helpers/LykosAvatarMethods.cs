@@ -7,7 +7,7 @@
         public static string MemberAvatarURL(DiscordMember member, string format = "default", int size = 4096)
         {
             string hash;
-            if (member.GuildAvatarHash == null && member.AvatarHash == null)
+            if (member.GuildAvatarHash is null && member.AvatarHash is null)
                 return member.DefaultAvatarUrl;
             else if (member.GuildAvatarHash != null)
                 hash = member.GuildAvatarHash;
@@ -51,7 +51,7 @@
             {
                 string hash = user.AvatarHash;
 
-                if (hash == null)
+                if (hash is null)
                     return user.DefaultAvatarUrl;
 
                 if (format == "default" || format == "png or gif")

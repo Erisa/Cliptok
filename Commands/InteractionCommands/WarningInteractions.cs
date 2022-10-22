@@ -38,10 +38,10 @@ namespace Cliptok.Commands.InteractionCommands
                 // do nothing :/
             }
 
-            if (channel == null)
+            if (channel is null)
                 channel = ctx.Channel;
 
-            if (channel == null)
+            if (channel is null)
                 channel = await ctx.Client.GetChannelAsync(ctx.Interaction.ChannelId);
 
             var messageBuild = new DiscordMessageBuilder()
@@ -183,7 +183,7 @@ namespace Cliptok.Commands.InteractionCommands
 
             UserWarning warningObject = GetWarning(user.Id, warnId);
 
-            if (warningObject == null)
+            if (warningObject is null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.", ephemeral: true);
             else
                 await ctx.RespondAsync(null, await FancyWarnEmbedAsync(warningObject, true, userID: user.Id), ephemeral: !publicWarnings);
@@ -208,7 +208,7 @@ namespace Cliptok.Commands.InteractionCommands
             }
 
             UserWarning warning = GetWarning(targetUser.Id, warnId);
-            if (warning == null)
+            if (warning is null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
             {
@@ -261,7 +261,7 @@ namespace Cliptok.Commands.InteractionCommands
             }
 
             var warningObject = GetWarning(user.Id, warnId);
-            if (warningObject == null)
+            if (warningObject is null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && warningObject.ModUserId != ctx.User.Id && warningObject.ModUserId != ctx.Client.CurrentUser.Id)
             {

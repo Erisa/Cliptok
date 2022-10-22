@@ -28,7 +28,7 @@
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task ListUpdate(CommandContext ctx)
         {
-            if (Program.cfgjson.GitListDirectory == null || Program.cfgjson.GitListDirectory == "")
+            if (Program.cfgjson.GitListDirectory is null || Program.cfgjson.GitListDirectory == "")
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Private lists directory is not configured in bot config.");
                 return;
@@ -62,7 +62,7 @@
             [RemainingText, Description("The text to add the list. Can be in a codeblock and across multiple line.")] string content
         )
         {
-            if (Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == null)
+            if (Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") is null)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} `CLIPTOK_GITHUB_TOKEN` was not set, so GitHub API commands cannot be used.");
                 return;

@@ -35,7 +35,7 @@ namespace Cliptok.Commands
             var reply = ctx.Message.ReferencedMessage;
 
             await ctx.Message.DeleteAsync();
-            if (reason == null)
+            if (reason is null)
             {
                 await ctx.Member.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} Reason must be included for the warning command to work.");
                 return;
@@ -80,7 +80,7 @@ namespace Cliptok.Commands
             }
 
             await ctx.Message.DeleteAsync();
-            if (reason == null)
+            if (reason is null)
             {
                 await ctx.Member.SendMessageAsync($"{Program.cfgjson.Emoji.Warning} Reason must be included for the warning command to work.");
                 return;
@@ -101,7 +101,7 @@ namespace Cliptok.Commands
             [Description("The user you want to look up warnings for. Accepts many formats.")] DiscordUser targetUser = null
         )
         {
-            if (targetUser == null)
+            if (targetUser is null)
                 targetUser = ctx.User;
 
             await ctx.RespondAsync(null, await GenerateWarningsEmbedAsync(targetUser));
@@ -120,7 +120,7 @@ namespace Cliptok.Commands
         )
         {
             UserWarning warning = GetWarning(targetUser.Id, warnId);
-            if (warning == null)
+            if (warning is null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
             {
@@ -161,7 +161,7 @@ namespace Cliptok.Commands
         )
         {
             UserWarning warning = GetWarning(targetUser.Id, warnId);
-            if (warning == null)
+            if (warning is null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else
                 await ctx.RespondAsync(null, await FancyWarnEmbedAsync(warning, userID: targetUser.Id));
@@ -182,7 +182,7 @@ namespace Cliptok.Commands
         {
             UserWarning warning = GetWarning(targetUser.Id, warnId);
 
-            if (warning == null)
+            if (warning is null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else
                 await ctx.RespondAsync(null, await FancyWarnEmbedAsync(warning, true, userID: targetUser.Id));
@@ -211,7 +211,7 @@ namespace Cliptok.Commands
 
             var msg = await ctx.RespondAsync("Processing your request...");
             var warning = GetWarning(targetUser.Id, warnId);
-            if (warning == null)
+            if (warning is null)
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
             {

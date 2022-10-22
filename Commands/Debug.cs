@@ -30,7 +30,7 @@
                 if (targetUser == default)
                 {
                     var muteList = Program.db.HashGetAll("mutes").ToDictionary();
-                    if (muteList == null | muteList.Keys.Count == 0)
+                    if (muteList is null | muteList.Keys.Count == 0)
                     {
                         await ctx.RespondAsync("No mutes found in database!");
                         return;
@@ -85,7 +85,7 @@
                 if (targetUser == default)
                 {
                     var banList = Program.db.HashGetAll("bans").ToDictionary();
-                    if (banList == null | banList.Keys.Count == 0)
+                    if (banList is null | banList.Keys.Count == 0)
                     {
                         await ctx.RespondAsync("No mutes found in database!");
                         return;

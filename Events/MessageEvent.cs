@@ -44,7 +44,7 @@ namespace Cliptok.Events
                 if (message.Timestamp.Year < (DateTime.Now.Year - 2))
                     return;
 
-                if (message.Author == null || message.Author.Id == client.CurrentUser.Id)
+                if (message.Author is null || message.Author.Id == client.CurrentUser.Id)
                     return;
 
                 if (!isAnEdit && channel.IsPrivate && Program.cfgjson.LogChannels.ContainsKey("dms"))
@@ -402,7 +402,7 @@ namespace Cliptok.Events
                             embed.AddField("Current message", messageContent);
                             if (message.Attachments.Count != 0)
                             {
-                                if (embed.ImageUrl == null)
+                                if (embed.ImageUrl is null)
                                     embed.WithImageUrl(message.Attachments[0].Url);
                                 else
                                     embed.ImageUrl = message.Attachments[0].Url;
@@ -531,7 +531,7 @@ namespace Cliptok.Events
                 {
                     var captures = bold_rx.Match(message.Content).Groups[1].Captures;
 
-                    if (captures == null || captures.Count == 0 || (!message.Content.Contains("aka.ms/") && !message.Content.Contains("feedback-hub:")))
+                    if (captures is null || captures.Count == 0 || (!message.Content.Contains("aka.ms/") && !message.Content.Contains("feedback-hub:")))
                     {
                         if (GetPermLevel(member) >= ServerPermLevel.TrialModerator)
                         {
