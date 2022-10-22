@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
-
-namespace Cliptok.Constants
+﻿namespace Cliptok.Constants
 {
     internal class VcRedistConstants
     {
@@ -17,7 +7,7 @@ namespace Cliptok.Constants
             new(
                 2015,
                 140,
-                new Dictionary<RedistArch, string>
+                new()
                 {
                     { RedistArch.X64, "https://aka.ms/vs/17/release/vc_redist.x64.exe" },
                     { RedistArch.X86, "https://aka.ms/vs/17/release/vc_redist.x86.exe" },
