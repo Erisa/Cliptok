@@ -100,6 +100,32 @@ namespace Cliptok.Events
             }
             e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of interaction command {command} by {user}", e.Context.CommandName, $"{e.Context.User.Username}#{e.Context.User.Discriminator}");
         }
+        public static async Task ContextCommandErrorEvent(SlashCommandsExtension _, DSharpPlus.SlashCommands.EventArgs.ContextMenuErrorEventArgs e)
+        {
+            if (e.Exception is SlashExecutionChecksFailedException slex)
+            {
+                foreach (var check in slex.FailedChecks)
+                    if (check is SlashRequireHomeserverPermAttribute att && e.Context.CommandName != "edit")
+                    {
+                        var level = GetPermLevel(e.Context.Member);
+                        var levelText = level.ToString();
+                        if (level == ServerPermLevel.Nothing && rand.Next(1, 100) == 69)
+                            levelText = $"naught but a thing, my dear human. Congratulations, you win {rand.Next(1, 10)} bonus points.";
+
+                        await e.Context.CreateResponseAsync(
+                            InteractionResponseType.ChannelMessageWithSource,
+                            new DiscordInteractionResponseBuilder().WithContent(
+                                $"{cfgjson.Emoji.NoPermissions} Invalid permission level to use command **{e.Context.CommandName}**!\n" +
+                                $"Required: `{att.TargetLvl}`\n" +
+                                $"You have: `{levelText}`")
+                                .AsEphemeral(true)
+                            );
+                    }
+            }
+            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of context command {command} by {user}", e.Context.CommandName, $"{e.Context.User.Username}#{e.Context.User.Discriminator}");
+        }
+
+
 
     }
 }

@@ -128,6 +128,7 @@ namespace Cliptok
 
             var slash = discord.UseSlashCommands();
             slash.SlashCommandErrored += InteractionEvents.SlashCommandErrorEvent;
+            slash.ContextMenuErrored += InteractionEvents.ContextCommandErrorEvent;
             var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands" && !t.IsNested);
             foreach (var type in slashCommandClasses)
                 slash.RegisterCommands(type, cfgjson.ServerID); ;
