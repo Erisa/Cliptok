@@ -7,7 +7,7 @@
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
         }
 
-        public static async Task RespondAsync(this BaseContext ctx, string text = null, DiscordEmbed embed = null, bool ephemeral = false, params DiscordComponent[] components)
+        public static async Task RespondAsync(this BaseContext ctx, string text = null, DiscordEmbed embed = null, bool ephemeral = false, bool mentions = true, params DiscordComponent[] components)
         {
             DiscordInteractionResponseBuilder response = new();
 
@@ -16,8 +16,7 @@
             if (components.Length != 0) response.AddComponents(components);
 
             response.AsEphemeral(ephemeral);
-
-            response.AddMentions(Mentions.All);
+            response.AddMentions(mentions ? Mentions.All : Mentions.None);
 
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, response);
         }

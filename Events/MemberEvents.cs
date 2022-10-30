@@ -193,6 +193,16 @@ namespace Cliptok.Events
                     db.HashDeleteAsync("mutes", e.Member.Id);
 
                 DehoistHelpers.CheckAndDehoistMemberAsync(e.Member);
+
+                // Persist permadehoists
+                if (await db.SetContainsAsync("permadehoists", e.Member.Id))
+                    if (e.Member.DisplayName[0] != DehoistHelpers.dehoistCharacter)
+                        // Member is in permadehoist list. Dehoist.
+                        e.Member.ModifyAsync(a =>
+                        {
+                            a.Nickname = DehoistHelpers.DehoistName(e.Member.DisplayName);
+                            a.AuditLogReason = "[Automatic dehoist; user is permadehoisted]";
+                        });
             }
             );
         }

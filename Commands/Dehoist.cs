@@ -24,6 +24,7 @@
                     await discordMembers[0].ModifyAsync(a =>
                     {
                         a.Nickname = DehoistHelpers.DehoistName(discordMembers[0].DisplayName);
+                        a.AuditLogReason = $"[Dehoist by {ctx.User.Username}#{ctx.User.Discriminator}]";
                     });
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {discordMembers[0].Mention}!");
                 }
@@ -51,6 +52,7 @@
                         await discordMember.ModifyAsync(a =>
                         {
                             a.Nickname = DehoistHelpers.DehoistName(origName);
+                            a.AuditLogReason = $"[Dehoist by {ctx.User.Username}#{ctx.User.Discriminator}]";
                         });
                     }
                     catch
@@ -74,7 +76,7 @@
 
             foreach (DiscordMember discordMember in discordMembers)
             {
-                bool success = await DehoistHelpers.CheckAndDehoistMemberAsync(discordMember);
+                bool success = await DehoistHelpers.CheckAndDehoistMemberAsync(discordMember, ctx.User, true);
                 if (!success)
                     failedCount++;
             }
@@ -120,12 +122,13 @@
                         continue;
                     }
 
-                    if (member.Nickname != null && member.Nickname[0] == DehoistHelpers.dehoistCharacter)
+                    if (member.DisplayName[0] == DehoistHelpers.dehoistCharacter)
                     {
                         var newNickname = member.Nickname[1..];
                         await member.ModifyAsync(a =>
                         {
                             a.Nickname = newNickname;
+                            a.AuditLogReason = $"[Mass undehoist by {ctx.User.Username}#{ctx.User.Discriminator}]";
                         }
                         );
                     }
@@ -137,6 +140,189 @@
 
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully undehoisted {list.Length - failedCount} of {list.Length} member(s)! (Check Audit Log for details)");
 
+            }
+        }
+
+        [Group("permadehoist")]
+        [Description("Permanently/persistently dehoist members.")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        public class Permadehoist : BaseCommandModule
+        {
+            // Toggle
+            [GroupCommand]
+            public async Task PermadehoistToggleCmd(CommandContext ctx, [Description("The member(s) to permadehoist.")] params DiscordUser[] discordUsers)
+            {
+                if (discordUsers.Length == 0)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} You need to tell me who to permadehoist!");
+                    return;
+                }
+
+                if (discordUsers.Length == 1)
+                {
+                    // Toggle permadehoist for single member
+
+                    var (success, _, isDehoist) = await DehoistHelpers.TogglePermadehoist(discordUsers[0], ctx.User, ctx.Guild);
+
+                    if (success)
+                    {
+                        if (isDehoist)
+                        {
+                            await ctx.RespondAsync(new DiscordMessageBuilder()
+                                .WithContent($"{Program.cfgjson.Emoji.On} Successfully permadehoisted {discordUsers[0].Mention}!")
+                                .WithAllowedMentions(Mentions.None));
+                        }
+                        else
+                        {
+                            await ctx.RespondAsync(new DiscordMessageBuilder()
+                                .WithContent($"{Program.cfgjson.Emoji.Off} Successfully removed the permadehoist for {discordUsers[0].Mention}!")
+                                .WithAllowedMentions(Mentions.None));
+                        }
+                    }
+                    else
+                    {
+                        if (isDehoist)
+                        {
+                            await ctx.RespondAsync(new DiscordMessageBuilder()
+                                .WithContent($"{Program.cfgjson.Emoji.Error} Failed to permadehoist {discordUsers[0].Mention}!")
+                                .WithAllowedMentions(Mentions.None));
+                        }
+                        else
+                        {
+                            await ctx.RespondAsync(new DiscordMessageBuilder()
+                                .WithContent($"{Program.cfgjson.Emoji.Error} Failed to remove the permadehoist for {discordUsers[0].Mention}!")
+                                .WithAllowedMentions(Mentions.None));
+                        }
+                    }
+
+                    return;
+                }
+
+                // Toggle permadehoist for multiple members
+
+                var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
+                int failedCount = 0;
+
+                foreach (var discordUser in discordUsers)
+                {
+                    var (success, _, _) = await DehoistHelpers.TogglePermadehoist(discordUser, ctx.User, ctx.Guild);
+
+                    if (!success)
+                        failedCount++;
+                }
+                _ = await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully toggled permadehoist for {discordUsers.Length - failedCount} of {discordUsers.Length} member(s)! (Check Audit Log for details)");
+            }
+
+            [Command("enable")]
+            [Description("Permanently dehoist a member (or members). They will be automatically dehoisted until disabled.")]
+            public async Task PermadehoistEnableCmd(CommandContext ctx, [Description("The member(s) to permadehoist.")] params DiscordUser[] discordUsers)
+            {
+                if (discordUsers.Length == 0)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} You need to tell me who to permadehoist!");
+                    return;
+                }
+
+                if (discordUsers.Length == 1)
+                {
+                    // Permadehoist single member
+
+                    var (success, isPermissionError) = await DehoistHelpers.PermadehoistMember(discordUsers[0], ctx.User, ctx.Guild);
+
+                    if (success)
+                        await ctx.RespondAsync(new DiscordMessageBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.On} Successfully permadehoisted {discordUsers[0].Mention}!")
+                            .WithAllowedMentions(Mentions.None));
+
+                    if (!success & !isPermissionError)
+                        await ctx.RespondAsync(new DiscordMessageBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.Error} {discordUsers[0].Mention} is already permadehoisted!")
+                            .WithAllowedMentions(Mentions.None));
+
+                    if (!success && isPermissionError)
+                        await ctx.RespondAsync(new DiscordMessageBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.Error} Failed to permadehoist {discordUsers[0].Mention}!")
+                            .WithAllowedMentions(Mentions.None));
+
+                    return;
+                }
+
+                // Permadehoist multiple members
+
+                var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
+                int failedCount = 0;
+
+                foreach (var discordUser in discordUsers)
+                {
+                    var (success, _) = await DehoistHelpers.PermadehoistMember(discordUser, ctx.User, ctx.Guild);
+
+                    if (!success)
+                        failedCount++;
+                }
+                _ = await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully permadehoisted {discordUsers.Length - failedCount} of {discordUsers.Length} member(s)! (Check Audit Log for details)");
+            }
+
+            [Command("disable")]
+            [Description("Disable permadehoist for a member (or members).")]
+            public async Task PermadehoistDisableCmd(CommandContext ctx, [Description("The member(s) to remove the permadehoist for.")] params DiscordUser[] discordUsers)
+            {
+                if (discordUsers.Length == 0)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} You need to tell me who to un-permadehoist!");
+                    return;
+                }
+
+                if (discordUsers.Length == 1)
+                {
+                    // Un-permadehoist single member
+
+                    var (success, isPermissionError) = await DehoistHelpers.UnpermadehoistMember(discordUsers[0], ctx.User, ctx.Guild);
+
+                    if (success)
+                        await ctx.RespondAsync(new DiscordMessageBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.Off} Successfully removed the permadehoist for {discordUsers[0].Mention}!")
+                            .WithAllowedMentions(Mentions.None));
+
+                    if (!success & !isPermissionError)
+                        await ctx.RespondAsync(new DiscordMessageBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.Error} {discordUsers[0].Mention} isn't permadehoisted!")
+                            .WithAllowedMentions(Mentions.None));
+
+                    if (!success && isPermissionError)
+                        await ctx.RespondAsync(new DiscordMessageBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.Error} Failed to remove the permadehoist for {discordUsers[0].Mention}!")
+                            .WithAllowedMentions(Mentions.None));
+
+                    return;
+                }
+
+                // Un-permadehoist multiple members
+
+                var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
+                int failedCount = 0;
+
+                foreach (var discordUser in discordUsers)
+                {
+                    var (success, _) = await DehoistHelpers.UnpermadehoistMember(discordUser, ctx.User, ctx.Guild);
+
+                    if (!success)
+                        failedCount++;
+                }
+                _ = await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully removed the permadehoist for {discordUsers.Length - failedCount} of {discordUsers.Length} member(s)! (Check Audit Log for details)");
+            }
+
+            [Command("status")]
+            [Description("Check the status of permadehoist for a member.")]
+            public async Task PermadehoistStatus(CommandContext ctx, [Description("The member whose permadehoist status to check.")] DiscordUser discordUser)
+            {
+                if (await Program.db.SetContainsAsync("permadehoists", discordUser.Id))
+                    await ctx.RespondAsync(new DiscordMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.On} {discordUser.Mention} is permadehoisted.")
+                        .WithAllowedMentions(Mentions.None));
+                else
+                    await ctx.RespondAsync(new DiscordMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Off} {discordUser.Mention} is not permadehoisted.")
+                        .WithAllowedMentions(Mentions.None));
             }
         }
     }
