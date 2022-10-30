@@ -101,10 +101,10 @@ If you have a change to make that follows the contribution guidelines, send a Pu
 
 ### 🖥️ Developer
 - [Erisa](https://github.com/Erisa)
+- [FloatingMilkshake](https://github.com/FloatingMilkshake)
 
 ### ⚙️ Code contributors
 - [TorchGM](https://github.com/TorchGM)
-- [FloatingMilkshake](https://github.com/FloatingMilkshake)
 
 ### 💗 Significant sponsors
 - [FloatingMilkshake](https://github.com/FloatingMilkshake)
