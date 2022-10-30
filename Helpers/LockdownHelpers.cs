@@ -184,7 +184,11 @@
             else
             {
                 if (!isMassUnlock)
+                {
+                    // this is just going to loop forever if we don't remove the entry 
+                    await Program.db.HashDeleteAsync("unlocks", discordChannel.Id);
                     await discordChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} This channel is not locked, or unlock failed.");
+                }
             }
             return success;
         }
