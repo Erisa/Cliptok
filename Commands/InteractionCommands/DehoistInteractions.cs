@@ -3,7 +3,7 @@
     internal class DehoistInteractions : ApplicationCommandModule
     {
         [SlashCommandGroup("permadehoist", "Permanently/persistently dehoist members.", defaultPermission: false)]
-        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(Permissions.ManageNicknames)]
         public class PermadehoistSlashCommands
         {
             [SlashCommand("enable", "Permanently dehoist a member. They will be automatically dehoisted until disabled.")]
