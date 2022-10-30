@@ -99,7 +99,7 @@ If you have a change to make that follows the contribution guidelines, send a Pu
 
 ## Credits
 
-### 🖥️ Developer
+### 🖥️ Developers
 - [Erisa](https://github.com/Erisa)
 - [FloatingMilkshake](https://github.com/FloatingMilkshake)
 
