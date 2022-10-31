@@ -162,7 +162,7 @@
                 {
                     // Toggle permadehoist for single member
 
-                    var (success, _, isDehoist) = await DehoistHelpers.TogglePermadehoist(discordUsers[0], ctx.User, ctx.Guild);
+                    var (success, isPermissionError, isDehoist) = await DehoistHelpers.TogglePermadehoist(discordUsers[0], ctx.User, ctx.Guild);
 
                     if (success)
                     {
@@ -184,13 +184,13 @@
                         if (isDehoist)
                         {
                             await ctx.RespondAsync(new DiscordMessageBuilder()
-                                .WithContent($"{Program.cfgjson.Emoji.Error} Failed to permadehoist {discordUsers[0].Mention}!")
+                                .WithContent(isPermissionError ? $"{Program.cfgjson.Emoji.Error} Failed to permadehoist {discordUsers[0].Mention}! Do I have permission?" : $"{Program.cfgjson.Emoji.Error} Failed to permadehoist {discordUsers[0].Mention}!")
                                 .WithAllowedMentions(Mentions.None));
                         }
                         else
                         {
                             await ctx.RespondAsync(new DiscordMessageBuilder()
-                                .WithContent($"{Program.cfgjson.Emoji.Error} Failed to remove the permadehoist for {discordUsers[0].Mention}!")
+                                .WithContent(isPermissionError ? $"{Program.cfgjson.Emoji.Error} Failed to remove the permadehoist for {discordUsers[0].Mention}! Do I have permission?" : $"{Program.cfgjson.Emoji.Error} Failed to remove the permadehoist for {discordUsers[0].Mention}!")
                                 .WithAllowedMentions(Mentions.None));
                         }
                     }

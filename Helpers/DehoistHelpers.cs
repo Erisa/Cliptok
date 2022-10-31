@@ -49,39 +49,43 @@
             if (await Program.db.SetContainsAsync("permadehoists", discordUser.Id))
                 return (false, false);
 
-            // Add member ID to permadehoist list
-            await Program.db.SetAddAsync("permadehoists", discordUser.Id);
-
-            if (guild is not null)
+            DiscordMember discordMember;
+            try
             {
-                DiscordMember discordMember;
+                discordMember = await guild.GetMemberAsync(discordUser.Id);
+            }
+            catch
+            {
+                // Add member ID to permadehoist list
+                await Program.db.SetAddAsync("permadehoists", discordUser.Id);
+
+                return (true, false);
+            }
+
+            // If member is dehoisted already, but NOT permadehoisted, skip updating nickname.
+
+            if (discordMember.DisplayName[0] != dehoistCharacter)
+            {
+                // Dehoist member
                 try
                 {
-                    discordMember = await guild.GetMemberAsync(discordUser.Id);
+                    await discordMember.ModifyAsync(a =>
+                    {
+                        a.Nickname = DehoistName(discordMember.DisplayName);
+                        a.AuditLogReason =
+                            $"[Permadehoist by {responsibleMod.Username}#{responsibleMod.Discriminator}]";
+                    });
+                }
+                catch (DSharpPlus.Exceptions.UnauthorizedException)
+                {
+                    return (false, true);
                 }
                 catch
                 {
-                    return (true, false);
-                }
-
-                // If member is dehoisted already, but NOT permadehoisted, skip updating nickname.
-
-                if (discordMember.Nickname is null || discordMember.Nickname[0] != dehoistCharacter)
-                {
-                    // Dehoist member
-                    try
-                    {
-                        await discordMember.ModifyAsync(a =>
-                        {
-                            a.Nickname = DehoistName(discordMember.DisplayName);
-                            a.AuditLogReason =
-                                $"[Permadehoist by {responsibleMod.Username}#{responsibleMod.Discriminator}]";
-                        });
-                    }
-                    catch
-                    {
-                        return (false, true);
-                    }
+                    // Add member ID to permadehoist list
+                    await Program.db.SetAddAsync("permadehoists", discordUser.Id);
+                    
+                    return (false, false);
                 }
             }
 
