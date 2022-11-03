@@ -193,6 +193,8 @@ namespace Cliptok
                     discord.Logger.LogError(CliptokEventID, "An Error occurred during task runs: {message}", e.ToString());
                 }
 
+                loopCount += 1;
+
                 // after 180 cycles, roughly 30 minutes has passed
                 if (loopCount == 180)
                 {
