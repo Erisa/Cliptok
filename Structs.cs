@@ -272,6 +272,9 @@
 
         [JsonProperty("forumIntroPosts")]
         public List<ulong> ForumIntroPosts { get; private set; } = new();
+
+        [JsonProperty("grantableRoles")]
+        public Dictionary<string, ulong> GrantableRoles { get; private set; } = new();
     }
 
     public class LogChannelConfig
