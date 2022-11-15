@@ -25,24 +25,45 @@ namespace Cliptok.Commands.InteractionCommands
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {member.Mention} can now access the server!");
         }
 
-        [SlashCommand("role", "Opt into roles.")]
-        public async Task SlashRole(
-            InteractionContext ctx,
-            [Choice("Windows 11 Insiders (Dev)", "dev")]
-            [Choice("Windows 11 Insiders (Beta)", "beta")]
-            [Choice("Windows 11 Insiders (Release Preview)", "rp")]
-            [Choice("Windows 10 Insiders (Release Preview)", "rp10")]
-            [Choice("Patch Tuesday", "patch")]
-            [Option("type", "The role to grant.")] string role)
+        [HomeServer]
+        [SlashCommandGroup("roles", "Opt in/out of roles.")]
+        public class RoleSlashCommands
         {
-            DiscordMember member = ctx.Member;
+            [SlashCommand("grant", "Opt into a role.")]
+            public async Task GrantRole(
+                InteractionContext ctx,
+                [Choice("Windows 11 Insiders (Dev)", "dev")]
+                [Choice("Windows 11 Insiders (Beta)", "beta")]
+                [Choice("Windows 11 Insiders (Release Preview)", "rp")]
+                [Choice("Windows 10 Insiders (Release Preview)", "rp10")]
+                [Choice("Patch Tuesday", "patch")]
+                [Option("role", "The role to opt into.")] string role)
+            {
+                DiscordMember member = ctx.Member;
 
-            var roleData = Program.cfgjson.GrantableRoles.FirstOrDefault(pair => pair.Key == role);
+                var roleData = Program.cfgjson.GrantableRoles.FirstOrDefault(pair => pair.Key == role);
 
-            DiscordRole roleObj = ctx.Guild.GetRole(roleData.Value);
+                await member.GrantRoleAsync(ctx.Guild.GetRole(roleData.Value), $"/roles grant used by {ctx.User.Username}#{ctx.User.Discriminator}");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} The role <@&{roleData.Value}> has been successfully granted!", ephemeral: true, mentions: false);
+            }
 
-            await member.GrantRoleAsync(roleObj, $"/role used by {ctx.User.Username}#{ctx.User.Discriminator}");
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} The role <@&{roleData.Value}> has been successfully granted!", ephemeral: true, mentions: false);
+            [SlashCommand("remove", "Opt out of a role.")]
+            public async Task RemoveRole(
+                InteractionContext ctx,
+                [Choice("Windows 11 Insiders (Dev)", "dev")]
+                [Choice("Windows 11 Insiders (Beta)", "beta")]
+                [Choice("Windows 11 Insiders (Release Preview)", "rp")]
+                [Choice("Windows 10 Insiders (Release Preview)", "rp10")]
+                [Choice("Patch Tuesday", "patch")]
+                [Option("role", "The role to opt out of.")] string role)
+            {
+                DiscordMember member = ctx.Member;
+
+                var roleData = Program.cfgjson.GrantableRoles.FirstOrDefault(pair => pair.Key == role);
+
+                await member.RevokeRoleAsync(ctx.Guild.GetRole(roleData.Value), $"/roles remove used by {ctx.User.Username}#{ctx.User.Discriminator}");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} The role <@&{roleData.Value}> has been successfully removed!", ephemeral: true, mentions: false);
+            }
         }
     }
 }
