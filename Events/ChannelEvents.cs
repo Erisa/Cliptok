@@ -126,11 +126,45 @@
                 foreach (var overwrite in currentChannelOverwrites)
                     if (overwrite.Type != OverwriteType.Role)
                     {
-                        var overwriteDict = new Dictionary<ulong, DiscordOverwrite> { { e.ChannelAfter.Id, overwrite } };
-    
-                        if (overwriteDict.Count > 0)
-                            await Program.db.HashSetAsync("overrides", overwriteDict.First().Value.Id,
-                                JsonConvert.SerializeObject(overwriteDict));
+                        var allUserOverwrites = new Dictionary<ulong, Dictionary<ulong, DiscordOverwrite>>();
+                        // <user ID, <channel ID, overwrite>>
+
+                        foreach (var dbOverwriteHash in dbOverwrites)
+                        {
+                            var dbOverwrite =
+                                JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(
+                                    dbOverwriteHash.Value);
+
+                            if (dbOverwrite is null) continue;
+
+                            foreach (var item in dbOverwrite.Where(item => item.Value.Type == OverwriteType.Member))
+                            {
+                                if (!allUserOverwrites.ContainsKey(item.Value.Id) &&
+                                    item.Value.Type == OverwriteType.Member)
+                                {
+                                    allUserOverwrites.Add(item.Value.Id,
+                                        new Dictionary<ulong, DiscordOverwrite> { { item.Key, item.Value } });
+                                }
+                            }
+                        }
+                        
+                        foreach (var item in e.ChannelAfter.PermissionOverwrites)
+                        {
+                            if (item.Type != OverwriteType.Member) continue;
+                            
+                            var dict = new Dictionary<ulong, DiscordOverwrite> { { e.ChannelAfter.Id, item } };
+
+                            if (allUserOverwrites.ContainsKey(item.Id))
+                                allUserOverwrites[item.Id].Add(e.ChannelAfter.Id, item);
+                            else
+                                allUserOverwrites.Add(item.Id, dict);
+                        }
+
+                        foreach (var userOverwrites in allUserOverwrites)
+                        {
+                            await Program.db.HashSetAsync("overrides", userOverwrites.Value.First().Value.Id,
+                                JsonConvert.SerializeObject(userOverwrites.Value));
+                        }
                     }
             });
         }
