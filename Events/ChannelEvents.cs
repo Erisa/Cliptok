@@ -155,7 +155,10 @@
                             var dict = new Dictionary<ulong, DiscordOverwrite> { { e.ChannelAfter.Id, item } };
 
                             if (allUserOverwrites.ContainsKey(item.Id))
-                                allUserOverwrites[item.Id].Add(e.ChannelAfter.Id, item);
+                                if (allUserOverwrites[item.Id].ContainsKey(e.ChannelAfter.Id))
+                                    allUserOverwrites[item.Id][e.ChannelAfter.Id] = item;
+                                else
+                                    allUserOverwrites[item.Id].Add(e.ChannelAfter.Id, item);
                             else
                                 allUserOverwrites.Add(item.Id, dict);
                         }
