@@ -1,11 +1,8 @@
-﻿using DSharpPlus.Entities;
-using System;
-
-namespace Cliptok.Commands.InteractionCommands
+﻿namespace Cliptok.Commands.InteractionCommands
 {
     internal class DehoistInteractions : ApplicationCommandModule
     {
-        [SlashCommand("dehoist", "Dehoist a member, dropping them to the bottom of the list. Lasts until they change nickname.")]
+        [SlashCommand("dehoist", "Dehoist a member, dropping them to the bottom of the list. Lasts until they change nickname.", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.ManageNicknames)]
         public async Task DehoistSlashCmd(InteractionContext ctx, [Option("member", "The member to dehoist.")] DiscordUser user)
         {
