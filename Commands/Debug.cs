@@ -252,7 +252,7 @@
                     if (overwrites is null)
                     {
                         await ctx.RespondAsync(
-                            $"Something went wrong while trying to fetch the overrides for {user.Mention}!" +
+                            $"{Program.cfgjson.Emoji.Error} Something went wrong while trying to fetch the overrides for {user.Mention}!" +
                             " There are overrides in the database but I could not parse them. Check the database manually for details.");
                         return;
                     }
@@ -298,7 +298,7 @@
                             if (overwrites is null)
                             {
                                 await ctx.RespondAsync(
-                                    $"Something went wrong while trying to fetch the overrides for {overwrite.Id}!" +
+                                    $"{Program.cfgjson.Emoji.Error} Something went wrong while trying to fetch the overrides for {overwrite.Id}!" +
                                     " There are overrides in the database but I could not parse them. Check the database manually for details.");
                                 return;
                             }
@@ -314,7 +314,7 @@
                         }
                     }
                     
-                    await ctx.RespondAsync($"Overrides for {channel.Mention} imported successfully!");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Overrides for {channel.Mention} imported successfully!");
                 }
 
                 [Command("remove")]
@@ -341,7 +341,7 @@
                             JsonConvert.SerializeObject(overwriteDict));
                     }
                     
-                    await ctx.RespondAsync($"Overrides for {user.Mention} in {channel.Mention} removed successfully!");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Overrides for {user.Mention} in {channel.Mention} removed successfully!");
                 }
             }
         }
