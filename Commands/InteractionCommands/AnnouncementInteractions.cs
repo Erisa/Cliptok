@@ -28,12 +28,18 @@
             [Option("flavour_text", "Extra text appended on the end of the main line, replacing :WindowsInsider: or :Windows10:")] string flavourText = "",
             [Option("autothread_name", "If no thread is given, create a thread with this name.")] string autothreadName = "Build {0} ({1})",
 
-            [Option("lockdown", "Set 0 to not lock. Lock the channel for a certain period of time after announcing the build.")] string lockdownTime = "1h"
+            [Option("lockdown", "Set 0 to not lock. Lock the channel for a certain period of time after announcing the build.")] string lockdownTime = "auto"
         )
         {
+            if (ctx.Channel.Id != Program.cfgjson.InsiderCommandLockedToChannel)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command only works in <#{Program.cfgjson.InsiderCommandLockedToChannel}>!", ephemeral: true);
+                return;
+            }
+
             if (windowsVersion == 10 && insiderChannel1 != "RP")
             {
-                await ctx.RespondAsync(text: "Windows 10 only has a Release Preview Channel.", ephemeral: true);
+                await ctx.RespondAsync(text: $"{Program.cfgjson.Emoji.Error} Windows 10 only has a Release Preview Channel.", ephemeral: true);
                 return;
             }
 
@@ -99,6 +105,47 @@
                 insiderRole2 = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles[roleKey2]);
             }
 
+            string pingMsgString = $"{insiderRole1.Mention}{(insiderChannel2 != "" ? $" {insiderRole2.Mention}\n" : " - ")}Hi Insiders!\n\n" +
+                $"Windows {windowsVersion} Build **{buildNumber}** has just been released to {channelString}! {flavourText}\n\n" +
+                $"Check it out here: {blogLink}";
+
+            string noPingMsgString = $"{(windowsVersion == 11 ? Program.cfgjson.Emoji.Windows11 : Program.cfgjson.Emoji.Windows10)} Windows {windowsVersion} Build **{buildNumber}** has just been released to {channelString}! {flavourText}\n\n" +
+                $"Check it out here: <{blogLink}>";
+
+            DiscordMessage messageSent;
+            if (Program.cfgjson.InsiderAnnouncementChannel == 0)
+            {
+                if (threadChannel != default)
+                {
+                    pingMsgString += $"\n\nDiscuss it here: {threadChannel.Mention}";
+                }
+                else
+                    pingMsgString += "\n\nDiscuss it in the thread below:";
+
+                await insiderRole1.ModifyAsync(mentionable: true);
+                if (insiderChannel2 != "")
+                    await insiderRole2.ModifyAsync(mentionable: true);
+
+                await ctx.RespondAsync(pingMsgString);
+                messageSent = await ctx.GetOriginalResponseAsync();
+
+                await insiderRole1.ModifyAsync(mentionable: false);
+                if (insiderChannel2 != "")
+                    await insiderRole2.ModifyAsync(mentionable: false);
+            }
+            else
+            {
+                if (threadChannel != default)
+                {
+                    noPingMsgString += $"\n\nDiscuss it here: {threadChannel.Mention}";
+                }
+                else
+                    noPingMsgString += "\n\nDiscuss it in the thread below:";
+
+                await ctx.RespondAsync(noPingMsgString);
+                messageSent = await ctx.GetOriginalResponseAsync();
+            }
+
             if (threadChannel == default)
             {
                 string threadBrackets = insiderChannel1;
@@ -109,20 +156,35 @@
                     threadBrackets = "10 RP";
 
                 string threadName = string.Format(autothreadName, buildNumber, threadBrackets);
-                threadChannel = await ctx.Channel.CreateThreadAsync(threadName, AutoArchiveDuration.Week, ChannelType.PublicThread, "Creating thread for Insider build.");
-                var initialMsg = await threadChannel.SendMessageAsync(blogLink);
+                threadChannel = await messageSent.CreateThreadAsync(threadName, AutoArchiveDuration.Week, "Creating thread for Insider build.");
+
+                var initialMsg = await threadChannel.SendMessageAsync($"<{blogLink}>");
                 await initialMsg.PinAsync();
             }
 
-            await insiderRole1.ModifyAsync(mentionable: true);
-            if (insiderChannel2 != "")
-                await insiderRole2.ModifyAsync(mentionable: true);
+            if (Program.cfgjson.InsiderAnnouncementChannel != 0)
+            {
+                pingMsgString += $"\n\nDiscuss it here: {threadChannel.Mention}";
 
-            await ctx.RespondAsync($"{insiderRole1.Mention}{(insiderChannel2 != "" ? $" {insiderRole2.Mention}\n" : " - ")}Hi Insiders!\n\nWindows {windowsVersion} Build **{buildNumber}** has just been released to {channelString}! {flavourText}\n\nCheck it out here: {blogLink}\n\nDiscuss it here: {threadChannel.Mention}");
+                var announcementChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderAnnouncementChannel);
+                await insiderRole1.ModifyAsync(mentionable: true);
+                if (insiderChannel2 != "")
+                    await insiderRole2.ModifyAsync(mentionable: true);
 
-            await insiderRole1.ModifyAsync(mentionable: false);
-            if (insiderChannel2 != "")
-                await insiderRole2.ModifyAsync(mentionable: false);
+                await announcementChannel.SendMessageAsync(pingMsgString);
+
+                await insiderRole1.ModifyAsync(mentionable: false);
+                if (insiderChannel2 != "")
+                    await insiderRole2.ModifyAsync(mentionable: false);
+            }
+
+            if (lockdownTime == "auto")
+            {
+                if (Program.cfgjson.InsiderAnnouncementChannel == 0)
+                    lockdownTime = "1h";
+                else
+                    lockdownTime = "0";
+            }
 
             if (lockdownTime != "0")
             {
