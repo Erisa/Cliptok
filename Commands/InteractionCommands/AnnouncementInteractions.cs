@@ -171,11 +171,14 @@
                 if (insiderChannel2 != "")
                     await insiderRole2.ModifyAsync(mentionable: true);
 
-                await announcementChannel.SendMessageAsync(pingMsgString);
+                var msg = await announcementChannel.SendMessageAsync(pingMsgString);
 
                 await insiderRole1.ModifyAsync(mentionable: false);
                 if (insiderChannel2 != "")
                     await insiderRole2.ModifyAsync(mentionable: false);
+
+                if (announcementChannel.Type is ChannelType.News)
+                    await announcementChannel.CrosspostMessageAsync(msg);
             }
 
             if (lockdownTime == "auto")
