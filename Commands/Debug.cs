@@ -243,7 +243,7 @@
                     if (string.IsNullOrWhiteSpace(userOverrides))
                     {
                         await ctx.RespondAsync(
-                            new DiscordMessageBuilder().WithContent($"{user.Mention} doesn't have any overrides set!")
+                            new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} {user.Mention} doesn't have any overrides set!")
                                 .WithAllowedMentions(Mentions.None));
                         return;
                     }
@@ -260,7 +260,7 @@
                     if (overwrites.Count < 1)
                     {
                         await ctx.RespondAsync(
-                            new DiscordMessageBuilder().WithContent($"{user.Mention} doesn't have any overrides set!")
+                            new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} {user.Mention} doesn't have any overrides set!")
                                 .WithAllowedMentions(Mentions.None));
                         return;
                     }
