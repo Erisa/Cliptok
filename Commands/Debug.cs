@@ -257,6 +257,14 @@
                         return;
                     }
 
+                    if (overwrites.Count < 1)
+                    {
+                        await ctx.RespondAsync(
+                            new DiscordMessageBuilder().WithContent($"{user.Mention} doesn't have any overrides set!")
+                                .WithAllowedMentions(Mentions.None));
+                        return;
+                    }
+
                     var response = $"**Overrides for {user.Mention}:**\n\n";
                     foreach (var overwrite in overwrites)
                     {
