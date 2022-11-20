@@ -335,10 +335,13 @@
                                      overwrite.Value.Id == user.Id && overwrite.Key == channel.Id))
                         {
                             overwriteDict.Remove(overwrite.Key);
-                        }
 
-                        await Program.db.HashSetAsync("overrides", overwriteDict.First().Value.Id,
-                            JsonConvert.SerializeObject(overwriteDict));
+                            if (overwriteDict.Count > 0)
+                                await Program.db.HashSetAsync("overrides", user.Id,
+                                    JsonConvert.SerializeObject(overwriteDict));
+                            else
+                                await Program.db.HashDeleteAsync("overrides", user.Id);
+                        }
                     }
                     
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Overrides for {user.Mention} in {channel.Mention} removed successfully!");
