@@ -31,7 +31,7 @@
             [Option("lockdown", "Set 0 to not lock. Lock the channel for a certain period of time after announcing the build.")] string lockdownTime = "auto"
         )
         {
-            if (ctx.Channel.Id != Program.cfgjson.InsiderCommandLockedToChannel)
+            if (Program.cfgjson.InsiderCommandLockedToChannel != 0 && ctx.Channel.Id != Program.cfgjson.InsiderCommandLockedToChannel)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command only works in <#{Program.cfgjson.InsiderCommandLockedToChannel}>!", ephemeral: true);
                 return;
