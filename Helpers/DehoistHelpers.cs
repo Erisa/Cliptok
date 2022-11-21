@@ -84,7 +84,7 @@
                 {
                     // Add member ID to permadehoist list
                     await Program.db.SetAddAsync("permadehoists", discordUser.Id);
-                    
+
                     return (false, false);
                 }
             }

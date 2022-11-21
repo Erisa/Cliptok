@@ -561,7 +561,8 @@ namespace Cliptok.Events
                                 );
                             await thread.DeleteAsync();
                             return;
-                        } else
+                        }
+                        else
                         {
                             await Task.Delay(2000);
                             await message.ModifyEmbedSuppressionAsync(true);

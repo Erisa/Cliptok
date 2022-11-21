@@ -100,6 +100,7 @@ namespace Cliptok.Events
             }
             e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of interaction command {command} by {user}", e.Context.CommandName, $"{e.Context.User.Username}#{e.Context.User.Discriminator}");
         }
+        
         public static async Task ContextCommandErrorEvent(SlashCommandsExtension _, DSharpPlus.SlashCommands.EventArgs.ContextMenuErrorEventArgs e)
         {
             if (e.Exception is SlashExecutionChecksFailedException slex)
@@ -124,8 +125,6 @@ namespace Cliptok.Events
             }
             e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of context command {command} by {user}", e.Context.CommandName, $"{e.Context.User.Username}#{e.Context.User.Discriminator}");
         }
-
-
 
     }
 }
