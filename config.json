@@ -33,7 +33,8 @@
     "iphone",
     "directx",
     "winadmins",
-    "minecraft"
+    "minecraft",
+    "intel"
   ],
   "inviteIDExclusion": [
     150662382874525696,
@@ -58,7 +59,8 @@
     568863120609640463,
     675491639804035089,
     114211522384756737,
-    834949385535750214
+    834949385535750214,
+    554824368740630529
   ],
   "warningDaysThreshold": 30,
   "autoMuteThresholds": {
@@ -307,5 +309,6 @@
   "forumIntroPosts": [
     1007802643856510996,
     1033197019164061756
-  ]
+  ],
+  "insiderAnnouncementChannel": 1043898319883219004
 }
