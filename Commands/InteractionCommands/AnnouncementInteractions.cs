@@ -158,7 +158,7 @@
                 string threadName = string.Format(autothreadName, buildNumber, threadBrackets);
                 threadChannel = await messageSent.CreateThreadAsync(threadName, AutoArchiveDuration.Week, "Creating thread for Insider build.");
 
-                var initialMsg = await threadChannel.SendMessageAsync($"<{blogLink}>");
+                var initialMsg = await threadChannel.SendMessageAsync($"{blogLink}");
                 await initialMsg.PinAsync();
             }
 
