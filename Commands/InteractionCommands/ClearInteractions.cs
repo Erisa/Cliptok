@@ -186,12 +186,6 @@
             // Attachments only
             if (attachmentsOnly)
             {
-                if (linksOnly || stickersOnly)
-                {
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You can't use `images_only` with `links_only` or `stickers_only` at the same time! Pick one please.").AsEphemeral(true));
-                    return;
-                }
-
                 foreach (var message in messagesToClear.ToList())
                 {
                     if (message.Attachments.Count == 0)
@@ -204,12 +198,6 @@
             // Stickers only
             if (stickersOnly)
             {
-                if (linksOnly)
-                {
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You can't use `stickers_only` with `links_only` at the same time! Pick one please.").AsEphemeral(true));
-                    return;
-                }
-
                 foreach (var message in messagesToClear.ToList())
                 {
                     if (message.Stickers.Count == 0)
