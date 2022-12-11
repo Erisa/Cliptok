@@ -15,13 +15,14 @@
             [Option("bots_only", "Optionally filter the deletion to only bots.")] bool botsOnly = false,
             [Option("humans_only", "Optionally filter the deletion to only humans.")] bool humansOnly = false,
             [Option("attachments_only", "Optionally filter the deletion to only messages with attachments.")] bool attachmentsOnly = false,
+            [Option("stickers_only", "Optionally filter the deletion to only messages with stickers.")] bool stickersOnly = false,
             [Option("links_only", "Optionally filter the deletion to only messages containing links.")] bool linksOnly = false
         )
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
             // If all args are unset
-            if (count == 0 && upTo == "" && user == default && ignoreMods == false && match == "" && botsOnly == false && humansOnly == false && attachmentsOnly == false && linksOnly == false)
+            if (count == 0 && upTo == "" && user == default && ignoreMods == false && match == "" && botsOnly == false && humansOnly == false && attachmentsOnly == false && stickersOnly == false && linksOnly == false)
             {
                 await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You must provide at least one argument! I need to know which messages to delete.").AsEphemeral(true));
                 return;
@@ -185,15 +186,33 @@
             // Attachments only
             if (attachmentsOnly)
             {
-                if (linksOnly)
+                if (linksOnly || stickersOnly)
                 {
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You can't use `images_only` and `links_only` together! Pick one or the other please.").AsEphemeral(true));
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You can't use `images_only` with `links_only` or `stickers_only` at the same time! Pick one please.").AsEphemeral(true));
                     return;
                 }
 
                 foreach (var message in messagesToClear.ToList())
                 {
                     if (message.Attachments.Count == 0)
+                    {
+                        messagesToClear.Remove(message);
+                    }
+                }
+            }
+            
+            // Stickers only
+            if (stickersOnly)
+            {
+                if (linksOnly)
+                {
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You can't use `stickers_only` with `links_only` at the same time! Pick one please.").AsEphemeral(true));
+                    return;
+                }
+
+                foreach (var message in messagesToClear.ToList())
+                {
+                    if (message.Stickers.Count == 0)
                     {
                         messagesToClear.Remove(message);
                     }
