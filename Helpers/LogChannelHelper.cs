@@ -103,11 +103,17 @@
             {
                 if (WebhookCache.ContainsKey(key))
                 {
-                    return await FireWebhookFromMessageAsync(WebhookCache[key], message, key);
+                    var builder = new DiscordWebhookBuilder(message);
+
+                    if (ChannelCache.ContainsKey(key) && ChannelCache[key].IsThread)
+                        builder.WithThreadId(ChannelCache[key].Id);
+
+                    var webhookResults = await WebhookCache[key].BroadcastMessageAsync(builder);
+                    return webhookResults.FirstOrDefault().Value;
                 }
                 else if (ChannelCache.ContainsKey(key))
                 {
-                    return await ChannelCache[key].SendMessageAsync(message);
+                    return await ChannelCache[key].SendMessageAsync((DiscordMessageBuilder)message);
                 }
                 else
                 {
@@ -136,38 +142,6 @@
             }
 
             return await LogMessageAsync(key, msg);
-        }
-
-        internal static async Task<DiscordMessage> FireWebhookFromMessageAsync(DiscordWebhookClient webhook, DiscordMessageBuilder message, string key)
-        {
-            var webhookBuilder = new DiscordWebhookBuilder()
-                .AddComponents(message.Components)
-                .WithAvatarUrl(Program.discord.CurrentUser.GetAvatarUrl(ImageFormat.Png, 1024))
-                .WithUsername(Program.discord.CurrentUser.Username);
-
-            if (message.Content is not null)
-                webhookBuilder.WithContent(message.Content);
-
-            if (message.Embeds.Count > 0)
-                webhookBuilder.AddEmbeds(message.Embeds);
-
-            if (message.Mentions is not null)
-                webhookBuilder.AddMentions(message.Mentions);
-
-            if (message.Files.Count > 0)
-            {
-                foreach (var file in message.Files)
-                {
-                    webhookBuilder.AddFile(file.FileName, file.Stream);
-                }
-            }
-
-            if (ChannelCache.ContainsKey(key) && ChannelCache[key].IsThread)
-                webhookBuilder.WithThreadId(ChannelCache[key].Id);
-
-            var webhookResults = await webhook.BroadcastMessageAsync(webhookBuilder);
-
-            return webhookResults.FirstOrDefault().Value;
         }
 
     }
