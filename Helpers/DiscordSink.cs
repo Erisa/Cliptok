@@ -46,7 +46,7 @@ namespace Cliptok
                     else
                     {
                         var stream = new MemoryStream(Encoding.UTF8.GetBytes(dummyWriter.ToString()));
-                        LogChannelHelper.LogMessageAsync("errors", new DiscordMessageBuilder().WithFile("error.txt", stream));
+                        LogChannelHelper.LogMessageAsync("errors", new DiscordMessageBuilder().AddFile("error.txt", stream));
                     }
                 }
                 catch

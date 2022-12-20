@@ -126,7 +126,7 @@
             string messageLog = await DiscordHelpers.CompileMessagesAsync(messages.AsEnumerable().Reverse().ToList(), channel);
 
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(messageLog));
-            var msg = new DiscordMessageBuilder().WithContent(content).WithFile("messages.txt", stream);
+            var msg = new DiscordMessageBuilder().WithContent(content).AddFile("messages.txt", stream);
 
             var hasteResult = await Program.hasteUploader.Post(messageLog);
 
