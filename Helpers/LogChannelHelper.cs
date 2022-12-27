@@ -103,7 +103,9 @@
             {
                 if (WebhookCache.ContainsKey(key))
                 {
-                    var builder = new DiscordWebhookBuilder(message);
+                    var builder = new DiscordWebhookBuilder(message)
+                        .WithAvatarUrl(Program.discord.CurrentUser.GetAvatarUrl(ImageFormat.Png, 1024))
+                        .WithUsername(Program.discord.CurrentUser.Username);
 
                     if (ChannelCache.ContainsKey(key) && ChannelCache[key].IsThread)
                         builder.WithThreadId(ChannelCache[key].Id);
