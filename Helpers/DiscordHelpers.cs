@@ -18,7 +18,7 @@
 
         public static string MessageLink(DiscordMessage msg)
         {
-            return $"https://discord.com/channels/{msg.Channel.Guild.Id}/{msg.Channel.Id}/{msg.Id}";
+            return $"https://discord.com/channels/{(msg.Channel.IsPrivate ? "@me" : msg.Channel.Guild.Id)}/{msg.Channel.Id}/{msg.Id}";
         }
 
         // If invoker is allowed to mod target.
@@ -195,7 +195,7 @@
             if (message.ReferencedMessage != null)
             {
                 embed.WithTitle($"Replying to {message.ReferencedMessage.Author.Username}")
-                    .WithUrl($"https://discord.com/channels/{message.Channel.Guild.Id}/{message.Channel.Id}/{message.ReferencedMessage.Id}");
+                    .WithUrl(MessageLink(message));
             }
 
             List<DiscordEmbed> embeds = new()
