@@ -192,7 +192,7 @@
                 embed.AddField("Message Link", $"[`Jump to message`]({message.JumpLink})");
 
 
-            if (message.ReferencedMessage != null)
+            if (message.ReferencedMessage is not null)
             {
                 embed.WithTitle($"Replying to {message.ReferencedMessage.Author.Username}")
                     .WithUrl(MessageLink(message.ReferencedMessage));

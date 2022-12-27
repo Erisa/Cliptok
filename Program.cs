@@ -90,17 +90,17 @@ namespace Cliptok
 
             avatars = File.ReadAllLines("Lists/avatars.txt");
 
-            if (Environment.GetEnvironmentVariable("CLIPTOK_TOKEN") != null)
+            if (Environment.GetEnvironmentVariable("CLIPTOK_TOKEN") is not null)
                 token = Environment.GetEnvironmentVariable("CLIPTOK_TOKEN");
             else
                 token = cfgjson.Core.Token;
 
-            if (Environment.GetEnvironmentVariable("REDIS_URL") != null)
+            if (Environment.GetEnvironmentVariable("REDIS_URL") is not null)
                 redis = ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("REDIS_URL"));
             else
             {
                 string redisHost;
-                if (Environment.GetEnvironmentVariable("REDIS_DOCKER_OVERRIDE") != null)
+                if (Environment.GetEnvironmentVariable("REDIS_DOCKER_OVERRIDE") is not null)
                     redisHost = "redis";
                 else
                     redisHost = cfgjson.Redis.Host;

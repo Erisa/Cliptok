@@ -388,7 +388,7 @@ namespace Cliptok.Events
                             var lastMsgs = await message.Channel.GetMessagesBeforeAsync(message.Id, 50);
                             var msgMatch = lastMsgs.FirstOrDefault(m => m.Author.Id == message.Author.Id);
 
-                            if (msgMatch != null)
+                            if (msgMatch is not null)
                             {
                                 var matchContent = StringHelpers.Truncate(string.IsNullOrWhiteSpace(msgMatch.Content) ? "`[No content]`" : msgMatch.Content, 1020, true);
                                 embed.AddField("Previous message", matchContent);
@@ -416,7 +416,7 @@ namespace Cliptok.Events
 
                     // phishing API
                     var urlMatches = url_rx.Matches(message.Content);
-                    if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
+                    if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") is not null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
                     {
                         var (phishingMatch, httpStatus, responseText, phishingResponse) = await APIs.PhishingAPI.PhishingAPICheckAsync(message.Content);
 
@@ -617,7 +617,7 @@ namespace Cliptok.Events
                         if (success)
                         {
                             DiscordChannel logChannel = default;
-                            if (listItem.ChannelId != null)
+                            if (listItem.ChannelId is not null)
                             {
                                 logChannel = await Program.discord.GetChannelAsync((ulong)listItem.ChannelId);
                             }

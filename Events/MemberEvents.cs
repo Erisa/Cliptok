@@ -55,7 +55,7 @@ namespace Cliptok.Events
                     DiscordRole mutedRole = e.Guild.GetRole(cfgjson.MutedRole);
                     await e.Member.GrantRoleAsync(mutedRole, "Reapplying mute on join: possible mute evasion.");
                 }
-                else if (e.Member.CommunicationDisabledUntil != null)
+                else if (e.Member.CommunicationDisabledUntil is not null)
                 {
                     await e.Member.TimeoutAsync(null, "Removing timeout since member was presumably unmuted while left");
                 }

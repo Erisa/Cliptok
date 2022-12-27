@@ -28,7 +28,7 @@
                 { "username", config.UsernameAPILogChannel}
             };
 
-            if (config.LogChannels != null)
+            if (config.LogChannels is not null)
             {
                 foreach (KeyValuePair<string, LogChannelConfig> logChannel in config.LogChannels)
                 {

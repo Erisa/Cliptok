@@ -21,10 +21,10 @@
                 await LykosAvatarMethods.UserOrMemberAvatarURL(infringingMessage.Author, infringingMessage.Channel.Guild, "png")
             );
 
-            if (reason != null && reason != "")
+            if (reason is not null && reason != "")
                 embed.AddField("Reason", reason, true);
 
-            if (messageURL != null)
+            if (messageURL is not null)
                 embed.AddField("Message link", $"[`{jumpText}`]({messageURL})", true);
 
             if (extraField != default)

@@ -21,7 +21,7 @@
                     targetMember.DisplayName[0] != dehoistCharacter
                     && (
                         Program.cfgjson.AutoDehoistCharacters.Contains(targetMember.DisplayName[0])
-                        || (targetMember.Nickname != null && targetMember.Nickname[0] != targetMember.Username[0] && Program.cfgjson.SecondaryAutoDehoistCharacters.Contains(targetMember.Nickname[0]))
+                        || (targetMember.Nickname is not null && targetMember.Nickname[0] != targetMember.Username[0] && Program.cfgjson.SecondaryAutoDehoistCharacters.Contains(targetMember.Nickname[0]))
                         )
                 ))
             {
