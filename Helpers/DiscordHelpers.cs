@@ -195,7 +195,7 @@
             if (message.ReferencedMessage != null)
             {
                 embed.WithTitle($"Replying to {message.ReferencedMessage.Author.Username}")
-                    .WithUrl(MessageLink(message));
+                    .WithUrl(MessageLink(message.ReferencedMessage));
             }
 
             List<DiscordEmbed> embeds = new()
