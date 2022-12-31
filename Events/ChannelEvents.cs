@@ -16,34 +16,49 @@
     
                 // Compare the two and sync them, prioritizing overwrites on channel over stored overwrites
 
-                foreach (var overwrite in dbOverwrites)
+                foreach (var userOverwrites in dbOverwrites)
                 {
-                    var overwriteObj = JsonConvert.DeserializeObject<DiscordOverwrite>(overwrite.Value);
+                    var overwriteDict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(userOverwrites.Value);
 
                     // If the db overwrites are not in the current channel overwrites, remove them from the db.
-                    
-                    // (if the current overwrite is in the channel, skip)
-                    if (currentChannelOverwrites.Any(a => a == overwriteObj)) continue;
-                    
-                    // If it looks like the member left, do NOT remove their overrides.
 
-                    // Delay to allow leave to complete first
-                    await Task.Delay(500);
-
-                    // Try to fetch member. If it fails, they are not in the guild.
-                    try
+                    foreach (var overwrite in overwriteDict)
                     {
-                        await e.Guild.GetMemberAsync((ulong)overwrite.Name);
-                    }
-                    catch
-                    {
-                        // Failed to fetch user. They probably left or were otherwise removed from the server.
-                        // Preserve overrides.
-                        return;
-                    }
+                        // (if overwrite is for a different channel, skip)
+                        if (overwrite.Key != e.ChannelAfter.Id) continue;
+                        
+                        // (if current overwrite is in the channel, skip)
+                        if (currentChannelOverwrites.Any(a => a == overwrite.Value && e.ChannelAfter.Id == overwrite.Key)) continue;
+                        
+                        // If it looks like the member left, do NOT remove their overrides.
 
-                    // User could be fetched, so they are in the server and their override was removed. Remove from db.
-                    await Program.db.HashDeleteAsync("overrides", overwrite.Name);
+                        // Delay to allow leave to complete first
+                        await Task.Delay(500);
+
+                        // Try to fetch member. If it fails, they are not in the guild.
+                        try
+                        {
+                            await e.Guild.GetMemberAsync((ulong)userOverwrites.Name);
+                        }
+                        catch
+                        {
+                            // Failed to fetch user. They probably left or were otherwise removed from the server.
+                            // Preserve overrides.
+                            return;
+                        }
+
+                        // User could be fetched, so they are in the server and their override was removed. Remove from db.
+                        
+                        var overrides = await Program.db.HashGetAsync("overrides", userOverwrites.Name);
+                        var dict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(overrides);
+                        dict.Remove(e.ChannelAfter.Id);
+                        if (dict.Count > 0)
+                            await Program.db.HashSetAsync("overrides", userOverwrites.Name, JsonConvert.SerializeObject(dict));
+                        else
+                        {
+                            await Program.db.HashDeleteAsync("overrides", userOverwrites.Name);
+                        }
+                    }
                 }
 
                 foreach (var overwrite in currentChannelOverwrites)
@@ -57,10 +72,37 @@
                         .Select(dbOverwrite => JsonConvert.DeserializeObject<DiscordOverwrite>(dbOverwrite.Value))
                         .All(dbOverwriteObj => dbOverwriteObj != overwrite))
                     {
-                        await Program.db.HashSetAsync("overrides",
-                            (await overwrite.GetMemberAsync()).Id,
-                            JsonConvert.SerializeObject(new Dictionary<ulong, DiscordOverwrite>
-                                { { e.ChannelAfter.Id, overwrite } }));
+                        if ((await Program.db.HashKeysAsync("overrides")).Any(a => a == overwrite.Id.ToString()))
+                        {
+                            // User has an overwrite in the db; add this one to their list of overrides without
+                            // touching existing ones
+
+                            var overwrites = await Program.db.HashGetAsync("overrides", overwrite.Id);
+
+                            if (!string.IsNullOrWhiteSpace(overwrites))
+                            {
+                                var dict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(overwrites);
+
+                                if (dict is not null)
+                                {                                    
+                                    dict.Add(e.ChannelAfter.Id, overwrite);
+
+                                    if (dict.Count > 0)
+                                        await Program.db.HashSetAsync("overrides", overwrite.Id,
+                                            JsonConvert.SerializeObject(dict));
+                                    else
+                                        await Program.db.HashDeleteAsync("overrides", overwrite.Id);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // User doesn't have any overrides in db, so store new dictionary
+
+                            await Program.db.HashSetAsync("overrides",
+                                overwrite.Id, JsonConvert.SerializeObject(new Dictionary<ulong, DiscordOverwrite>
+                                    { { e.ChannelAfter.Id, overwrite } }));
+                        }
                     }
                 }
             });
