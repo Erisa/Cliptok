@@ -18,10 +18,11 @@
                     // Make sure the message before the current one is from the bot and is a warn/mute DM & respond
                     if (msgBefore[0].Author.Id == Program.discord.CurrentUser.Id &&
                         (msgBefore[0].Content.Contains("You were warned") ||
-                         msgBefore[0].Content.Contains("You have been muted")))
+                         msgBefore[0].Content.Contains("You have been muted") ||
+                         msgBefore[0].Content.Contains("You were automatically warned")))
                     {
                         await message.RespondAsync(
-                            "You can discuss warnings and punishments with the moderators by messaging modmail:" +
+                            $"{Program.cfgjson.Emoji.Information} If you wish to discuss moderator actions, **please contact**" +
                             $" <@{Program.cfgjson.ModmailUserId}>");
                         sentAutoresponse = true;
                     }
