@@ -158,7 +158,7 @@
             return embed.Build();
         }
 
-        public static async Task<DiscordMessageBuilder> GenerateMessageRelay(DiscordMessage message, bool jumplink = false, bool channelRef = false, bool showChannelId = true)
+        public static async Task<DiscordMessageBuilder> GenerateMessageRelay(DiscordMessage message, bool jumplink = false, bool channelRef = false, bool showChannelId = true, bool sentAutoresponse = false)
         {
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}{(channelRef ? $" in #{message.Channel.Name}" : "")}", null, message.Author.AvatarUrl)
@@ -196,6 +196,11 @@
             {
                 embed.WithTitle($"Replying to {message.ReferencedMessage.Author.Username}")
                     .WithUrl(MessageLink(message.ReferencedMessage));
+            }
+
+            if (sentAutoresponse)
+            {
+                embed.Footer.Text += "\nThis DM triggered an autoresponse.";
             }
 
             List<DiscordEmbed> embeds = new()
