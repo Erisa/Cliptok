@@ -150,7 +150,7 @@
                 //int ruleInt;
                 foreach (var probablyRule in rulesBrokenStr)
                 {
-                    var probablyRuleSplit = probablyRule.Split()[0];
+                    var probablyRuleSplit = probablyRule.Replace(" ", "");
                     if (int.TryParse(probablyRuleSplit, out int ruleInt) && ruleInt >= 0 && ruleInt <= rules.Count)
                     {
                         rulesBroken.Add(ruleInt);

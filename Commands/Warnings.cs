@@ -44,7 +44,7 @@ namespace Cliptok.Commands
             var messageBuild = new DiscordMessageBuilder()
                 .WithContent($"{Program.cfgjson.Emoji.Warning} <@{targetUser.Id}> was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
 
-            if (reply != null)
+            if (reply is not null)
                 messageBuild.WithReply(reply.Id, true, false);
 
             var msg = await ctx.Channel.SendMessageAsync(messageBuild);

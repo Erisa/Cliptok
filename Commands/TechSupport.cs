@@ -22,7 +22,7 @@
             {
                 await ctx.Channel.SendMessageAsync(user.Mention, embed);
             }
-            else if (ctx.Message.ReferencedMessage != null)
+            else if (ctx.Message.ReferencedMessage is not null)
             {
                 var messageBuild = new DiscordMessageBuilder()
                     .WithEmbed(embed)

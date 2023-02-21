@@ -10,7 +10,7 @@ namespace Cliptok.Commands.InteractionCommands
         public async Task ScamCheck(InteractionContext ctx, [Option("input", "Domain or message content to scan.")] string content)
         {
             var urlMatches = Constants.RegexConstants.url_rx.Matches(content);
-            if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
+            if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") is not null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
             {
                 var (match, httpStatus, responseText, _) = await APIs.PhishingAPI.PhishingAPICheckAsync(content);
 

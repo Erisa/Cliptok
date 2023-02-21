@@ -36,7 +36,7 @@
         {
             var user = ctx.TargetUser;
 
-            if (user != null)
+            if (user is not null)
             {
                 switch (new Random().Next(4))
                 {

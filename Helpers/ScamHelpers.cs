@@ -11,7 +11,7 @@ namespace Cliptok.Helpers
             if (db.HashExists("unbanned", member.Id))
                 return false;
 
-            if (cfgjson.UsernameAPILogChannel != 0 && Environment.GetEnvironmentVariable("USERNAME_CHECK_ENDPOINT") != null)
+            if (cfgjson.UsernameAPILogChannel != 0 && Environment.GetEnvironmentVariable("USERNAME_CHECK_ENDPOINT") is not null)
             {
                 if (db.SetContains("safeusernamestore", member.Username))
                 {
@@ -98,7 +98,7 @@ namespace Cliptok.Helpers
 
             // turns out checking guild avatars isn't important
 
-            //               if (member.GuildAvatarHash != null)
+            //               if (member.GuildAvatarHash is not null)
             //               {
             //                   usedHash = member.GuildAvatarHash;
             //                   usedUrl = member.GuildAvatarUrl;

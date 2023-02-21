@@ -20,7 +20,7 @@
             var tierOne = ctx.Guild.GetRole(Program.cfgjson.TierRoles[0]);
 
             await member.GrantRoleAsync(tierOne, $"/grant used by {ctx.User.Username}#{ctx.User.Discriminator}");
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {member.Mention} can now access the server!");
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {member.Mention} can now access the server(?)\n**WARNING**: This probably did not work due to recent Discord changes. Please use a desktop or web Discord client, right click the user and click \"Verify Member\" if available.");
         }
 
     }

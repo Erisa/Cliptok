@@ -4,7 +4,7 @@
     {
         public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
         {
-            return Program.cfgjson.UserRoles != null;
+            return Program.cfgjson.UserRoles is not null;
         }
     }
 }
