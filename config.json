@@ -1,4 +1,4 @@
-﻿{
+{
   "core": {
     "prefixes": [
       "!",
@@ -314,5 +314,5 @@
   ],
   "insiderAnnouncementChannel": 1043898319883219004,
   "insiderCommandLockedToChannel": 187649467611086849,
-  "dmAutoresponseTimeLimit": 0
+  "dmAutoresponseTimeLimit": 6
 }
