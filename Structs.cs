@@ -456,6 +456,10 @@
 
     public class UserRoleConfig
     {
+        [JsonProperty("insiderCanary")]
+        public ulong InsiderCanary { get; private set; }
+
+
         [JsonProperty("insiderDev")]
         public ulong InsiderDev { get; private set; }
 

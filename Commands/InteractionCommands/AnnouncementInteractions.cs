@@ -14,11 +14,13 @@
 
             [Option("blog_link", "The link to the Windows blog entry relating to this build.")] string blogLink,
 
+            [Choice("Canary Channel", "Canary")]
             [Choice("Dev Channel", "Dev")]
             [Choice("Beta Channel", "Beta")]
             [Choice("Release Preview Channel", "RP")]
             [Option("insider_role1", "The first insider role to ping.")] string insiderChannel1,
 
+            [Choice("Canary Channel", "Canary")]
             [Choice("Dev Channel", "Dev")]
             [Choice("Beta Channel", "Beta")]
             [Choice("Release Preview Channel", "RP")]

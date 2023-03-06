@@ -16,7 +16,8 @@
   "modmailUserId": 459322015044730903,
   "supportRatelimitMinutes": 15,
   "announcementRoles": {
-    "dev": 434426594271166474,
+    "canary": 434426594271166474,
+    "dev": 1082364328474329179,
     "beta": 643712828217360394,
     "rp": 288729239921098752,
     "rp10": 910319453491839069,
@@ -227,11 +228,12 @@
   "secondaryAutoDehoistCharacters": "0123456789",
   "hastebinEndpoint": "https://haste.erisa.uk",
   "userRoles": {
-    "insiderDev": 434426594271166474,
+    "insiderDev": 1082364328474329179,
     "insiderBeta": 643712828217360394,
     "insiderRP": 288729239921098752,
     "insider10RP": 910319453491839069,
-    "patchTuesday": 445773142233710594
+    "patchTuesday": 445773142233710594,
+    "insiderCanary": 434426594271166474
   },
   "modmailCategory": 536572162450915340,
   "autobanIds": [
