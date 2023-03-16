@@ -137,6 +137,7 @@ namespace Cliptok
             discord.Ready += ReadyEvent.OnReady;
             discord.MessageCreated += MessageEvent.MessageCreated;
             discord.MessageUpdated += MessageEvent.MessageUpdated;
+            discord.MessageDeleted += MessageEvent.MessageDeleted;
             discord.GuildMemberAdded += MemberEvents.GuildMemberAdded;
             discord.GuildMemberRemoved += MemberEvents.GuildMemberRemoved;
             discord.MessageReactionAdded += ReactionEvent.OnReaction;
