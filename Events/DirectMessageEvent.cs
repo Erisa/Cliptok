@@ -7,7 +7,7 @@
             // Auto-response to contact modmail if DM follows warn/mute and is within configured time limit
 
             bool sentAutoresponse = false;
-            
+
             // Ignore messages older than time limit (in hours)
             if ((DateTime.UtcNow - message.CreationTimestamp.DateTime).TotalHours < Program.cfgjson.DmAutoresponseTimeLimit)
             {

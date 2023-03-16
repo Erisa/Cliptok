@@ -194,7 +194,7 @@
                     }
                 }
             }
-            
+
             // Stickers only
             if (stickersOnly)
             {
