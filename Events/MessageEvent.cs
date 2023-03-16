@@ -25,7 +25,7 @@ namespace Cliptok.Events
         public static async Task MessageDeleted(DiscordClient client, MessageDeleteEventArgs e)
         {
             // Delete thread if all messages are deleted
-            if (e.Channel is DiscordThreadChannel)
+            if (Program.cfgjson.AutoDeleteEmptyThreads && e.Channel is DiscordThreadChannel)
             {
                 var member = await e.Guild.GetMemberAsync(e.Message.Author.Id);
                 if (GetPermLevel(member) >= ServerPermLevel.TrialModerator)

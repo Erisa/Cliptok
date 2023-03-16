@@ -316,5 +316,6 @@
   ],
   "insiderAnnouncementChannel": 1043898319883219004,
   "insiderCommandLockedToChannel": 187649467611086849,
-  "dmAutoresponseTimeLimit": 6
+  "dmAutoresponseTimeLimit": 6,
+  "autoDeleteEmptyThreads": true
 }

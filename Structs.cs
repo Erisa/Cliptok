@@ -281,6 +281,9 @@
 
         [JsonProperty("dmAutoresponseTimeLimit")]
         public int DmAutoresponseTimeLimit { get; private set; } = 0;
+
+        [JsonProperty("autoDeleteEmptyThreads")]
+        public bool AutoDeleteEmptyThreads { get; private set; } = false;
     }
 
     public class LogChannelConfig
