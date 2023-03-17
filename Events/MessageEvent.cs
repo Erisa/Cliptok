@@ -27,9 +27,17 @@ namespace Cliptok.Events
             // Delete thread if all messages are deleted
             if (Program.cfgjson.AutoDeleteEmptyThreads && e.Channel is DiscordThreadChannel)
             {
-                var member = await e.Guild.GetMemberAsync(e.Message.Author.Id);
-                if (GetPermLevel(member) >= ServerPermLevel.TrialModerator)
-                    return;
+                try
+                {
+                    var member = await e.Guild.GetMemberAsync(e.Message.Author.Id);
+                    if (GetPermLevel(member) >= ServerPermLevel.TrialModerator)
+                        return;
+                }
+                catch
+                {
+                    // User is not in the server. Assume they are not a moderator,
+                    // so do nothing here.
+                }
 
                 var messages = await e.Channel.GetMessagesAsync(1);
                 if (messages.Count == 0)
