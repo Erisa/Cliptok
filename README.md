@@ -108,7 +108,6 @@ If you have a change to make that follows the contribution guidelines, send a Pu
 
 ### 💗 Significant sponsors
 - [FloatingMilkshake](https://github.com/FloatingMilkshake)
-- [PirateWill](https://github.com/PirateWill)
 - [TorchGM](https://github.com/TorchGM)
 
 ### 🙏Special thanks
