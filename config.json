@@ -219,10 +219,6 @@
   "heartosoftId": 413429915187281940,
   "noHeartosoftId": 642508756189446165,
   "restrictedHeartosoftPhrases": [
-    "heartosoft",
-    "starboard",
-    "413429915187281940",
-    "544153359712649251"
   ],
   "autoDehoistCharacters": " !\"#$%&'()*+,-./:;<=>?@[\\]^_`'",
   "secondaryAutoDehoistCharacters": "0123456789",
