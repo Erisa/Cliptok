@@ -50,7 +50,6 @@ namespace Cliptok.Events
                     return;
                 }
 
-                messages = await e.Channel.GetMessagesAsync(1);
                 if (messages.Count == 0)
                     await e.Channel.DeleteAsync("All messages in thread were deleted.");
             }
