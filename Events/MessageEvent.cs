@@ -39,7 +39,18 @@ namespace Cliptok.Events
                     // so do nothing here.
                 }
 
-                var messages = await e.Channel.GetMessagesAsync(1);
+                IReadOnlyList<DiscordMessage> messages;
+                try
+                {
+                    messages = await e.Channel.GetMessagesAsync(1);
+                }
+                catch (DSharpPlus.Exceptions.NotFoundException ex)
+                {
+                    Program.discord.Logger.LogDebug(ex, "Delete event failed to fetch messages from channel {channel}", e.Channel.Id);
+                    return;
+                }
+
+                messages = await e.Channel.GetMessagesAsync(1);
                 if (messages.Count == 0)
                     await e.Channel.DeleteAsync("All messages in thread were deleted.");
             }
