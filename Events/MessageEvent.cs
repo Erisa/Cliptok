@@ -14,12 +14,12 @@ namespace Cliptok.Events
 
         public static async Task MessageCreated(DiscordClient client, MessageCreateEventArgs e)
         {
-            MessageHandlerAsync(client, e.Message, e.Channel);
+            await MessageHandlerAsync(client, e.Message, e.Channel);
         }
 
         public static async Task MessageUpdated(DiscordClient client, MessageUpdateEventArgs e)
         {
-            MessageHandlerAsync(client, e.Message, e.Channel, true);
+            await MessageHandlerAsync(client, e.Message, e.Channel, true);
         }
 
         public static async Task MessageDeleted(DiscordClient client, MessageDeleteEventArgs e)
@@ -50,7 +50,6 @@ namespace Cliptok.Events
                     return;
                 }
 
-                messages = await e.Channel.GetMessagesAsync(1);
                 if (messages.Count == 0)
                     await e.Channel.DeleteAsync("All messages in thread were deleted.");
             }
