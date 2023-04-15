@@ -728,7 +728,7 @@ namespace Cliptok.Events
             if (invite is null || invite.Guild is null)
                 return false;
 
-            (bool serverMatch, HttpStatusCode httpStatus, string responseString, ServerApiResponseJson? serverResponse) = await APIs.ServerAPI.ServerAPICheckAsynnc(invite.Guild.Id);
+            (bool serverMatch, HttpStatusCode httpStatus, string responseString, ServerApiResponseJson? serverResponse) = await APIs.ServerAPI.ServerAPICheckAsync(invite.Guild.Id);
 
             if (httpStatus != HttpStatusCode.OK)
             {
