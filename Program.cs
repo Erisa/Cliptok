@@ -191,7 +191,7 @@ namespace Cliptok
                 }
                 catch (Exception e)
                 {
-                    discord.Logger.LogError(CliptokEventID, "An Error occurred during task runs: {message}", e.ToString());
+                    discord.Logger.LogError(CliptokEventID, e, "An Error occurred during task runs}");
                 }
 
                 loopCount += 1;
@@ -211,7 +211,7 @@ namespace Cliptok
                     }
                     catch (Exception e)
                     {
-                        discord.Logger.LogError(CliptokEventID, "An Error occurred during server list update: {message}", e.ToString());
+                        discord.Logger.LogError(CliptokEventID, e, "An Error occurred during server list update");
                     }
                     loopCount = 0;
                 }
