@@ -112,7 +112,6 @@
 
             while (PendingOverWrites.Contains(e.User.Id))
             {
-                Console.WriteLine("spinning");
                 await Task.Delay(5);
             }
 
