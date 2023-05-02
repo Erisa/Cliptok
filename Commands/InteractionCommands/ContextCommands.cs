@@ -2,7 +2,7 @@
 {
     internal class ContextCommands : ApplicationCommandModule
     {
-        [ContextMenu(ApplicationCommandType.UserContextMenu, "Show Avatar")]
+        [ContextMenu(ApplicationCommandType.UserContextMenu, "Show Avatar", defaultPermission: true)]
         public async Task ContextAvatar(ContextMenuContext ctx)
         {
             string avatarUrl = await LykosAvatarMethods.UserOrMemberAvatarURL(ctx.TargetUser, ctx.Guild);
@@ -19,19 +19,19 @@
             await ctx.RespondAsync(null, embed, ephemeral: true);
         }
 
-        [ContextMenu(ApplicationCommandType.UserContextMenu, "Show Warnings")]
+        [ContextMenu(ApplicationCommandType.UserContextMenu, "Show Warnings", defaultPermission: true)]
         public async Task ContextWarnings(ContextMenuContext ctx)
         {
             await ctx.RespondAsync(embed: await WarningHelpers.GenerateWarningsEmbedAsync(ctx.TargetUser), ephemeral: true);
         }
 
-        [ContextMenu(ApplicationCommandType.UserContextMenu, "User Information")]
+        [ContextMenu(ApplicationCommandType.UserContextMenu, "User Information", defaultPermission: true)]
         public async Task ContextUserInformation(ContextMenuContext ctx)
         {
             await ctx.RespondAsync(embed: await DiscordHelpers.GenerateUserEmbed(ctx.TargetUser, ctx.Guild), ephemeral: true);
         }
 
-        [ContextMenu(ApplicationCommandType.UserContextMenu, "Hug")]
+        [ContextMenu(ApplicationCommandType.UserContextMenu, "Hug", defaultPermission: true),]
         public async Task Hug(ContextMenuContext ctx)
         {
             var user = ctx.TargetUser;
