@@ -110,7 +110,7 @@ namespace Cliptok.Commands
         [
             Command("delwarn"),
             Description("Delete a warning that was issued by mistake or later became invalid."),
-            Aliases("delwarm", "delwam", "deletewarn"),
+            Aliases("delwarm", "delwam", "deletewarn", "delwarning", "deletewarning"),
             HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
         public async Task DelwarnCmd(
@@ -191,7 +191,7 @@ namespace Cliptok.Commands
 
         [
             Command("editwarn"),
-            Aliases("warnedit"),
+            Aliases("warnedit", "editwarning"),
             Description("Edit the reason of an existing warning.\n" +
                 "The Moderator who is editing the reason will become responsible for the case."),
             HomeServer,
