@@ -11,97 +11,92 @@
             if (!Program.cfgjson.EnableTextInVoice)
                 return;
 
-            Task.Run(async () =>
+            if (e.After.Channel is null)
             {
-                if (e.After.Channel is null)
+                client.Logger.LogDebug("{user} left {channel}", e.User.Username, e.Before.Channel.Name);
+
+                UserLeft(client, e);
+            }
+            else if (e.Before is null)
+            {
+                client.Logger.LogDebug("{user} joined {channel}", e.User.Username, e.After.Channel.Name);
+
+                UserJoined(client, e);
+            }
+            else if (e.Before.Channel.Id != e.After.Channel.Id)
+            {
+                client.Logger.LogDebug("{user} moved from {before} to {after}", e.User.Username, e.Before.Channel.Name, e.After.Channel.Name);
+
+                UserLeft(client, e);
+                UserJoined(client, e);
+            }
+
+            if (e.Before is not null && e.Before.Channel.Users.Count == 0 && !Program.cfgjson.IgnoredVoiceChannels.Contains(e.Before.Channel.Id))
+            {
+                client.Logger.LogDebug("{channel} is now empty!", e.Before.Channel.Name);
+
+
+                if (PendingPurge.Contains(e.Before.Channel.Id))
+                    return;
+
+                PendingPurge.Add(e.Before.Channel.Id);
+
+                for (int i = 0; i <= 12; i++)
                 {
-                    client.Logger.LogDebug("{user} left {channel}", e.User.Username, e.Before.Channel.Name);
-
-                    UserLeft(client, e);
-                }
-                else if (e.Before is null)
-                {
-                    client.Logger.LogDebug("{user} joined {channel}", e.User.Username, e.After.Channel.Name);
-
-                    UserJoined(client, e);
-                }
-                else if (e.Before.Channel.Id != e.After.Channel.Id)
-                {
-                    client.Logger.LogDebug("{user} moved from {before} to {after}", e.User.Username, e.Before.Channel.Name, e.After.Channel.Name);
-
-                    UserLeft(client, e);
-                    UserJoined(client, e);
-                }
-
-                if (e.Before is not null && e.Before.Channel.Users.Count == 0 && !Program.cfgjson.IgnoredVoiceChannels.Contains(e.Before.Channel.Id))
-                {
-                    client.Logger.LogDebug("{channel} is now empty!", e.Before.Channel.Name);
-
-                    Task.Run(async () =>
+                    if (e.Guild.Channels[e.Before.Channel.Id].Users.Count != 0)
                     {
+                        PendingPurge.Remove(e.Before.Channel.Id);
+                        return;
+                    }
+                    else
+                    {
+                        await Task.Delay(10000);
+                    }
+                }
 
-                        if (PendingPurge.Contains(e.Before.Channel.Id))
+                if (e.Guild.Channels[e.Before.Channel.Id].Users.Count == 0)
+                {
+                    List<DiscordMessage> messages = new();
+                    try
+                    {
+                        var firstMsg = (await e.Before.Channel.GetMessagesAsync(1)).FirstOrDefault();
+                        if (firstMsg == default)
                             return;
 
-                        PendingPurge.Add(e.Before.Channel.Id);
-
-                        for (int i = 0; i <= 12; i++)
+                        messages.Add(firstMsg);
+                        var lastMsgId = firstMsg.Id;
+                        // delete all the messages from the channel
+                        while (true)
                         {
-                            if (e.Guild.Channels[e.Before.Channel.Id].Users.Count != 0)
-                            {
-                                PendingPurge.Remove(e.Before.Channel.Id);
-                                return;
-                            }
+                            var newmsgs = (await e.Before.Channel.GetMessagesBeforeAsync(lastMsgId, 100)).ToList();
+                            messages.AddRange(newmsgs);
+                            if (newmsgs.Count < 100)
+                                break;
                             else
-                            {
-                                await Task.Delay(10000);
-                            }
+                                lastMsgId = newmsgs.Last().Id;
                         }
+                        messages.RemoveAll(message => message.CreationTimestamp.ToUniversalTime() < DateTime.UtcNow.AddDays(-14));
+                        PendingPurge.Remove(e.Before.Channel.Id);
 
-                        if (e.Guild.Channels[e.Before.Channel.Id].Users.Count == 0)
-                        {
-                            List<DiscordMessage> messages = new();
-                            try
-                            {
-                                var firstMsg = (await e.Before.Channel.GetMessagesAsync(1)).FirstOrDefault();
-                                if (firstMsg == default)
-                                    return;
+                        await e.Before.Channel.DeleteMessagesAsync(messages);
+                    }
+                    catch (Exception ex)
+                    {
+                        PendingPurge.Remove(e.Before.Channel.Id);
+                        Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error ocurred trying to purge messages from {channel}", e.Before.Channel.Name);
+                        return;
+                    }
 
-                                messages.Add(firstMsg);
-                                var lastMsgId = firstMsg.Id;
-                                // delete all the messages from the channel
-                                while (true)
-                                {
-                                    var newmsgs = (await e.Before.Channel.GetMessagesBeforeAsync(lastMsgId, 100)).ToList();
-                                    messages.AddRange(newmsgs);
-                                    if (newmsgs.Count < 100)
-                                        break;
-                                    else
-                                        lastMsgId = newmsgs.Last().Id;
-                                }
-                                messages.RemoveAll(message => message.CreationTimestamp.ToUniversalTime() < DateTime.UtcNow.AddDays(-14));
-                                PendingPurge.Remove(e.Before.Channel.Id);
+                    await LogChannelHelper.LogDeletedMessagesAsync(
+                        "messages",
+                        $"{Program.cfgjson.Emoji.Deleted} Automatically purged **{messages.Count}** messages from {e.Before.Channel.Mention}.",
+                        messages,
+                        e.Before.Channel
+                    );
 
-                                await e.Before.Channel.DeleteMessagesAsync(messages);
-                            }
-                            catch (Exception ex)
-                            {
-                                PendingPurge.Remove(e.Before.Channel.Id);
-                                Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error ocurred trying to purge messages from {channel}", e.Before.Channel.Name);
-                                return;
-                            }
-
-                            await LogChannelHelper.LogDeletedMessagesAsync(
-                                "messages",
-                                $"{Program.cfgjson.Emoji.Deleted} Automatically purged **{messages.Count}** messages from {e.Before.Channel.Mention}.",
-                                messages,
-                                e.Before.Channel
-                            );
-
-                        }
-                    });
                 }
-            });
+            }
+
         }
 
         public static async Task UserJoined(DiscordClient _, VoiceStateUpdateEventArgs e)

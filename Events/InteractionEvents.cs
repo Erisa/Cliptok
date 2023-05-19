@@ -32,42 +32,39 @@ namespace Cliptok.Events
             }
             else if (e.Id == "clear-confirm-callback")
             {
-                Task.Run(async () =>
+                Dictionary<ulong, List<DiscordMessage>> messagesToClear = Commands.InteractionCommands.ClearInteractions.MessagesToClear;
+
+                if (!messagesToClear.ContainsKey(e.Message.Id))
                 {
-                    Dictionary<ulong, List<DiscordMessage>> messagesToClear = Commands.InteractionCommands.ClearInteractions.MessagesToClear;
+                    await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                        new DiscordInteractionResponseBuilder().WithContent($"{cfgjson.Emoji.Error} These messages have already been deleted!").AsEphemeral(true));
+                    return;
+                }
 
-                    if (!messagesToClear.ContainsKey(e.Message.Id))
-                    {
-                        await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                            new DiscordInteractionResponseBuilder().WithContent($"{cfgjson.Emoji.Error} These messages have already been deleted!").AsEphemeral(true));
-                        return;
-                    }
+                await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-                    await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+                List<DiscordMessage> messages = messagesToClear.GetValueOrDefault(e.Message.Id);
 
-                    List<DiscordMessage> messages = messagesToClear.GetValueOrDefault(e.Message.Id);
+                await e.Channel.DeleteMessagesAsync(messages, $"[Clear by {DiscordHelpers.UniqueUsername(e.User)}]");
 
-                    await e.Channel.DeleteMessagesAsync(messages, $"[Clear by {e.User.Username}#{e.User.Discriminator}]");
+                await LogChannelHelper.LogMessageAsync("mod",
+                    new DiscordMessageBuilder()
+                        .WithContent($"{cfgjson.Emoji.Deleted} **{messages.Count}** messages were cleared in {e.Channel.Mention} by {e.User.Mention}.")
+                        .WithAllowedMentions(Mentions.None)
+                );
 
-                    await LogChannelHelper.LogMessageAsync("mod",
-                        new DiscordMessageBuilder()
-                            .WithContent($"{cfgjson.Emoji.Deleted} **{messages.Count}** messages were cleared in {e.Channel.Mention} by {e.User.Mention}.")
-                            .WithAllowedMentions(Mentions.None)
-                    );
+                await LogChannelHelper.LogDeletedMessagesAsync(
+                    "messages",
+                    $"{cfgjson.Emoji.Deleted} **{messages.Count}** messages were cleared from {e.Channel.Mention} by {e.User.Mention}.",
+                    messages,
+                    e.Channel
+                );
 
-                    await LogChannelHelper.LogDeletedMessagesAsync(
-                        "messages",
-                        $"{cfgjson.Emoji.Deleted} **{messages.Count}** messages were cleared from {e.Channel.Mention} by {e.User.Mention}.",
-                        messages,
-                        e.Channel
-                    );
+                messagesToClear.Remove(e.Message.Id);
 
-                    messagesToClear.Remove(e.Message.Id);
+                await e.Channel.SendMessageAsync($"{cfgjson.Emoji.Deleted} Cleared **{messages.Count}** messages from {e.Channel.Mention}!");
 
-                    await e.Channel.SendMessageAsync($"{cfgjson.Emoji.Deleted} Cleared **{messages.Count}** messages from {e.Channel.Mention}!");
-
-                    await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent($"{cfgjson.Emoji.Success} Done!").AsEphemeral(true));
-                });
+                await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent($"{cfgjson.Emoji.Success} Done!").AsEphemeral(true));
             }
             else
             {
@@ -98,7 +95,7 @@ namespace Cliptok.Events
                             );
                     }
             }
-            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of interaction command {command} by {user}", e.Context.CommandName, $"{e.Context.User.Username}#{e.Context.User.Discriminator}");
+            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of interaction command {command} by {user}", e.Context.CommandName, $"{DiscordHelpers.UniqueUsername(e.Context.User)}");
         }
 
         public static async Task ContextCommandErrorEvent(SlashCommandsExtension _, DSharpPlus.SlashCommands.EventArgs.ContextMenuErrorEventArgs e)
@@ -123,7 +120,7 @@ namespace Cliptok.Events
                             );
                     }
             }
-            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of context command {command} by {user}", e.Context.CommandName, $"{e.Context.User.Username}#{e.Context.User.Discriminator}");
+            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of context command {command} by {user}", e.Context.CommandName, $"{DiscordHelpers.UniqueUsername(e.Context.User)}");
         }
 
     }

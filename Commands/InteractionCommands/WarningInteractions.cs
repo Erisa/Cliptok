@@ -121,7 +121,7 @@ namespace Cliptok.Commands.InteractionCommands
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully {operationText}transferred warnings from {sourceUser.Mention} to {targetUser.Mention}!");
             await LogChannelHelper.LogMessageAsync("mod",
                 new DiscordMessageBuilder()
-                    .WithContent($"{Program.cfgjson.Emoji.Information} Warnings from {sourceUser.Mention} were {operationText}transferred to {targetUser.Mention} by `{ctx.User.Username}#{ctx.User.Discriminator}`")
+                    .WithContent($"{Program.cfgjson.Emoji.Information} Warnings from {sourceUser.Mention} were {operationText}transferred to {targetUser.Mention} by `{DiscordHelpers.UniqueUsername(ctx.User)}`")
                     .WithEmbed(await WarningHelpers.GenerateWarningsEmbedAsync(targetUser))
            );
         }

@@ -27,7 +27,7 @@
                 await member.ModifyAsync(a =>
                 {
                     a.Nickname = DehoistHelpers.DehoistName(member.DisplayName);
-                    a.AuditLogReason = $"[Dehoist by {ctx.User.Username}#{ctx.User.Discriminator}]";
+                    a.AuditLogReason = $"[Dehoist by {DiscordHelpers.UniqueUsername(ctx.User)}]";
                 });
             }
             catch

@@ -6,19 +6,17 @@ namespace Cliptok.Events
     {
         public static async Task OnReady(DiscordClient client, ReadyEventArgs _)
         {
-            Task.Run(async () =>
-            {
-                homeGuild = await discord.GetGuildAsync(cfgjson.ServerID);
-                await LogChannelHelper.UnpackLogConfigAsync(cfgjson);
-                var fetchResult = await APIs.ServerAPI.FetchMaliciousServersList();
-                if (fetchResult is not null)
-                {
-                    serverApiList = fetchResult;
-                    client.Logger.LogDebug("Successfully initalised malicious invite list with {count} servers.", fetchResult.Count);
-                }
 
-                client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
-            });
+            homeGuild = await discord.GetGuildAsync(cfgjson.ServerID);
+            await LogChannelHelper.UnpackLogConfigAsync(cfgjson);
+            var fetchResult = await APIs.ServerAPI.FetchMaliciousServersList();
+            if (fetchResult is not null)
+            {
+                serverApiList = fetchResult;
+                client.Logger.LogDebug("Successfully initalised malicious invite list with {count} servers.", fetchResult.Count);
+            }
+
+            client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{DiscordHelpers.UniqueUsername(client.CurrentUser)}");
         }
 
         public static async Task OnStartup(DiscordClient client)

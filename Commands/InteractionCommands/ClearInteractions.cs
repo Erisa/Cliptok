@@ -251,7 +251,7 @@
             {
                 if (messagesToClear.Count >= 1)
                 {
-                    await ctx.Channel.DeleteMessagesAsync(messagesToClear, $"[Clear by {ctx.User.Username}#{ctx.User.Discriminator}]");
+                    await ctx.Channel.DeleteMessagesAsync(messagesToClear, $"[Clear by {DiscordHelpers.UniqueUsername(ctx.User)}]");
                     if (skipped)
                     {
                         await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Cleared **{messagesToClear.Count}** messages from {ctx.Channel.Mention}!\nSome messages were not deleted because they are older than 2 weeks.");

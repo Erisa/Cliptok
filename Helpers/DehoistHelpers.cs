@@ -33,7 +33,7 @@
                 await targetMember.ModifyAsync(a =>
                 {
                     a.Nickname = DehoistName(targetMember.DisplayName);
-                    a.AuditLogReason = responsibleMod != default ? isMassDehoist ? $"[Mass dehoist by {responsibleMod.Username}#{responsibleMod.Discriminator}]" : $"[Dehoist by {responsibleMod.Username}#{responsibleMod.Discriminator}]" : "[Automatic dehoist]";
+                    a.AuditLogReason = responsibleMod != default ? isMassDehoist ? $"[Mass dehoist by {DiscordHelpers.UniqueUsername(responsibleMod)}]" : $"[Dehoist by {DiscordHelpers.UniqueUsername(responsibleMod)}]" : "[Automatic dehoist]";
                 });
                 return true;
             }
@@ -73,7 +73,7 @@
                     {
                         a.Nickname = DehoistName(discordMember.DisplayName);
                         a.AuditLogReason =
-                            $"[Permadehoist by {responsibleMod.Username}#{responsibleMod.Discriminator}]";
+                            $"[Permadehoist by {DiscordHelpers.UniqueUsername(responsibleMod)}]";
                     });
                 }
                 catch (DSharpPlus.Exceptions.UnauthorizedException)
@@ -122,7 +122,7 @@
                         await discordMember.ModifyAsync(a =>
                         {
                             a.Nickname = newNickname;
-                            a.AuditLogReason = $"[Permadehoist removed by {responsibleMod.Username}#{responsibleMod.Discriminator}]";
+                            a.AuditLogReason = $"[Permadehoist removed by {DiscordHelpers.UniqueUsername(responsibleMod)}]";
                         });
                     }
                     catch
