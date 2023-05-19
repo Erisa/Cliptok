@@ -15,7 +15,7 @@ namespace Cliptok.Events
                .WithTimestamp(DateTimeOffset.Now)
                .WithThumbnail(e.Member.AvatarUrl)
                .WithAuthor(
-                   name: $"{e.Member.Username}#{e.Member.Discriminator} has joined",
+                   name: $"{DiscordHelpers.UniqueUsername(e.Member)} has joined",
                    iconUrl: e.Member.AvatarUrl
                 )
                .AddField("User", e.Member.Mention, false)
@@ -138,7 +138,7 @@ namespace Cliptok.Events
                 .WithTimestamp(DateTimeOffset.Now)
                 .WithThumbnail(e.Member.AvatarUrl)
                 .WithAuthor(
-                    name: $"{e.Member.Username}#{e.Member.Discriminator} has left",
+                    name: $"{DiscordHelpers.UniqueUsername(e.Member)} has left",
                     iconUrl: e.Member.AvatarUrl
                  )
                 .AddField("User", e.Member.Mention, false)

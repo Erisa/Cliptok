@@ -45,7 +45,7 @@ namespace Cliptok.Events
 
                 List<DiscordMessage> messages = messagesToClear.GetValueOrDefault(e.Message.Id);
 
-                await e.Channel.DeleteMessagesAsync(messages, $"[Clear by {e.User.Username}#{e.User.Discriminator}]");
+                await e.Channel.DeleteMessagesAsync(messages, $"[Clear by {DiscordHelpers.UniqueUsername(e.User)}]");
 
                 await LogChannelHelper.LogMessageAsync("mod",
                     new DiscordMessageBuilder()
@@ -95,7 +95,7 @@ namespace Cliptok.Events
                             );
                     }
             }
-            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of interaction command {command} by {user}", e.Context.CommandName, $"{e.Context.User.Username}#{e.Context.User.Discriminator}");
+            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of interaction command {command} by {user}", e.Context.CommandName, $"{DiscordHelpers.UniqueUsername(e.Context.User)}");
         }
 
         public static async Task ContextCommandErrorEvent(SlashCommandsExtension _, DSharpPlus.SlashCommands.EventArgs.ContextMenuErrorEventArgs e)
@@ -120,7 +120,7 @@ namespace Cliptok.Events
                             );
                     }
             }
-            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of context command {command} by {user}", e.Context.CommandName, $"{e.Context.User.Username}#{e.Context.User.Discriminator}");
+            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of context command {command} by {user}", e.Context.CommandName, $"{DiscordHelpers.UniqueUsername(e.Context.User)}");
         }
 
     }

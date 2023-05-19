@@ -416,7 +416,7 @@ namespace Cliptok.Events
 
                             var embed = new DiscordEmbedBuilder()
                                 .WithTimestamp(DateTime.Now)
-                                .WithAuthor(message.Author.Username + '#' + message.Author.Discriminator, null, $"https://cdn.discordapp.com/avatars/{message.Author.Id}/{message.Author.AvatarHash}.png?size=128");
+                                .WithAuthor(DiscordHelpers.UniqueUsername(message.Author), null, $"https://cdn.discordapp.com/avatars/{message.Author.Id}/{message.Author.AvatarHash}.png?size=128");
 
                             var lastMsgs = await message.Channel.GetMessagesBeforeAsync(message.Id, 50);
                             var msgMatch = lastMsgs.FirstOrDefault(m => m.Author.Id == message.Author.Id);
@@ -584,7 +584,7 @@ namespace Cliptok.Events
                                     .WithContent($"{Program.cfgjson.Emoji.Deleted} Deleted non-feedback post from {message.Author.Mention} in {message.Channel.Parent.Mention}:")
                                     .WithEmbed(new DiscordEmbedBuilder()
                                         .WithAuthor(
-                                            $"{message.Author.Username}#{message.Author.Discriminator} in #{message.Channel.Parent.Name}",
+                                            $"{DiscordHelpers.UniqueUsername(message.Author)} in #{message.Channel.Parent.Name}",
                                             null, await LykosAvatarMethods.UserOrMemberAvatarURL(message.Author, message.Channel.Guild))
                                         .WithTitle(thread.Name)
                                         .WithDescription(message.Content)

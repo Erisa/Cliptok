@@ -93,7 +93,7 @@
                 return;
             }
 
-            string nameToSend = $"{ctx.User.Username}#{ctx.User.Discriminator}";
+            string nameToSend = $"{DiscordHelpers.UniqueUsername(ctx.User)}";
 
             using HttpClient httpClient = new()
             {

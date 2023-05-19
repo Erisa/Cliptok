@@ -23,7 +23,7 @@
                     null
                 )
                 .WithAuthor(
-                    $"Warnings for {targetUser.Username}#{targetUser.Discriminator}",
+                    $"Warnings for {DiscordHelpers.UniqueUsername(targetUser)}",
                     null,
                     await LykosAvatarMethods.UserOrMemberAvatarURL(targetUser, Program.homeGuild, "png")
                 );
@@ -105,7 +105,7 @@
                 null
             )
             .WithAuthor(
-                $"Warning for {targetUser.Username}#{targetUser.Discriminator}",
+                $"Warning for {DiscordHelpers.UniqueUsername(targetUser)}",
                 null,
                 await LykosAvatarMethods.UserOrMemberAvatarURL(targetUser, Program.homeGuild, "png")
             )

@@ -16,7 +16,7 @@ namespace Cliptok.Events
                 client.Logger.LogDebug("Successfully initalised malicious invite list with {count} servers.", fetchResult.Count);
             }
 
-            client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
+            client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{DiscordHelpers.UniqueUsername(client.CurrentUser)}");
         }
 
         public static async Task OnStartup(DiscordClient client)

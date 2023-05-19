@@ -260,7 +260,7 @@ namespace Cliptok.Commands
             );
 
             var user = await ctx.Client.GetUserAsync(Convert.ToUInt64(myList.Last().Key));
-            await ctx.RespondAsync($":thinking: The user with the most warnings is **{user.Username}#{user.Discriminator}** with a total of **{myList.Last().Value} warnings!**\nThis includes users who have left or been banned.");
+            await ctx.RespondAsync($":thinking: The user with the most warnings is **{DiscordHelpers.UniqueUsername(user)}** with a total of **{myList.Last().Value} warnings!**\nThis includes users who have left or been banned.");
         }
 
         [Command("mostwarningsday"), Description("Which day has the most warnings???")]

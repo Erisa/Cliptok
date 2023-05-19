@@ -29,7 +29,7 @@ namespace Cliptok.Helpers
                             var embed = new DiscordEmbedBuilder()
                                 .WithTimestamp(DateTime.Now)
                                 .WithFooter($"User ID: {member.Id}", null)
-                                .WithAuthor($"{member.Username}#{member.Discriminator}", null, member.AvatarUrl)
+                                .WithAuthor($"{DiscordHelpers.UniqueUsername(member)}", null, member.AvatarUrl)
                                 .AddField("Infringing name", member.Username)
                                 .AddField("API Response", $"```json\n{apiResult.responseString}\n```")
                                 .WithColor(new DiscordColor(0xf03916));
@@ -71,7 +71,7 @@ namespace Cliptok.Helpers
                     var embed = new DiscordEmbedBuilder()
                         .WithTimestamp(DateTime.Now)
                         .WithFooter($"User ID: {member.Id}", null)
-                        .WithAuthor($"{member.Username}#{member.Discriminator}", null, member.AvatarUrl)
+                        .WithAuthor($"{DiscordHelpers.UniqueUsername(member)}", null, member.AvatarUrl)
                         .AddField("Infringing name", member.Username)
                         .AddField("Matching pattern", username)
                         .WithColor(new DiscordColor(0xf03916));
@@ -127,7 +127,7 @@ namespace Cliptok.Helpers
                 {
                     var embed = new DiscordEmbedBuilder()
                         .WithDescription($"API Response:\n```json\n{responseString}\n```")
-                        .WithAuthor($"{member.Username}#{member.Discriminator}", null, usedUrl)
+                        .WithAuthor($"{DiscordHelpers.UniqueUsername(member)}", null, usedUrl)
                         .WithFooter($"User ID: {member.Id}")
                         .WithImageUrl(await LykosAvatarMethods.UserOrMemberAvatarURL(member, member.Guild, "default", 256));
 

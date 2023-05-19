@@ -24,7 +24,7 @@
                     await discordMembers[0].ModifyAsync(a =>
                     {
                         a.Nickname = DehoistHelpers.DehoistName(discordMembers[0].DisplayName);
-                        a.AuditLogReason = $"[Dehoist by {ctx.User.Username}#{ctx.User.Discriminator}]";
+                        a.AuditLogReason = $"[Dehoist by {DiscordHelpers.UniqueUsername(ctx.User)}]";
                     });
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {discordMembers[0].Mention}!");
                 }
@@ -52,7 +52,7 @@
                         await discordMember.ModifyAsync(a =>
                         {
                             a.Nickname = DehoistHelpers.DehoistName(origName);
-                            a.AuditLogReason = $"[Dehoist by {ctx.User.Username}#{ctx.User.Discriminator}]";
+                            a.AuditLogReason = $"[Dehoist by {DiscordHelpers.UniqueUsername(ctx.User)}]";
                         });
                     }
                     catch
@@ -128,7 +128,7 @@
                         await member.ModifyAsync(a =>
                         {
                             a.Nickname = newNickname;
-                            a.AuditLogReason = $"[Mass undehoist by {ctx.User.Username}#{ctx.User.Discriminator}]";
+                            a.AuditLogReason = $"[Mass undehoist by {DiscordHelpers.UniqueUsername(ctx.User)}]";
                         }
                         );
                     }
