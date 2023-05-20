@@ -122,7 +122,7 @@ namespace Cliptok
                 MinimumLogLevel = LogLevel.Information,
 #endif
                 LoggerFactory = logFactory,
-                Intents = DiscordIntents.All + 3145728,
+                Intents = DiscordIntents.All,
                 LogUnknownEvents = false
             });
 
