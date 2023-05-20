@@ -64,7 +64,7 @@
             foreach (DiscordMessage message in messages)
             {
                 output.AppendLine();
-                output.AppendLine($"{DiscordHelpers.UniqueUsername(message.ReferencedMessage.Author)} [{message.Timestamp.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss zzz")}] (User: {message.Author.Id}) (Message: {message.Id})");
+                output.AppendLine($"{DiscordHelpers.UniqueUsername(message.Author)} [{message.Timestamp.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss zzz")}] (User: {message.Author.Id}) (Message: {message.Id})");
 
                 if (message.ReferencedMessage is not null)
                 {
