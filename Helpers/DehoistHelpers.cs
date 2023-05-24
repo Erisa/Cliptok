@@ -73,6 +73,7 @@
 
             // If member is dehoisted already, but NOT permadehoisted, skip updating nickname.
 
+            // If member is not dehoisted
             if (discordMember.DisplayName[0] != dehoistCharacter)
             {
                 // Dehoist member
@@ -91,12 +92,15 @@
                 }
                 catch
                 {
-                    // Add member ID to permadehoist list
+                    // On failure, add member ID to permadehoist list anyway
                     await Program.db.SetAddAsync("permadehoists", discordUser.Id);
 
                     return (false, false);
                 }
             }
+
+            // On success or if member is already dehoisted, just add member ID to permadehoist list
+            await Program.db.SetAddAsync("permadehoists", discordUser.Id);
 
             return (true, false);
         }
