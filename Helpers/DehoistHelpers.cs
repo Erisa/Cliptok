@@ -25,6 +25,15 @@
                         )
                 ))
             {
+                if (targetMember.DisplayName[0] == dehoistCharacter && targetMember.DisplayName.Length == 1) {
+                    await targetMember.ModifyAsync(a =>
+                    {
+                        a.Nickname = DehoistName(targetMember.Username);
+                        a.AuditLogReason = responsibleMod != default ? isMassDehoist ? $"[Mass dehoist by {DiscordHelpers.UniqueUsername(responsibleMod)}]" : $"[Dehoist by {DiscordHelpers.UniqueUsername(responsibleMod)}]" : "[Automatic dehoist]";
+                    });
+                    return true;
+                }
+                
                 return false;
             }
 
