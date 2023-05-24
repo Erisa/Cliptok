@@ -63,7 +63,7 @@
                 var (success, isPermissionError) = await DehoistHelpers.UnpermadehoistMember(discordUser, ctx.User, ctx.Guild);
 
                 if (success)
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.On} Successfully removed the permadehoist for {discordUser.Mention}!", mentions: false);
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Off} Successfully removed the permadehoist for {discordUser.Mention}!", mentions: false);
 
                 if (!success & !isPermissionError)
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {discordUser.Mention} isn't permadehoisted!", mentions: false);
