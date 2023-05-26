@@ -185,9 +185,9 @@
 
                     embed.AddField($"Sticker", fieldValue);
 
-                    if (message.Attachments.Count == 0 && message.Stickers.Count == 1)
+                    if (message.Attachments.Count == 0 && message.Stickers.Count == 1 && sticker.FormatType is not StickerFormat.LOTTIE)
                     {
-                        embed.WithImageUrl(sticker.StickerUrl);
+                        embed.WithImageUrl(sticker.StickerUrl.Replace("cdn.discordapp.com", "media.discordapp.net") + "?size=160");
                     }
                 }
             }
