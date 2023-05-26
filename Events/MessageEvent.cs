@@ -7,6 +7,8 @@ namespace Cliptok.Events
         public static Dictionary<string, string[]> wordLists = new();
         public static Dictionary<ulong, DateTime> supportRatelimit = new();
 
+        public static Dictionary<ulong, DiscordThreadChannel> trackingThreadCache = new();
+
         public static List<string> allowedInviteCodes = new();
         public static List<string> disallowedInviteCodes = new();
 
@@ -79,6 +81,23 @@ namespace Cliptok.Events
 
                 if (message.Author is null || message.Author.Id == client.CurrentUser.Id)
                     return;
+
+                if (Program.db.SetContains("trackedUsers", message.Author.Id))
+                {
+                    DiscordThreadChannel relayThread;
+
+                    if (trackingThreadCache.ContainsKey(message.Author.Id))
+                    {
+                        relayThread = trackingThreadCache[message.Author.Id];
+                    }
+                    else
+                    {
+                        relayThread = (DiscordThreadChannel)await client.GetChannelAsync((ulong)await Program.db.HashGetAsync("trackingThreads", message.Author.Id));
+                        trackingThreadCache.Add(message.Author.Id, relayThread);
+                    }
+                    var _ = await relayThread.SendMessageAsync(await DiscordHelpers.GenerateMessageRelay(message, true, true));
+
+                }
 
                 if (!isAnEdit && channel.IsPrivate && Program.cfgjson.LogChannels.ContainsKey("dms"))
                 {
