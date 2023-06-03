@@ -685,7 +685,6 @@ namespace Cliptok.Events
                                 DiscordHelpers.MessageLink(message),
                                 content: content,
                                 colour: new DiscordColor(0xFEC13D),
-                                jumpText: "Jump to message",
                                 channelOverride: logChannel,
                                 extraField: extraField
                             );

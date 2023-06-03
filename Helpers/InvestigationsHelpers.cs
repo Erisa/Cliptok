@@ -2,7 +2,7 @@
 {
     public class InvestigationsHelpers
     {
-        public static async Task SendInfringingMessaageAsync(string logChannelKey, DiscordMessage infringingMessage, string reason, string messageURL, (string name, string value, bool inline) extraField = default, string content = default, DiscordColor? colour = null, string jumpText = "Jump to warning", DiscordChannel channelOverride = default)
+        public static async Task SendInfringingMessaageAsync(string logChannelKey, DiscordMessage infringingMessage, string reason, string messageURL, (string name, string value, bool inline) extraField = default, string content = default, DiscordColor? colour = null, DiscordChannel channelOverride = default)
         {
             if (colour is null)
                 colour = new DiscordColor(0xf03916);
@@ -25,7 +25,7 @@
                 embed.AddField("Reason", reason, true);
 
             if (messageURL is not null)
-                embed.AddField("Message link", $"[`{jumpText}`]({messageURL})", true);
+                embed.AddField("Message link", messageURL, true);
 
             if (extraField != default)
                 embed.AddField(extraField.name, extraField.value, extraField.inline);
