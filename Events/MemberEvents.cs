@@ -90,6 +90,29 @@ namespace Cliptok.Events
 
                 db.HashSet(IdAutoBanSet.Name, e.Member.Id, true);
             }
+
+            // Restore user overrides stored in db (if there are any)
+            
+            var userOverwrites = await db.HashGetAsync("overrides", e.Member.Id.ToString());
+            if (string.IsNullOrWhiteSpace(userOverwrites)) return; // user has no overrides saved
+            var dictionary = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(userOverwrites);
+            if (dictionary is null) return;
+            
+            foreach (var overwrite in dictionary)
+            {
+                DiscordChannel channel;
+                try
+                {
+                    channel = await client.GetChannelAsync(overwrite.Key);
+                }
+                catch
+                {
+                    continue;
+                }
+                
+                await channel.AddOverwriteAsync(e.Member, overwrite.Value.Allowed, overwrite.Value.Denied,
+                    "Restoring saved overrides for member.");
+            }
         }
 
         public static async Task GuildMemberRemoved(DiscordClient client, GuildMemberRemoveEventArgs e)

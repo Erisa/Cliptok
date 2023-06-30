@@ -156,6 +156,8 @@ namespace Cliptok
 
             discord.VoiceStateUpdated += VoiceEvents.VoiceStateUpdate;
 
+            discord.ChannelUpdated += ChannelEvents.ChannelUpdated;
+
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
                 StringPrefixes = cfgjson.Core.Prefixes
