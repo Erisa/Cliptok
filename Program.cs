@@ -122,7 +122,7 @@ namespace Cliptok
                 MinimumLogLevel = LogLevel.Information,
 #endif
                 LoggerFactory = logFactory,
-                Intents = DiscordIntents.All + 3145728,
+                Intents = DiscordIntents.All,
                 LogUnknownEvents = false
             });
 
@@ -137,6 +137,7 @@ namespace Cliptok
             discord.Ready += ReadyEvent.OnReady;
             discord.MessageCreated += MessageEvent.MessageCreated;
             discord.MessageUpdated += MessageEvent.MessageUpdated;
+            discord.MessageDeleted += MessageEvent.MessageDeleted;
             discord.GuildMemberAdded += MemberEvents.GuildMemberAdded;
             discord.GuildMemberRemoved += MemberEvents.GuildMemberRemoved;
             discord.MessageReactionAdded += ReactionEvent.OnReaction;
@@ -192,7 +193,7 @@ namespace Cliptok
                 }
                 catch (Exception e)
                 {
-                    discord.Logger.LogError(CliptokEventID, "An Error occurred during task runs: {message}", e.ToString());
+                    discord.Logger.LogError(CliptokEventID, e, "An Error occurred during task runs}");
                 }
 
                 loopCount += 1;
@@ -200,11 +201,19 @@ namespace Cliptok
                 // after 180 cycles, roughly 30 minutes has passed
                 if (loopCount == 180)
                 {
-                    var fetchResult = await APIs.ServerAPI.FetchMaliciousServersList();
-                    if (fetchResult is not null)
+                    List<ServerApiResponseJson> fetchResult;
+                    try
                     {
-                        serverApiList = fetchResult;
-                        discord.Logger.LogDebug("Successfully updated malicious invite list with {count} servers.", fetchResult.Count);
+                        fetchResult = await APIs.ServerAPI.FetchMaliciousServersList();
+                        if (fetchResult is not null)
+                        {
+                            serverApiList = fetchResult;
+                            discord.Logger.LogDebug("Successfully updated malicious invite list with {count} servers.", fetchResult.Count);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        discord.Logger.LogError(CliptokEventID, e, "An Error occurred during server list update");
                     }
                     loopCount = 0;
                 }

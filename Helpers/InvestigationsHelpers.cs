@@ -2,7 +2,7 @@
 {
     public class InvestigationsHelpers
     {
-        public static async Task SendInfringingMessaageAsync(string logChannelKey, DiscordMessage infringingMessage, string reason, string messageURL, (string name, string value, bool inline) extraField = default, string content = default, DiscordColor? colour = null, string jumpText = "Jump to warning", DiscordChannel channelOverride = default)
+        public static async Task SendInfringingMessaageAsync(string logChannelKey, DiscordMessage infringingMessage, string reason, string messageURL, (string name, string value, bool inline) extraField = default, string content = default, DiscordColor? colour = null, DiscordChannel channelOverride = default)
         {
             if (colour is null)
                 colour = new DiscordColor(0xf03916);
@@ -16,7 +16,7 @@
                 null
             )
             .WithAuthor(
-                $"{infringingMessage.Author.Username}#{infringingMessage.Author.Discriminator} in #{infringingMessage.Channel.Name}",
+                $"{DiscordHelpers.UniqueUsername(infringingMessage.Author)} in #{infringingMessage.Channel.Name}",
                 null,
                 await LykosAvatarMethods.UserOrMemberAvatarURL(infringingMessage.Author, infringingMessage.Channel.Guild, "png")
             );
@@ -25,7 +25,7 @@
                 embed.AddField("Reason", reason, true);
 
             if (messageURL is not null)
-                embed.AddField("Message link", $"[`{jumpText}`]({messageURL})", true);
+                embed.AddField("Message link", messageURL, true);
 
             if (extraField != default)
                 embed.AddField(extraField.name, extraField.value, extraField.inline);

@@ -44,7 +44,7 @@ First you'll want to install Docker. On a Debian or Ubuntu-based Linux distribut
 
 Then:
 1. Clone this repository and `cd` into the directory.
-2. Copy `.env` to `.env-example` and add the bot token.
+2. Copy `.env-example` to `.env` and add the bot token.
 3. If you're not deploying for Microsoft Community, uncomment lines 21-23 in `docker-compose.yml` and edit the `config.json` to fit your needs.
 4. Run the bot in the background: `docker-compose up -d`
 
@@ -108,7 +108,6 @@ If you have a change to make that follows the contribution guidelines, send a Pu
 
 ### 💗 Significant sponsors
 - [FloatingMilkshake](https://github.com/FloatingMilkshake)
-- [PirateWill](https://github.com/PirateWill)
 - [TorchGM](https://github.com/TorchGM)
 
 ### 🙏Special thanks

@@ -1,4 +1,4 @@
-﻿{
+{
   "core": {
     "prefixes": [
       "!",
@@ -30,7 +30,6 @@
     "FjJfTZdtXg",
     "cMxFErsEDB",
     "apple",
-    "google",
     "iphone",
     "directx",
     "winadmins",
@@ -159,7 +158,7 @@
       "name": "exploits.txt",
       "wholeWord": false,
       "url": false,
-      "reason": "Using a text-rendering exploit to mask URL(s) and/or mentions"
+      "reason": "Sending text that takes advantage of an exploit in Discord clients"
     },
     {
       "name": "Private/passive.txt",
@@ -219,10 +218,6 @@
   "heartosoftId": 413429915187281940,
   "noHeartosoftId": 642508756189446165,
   "restrictedHeartosoftPhrases": [
-    "heartosoft",
-    "starboard",
-    "413429915187281940",
-    "544153359712649251"
   ],
   "autoDehoistCharacters": " !\"#$%&'()*+,-./:;<=>?@[\\]^_`'",
   "secondaryAutoDehoistCharacters": "0123456789",
@@ -315,5 +310,8 @@
     1065659890036646019
   ],
   "insiderAnnouncementChannel": 1043898319883219004,
-  "insiderCommandLockedToChannel": 187649467611086849
+  "insiderCommandLockedToChannel": 187649467611086849,
+  "dmAutoresponseTimeLimit": 6,
+  "autoDeleteEmptyThreads": true,
+  "insiderCanaryThread": 1082394217168523315
 }

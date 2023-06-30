@@ -110,7 +110,7 @@ namespace Cliptok.Commands
         [
             Command("delwarn"),
             Description("Delete a warning that was issued by mistake or later became invalid."),
-            Aliases("delwarm", "delwam", "deletewarn"),
+            Aliases("delwarm", "delwam", "deletewarn", "delwarning", "deletewarning"),
             HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
         public async Task DelwarnCmd(
@@ -191,7 +191,7 @@ namespace Cliptok.Commands
 
         [
             Command("editwarn"),
-            Aliases("warnedit"),
+            Aliases("warnedit", "editwarning"),
             Description("Edit the reason of an existing warning.\n" +
                 "The Moderator who is editing the reason will become responsible for the case."),
             HomeServer,
@@ -260,7 +260,7 @@ namespace Cliptok.Commands
             );
 
             var user = await ctx.Client.GetUserAsync(Convert.ToUInt64(myList.Last().Key));
-            await ctx.RespondAsync($":thinking: The user with the most warnings is **{user.Username}#{user.Discriminator}** with a total of **{myList.Last().Value} warnings!**\nThis includes users who have left or been banned.");
+            await ctx.RespondAsync($":thinking: The user with the most warnings is **{DiscordHelpers.UniqueUsername(user)}** with a total of **{myList.Last().Value} warnings!**\nThis includes users who have left or been banned.");
         }
 
         [Command("mostwarningsday"), Description("Which day has the most warnings???")]

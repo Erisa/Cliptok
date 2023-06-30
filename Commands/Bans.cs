@@ -106,13 +106,13 @@ namespace Cliptok.Commands
                     }
                     else
                     {
-                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
+                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I don't have permission to ban **{DiscordHelpers.UniqueUsername(targetMember)}**!");
                         return;
                     }
                 }
                 else
                 {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} You don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} You don't have permission to ban **{DiscordHelpers.UniqueUsername(targetMember)}**!");
                     return;
                 }
             }
@@ -190,13 +190,13 @@ namespace Cliptok.Commands
                     }
                     else
                     {
-                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
+                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I don't have permission to ban **{DiscordHelpers.UniqueUsername(targetMember)}**!");
                         return;
                     }
                 }
                 else
                 {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} You don't have permission to ban **{targetMember.Username}#{targetMember.Discriminator}**!");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} You don't have permission to ban **{DiscordHelpers.UniqueUsername(targetMember)}**!");
                     return;
                 }
             }
@@ -214,14 +214,14 @@ namespace Cliptok.Commands
         {
             if ((await Program.db.HashExistsAsync("bans", targetUser.Id)))
             {
-                await UnbanUserAsync(ctx.Guild, targetUser, $"[Unban by {ctx.User.Username}#{ctx.User.Discriminator}]: {reason}");
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned **{targetUser.Username}#{targetUser.Discriminator}**.");
+                await UnbanUserAsync(ctx.Guild, targetUser, $"[Unban by {DiscordHelpers.UniqueUsername(ctx.User)}]: {reason}");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned **{DiscordHelpers.UniqueUsername(targetUser)}**.");
             }
             else
             {
                 bool banSuccess = await UnbanUserAsync(ctx.Guild, targetUser);
                 if (banSuccess)
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned **{targetUser.Username}#{targetUser.Discriminator}**.");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned **{DiscordHelpers.UniqueUsername(targetUser)}**.");
                 else
                 {
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.Member.Mention}, that user doesn't appear to be banned, *and* an error occurred while attempting to unban them anyway.\nPlease contact the bot owner if this wasn't expected, the error has been logged.");
