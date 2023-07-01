@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace Cliptok.Commands.InteractionCommands
+﻿namespace Cliptok.Commands.InteractionCommands
 {
     internal class RoleInteractions : ApplicationCommandModule
     {
