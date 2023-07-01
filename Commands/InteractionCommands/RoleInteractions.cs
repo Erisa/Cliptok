@@ -43,7 +43,7 @@ namespace Cliptok.Commands.InteractionCommands
 
                 var roleData = Program.cfgjson.GrantableRoles.FirstOrDefault(pair => pair.Key == role);
 
-                await member.GrantRoleAsync(ctx.Guild.GetRole(roleData.Value), $"/roles grant used by {ctx.User.Username}#{ctx.User.Discriminator}");
+                await member.GrantRoleAsync(ctx.Guild.GetRole(roleData.Value), $"/roles grant used by {DiscordHelpers.UniqueUsername(ctx.User)}");
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} The role <@&{roleData.Value}> has been successfully granted!", ephemeral: true, mentions: false);
             }
 
@@ -61,7 +61,7 @@ namespace Cliptok.Commands.InteractionCommands
 
                 var roleData = Program.cfgjson.GrantableRoles.FirstOrDefault(pair => pair.Key == role);
 
-                await member.RevokeRoleAsync(ctx.Guild.GetRole(roleData.Value), $"/roles remove used by {ctx.User.Username}#{ctx.User.Discriminator}");
+                await member.RevokeRoleAsync(ctx.Guild.GetRole(roleData.Value), $"/roles remove used by {DiscordHelpers.UniqueUsername(ctx.User)}");
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} The role <@&{roleData.Value}> has been successfully removed!", ephemeral: true, mentions: false);
             }
         }
