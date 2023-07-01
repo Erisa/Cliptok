@@ -2,7 +2,7 @@
 
 namespace Cliptok.Commands.InteractionCommands
 {
-    public class RoleInteractions : ApplicationCommandModule
+    internal class RoleInteractions : ApplicationCommandModule
     {
         [SlashCommand("grant", "Grant a user Tier 1, bypassing any verification requirements.", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(Permissions.ModerateMembers)]
@@ -27,11 +27,12 @@ namespace Cliptok.Commands.InteractionCommands
 
         [HomeServer]
         [SlashCommandGroup("roles", "Opt in/out of roles.")]
-        public class RoleSlashCommands
+        internal class RoleSlashCommands
         {
             [SlashCommand("grant", "Opt into a role.")]
             public async Task GrantRole(
                 InteractionContext ctx,
+                [Choice("Windows 11 Insiders (Canary)", "canary")]
                 [Choice("Windows 11 Insiders (Dev)", "dev")]
                 [Choice("Windows 11 Insiders (Beta)", "beta")]
                 [Choice("Windows 11 Insiders (Release Preview)", "rp")]
@@ -50,6 +51,7 @@ namespace Cliptok.Commands.InteractionCommands
             [SlashCommand("remove", "Opt out of a role.")]
             public async Task RemoveRole(
                 InteractionContext ctx,
+                [Choice("Windows 11 Insiders (Canary)", "canary")]
                 [Choice("Windows 11 Insiders (Dev)", "dev")]
                 [Choice("Windows 11 Insiders (Beta)", "beta")]
                 [Choice("Windows 11 Insiders (Release Preview)", "rp")]
