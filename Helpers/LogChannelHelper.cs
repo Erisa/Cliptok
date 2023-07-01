@@ -28,7 +28,7 @@
                 { "username", config.UsernameAPILogChannel}
             };
 
-            if (config.LogChannels != null)
+            if (config.LogChannels is not null)
             {
                 foreach (KeyValuePair<string, LogChannelConfig> logChannel in config.LogChannels)
                 {
@@ -103,11 +103,19 @@
             {
                 if (WebhookCache.ContainsKey(key))
                 {
-                    return await FireWebhookFromMessageAsync(WebhookCache[key], message, key);
+                    var builder = new DiscordWebhookBuilder(message)
+                        .WithAvatarUrl(Program.discord.CurrentUser.GetAvatarUrl(ImageFormat.Png, 1024))
+                        .WithUsername(Program.discord.CurrentUser.Username);
+
+                    if (ChannelCache.ContainsKey(key) && ChannelCache[key].IsThread)
+                        builder.WithThreadId(ChannelCache[key].Id);
+
+                    var webhookResults = await WebhookCache[key].BroadcastMessageAsync(builder);
+                    return webhookResults.FirstOrDefault().Value;
                 }
                 else if (ChannelCache.ContainsKey(key))
                 {
-                    return await ChannelCache[key].SendMessageAsync(message);
+                    return await ChannelCache[key].SendMessageAsync((DiscordMessageBuilder)message);
                 }
                 else
                 {
@@ -126,7 +134,7 @@
             string messageLog = await DiscordHelpers.CompileMessagesAsync(messages.AsEnumerable().Reverse().ToList(), channel);
 
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(messageLog));
-            var msg = new DiscordMessageBuilder().WithContent(content).WithFile("messages.txt", stream);
+            var msg = new DiscordMessageBuilder().WithContent(content).AddFile("messages.txt", stream);
 
             var hasteResult = await Program.hasteUploader.Post(messageLog);
 
@@ -136,38 +144,6 @@
             }
 
             return await LogMessageAsync(key, msg);
-        }
-
-        internal static async Task<DiscordMessage> FireWebhookFromMessageAsync(DiscordWebhookClient webhook, DiscordMessageBuilder message, string key)
-        {
-            var webhookBuilder = new DiscordWebhookBuilder()
-                .AddComponents(message.Components)
-                .WithAvatarUrl(Program.discord.CurrentUser.GetAvatarUrl(ImageFormat.Png, 1024))
-                .WithUsername(Program.discord.CurrentUser.Username);
-
-            if (message.Content is not null)
-                webhookBuilder.WithContent(message.Content);
-
-            if (message.Embeds.Count > 0)
-                webhookBuilder.AddEmbeds(message.Embeds);
-
-            if (message.Mentions is not null)
-                webhookBuilder.AddMentions(message.Mentions);
-
-            if (message.Files.Count > 0)
-            {
-                foreach (var file in message.Files)
-                {
-                    webhookBuilder.AddFile(file.FileName, file.Stream);
-                }
-            }
-
-            if (ChannelCache.ContainsKey(key) && ChannelCache[key].IsThread)
-                webhookBuilder.WithThreadId(ChannelCache[key].Id);
-
-            var webhookResults = await webhook.BroadcastMessageAsync(webhookBuilder);
-
-            return webhookResults.FirstOrDefault().Value;
         }
 
     }

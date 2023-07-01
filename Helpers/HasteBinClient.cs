@@ -39,7 +39,7 @@ namespace Cliptok.Helpers
                 string json = await result.Content.ReadAsStringAsync();
                 HasteBinResult hasteBinResult = JsonConvert.DeserializeObject<HasteBinResult>(json);
 
-                if (hasteBinResult?.Key != null)
+                if (hasteBinResult?.Key is not null)
                 {
                     hasteBinResult.FullUrl = $"{fullUrl}{hasteBinResult.Key}";
                     hasteBinResult.IsSuccess = true;

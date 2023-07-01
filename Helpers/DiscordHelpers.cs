@@ -2,6 +2,14 @@
 {
     public class DiscordHelpers
     {
+        public static string UniqueUsername(DiscordUser user)
+        {
+            if (user.Discriminator == "0")
+                return user.Username;
+            else
+                return $"{user.Username}#{user.Discriminator}";
+        }
+
         public static async Task<bool> SafeTyping(DiscordChannel channel)
         {
             try
@@ -18,7 +26,7 @@
 
         public static string MessageLink(DiscordMessage msg)
         {
-            return $"https://discord.com/channels/{msg.Channel.Guild.Id}/{msg.Channel.Id}/{msg.Id}";
+            return $"https://discord.com/channels/{(msg.Channel.IsPrivate ? "@me" : msg.Channel.Guild.Id)}/{msg.Channel.Id}/{msg.Id}";
         }
 
         // If invoker is allowed to mod target.
@@ -56,11 +64,11 @@
             foreach (DiscordMessage message in messages)
             {
                 output.AppendLine();
-                output.AppendLine($"{message.Author.Username}#{message.Author.Discriminator} [{message.Timestamp.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss zzz")}] (User: {message.Author.Id}) (Message: {message.Id})");
+                output.AppendLine($"{DiscordHelpers.UniqueUsername(message.Author)} [{message.Timestamp.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss zzz")}] (User: {message.Author.Id}) (Message: {message.Id})");
 
                 if (message.ReferencedMessage is not null)
                 {
-                    output.AppendLine($"[Replying to {message.ReferencedMessage.Author.Username}#{message.ReferencedMessage.Author.Discriminator} (User: {message.ReferencedMessage.Author.Id}) (Message: {message.ReferencedMessage.Id})]");
+                    output.AppendLine($"[Replying to {DiscordHelpers.UniqueUsername(message.ReferencedMessage.Author)} (User: {message.ReferencedMessage.Author.Id}) (Message: {message.ReferencedMessage.Id})]");
                 }
 
                 if (message.Content is not null && message.Content != "")
@@ -111,7 +119,7 @@
             {
                 embed = new DiscordEmbedBuilder()
                     .WithThumbnail(avatarUrl)
-                    .WithTitle($"User information for {user.Username}#{user.Discriminator}")
+                    .WithTitle($"User information for {DiscordHelpers.UniqueUsername(user)}")
                     .AddField("User", user.Mention, true)
                     .AddField("User ID", user.Id.ToString(), true)
                     .AddField($"{Program.discord.CurrentUser.Username} permission level", "N/A (not in server)", true);
@@ -145,7 +153,7 @@
 
             embed = new DiscordEmbedBuilder()
                 .WithThumbnail(avatarUrl)
-                .WithTitle($"User information for {user.Username}#{user.Discriminator}")
+                .WithTitle($"User information for {DiscordHelpers.UniqueUsername(user)}")
                 .AddField("User", member.Mention, true)
                 .AddField("User ID", member.Id.ToString(), true)
                 .AddField($"{Program.discord.CurrentUser.Username} permission level", GetPermLevel(member).ToString(), false);
@@ -158,10 +166,10 @@
             return embed.Build();
         }
 
-        public static async Task<DiscordMessageBuilder> GenerateMessageRelay(DiscordMessage message, bool jumplink = false, bool channelRef = false, bool showChannelId = true)
+        public static async Task<DiscordMessageBuilder> GenerateMessageRelay(DiscordMessage message, bool jumplink = false, bool channelRef = false, bool showChannelId = true, bool sentAutoresponse = false)
         {
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}{(channelRef ? $" in #{message.Channel.Name}" : "")}", null, message.Author.AvatarUrl)
+                .WithAuthor($"{DiscordHelpers.UniqueUsername(message.Author)}{(channelRef ? $" in #{message.Channel.Name}" : "")}", null, message.Author.AvatarUrl)
                 .WithDescription(message.Content)
                 .WithFooter($"{(showChannelId ? $"Channel ID: {message.Channel.Id} | " : "")}User ID: {message.Author.Id}");
 
@@ -177,9 +185,9 @@
 
                     embed.AddField($"Sticker", fieldValue);
 
-                    if (message.Attachments.Count == 0 && message.Stickers.Count == 1)
+                    if (message.Attachments.Count == 0 && message.Stickers.Count == 1 && sticker.FormatType is not StickerFormat.LOTTIE)
                     {
-                        embed.WithImageUrl(sticker.StickerUrl);
+                        embed.WithImageUrl(sticker.StickerUrl.Replace("cdn.discordapp.com", "media.discordapp.net") + "?size=160");
                     }
                 }
             }
@@ -189,13 +197,18 @@
                     .AddField($"Attachment", $"[{message.Attachments[0].FileName}]({message.Attachments[0].Url})");
 
             if (jumplink)
-                embed.AddField("Message Link", $"[`Jump to message`]({message.JumpLink})");
+                embed.AddField("Message Link", $"{message.JumpLink}");
 
 
-            if (message.ReferencedMessage != null)
+            if (message.ReferencedMessage is not null)
             {
                 embed.WithTitle($"Replying to {message.ReferencedMessage.Author.Username}")
-                    .WithUrl($"https://discord.com/channels/{message.Channel.Guild.Id}/{message.Channel.Id}/{message.ReferencedMessage.Id}");
+                    .WithUrl(MessageLink(message.ReferencedMessage));
+            }
+
+            if (sentAutoresponse)
+            {
+                embed.Footer.Text += "\nThis DM triggered an autoresponse.";
             }
 
             List<DiscordEmbed> embeds = new()
@@ -208,7 +221,7 @@
                 foreach (var attachment in message.Attachments.Skip(1))
                 {
                     embeds.Add(new DiscordEmbedBuilder()
-                        .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}", null, message.Author.AvatarUrl)
+                        .WithAuthor($"{DiscordHelpers.UniqueUsername(message.Author)}", null, message.Author.AvatarUrl)
                         .AddField("Additional attachment", $"[{attachment.FileName}]({attachment.Url})")
                         .WithImageUrl(attachment.Url));
                 }

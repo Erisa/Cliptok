@@ -5,7 +5,7 @@
         static readonly string serverCheckUrl = "https://api.phish.gg/server";
         static readonly string serverListUrl = "https://api.phish.gg/servers/all";
 
-        public static async Task<(bool match, HttpStatusCode httpStatus, string responseString, ServerApiResponseJson? serverResponse)> ServerAPICheckAsynnc(ulong serverID)
+        public static async Task<(bool match, HttpStatusCode httpStatus, string responseString, ServerApiResponseJson? serverResponse)> ServerAPICheckAsync(ulong serverID)
         {
             var builder = new UriBuilder(serverCheckUrl);
             var query = HttpUtility.ParseQueryString(builder.Query);

@@ -41,7 +41,7 @@
         [Command("announce")]
         [Description("Announces something in the current channel, pinging an Insider role in the process.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task AnnounceCmd(CommandContext ctx, [Description("'dev','beta','rp', 'rp10, 'patch', 'rpbeta', 'betadev'")] string roleName, [RemainingText, Description("The announcement message to send.")] string announcementMessage)
+        public async Task AnnounceCmd(CommandContext ctx, [Description("'canary', 'dev','beta','rp', 'rp10, 'patch', 'rpbeta', 'betadev'")] string roleName, [RemainingText, Description("The announcement message to send.")] string announcementMessage)
         {
             DiscordRole discordRole;
 

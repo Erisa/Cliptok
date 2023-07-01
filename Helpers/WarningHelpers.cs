@@ -23,7 +23,7 @@
                     null
                 )
                 .WithAuthor(
-                    $"Warnings for {targetUser.Username}#{targetUser.Discriminator}",
+                    $"Warnings for {DiscordHelpers.UniqueUsername(targetUser)}",
                     null,
                     await LykosAvatarMethods.UserOrMemberAvatarURL(targetUser, Program.homeGuild, "png")
                 );
@@ -105,7 +105,7 @@
                 null
             )
             .WithAuthor(
-                $"Warning for {targetUser.Username}#{targetUser.Discriminator}",
+                $"Warning for {DiscordHelpers.UniqueUsername(targetUser)}",
                 null,
                 await LykosAvatarMethods.UserOrMemberAvatarURL(targetUser, Program.homeGuild, "png")
             )
@@ -113,7 +113,7 @@
             if (detailed)
             {
                 embed.AddField("Responsible moderator", $"<@{warning.ModUserId}>")
-                .AddField("Message link", warning.ContextLink is null ? "N/A" : $"[`Jump to warning`]({warning.ContextLink})");
+                .AddField("Message link", warning.ContextLink is null ? "N/A" : $"{warning.ContextLink}");
             }
             if (showTime)
                 embed.AddField("Time", detailed ? $"<t:{TimeHelpers.ToUnixTimestamp(warning.WarnTimestamp)}:f>" : $"<t:{TimeHelpers.ToUnixTimestamp(warning.WarnTimestamp)}:R>", true);
@@ -150,7 +150,7 @@
                 //int ruleInt;
                 foreach (var probablyRule in rulesBrokenStr)
                 {
-                    var probablyRuleSplit = probablyRule.Split()[0];
+                    var probablyRuleSplit = probablyRule.Replace(" ", "");
                     if (int.TryParse(probablyRuleSplit, out int ruleInt) && ruleInt >= 0 && ruleInt <= rules.Count)
                     {
                         rulesBroken.Add(ruleInt);

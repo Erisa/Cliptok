@@ -1,4 +1,4 @@
-﻿{
+{
   "core": {
     "prefixes": [
       "!",
@@ -16,7 +16,8 @@
   "modmailUserId": 459322015044730903,
   "supportRatelimitMinutes": 15,
   "announcementRoles": {
-    "dev": 434426594271166474,
+    "canary": 434426594271166474,
+    "dev": 1082364328474329179,
     "beta": 643712828217360394,
     "rp": 288729239921098752,
     "rp10": 910319453491839069,
@@ -36,7 +37,6 @@
     "FjJfTZdtXg",
     "cMxFErsEDB",
     "apple",
-    "google",
     "iphone",
     "directx",
     "winadmins",
@@ -165,7 +165,7 @@
       "name": "exploits.txt",
       "wholeWord": false,
       "url": false,
-      "reason": "Using a text-rendering exploit to mask URL(s) and/or mentions"
+      "reason": "Sending text that takes advantage of an exploit in Discord clients"
     },
     {
       "name": "Private/passive.txt",
@@ -188,7 +188,8 @@
     240528256292356096,
     812412803104768111,
     939441229157007380,
-    947775206141870111
+    947775206141870111,
+    955866568531775608
   ],
   "lockdownEnabledChannels": [
     150662382874525696,
@@ -224,20 +225,17 @@
   "heartosoftId": 413429915187281940,
   "noHeartosoftId": 642508756189446165,
   "restrictedHeartosoftPhrases": [
-    "heartosoft",
-    "starboard",
-    "413429915187281940",
-    "544153359712649251"
   ],
   "autoDehoistCharacters": " !\"#$%&'()*+,-./:;<=>?@[\\]^_`'",
   "secondaryAutoDehoistCharacters": "0123456789",
   "hastebinEndpoint": "https://haste.erisa.uk",
   "userRoles": {
-    "insiderDev": 434426594271166474,
+    "insiderDev": 1082364328474329179,
     "insiderBeta": 643712828217360394,
     "insiderRP": 288729239921098752,
     "insider10RP": 910319453491839069,
-    "patchTuesday": 445773142233710594
+    "patchTuesday": 445773142233710594,
+    "insiderCanary": 434426594271166474
   },
   "modmailCategory": 536572162450915340,
   "autobanIds": [
@@ -315,6 +313,12 @@
   "feedbackHubForum": 1033193525975715911,
   "forumIntroPosts": [
     1007802643856510996,
-    1033197019164061756
-  ]
+    1033197019164061756,
+    1065659890036646019
+  ],
+  "insiderAnnouncementChannel": 1043898319883219004,
+  "insiderCommandLockedToChannel": 187649467611086849,
+  "dmAutoresponseTimeLimit": 6,
+  "autoDeleteEmptyThreads": true,
+  "insiderCanaryThread": 1082394217168523315
 }

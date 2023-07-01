@@ -11,8 +11,7 @@
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithTitle("**__Need Help Or Have a Problem?__**")
                 .WithDescription(
-                $"You're probably looking for <#{Program.cfgjson.TechSupportChannel}>.\n" +
-                $"🆕 Try asking for help in <#{Program.cfgjson.SupportForumId}>!\n\n" +
+                $"You're probably looking for <#{Program.cfgjson.TechSupportChannel}> or <#{Program.cfgjson.SupportForumId}>!\n\n" +
                 $"Once there, please be sure to provide **plenty of details**, ping the <@&{Program.cfgjson.CommunityTechSupportRoleID}> role, and *be patient!*\n\n" +
                 $"Look under the `🔧 Support` category for the appropriate channel for your issue. See <#413274922413195275> for more info."
                 )
@@ -22,7 +21,7 @@
             {
                 await ctx.Channel.SendMessageAsync(user.Mention, embed);
             }
-            else if (ctx.Message.ReferencedMessage != null)
+            else if (ctx.Message.ReferencedMessage is not null)
             {
                 var messageBuild = new DiscordMessageBuilder()
                     .WithEmbed(embed)

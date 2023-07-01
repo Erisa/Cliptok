@@ -6,19 +6,17 @@ namespace Cliptok.Events
     {
         public static async Task OnReady(DiscordClient client, ReadyEventArgs _)
         {
-            Task.Run(async () =>
-            {
-                homeGuild = await discord.GetGuildAsync(cfgjson.ServerID);
-                await LogChannelHelper.UnpackLogConfigAsync(cfgjson);
-                var fetchResult = await APIs.ServerAPI.FetchMaliciousServersList();
-                if (fetchResult is not null)
-                {
-                    serverApiList = fetchResult;
-                    client.Logger.LogDebug("Successfully initalised malicious invite list with {count} servers.", fetchResult.Count);
-                }
 
-                client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{client.CurrentUser.Username}#{client.CurrentUser.Discriminator}");
-            });
+            homeGuild = await discord.GetGuildAsync(cfgjson.ServerID);
+            await LogChannelHelper.UnpackLogConfigAsync(cfgjson);
+            var fetchResult = await APIs.ServerAPI.FetchMaliciousServersList();
+            if (fetchResult is not null)
+            {
+                serverApiList = fetchResult;
+                client.Logger.LogDebug("Successfully initalised malicious invite list with {count} servers.", fetchResult.Count);
+            }
+
+            client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{DiscordHelpers.UniqueUsername(client.CurrentUser)}");
         }
 
         public static async Task OnStartup(DiscordClient client)
@@ -52,7 +50,7 @@ namespace Cliptok.Events
                 commitHash = sr.ReadToEnd();
             }
 
-            if (Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_SHA") != null)
+            if (Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_SHA") is not null)
             {
                 commitHash = Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_SHA");
                 commitHash = commitHash[..Math.Min(commitHash.Length, 7)];
@@ -69,7 +67,7 @@ namespace Cliptok.Events
                 commitMessage = sr.ReadToEnd();
             }
 
-            if (Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_MESSAGE") != null)
+            if (Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_MESSAGE") is not null)
             {
                 commitMessage = Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_MESSAGE");
             }
@@ -91,7 +89,7 @@ namespace Cliptok.Events
             }
 
             bool listSuccess = false;
-            if (cfgjson.GitListDirectory != null && cfgjson.GitListDirectory != "")
+            if (cfgjson.GitListDirectory is not null && cfgjson.GitListDirectory != "")
             {
 
                 ShellResult finishedShell = RunShellCommand($"cd Lists/{cfgjson.GitListDirectory} && git pull");

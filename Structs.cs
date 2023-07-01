@@ -260,7 +260,6 @@
         [JsonProperty("supportForumIntroThreadId")]
         public ulong SupportForumIntroThreadId { get; private set; } = 0;
 
-
         [JsonProperty("supportForumId")]
         public ulong SupportForumId { get; private set; } = 0;
 
@@ -275,6 +274,22 @@
 
         [JsonProperty("grantableRoles")]
         public Dictionary<string, ulong> GrantableRoles { get; private set; } = new();
+
+        [JsonProperty("insiderAnnouncementChannel")]
+        public ulong InsiderAnnouncementChannel { get; private set; } = 0;
+
+        [JsonProperty("insiderCommandLockedToChannel")]
+        public ulong InsiderCommandLockedToChannel { get; private set; } = 0;
+
+        [JsonProperty("dmAutoresponseTimeLimit")]
+        public int DmAutoresponseTimeLimit { get; private set; } = 0;
+
+        [JsonProperty("autoDeleteEmptyThreads")]
+        public bool AutoDeleteEmptyThreads { get; private set; } = false;
+
+        [JsonProperty("insiderCanaryThread")]
+        public ulong InsiderCanaryThread { get; set; } = 0;
+
     }
 
     public class LogChannelConfig
@@ -450,6 +465,10 @@
 
     public class UserRoleConfig
     {
+        [JsonProperty("insiderCanary")]
+        public ulong InsiderCanary { get; private set; }
+
+
         [JsonProperty("insiderDev")]
         public ulong InsiderDev { get; private set; }
 

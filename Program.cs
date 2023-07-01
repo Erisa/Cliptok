@@ -90,17 +90,17 @@ namespace Cliptok
 
             avatars = File.ReadAllLines("Lists/avatars.txt");
 
-            if (Environment.GetEnvironmentVariable("CLIPTOK_TOKEN") != null)
+            if (Environment.GetEnvironmentVariable("CLIPTOK_TOKEN") is not null)
                 token = Environment.GetEnvironmentVariable("CLIPTOK_TOKEN");
             else
                 token = cfgjson.Core.Token;
 
-            if (Environment.GetEnvironmentVariable("REDIS_URL") != null)
+            if (Environment.GetEnvironmentVariable("REDIS_URL") is not null)
                 redis = ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("REDIS_URL"));
             else
             {
                 string redisHost;
-                if (Environment.GetEnvironmentVariable("REDIS_DOCKER_OVERRIDE") != null)
+                if (Environment.GetEnvironmentVariable("REDIS_DOCKER_OVERRIDE") is not null)
                     redisHost = "redis";
                 else
                     redisHost = cfgjson.Redis.Host;
@@ -122,7 +122,7 @@ namespace Cliptok
                 MinimumLogLevel = LogLevel.Information,
 #endif
                 LoggerFactory = logFactory,
-                Intents = DiscordIntents.All + 3145728,
+                Intents = DiscordIntents.All,
                 LogUnknownEvents = false
             });
 
@@ -137,6 +137,7 @@ namespace Cliptok
             discord.Ready += ReadyEvent.OnReady;
             discord.MessageCreated += MessageEvent.MessageCreated;
             discord.MessageUpdated += MessageEvent.MessageUpdated;
+            discord.MessageDeleted += MessageEvent.MessageDeleted;
             discord.GuildMemberAdded += MemberEvents.GuildMemberAdded;
             discord.GuildMemberRemoved += MemberEvents.GuildMemberRemoved;
             discord.MessageReactionAdded += ReactionEvent.OnReaction;
@@ -154,6 +155,8 @@ namespace Cliptok
             discord.GuildBanRemoved += UnbanEvent.OnUnban;
 
             discord.VoiceStateUpdated += VoiceEvents.VoiceStateUpdate;
+
+            discord.ChannelUpdated += ChannelEvents.ChannelUpdated;
 
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
@@ -190,7 +193,7 @@ namespace Cliptok
                 }
                 catch (Exception e)
                 {
-                    discord.Logger.LogError(CliptokEventID, "An Error occurred during task runs: {message}", e.ToString());
+                    discord.Logger.LogError(CliptokEventID, e, "An Error occurred during task runs}");
                 }
 
                 loopCount += 1;
@@ -198,11 +201,19 @@ namespace Cliptok
                 // after 180 cycles, roughly 30 minutes has passed
                 if (loopCount == 180)
                 {
-                    var fetchResult = await APIs.ServerAPI.FetchMaliciousServersList();
-                    if (fetchResult is not null)
+                    List<ServerApiResponseJson> fetchResult;
+                    try
                     {
-                        serverApiList = fetchResult;
-                        discord.Logger.LogDebug("Successfully updated malicious invite list with {count} servers.", fetchResult.Count);
+                        fetchResult = await APIs.ServerAPI.FetchMaliciousServersList();
+                        if (fetchResult is not null)
+                        {
+                            serverApiList = fetchResult;
+                            discord.Logger.LogDebug("Successfully updated malicious invite list with {count} servers.", fetchResult.Count);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        discord.Logger.LogError(CliptokEventID, e, "An Error occurred during server list update");
                     }
                     loopCount = 0;
                 }

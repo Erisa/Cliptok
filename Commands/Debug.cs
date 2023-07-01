@@ -230,6 +230,131 @@
                     await ctx.RespondAsync($"Logs:```\n{result}```");
                 }
             }
+
+            [Group("overrides")]
+            [Description("Commands for managing stored permission overrides.")]
+            public class Overrides : BaseCommandModule
+            {
+                [GroupCommand]
+                public async Task ShowOverrides(CommandContext ctx,
+                    [Description("The user whose overrides to show.")] DiscordUser user)
+                {
+                    var userOverrides = await Program.db.HashGetAsync("overrides", user.Id.ToString());
+                    if (string.IsNullOrWhiteSpace(userOverrides))
+                    {
+                        await ctx.RespondAsync(
+                            new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} {user.Mention} doesn't have any overrides set!")
+                                .WithAllowedMentions(Mentions.None));
+                        return;
+                    }
+
+                    var overwrites = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(userOverrides);
+                    if (overwrites is null)
+                    {
+                        await ctx.RespondAsync(
+                            $"{Program.cfgjson.Emoji.Error} Something went wrong while trying to fetch the overrides for {user.Mention}!" +
+                            " There are overrides in the database but I could not parse them. Check the database manually for details.");
+                        return;
+                    }
+
+                    if (overwrites.Count < 1)
+                    {
+                        await ctx.RespondAsync(
+                            new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} {user.Mention} doesn't have any overrides set!")
+                                .WithAllowedMentions(Mentions.None));
+                        return;
+                    }
+
+                    var response = $"**Overrides for {user.Mention}:**\n\n";
+                    foreach (var overwrite in overwrites)
+                    {
+                        response +=
+                            $"<#{overwrite.Key}>:\n**Allowed**: {overwrite.Value.Allowed}\n**Denied**: {overwrite.Value.Denied}\n\n";
+                    }
+
+                    await ctx.RespondAsync(new DiscordMessageBuilder().WithContent(response)
+                        .WithAllowedMentions(Mentions.None));
+                }
+
+                [Command("import")]
+                [Description("Import overrides from a channel to the database.")]
+                public async Task Import(CommandContext ctx,
+                    [Description("The channel to import overrides from.")] DiscordChannel channel)
+                {
+                    // Import all overrides for channel to db
+                    foreach (var overwrite in channel.PermissionOverwrites)
+                    {
+                        // Ignore role overrides
+                        if (overwrite.Type == OverwriteType.Role) continue;
+                        
+                        // Get user's current overrides from db
+                        var userOverrides = await Program.db.HashGetAsync("overrides", overwrite.Id.ToString());
+                        if (string.IsNullOrWhiteSpace(userOverrides))
+                        {
+                            // User doesn't have any overrides in db, so just add the new one
+                            await Program.db.HashSetAsync("overrides", overwrite.Id.ToString(),
+                                JsonConvert.SerializeObject(new Dictionary<ulong, DiscordOverwrite>
+                                {
+                                    { channel.Id, overwrite }
+                                }));
+                        }
+                        else
+                        {
+                            // User has overrides in db, so add the new one to the existing ones
+                            var overwrites =
+                                JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(userOverrides);
+                            if (overwrites is null)
+                            {
+                                await ctx.RespondAsync(
+                                    $"{Program.cfgjson.Emoji.Error} Something went wrong while trying to fetch the overrides for {overwrite.Id}!" +
+                                    " There are overrides in the database but I could not parse them. Check the database manually for details.");
+                                return;
+                            }
+
+                            if (overwrites.ContainsKey(channel.Id))
+                                overwrites[channel.Id] = overwrite;
+                            else
+                                overwrites.Add(channel.Id, overwrite);
+
+                            // Update the db
+                            await Program.db.HashSetAsync("overrides", overwrite.Id.ToString(),
+                                JsonConvert.SerializeObject(overwrites));
+                        }
+                    }
+                    
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Overrides for {channel.Mention} imported successfully!");
+                }
+
+                [Command("remove")]
+                [Description("Remove a user's overrides for a channel from the database.")]
+                public async Task Remove(CommandContext ctx,
+                    [Description("The user whose overrides to remove.")] DiscordUser user,
+                    [Description("The channel to remove overrides from.")] DiscordChannel channel)
+                {
+                    // Remove user's overrides for channel from db
+                    foreach (var overwriteHash in await Program.db.HashGetAllAsync("overrides"))
+                    {
+                        var overwriteDict =
+                            JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(
+                                overwriteHash.Value);
+                        if (overwriteDict is null) continue;
+
+                        foreach (var overwrite in overwriteDict.Where(overwrite =>
+                                     overwrite.Value.Id == user.Id && overwrite.Key == channel.Id))
+                        {
+                            overwriteDict.Remove(overwrite.Key);
+
+                            if (overwriteDict.Count > 0)
+                                await Program.db.HashSetAsync("overrides", user.Id,
+                                    JsonConvert.SerializeObject(overwriteDict));
+                            else
+                                await Program.db.HashDeleteAsync("overrides", user.Id);
+                        }
+                    }
+                    
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Overrides for {user.Mention} in {channel.Mention} removed successfully!");
+                }
+            }
         }
 
     }

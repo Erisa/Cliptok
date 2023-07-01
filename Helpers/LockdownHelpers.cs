@@ -27,11 +27,11 @@
                         {
                             if (overwrite.Denied.HasPermission(Permissions.AccessChannels))
                             {
-                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.AccessChannels | Permissions.SendMessagesInThreads, $"[Lockdown by {user.Username}#{user.Discriminator}]: {reason}");
+                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.AccessChannels | Permissions.SendMessagesInThreads, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
                             }
                             else
                             {
-                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.SendMessagesInThreads, $"[Lockdown by {user.Username}#{user.Discriminator}]: {reason}");
+                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.SendMessagesInThreads, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
                             }
 
                             if (overwrite.Allowed.HasPermission(Permissions.SendMessages))
@@ -47,11 +47,11 @@
                         {
                             if (overwrite.Denied.HasPermission(Permissions.AccessChannels))
                             {
-                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.AccessChannels, $"[Lockdown by {user.Username}#{user.Discriminator}]: {reason}");
+                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.AccessChannels, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
                             }
                             else
                             {
-                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, $"[Lockdown by {user.Username}#{user.Discriminator}]: {reason}");
+                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
                             }
 
                             if (overwrite.Allowed.HasPermission(Permissions.SendMessages))
@@ -88,11 +88,11 @@
             {
                 if (lockThreads)
                 {
-                    await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.SendMessagesInThreads, $"[Lockdown by {user.Username}#{user.Discriminator}]: {reason}");
+                    await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.SendMessagesInThreads, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
                 }
                 else
                 {
-                    await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, $"[Lockdown by {user.Username}#{user.Discriminator}]: {reason}");
+                    await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
                 }
             }
 
@@ -102,7 +102,7 @@
             else
                 msg = $"{Program.cfgjson.Emoji.Locked} This channel has been locked: **{reason}**";
 
-            if (duration != null)
+            if (duration is not null)
             {
                 await Program.db.HashSetAsync("unlocks", channel.Id, TimeHelpers.ToUnixTimestamp(DateTime.Now + duration));
                 msg += $"\nChannel unlocks: <t:{TimeHelpers.ToUnixTimestamp(DateTime.Now + duration)}:R>";
@@ -149,7 +149,7 @@
                         if (discordMember.Id == Program.discord.CurrentUser.Id)
                             await discordChannel.AddOverwriteAsync(discordChannel.Guild.EveryoneRole, newOverwrite.Allowed, newOverwrite.Denied, "Lockdown has naturally expired.");
                         else
-                            await discordChannel.AddOverwriteAsync(discordChannel.Guild.EveryoneRole, newOverwrite.Allowed, newOverwrite.Denied, $"[Unlock by {discordMember.Username}#{discordMember.Discriminator}]: {reason}");
+                            await discordChannel.AddOverwriteAsync(discordChannel.Guild.EveryoneRole, newOverwrite.Allowed, newOverwrite.Denied, $"[Unlock by {DiscordHelpers.UniqueUsername(discordMember)}]: {reason}");
                     }
 
                     if (role == discordChannel.Guild.GetRole(Program.cfgjson.ModRole)

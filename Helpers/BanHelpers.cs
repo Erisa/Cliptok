@@ -72,7 +72,7 @@
                 }
                 _ = LogChannelHelper.LogMessageAsync("mod", logOut);
 
-                if (channel != null)
+                if (channel is not null)
                     logOut += $"\nChannel: {channel.Mention}";
 
                 _ = FindModmailThreadAndSendMessage(guild, $"User ID: {targetUserId}", logOut);
@@ -87,7 +87,7 @@
 
         public static async Task FindModmailThreadAndSendMessage(DiscordGuild guild, string searchText, string messageToSend)
         {
-            var matchPair = guild.Channels.FirstOrDefault(c => c.Value.Type == ChannelType.Text && c.Value.Topic != null && c.Value.Topic.EndsWith(searchText));
+            var matchPair = guild.Channels.FirstOrDefault(c => c.Value.Type == ChannelType.Text && c.Value.Topic is not null && c.Value.Topic.EndsWith(searchText));
             var channel = matchPair.Value;
 
             if (channel != default)

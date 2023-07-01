@@ -7,6 +7,8 @@ namespace Cliptok.Events
         public static Dictionary<string, string[]> wordLists = new();
         public static Dictionary<ulong, DateTime> supportRatelimit = new();
 
+        public static Dictionary<ulong, DiscordThreadChannel> trackingThreadCache = new();
+
         public static List<string> allowedInviteCodes = new();
         public static List<string> disallowedInviteCodes = new();
 
@@ -14,12 +16,45 @@ namespace Cliptok.Events
 
         public static async Task MessageCreated(DiscordClient client, MessageCreateEventArgs e)
         {
-            MessageHandlerAsync(client, e.Message, e.Channel);
+            await MessageHandlerAsync(client, e.Message, e.Channel);
         }
 
         public static async Task MessageUpdated(DiscordClient client, MessageUpdateEventArgs e)
         {
-            MessageHandlerAsync(client, e.Message, e.Channel, true);
+            await MessageHandlerAsync(client, e.Message, e.Channel, true);
+        }
+
+        public static async Task MessageDeleted(DiscordClient client, MessageDeleteEventArgs e)
+        {
+            // Delete thread if all messages are deleted
+            if (Program.cfgjson.AutoDeleteEmptyThreads && e.Channel is DiscordThreadChannel)
+            {
+                try
+                {
+                    var member = await e.Guild.GetMemberAsync(e.Message.Author.Id);
+                    if (GetPermLevel(member) >= ServerPermLevel.TrialModerator)
+                        return;
+                }
+                catch
+                {
+                    // User is not in the server. Assume they are not a moderator,
+                    // so do nothing here.
+                }
+
+                IReadOnlyList<DiscordMessage> messages;
+                try
+                {
+                    messages = await e.Channel.GetMessagesAsync(1);
+                }
+                catch (DSharpPlus.Exceptions.NotFoundException ex)
+                {
+                    Program.discord.Logger.LogDebug(ex, "Delete event failed to fetch messages from channel {channel}", e.Channel.Id);
+                    return;
+                }
+
+                if (messages.Count == 0)
+                    await e.Channel.DeleteAsync("All messages in thread were deleted.");
+            }
         }
 
         static async Task DeleteAndWarnAsync(DiscordMessage message, string reason, DiscordClient client)
@@ -46,6 +81,23 @@ namespace Cliptok.Events
 
                 if (message.Author is null || message.Author.Id == client.CurrentUser.Id)
                     return;
+
+                if (Program.db.SetContains("trackedUsers", message.Author.Id))
+                {
+                    DiscordThreadChannel relayThread;
+
+                    if (trackingThreadCache.ContainsKey(message.Author.Id))
+                    {
+                        relayThread = trackingThreadCache[message.Author.Id];
+                    }
+                    else
+                    {
+                        relayThread = (DiscordThreadChannel)await client.GetChannelAsync((ulong)await Program.db.HashGetAsync("trackingThreads", message.Author.Id));
+                        trackingThreadCache.Add(message.Author.Id, relayThread);
+                    }
+                    var _ = await relayThread.SendMessageAsync(await DiscordHelpers.GenerateMessageRelay(message, true, true));
+
+                }
 
                 if (!isAnEdit && channel.IsPrivate && Program.cfgjson.LogChannels.ContainsKey("dms"))
                 {
@@ -383,12 +435,12 @@ namespace Cliptok.Events
 
                             var embed = new DiscordEmbedBuilder()
                                 .WithTimestamp(DateTime.Now)
-                                .WithAuthor(message.Author.Username + '#' + message.Author.Discriminator, null, $"https://cdn.discordapp.com/avatars/{message.Author.Id}/{message.Author.AvatarHash}.png?size=128");
+                                .WithAuthor(DiscordHelpers.UniqueUsername(message.Author), null, $"https://cdn.discordapp.com/avatars/{message.Author.Id}/{message.Author.AvatarHash}.png?size=128");
 
                             var lastMsgs = await message.Channel.GetMessagesBeforeAsync(message.Id, 50);
                             var msgMatch = lastMsgs.FirstOrDefault(m => m.Author.Id == message.Author.Id);
 
-                            if (msgMatch != null)
+                            if (msgMatch is not null)
                             {
                                 var matchContent = StringHelpers.Truncate(string.IsNullOrWhiteSpace(msgMatch.Content) ? "`[No content]`" : msgMatch.Content, 1020, true);
                                 embed.AddField("Previous message", matchContent);
@@ -408,7 +460,7 @@ namespace Cliptok.Events
                                     embed.ImageUrl = message.Attachments[0].Url;
                             }
 
-                            embed.AddField("Message Link", $"[`Jump to message`](https://discord.com/channels/{message.Channel.Guild.Id}/{message.Channel.Id}/{message.Id})");
+                            embed.AddField("Message Link", $"https://discord.com/channels/{message.Channel.Guild.Id}/{message.Channel.Id}/{message.Id}");
                             var logOut = await LogChannelHelper.LogMessageAsync("support", new DiscordMessageBuilder().WithEmbed(embed));
                             _ = logOut.CreateReactionAsync(DiscordEmoji.FromName(client, ":CliptokAcknowledge:", true));
                         }
@@ -416,7 +468,7 @@ namespace Cliptok.Events
 
                     // phishing API
                     var urlMatches = url_rx.Matches(message.Content);
-                    if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
+                    if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") is not null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
                     {
                         var (phishingMatch, httpStatus, responseText, phishingResponse) = await APIs.PhishingAPI.PhishingAPICheckAsync(message.Content);
 
@@ -551,7 +603,7 @@ namespace Cliptok.Events
                                     .WithContent($"{Program.cfgjson.Emoji.Deleted} Deleted non-feedback post from {message.Author.Mention} in {message.Channel.Parent.Mention}:")
                                     .WithEmbed(new DiscordEmbedBuilder()
                                         .WithAuthor(
-                                            $"{message.Author.Username}#{message.Author.Discriminator} in #{message.Channel.Parent.Name}",
+                                            $"{DiscordHelpers.UniqueUsername(message.Author)} in #{message.Channel.Parent.Name}",
                                             null, await LykosAvatarMethods.UserOrMemberAvatarURL(message.Author, message.Channel.Guild))
                                         .WithTitle(thread.Name)
                                         .WithDescription(message.Content)
@@ -561,7 +613,8 @@ namespace Cliptok.Events
                                 );
                             await thread.DeleteAsync();
                             return;
-                        } else
+                        }
+                        else
                         {
                             await Task.Delay(2000);
                             await message.ModifyEmbedSuppressionAsync(true);
@@ -616,7 +669,7 @@ namespace Cliptok.Events
                         if (success)
                         {
                             DiscordChannel logChannel = default;
-                            if (listItem.ChannelId != null)
+                            if (listItem.ChannelId is not null)
                             {
                                 logChannel = await Program.discord.GetChannelAsync((ulong)listItem.ChannelId);
                             }
@@ -632,7 +685,6 @@ namespace Cliptok.Events
                                 DiscordHelpers.MessageLink(message),
                                 content: content,
                                 colour: new DiscordColor(0xFEC13D),
-                                jumpText: "Jump to message",
                                 channelOverride: logChannel,
                                 extraField: extraField
                             );
@@ -694,7 +746,7 @@ namespace Cliptok.Events
             if (invite is null || invite.Guild is null)
                 return false;
 
-            (bool serverMatch, HttpStatusCode httpStatus, string responseString, ServerApiResponseJson? serverResponse) = await APIs.ServerAPI.ServerAPICheckAsynnc(invite.Guild.Id);
+            (bool serverMatch, HttpStatusCode httpStatus, string responseString, ServerApiResponseJson? serverResponse) = await APIs.ServerAPI.ServerAPICheckAsync(invite.Guild.Id);
 
             if (httpStatus != HttpStatusCode.OK)
             {

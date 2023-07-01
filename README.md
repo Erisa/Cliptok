@@ -44,7 +44,7 @@ First you'll want to install Docker. On a Debian or Ubuntu-based Linux distribut
 
 Then:
 1. Clone this repository and `cd` into the directory.
-2. Copy `.env` to `.env-example` and add the bot token.
+2. Copy `.env-example` to `.env` and add the bot token.
 3. If you're not deploying for Microsoft Community, uncomment lines 21-23 in `docker-compose.yml` and edit the `config.json` to fit your needs.
 4. Run the bot in the background: `docker-compose up -d`
 
@@ -59,7 +59,7 @@ To update the bot in the future, `git pull` the repository and then pull and res
 ### Setup - Standalone
 If you want to run the bot as a standalone application rather than a Docker container, you'll need to install the dependencies manually:
 - If running on Windows, Windows 10 or higher is required.
-- .NET SDK 6.0, instructions can be found on the [Microsoft website](https://dotnet.microsoft.com/download).
+- .NET SDK 7.0, instructions can be found on the [Microsoft website](https://dotnet.microsoft.com/download).
 - Redis server, on Debian or Ubuntu-based Linux distributions this should be `sudo apt-get install redis-server`
     - It may be in your best interests to configure Redis to use AOF persistence. This will dramatically decrease the risk of losing data due to power failure or similar issues. You can find more information about that on the [Redis website](https://redis.io/topics/persistence).
     - If running on Windows, [tporadowski/redis](https://github.com/tporadowski/redis) is preferred over WSL or other methods of running Redis.
@@ -79,7 +79,7 @@ If you go with this method you will have to fork the bot to the background yours
 If you want to develop and make changes to the bot, you need the following:
 - First read [our contribution guidelines](CONTRIBUTING.md) if you intend to submit changes back to the repository.
 - You need Windows 10 or higher. Windows 8.1 or lower will not work anymore.
-- You will need .NET SDK 6.0, instructions can be found on the [Microsoft website](https://dotnet.microsoft.com/download).
+- You will need .NET SDK 7.0, instructions can be found on the [Microsoft website](https://dotnet.microsoft.com/download).
 - [Visual Studio 2022](https://visualstudio.microsoft.com/vs/), with `.NET desktop development` selected on the installer. 
     - Visual Studio 2019 is untested and no longer preferred.
 - Redis. It is recommended to install [tporadowski/redis](https://github.com/tporadowski/redis).
@@ -108,7 +108,6 @@ If you have a change to make that follows the contribution guidelines, send a Pu
 
 ### 💗 Significant sponsors
 - [FloatingMilkshake](https://github.com/FloatingMilkshake)
-- [PirateWill](https://github.com/PirateWill)
 - [TorchGM](https://github.com/TorchGM)
 
 ### 🙏Special thanks

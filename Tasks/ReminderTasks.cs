@@ -53,7 +53,7 @@
                         null,
                         user.AvatarUrl
                     )
-                    .AddField("Context", $"[`Jump to context`]({reminderObject.MessageLink})", true);
+                    .AddField("Context", $"{reminderObject.MessageLink}", true);
 
                     var msg = new DiscordMessageBuilder()
                         .WithEmbed(embed)

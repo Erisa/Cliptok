@@ -12,7 +12,7 @@
                     null
                 )
                 .WithAuthor(
-                    $"Mute status for {user.Username}#{user.Discriminator}",
+                    $"Mute status for {DiscordHelpers.UniqueUsername(user)}",
                     null,
                     await LykosAvatarMethods.UserOrMemberAvatarURL(user, Program.homeGuild, "png")
                 );
@@ -131,7 +131,7 @@
             {
                 try
                 {
-                    string fullReason = $"[Mute by {moderator.Username}#{moderator.Discriminator}]: {reason}";
+                    string fullReason = $"[Mute by {DiscordHelpers.UniqueUsername(moderator)}]: {reason}";
                     await naughtyMember.GrantRoleAsync(mutedRole, fullReason);
                     try
                     {
@@ -266,7 +266,7 @@
             }
             catch (DSharpPlus.Exceptions.NotFoundException ex)
             {
-                Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, exception: ex, message: "Failed to unmute {user} in {servername} because they weren't in the server.", $"{targetUser.Username}#{targetUser.Discriminator}", guild.Name);
+                Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, exception: ex, message: "Failed to unmute {user} in {servername} because they weren't in the server.", $"{DiscordHelpers.UniqueUsername(targetUser)}", guild.Name);
             }
 
             if (member == default)
