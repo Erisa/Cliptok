@@ -47,6 +47,7 @@
                     "insiderBeta" => Program.cfgjson.UserRoles.InsiderBeta,
                     "insiderRP" => Program.cfgjson.UserRoles.InsiderRP,
                     "insider10RP" => Program.cfgjson.UserRoles.Insider10RP,
+                    "patchTuesday" => Program.cfgjson.UserRoles.PatchTuesday,
                     _ => throw new NotSupportedException()
                 };
 
@@ -76,6 +77,7 @@
                     "insiderBeta" => Program.cfgjson.UserRoles.InsiderBeta,
                     "insiderRP" => Program.cfgjson.UserRoles.InsiderRP,
                     "insider10RP" => Program.cfgjson.UserRoles.Insider10RP,
+                    "patchTuesday" => Program.cfgjson.UserRoles.PatchTuesday,
                     _ => throw new NotSupportedException()
                 };
 
