@@ -30,39 +30,59 @@
             [SlashCommand("grant", "Opt into a role.")]
             public async Task GrantRole(
                 InteractionContext ctx,
-                [Choice("Windows 11 Insiders (Canary)", "canary")]
-                [Choice("Windows 11 Insiders (Dev)", "dev")]
-                [Choice("Windows 11 Insiders (Beta)", "beta")]
-                [Choice("Windows 11 Insiders (Release Preview)", "rp")]
-                [Choice("Windows 10 Insiders (Release Preview)", "rp10")]
-                [Choice("Patch Tuesday", "patch")]
+                [Choice("Windows 11 Insiders (Canary)", "insiderCanary")]
+                [Choice("Windows 11 Insiders (Dev)", "insiderDev")]
+                [Choice("Windows 11 Insiders (Beta)", "insiderBeta")]
+                [Choice("Windows 11 Insiders (Release Preview)", "insiderRP")]
+                [Choice("Windows 10 Insiders (Release Preview)", "insider10RP")]
+                [Choice("Patch Tuesday", "patchTuesday")]
                 [Option("role", "The role to opt into.")] string role)
             {
                 DiscordMember member = ctx.Member;
 
-                var roleData = Program.cfgjson.GrantableRoles.FirstOrDefault(pair => pair.Key == role);
+                var roleId = role switch
+                {
+                    "insiderCanary" => Program.cfgjson.UserRoles.InsiderCanary,
+                    "insiderDev" => Program.cfgjson.UserRoles.InsiderDev,
+                    "insiderBeta" => Program.cfgjson.UserRoles.InsiderBeta,
+                    "insiderRP" => Program.cfgjson.UserRoles.InsiderRP,
+                    "insider10RP" => Program.cfgjson.UserRoles.Insider10RP,
+                    _ => throw new NotSupportedException()
+                };
 
-                await member.GrantRoleAsync(ctx.Guild.GetRole(roleData.Value), $"/roles grant used by {DiscordHelpers.UniqueUsername(ctx.User)}");
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} The role <@&{roleData.Value}> has been successfully granted!", ephemeral: true, mentions: false);
+                var roleData = ctx.Guild.GetRole(roleId);
+
+                await member.GrantRoleAsync(roleData, $"/roles grant used by {DiscordHelpers.UniqueUsername(ctx.User)}");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} The role {roleData.Mention} has been successfully granted!", ephemeral: true, mentions: false);
             }
 
             [SlashCommand("remove", "Opt out of a role.")]
             public async Task RemoveRole(
                 InteractionContext ctx,
-                [Choice("Windows 11 Insiders (Canary)", "canary")]
-                [Choice("Windows 11 Insiders (Dev)", "dev")]
-                [Choice("Windows 11 Insiders (Beta)", "beta")]
-                [Choice("Windows 11 Insiders (Release Preview)", "rp")]
-                [Choice("Windows 10 Insiders (Release Preview)", "rp10")]
-                [Choice("Patch Tuesday", "patch")]
+                [Choice("Windows 11 Insiders (Canary)", "insiderCanary")]
+                [Choice("Windows 11 Insiders (Dev)", "insiderDev")]
+                [Choice("Windows 11 Insiders (Beta)", "insiderBeta")]
+                [Choice("Windows 11 Insiders (Release Preview)", "insiderRP")]
+                [Choice("Windows 10 Insiders (Release Preview)", "insider10RP")]
+                [Choice("Patch Tuesday", "patchTuesday")]
                 [Option("role", "The role to opt out of.")] string role)
             {
                 DiscordMember member = ctx.Member;
 
-                var roleData = Program.cfgjson.GrantableRoles.FirstOrDefault(pair => pair.Key == role);
+                var roleId = role switch
+                {
+                    "insiderCanary" => Program.cfgjson.UserRoles.InsiderCanary,
+                    "insiderDev" => Program.cfgjson.UserRoles.InsiderDev,
+                    "insiderBeta" => Program.cfgjson.UserRoles.InsiderBeta,
+                    "insiderRP" => Program.cfgjson.UserRoles.InsiderRP,
+                    "insider10RP" => Program.cfgjson.UserRoles.Insider10RP,
+                    _ => throw new NotSupportedException()
+                };
 
-                await member.RevokeRoleAsync(ctx.Guild.GetRole(roleData.Value), $"/roles remove used by {DiscordHelpers.UniqueUsername(ctx.User)}");
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} The role <@&{roleData.Value}> has been successfully removed!", ephemeral: true, mentions: false);
+                var roleData = ctx.Guild.GetRole(roleId);
+
+                await member.RevokeRoleAsync(roleData, $"/roles remove used by {DiscordHelpers.UniqueUsername(ctx.User)}");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} The role {roleData.Mention} has been successfully removed!", ephemeral: true, mentions: false);
             }
         }
     }
