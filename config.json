@@ -223,12 +223,12 @@
   "secondaryAutoDehoistCharacters": "0123456789",
   "hastebinEndpoint": "https://haste.erisa.uk",
   "userRoles": {
+    "insiderCanary": 434426594271166474,
     "insiderDev": 1082364328474329179,
     "insiderBeta": 643712828217360394,
     "insiderRP": 288729239921098752,
     "insider10RP": 910319453491839069,
-    "patchTuesday": 445773142233710594,
-    "insiderCanary": 434426594271166474
+    "patchTuesday": 445773142233710594
   },
   "modmailCategory": 536572162450915340,
   "autobanIds": [
