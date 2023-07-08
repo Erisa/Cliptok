@@ -1,10 +1,11 @@
-﻿using static Cliptok.Program;
+﻿using DSharpPlus.EventArgs;
+using static Cliptok.Program;
 
 namespace Cliptok.Events
 {
     public class ReadyEvent
     {
-        public static async Task OnReady(DiscordClient client, ReadyEventArgs _)
+        public static async Task OnReady(DiscordClient client, SessionReadyEventArgs _)
         {
 
             homeGuild = await discord.GetGuildAsync(cfgjson.ServerID);
