@@ -8,18 +8,21 @@
 
             bool sentAutoresponse = false;
 
-            // Ignore messages older than time limit (in hours)
-            if ((DateTime.UtcNow - message.CreationTimestamp.DateTime).TotalHours < Program.cfgjson.DmAutoresponseTimeLimit)
+            // Make sure there is a message before the current one, otherwise an exception could be thrown
+            var msgsBefore = await message.Channel.GetMessagesBeforeAsync(message.Id, 1);
+            if (msgsBefore.Count > 0)
             {
-                // Make sure there is a message before the current one, otherwise an exception could be thrown
-                var msgBefore = await message.Channel.GetMessagesBeforeAsync(message.Id, 1);
-                if (msgBefore.Count > 0)
+                // Get single message before the current one
+                var msgBefore = msgsBefore[0];
+
+                // Ignore messages older than time limit (in hours)
+                if ((DateTime.UtcNow - msgBefore.CreationTimestamp.DateTime).TotalHours < Program.cfgjson.DmAutoresponseTimeLimit)
                 {
                     // Make sure the message before the current one is from the bot and is a warn/mute DM & respond
-                    if (msgBefore[0].Author.Id == Program.discord.CurrentUser.Id &&
-                        (msgBefore[0].Content.Contains("You were warned") ||
-                         msgBefore[0].Content.Contains("You have been muted") ||
-                         msgBefore[0].Content.Contains("You were automatically warned")))
+                    if (msgBefore.Author.Id == Program.discord.CurrentUser.Id &&
+                        (msgBefore.Content.Contains("You were warned") ||
+                            msgBefore.Content.Contains("You have been muted") ||
+                            msgBefore.Content.Contains("You were automatically warned")))
                     {
                         await message.RespondAsync(
                             $"{Program.cfgjson.Emoji.Information} If you wish to discuss moderator actions, **please contact**" +
