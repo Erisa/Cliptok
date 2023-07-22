@@ -15,6 +15,8 @@
 
         public static async Task UnpackLogConfigAsync(ConfigJson config)
         {
+            if (ready) return;
+
             Dictionary<string, ulong> MigrationMapping = new()
             {
                 { "mod", config.LogChannel},
