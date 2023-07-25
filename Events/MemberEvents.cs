@@ -29,6 +29,11 @@ namespace Cliptok.Events
 
             if (joinWatchlist.Contains(e.Member.Id))
             {
+                if (await db.HashExistsAsync("joinWatchedUsersNotes", e.Member.Id))
+                {
+                    embed.AddField($"Joinwatch Note", await db.HashGetAsync("joinWatchedUsersNotes", e.Member.Id));
+                }
+
                 LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Warning} Watched user {e.Member.Mention} just joined the server!", embed);
             }
 
@@ -176,6 +181,11 @@ namespace Cliptok.Events
 
             if (joinWatchlist.Contains(e.Member.Id))
             {
+                if (await db.HashExistsAsync("joinWatchedUsersNotes", e.Member.Id))
+                {
+                    embed.AddField($"Joinwatch Note", await db.HashGetAsync("joinWatchedUsersNotes", e.Member.Id));
+                }
+
                 LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Warning} Watched user {e.Member.Mention} just left the server!", embed);
             }
         }
