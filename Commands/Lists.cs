@@ -213,5 +213,31 @@
             }
         }
 
+        [Command("appealblock")]
+        [Aliases("superduperban", "ablock")]
+        [Description("Watch for joins and leaves of a given user. Output goes to #investigations.")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        public async Task AppealBlock(
+            CommandContext ctx,
+            [Description("The user to block from ban appeals.")] DiscordUser user
+        )
+        {
+            var joinWatchlist = await Program.db.ListRangeAsync("joinWatchedUsers");
+
+            if (Program.db.SetContains("appealBlocks", user.Id))
+            {
+                // User is already blocked, unblock
+                Program.db.ListRemove("joinWatchedUsers", joinWatchlist.First(x => x == user.Id));
+                await Program.db.HashDeleteAsync("joinWatchedUsersNotes", user.Id);
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully unblocked {user.Mention}, since they were already in the list.");
+            }
+            else
+            {
+                // User is not blocked, block
+                await Program.db.ListRightPushAsync("joinWatchedUsers", user.Id);
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {user.Mention} is now blocked from appealing bans.");
+            }
+        }
+
     }
 }
