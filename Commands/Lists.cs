@@ -222,19 +222,16 @@
             [Description("The user to block from ban appeals.")] DiscordUser user
         )
         {
-            var joinWatchlist = await Program.db.ListRangeAsync("joinWatchedUsers");
-
             if (Program.db.SetContains("appealBlocks", user.Id))
             {
                 // User is already blocked, unblock
-                Program.db.ListRemove("joinWatchedUsers", joinWatchlist.First(x => x == user.Id));
-                await Program.db.HashDeleteAsync("joinWatchedUsersNotes", user.Id);
+                Program.db.SetRemove("appealBlocks", user.Id);
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully unblocked {user.Mention}, since they were already in the list.");
             }
             else
             {
                 // User is not blocked, block
-                await Program.db.ListRightPushAsync("joinWatchedUsers", user.Id);
+                Program.db.SetAdd("appealBlocks", user.Id);
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {user.Mention} is now blocked from appealing bans.");
             }
         }
