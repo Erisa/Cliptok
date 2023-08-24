@@ -4,6 +4,9 @@
     {
         public static async void DirectMessageEventHandler(DiscordMessage message)
         {
+            // Ignore message if user is blocked
+            if (await Program.db.SetContainsAsync("dmRelayBlocklist", message.Author.Id)) return;
+
             // Auto-response to contact modmail if DM follows warn/mute and is within configured time limit
 
             bool sentAutoresponse = false;
