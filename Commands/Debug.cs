@@ -286,7 +286,7 @@
                     {
                         // Ignore role overrides
                         if (overwrite.Type == OverwriteType.Role) continue;
-                        
+
                         // Get user's current overrides from db
                         var userOverrides = await Program.db.HashGetAsync("overrides", overwrite.Id.ToString());
                         if (string.IsNullOrWhiteSpace(userOverrides))
@@ -321,7 +321,7 @@
                                 JsonConvert.SerializeObject(overwrites));
                         }
                     }
-                    
+
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Overrides for {channel.Mention} imported successfully!");
                 }
 
@@ -351,7 +351,7 @@
                                 await Program.db.HashDeleteAsync("overrides", user.Id);
                         }
                     }
-                    
+
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Overrides for {user.Mention} in {channel.Mention} removed successfully!");
                 }
             }

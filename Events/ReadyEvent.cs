@@ -16,14 +16,16 @@ namespace Cliptok.Events
                 client.Logger.LogDebug("Successfully initalised malicious invite list with {count} servers.", fetchResult.Count);
             }
 
-            if (db.KeyExists("config:status") && db.KeyExists("config:status_type")) {
+            if (db.KeyExists("config:status") && db.KeyExists("config:status_type"))
+            {
                 var statusText = await db.StringGetAsync("config:status");
                 var statusType = await db.StringGetAsync("config:status_type");
-                
+
                 try
                 {
                     await client.UpdateStatusAsync(new DiscordActivity(statusText, (ActivityType)(long)statusType));
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     client.Logger.LogError(ex, "Error updating status to {status}", statusText);
                 }

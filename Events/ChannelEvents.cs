@@ -7,13 +7,13 @@
             Task.Run(async () =>
             {
                 // Sync channel overwrites with db so that they can be restored when a user leaves & rejoins.
-    
+
                 // Get the current channel overwrites
                 var currentChannelOverwrites = e.ChannelAfter.PermissionOverwrites;
-    
+
                 // Get the db overwrites
                 var dbOverwrites = await Program.db.HashGetAllAsync("overrides");
-    
+
                 // Compare the two and sync them, prioritizing overwrites on channel over stored overwrites
 
                 foreach (var userOverwrites in dbOverwrites)
@@ -26,10 +26,10 @@
                     {
                         // (if overwrite is for a different channel, skip)
                         if (overwrite.Key != e.ChannelAfter.Id) continue;
-                        
+
                         // (if current overwrite is in the channel, skip)
                         if (currentChannelOverwrites.Any(a => a == overwrite.Value && e.ChannelAfter.Id == overwrite.Key)) continue;
-                        
+
                         // If it looks like the member left, do NOT remove their overrides.
 
                         // Delay to allow leave to complete first
@@ -48,7 +48,7 @@
                         }
 
                         // User could be fetched, so they are in the server and their override was removed. Remove from db.
-                        
+
                         var overrides = await Program.db.HashGetAsync("overrides", userOverwrites.Name);
                         var dict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(overrides);
                         dict.Remove(e.ChannelAfter.Id);
@@ -84,7 +84,7 @@
                                 var dict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(overwrites);
 
                                 if (dict is not null)
-                                {                                    
+                                {
                                     dict.Add(e.ChannelAfter.Id, overwrite);
 
                                     if (dict.Count > 0)
