@@ -1,5 +1,4 @@
-﻿using DSharpPlus.EventArgs;
-using static Cliptok.Program;
+﻿using static Cliptok.Program;
 
 namespace Cliptok.Events
 {
@@ -15,6 +14,19 @@ namespace Cliptok.Events
             {
                 serverApiList = fetchResult;
                 client.Logger.LogDebug("Successfully initalised malicious invite list with {count} servers.", fetchResult.Count);
+            }
+
+            if (db.KeyExists("config:status") && db.KeyExists("config:status_type")) {
+                var statusText = await db.StringGetAsync("config:status");
+                var statusType = await db.StringGetAsync("config:status_type");
+                
+                try
+                {
+                    await client.UpdateStatusAsync(new DiscordActivity(statusText, (ActivityType)(long)statusType));
+                } catch (Exception ex)
+                {
+                    client.Logger.LogError(ex, "Error updating status to {status}", statusText);
+                }
             }
 
             client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{DiscordHelpers.UniqueUsername(client.CurrentUser)}");
