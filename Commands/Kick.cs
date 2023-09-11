@@ -56,22 +56,35 @@
                 return;
             }
 
-            List<Task> taskList = new();
+            List<Task<bool>> taskList = new();
             int successes = 0;
 
             var loading = await ctx.RespondAsync("Processing, please wait.");
 
             foreach (ulong user in users)
             {
-                var member = await ctx.Guild.GetMemberAsync(user);
-                if (member is not null)
+                try
                 {
-                    successes += 1;
-                    taskList.Add(KickAndLogAsync(member, "Mass kick", ctx.Member));
+                    var member = await ctx.Guild.GetMemberAsync(user);
+                    if (member is not null)
+                    {
+
+                        taskList.Add(SafeKickAndLogAsync(member, "Mass kick", ctx.Member));
+                    }
+                }
+                catch
+                {
+                    // not successful, move on
                 }
             }
 
-            await Task.WhenAll(taskList);
+            var tasks = await Task.WhenAll(taskList);
+
+            foreach (var task in taskList)
+            {
+                if (task.Result)
+                    successes += 1;
+            }
 
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Deleted} **{successes}**/{users.Count} users were kicked successfully.");
             await loading.DeleteAsync();
@@ -86,6 +99,23 @@
                     .WithContent($"{Program.cfgjson.Emoji.Ejected} {target.Mention} was kicked by {moderator.Mention}.\nReason: **{reason}**")
                     .WithAllowedMentions(Mentions.None)
            );
+        }
+
+        public async static Task<bool> SafeKickAndLogAsync(DiscordMember target, string reason, DiscordMember moderator)
+        {
+            try
+            {
+                await target.RemoveAsync(reason);
+                await LogChannelHelper.LogMessageAsync("mod",
+                    new DiscordMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Ejected} {target.Mention} was kicked by {moderator.Mention}.\nReason: **{reason}**")
+                        .WithAllowedMentions(Mentions.None)
+               );
+                return true;
+            } catch
+            {
+                return false;
+            }
         }
 
     }
