@@ -43,6 +43,41 @@
             }
         }
 
+        [Command("masskick")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        public async Task MassKickCmd(CommandContext ctx, [RemainingText] string input)
+        {
+
+            List<string> usersString = input.Replace("\n", " ").Replace("\r", "").Split(' ').ToList();
+            List<ulong> users = usersString.Select(x => Convert.ToUInt64(x)).ToList();
+            if (users.Count == 1 || users.Count == 0)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Not accepting a masskick with a single user. Please use `!ban`.");
+                return;
+            }
+
+            List<Task> taskList = new();
+            int successes = 0;
+
+            var loading = await ctx.RespondAsync("Processing, please wait.");
+
+            foreach (ulong user in users)
+            {
+                var member = await ctx.Guild.GetMemberAsync(user);
+                if (member is not null)
+                {
+                    successes += 1;
+                    taskList.Add(KickAndLogAsync(member, "Mass kick", ctx.Member));
+                }
+            }
+
+            await Task.WhenAll(taskList);
+
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Deleted} **{successes}**/{users.Count} users were kicked successfully.");
+            await loading.DeleteAsync();
+        }
+
+
         public async static Task KickAndLogAsync(DiscordMember target, string reason, DiscordMember moderator)
         {
             await target.RemoveAsync(reason);
