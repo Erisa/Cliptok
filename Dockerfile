@@ -21,7 +21,7 @@ RUN touch dummy.txt && \
     fi
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/runtime:7.0.11-alpine3.17
+FROM mcr.microsoft.com/dotnet/runtime:7.0.11-alpine3.18
 LABEL com.centurylinklabs.watchtower.enable true
 WORKDIR /app
 RUN apk add --no-cache git redis openssh
