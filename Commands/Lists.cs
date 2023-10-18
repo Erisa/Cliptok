@@ -207,7 +207,8 @@
             {
                 // User is not joinwatched, watch
                 await Program.db.ListRightPushAsync("joinWatchedUsers", user.Id);
-                await Program.db.HashSetAsync("joinWatchedUsersNotes", user.Id, note);
+                if (note != "")
+                    await Program.db.HashSetAsync("joinWatchedUsersNotes", user.Id, note);
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Now watching for joins/leaves of {user.Mention} to send to the investigations channel"
                     + (note == "" ? "!" : $" with the following note:\n>>> {note}"));
             }
