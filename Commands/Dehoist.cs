@@ -71,7 +71,7 @@
         public async Task MassDehoist(CommandContext ctx)
         {
             var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it. This will take a while.");
-            var discordMembers = await ctx.Guild.GetAllMembersAsync();
+            var discordMembers = await ctx.Guild.GetAllMembersAsync().ToListAsync();
             int failedCount = 0;
 
             foreach (DiscordMember discordMember in discordMembers)
@@ -82,7 +82,7 @@
             }
 
             _ = msg.DeleteAsync();
-            await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {discordMembers.Count - failedCount} of {discordMembers.Count} member(s)! (Check Audit Log for details)").WithReply(ctx.Message.Id, true, false));
+            await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {discordMembers.Count() - failedCount} of {discordMembers.Count()} member(s)! (Check Audit Log for details)").WithReply(ctx.Message.Id, true, false));
         }
 
         [Command("massundehoist")]

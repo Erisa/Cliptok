@@ -12,8 +12,8 @@
             bool sentAutoresponse = false;
 
             // Make sure there is a message before the current one, otherwise an exception could be thrown
-            var msgsBefore = await message.Channel.GetMessagesBeforeAsync(message.Id, 1);
-            if (msgsBefore.Count > 0)
+            var msgsBefore = await message.Channel.GetMessagesBeforeAsync(message.Id, 1).ToListAsync();
+            if (msgsBefore.Count() > 0)
             {
                 // Get single message before the current one
                 var msgBefore = msgsBefore[0];
