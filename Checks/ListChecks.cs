@@ -27,6 +27,7 @@ namespace Cliptok.Checks
 
                 for (int i = 0; i < arrayOfWords.Length; i++)
                 {
+                    string naughtyWord = "";
                     bool isNaughty = false;
                     foreach (string naughty in naughtyWords)
                     {
