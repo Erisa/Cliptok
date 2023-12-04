@@ -165,9 +165,9 @@ namespace Cliptok.Commands.InteractionCommands
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task WarndetailsSlashCommand(InteractionContext ctx,
             [Option("user", "The user to fetch a warning for.")] DiscordUser user,
-             [Autocomplete(typeof(WarningsAutocompleteProvider)), Option("warning", "Type to search! Find the warning you want to fetch.")] string warning
-             , [Option("public", "Whether to show the output publicly.")] bool publicWarnings = false
-            )
+            [Autocomplete(typeof(WarningsAutocompleteProvider)), Option("warning", "Type to search! Find the warning you want to fetch.")] string warning,
+            [Option("public", "Whether to show the output publicly.")] bool publicWarnings = false
+        )
         {
             long warnId = default;
 
@@ -193,7 +193,9 @@ namespace Cliptok.Commands.InteractionCommands
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task DelwarnSlashCommand(InteractionContext ctx,
             [Option("user", "The user to delete a warning for.")] DiscordUser targetUser,
-             [Autocomplete(typeof(WarningsAutocompleteProvider))][Option("warning", "Type to search! Find the warning you want to delete.")] string warningId)
+            [Autocomplete(typeof(WarningsAutocompleteProvider))][Option("warning", "Type to search! Find the warning you want to delete.")] string warningId,
+            [Option("public", "Whether to show the output publicly. Default: false")] bool showPublic = false
+        )
         {
             long warnId = default;
 
@@ -219,7 +221,7 @@ namespace Cliptok.Commands.InteractionCommands
                 bool success = await DelWarningAsync(warning, targetUser.Id);
                 if (success)
                 {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Deleted} Successfully deleted warning `{StringHelpers.Pad(warnId)}` (belonging to {targetUser.Mention})");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Deleted} Successfully deleted warning `{StringHelpers.Pad(warnId)}` (belonging to {targetUser.Mention})", ephemeral: !showPublic);
 
                     await LogChannelHelper.LogMessageAsync("mod",
                         new DiscordMessageBuilder()
@@ -231,7 +233,7 @@ namespace Cliptok.Commands.InteractionCommands
                 }
                 else
                 {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Failed to delete warning `{StringHelpers.Pad(warnId)}` from {targetUser.Mention}!\nPlease contact the bot author.");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Failed to delete warning `{StringHelpers.Pad(warnId)}` from {targetUser.Mention}!\nPlease contact the bot author.", ephemeral: true);
                 }
             }
         }
@@ -239,8 +241,10 @@ namespace Cliptok.Commands.InteractionCommands
         [SlashCommand("editwarn", "Search for a warning and edit it!", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(Permissions.ModerateMembers)]
         public async Task EditWarnSlashCommand(InteractionContext ctx,
-        [Option("user", "The user to fetch a warning for.")] DiscordUser user,
-         [Autocomplete(typeof(WarningsAutocompleteProvider))][Option("warning", "Type to search! Find the warning you want to edit.")] string warning, [Option("new_reason", "The new reason for the warning")] string reason)
+            [Option("user", "The user to fetch a warning for.")] DiscordUser user,
+            [Autocomplete(typeof(WarningsAutocompleteProvider))][Option("warning", "Type to search! Find the warning you want to edit.")] string warning,
+            [Option("new_reason", "The new reason for the warning")] string reason,
+            [Option("public", "Whether to show the output publicly. Default: false")] bool showPublic = false)
         {
             long warnId = default;
 
@@ -271,7 +275,7 @@ namespace Cliptok.Commands.InteractionCommands
             {
                 await EditWarning(user, warnId, ctx.User, reason);
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Information} Successfully edited warning `{StringHelpers.Pad(warnId)}` (belonging to {user.Mention})",
-                    await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), userID: user.Id));
+                    await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), userID: user.Id), ephemeral: !showPublic);
 
                 await LogChannelHelper.LogMessageAsync("mod",
                     new DiscordMessageBuilder()
