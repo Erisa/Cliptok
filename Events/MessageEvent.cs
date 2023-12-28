@@ -310,7 +310,7 @@ namespace Cliptok.Events
                         if (invite != default && invite.Guild is not null && (Program.cfgjson.InviteIDExclusion.Contains(invite.Guild.Id) || invite.Guild.Id == message.Channel.Guild.Id))
                             continue;
 
-                        if (maliciousCache == default && invite != default)
+                        if (maliciousCache == default && invite != default && invite.Guild is not null)
                             maliciousCache = Program.serverApiList.FirstOrDefault(x => x.ServerID == invite.Guild.Id.ToString());
 
                         if (maliciousCache != default)
