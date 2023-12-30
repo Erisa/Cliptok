@@ -93,7 +93,7 @@ namespace Cliptok.Helpers
             string usedHash;
             string usedUrl;
 
-            if (member.GuildAvatarHash is null && member.AvatarHash is null)
+            if (member.AvatarHash is null)
                 return false;
 
             // turns out checking guild avatars isn't important
