@@ -180,12 +180,14 @@ namespace Cliptok
             {
                 try
                 {
-                    List<Task<bool>> taskList = new();
-                    taskList.Add(Tasks.PunishmentTasks.CheckMutesAsync());
-                    taskList.Add(Tasks.PunishmentTasks.CheckBansAsync());
-                    taskList.Add(Tasks.ReminderTasks.CheckRemindersAsync());
-                    taskList.Add(Tasks.RaidmodeTasks.CheckRaidmodeAsync(cfgjson.ServerID));
-                    taskList.Add(Tasks.LockdownTasks.CheckUnlocksAsync());
+                    List<Task<bool>> taskList =
+                    [
+                        Tasks.PunishmentTasks.CheckMutesAsync(),
+                        Tasks.PunishmentTasks.CheckBansAsync(),
+                        Tasks.ReminderTasks.CheckRemindersAsync(),
+                        Tasks.RaidmodeTasks.CheckRaidmodeAsync(cfgjson.ServerID),
+                        Tasks.LockdownTasks.CheckUnlocksAsync(),
+                    ];
 
                     // To prevent a future issue if checks take longer than 10 seconds,
                     // we only start the 10 second counter after all tasks have concluded.
