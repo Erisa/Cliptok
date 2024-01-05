@@ -151,6 +151,7 @@ namespace Cliptok
             discord.ThreadListSynced += ThreadEvents.Discord_ThreadListSynced;
             discord.ThreadMemberUpdated += ThreadEvents.Discord_ThreadMemberUpdated;
             discord.ThreadMembersUpdated += ThreadEvents.Discord_ThreadMembersUpdated;
+            discord.Heartbeated += HeartbeatEvent.OnHeartbeat;
 
             discord.GuildBanRemoved += UnbanEvent.OnUnban;
 
