@@ -36,6 +36,7 @@
                 [Choice("Windows 11 Insiders (Release Preview)", "insiderRP")]
                 [Choice("Windows 10 Insiders (Release Preview)", "insider10RP")]
                 [Choice("Patch Tuesday", "patchTuesday")]
+                [Choice("Giveaways", "giveaways")]
                 [Option("role", "The role to opt into.")] string role)
             {
                 DiscordMember member = ctx.Member;
@@ -48,6 +49,7 @@
                     "insiderRP" => Program.cfgjson.UserRoles.InsiderRP,
                     "insider10RP" => Program.cfgjson.UserRoles.Insider10RP,
                     "patchTuesday" => Program.cfgjson.UserRoles.PatchTuesday,
+                    "giveaways" => Program.cfgjson.UserRoles.Giveaways,
                     _ => throw new NotSupportedException()
                 };
 
@@ -66,6 +68,7 @@
                 [Choice("Windows 11 Insiders (Release Preview)", "insiderRP")]
                 [Choice("Windows 10 Insiders (Release Preview)", "insider10RP")]
                 [Choice("Patch Tuesday", "patchTuesday")]
+                [Choice("Giveaways", "giveaways")]
                 [Option("role", "The role to opt out of.")] string role)
             {
                 DiscordMember member = ctx.Member;
@@ -78,6 +81,7 @@
                     "insiderRP" => Program.cfgjson.UserRoles.InsiderRP,
                     "insider10RP" => Program.cfgjson.UserRoles.Insider10RP,
                     "patchTuesday" => Program.cfgjson.UserRoles.PatchTuesday,
+                    "giveaways" => Program.cfgjson.UserRoles.Giveaways,
                     _ => throw new NotSupportedException()
                 };
 

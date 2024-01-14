@@ -480,6 +480,9 @@
 
         [JsonProperty("patchTuesday")]
         public ulong PatchTuesday { get; private set; }
+
+        [JsonProperty("giveaways")]
+        public ulong Giveaways { get; private set; }
     }
 
     public class PhishingRequestBody
