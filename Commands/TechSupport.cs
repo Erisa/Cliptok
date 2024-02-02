@@ -24,7 +24,7 @@
             else if (ctx.Message.ReferencedMessage is not null)
             {
                 var messageBuild = new DiscordMessageBuilder()
-                    .WithEmbed(embed)
+                    .AddEmbed(embed)
                     .WithReply(ctx.Message.ReferencedMessage.Id, mention: true);
 
                 await ctx.Channel.SendMessageAsync(messageBuild);

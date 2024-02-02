@@ -99,7 +99,7 @@ namespace Cliptok.Commands.InteractionCommands
                 new DiscordMessageBuilder()
                 .WithContent($"{ctx.User.Mention} used tellraw in {channelObj.Mention}:")
                 .WithAllowedMentions(Mentions.None)
-                .WithEmbed(new DiscordEmbedBuilder().WithDescription(input))
+                .AddEmbed(new DiscordEmbedBuilder().WithDescription(input))
             );
         }
 

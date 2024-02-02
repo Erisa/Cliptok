@@ -224,7 +224,7 @@
             LogChannelHelper.LogMessageAsync("mod",
                 new DiscordMessageBuilder()
                     .WithContent($"{Program.cfgjson.Emoji.Warning} New warning for {targetUser.Mention}!")
-                    .WithEmbed(await FancyWarnEmbedAsync(warning, true, 0xFEC13D, false, targetUser.Id))
+                    .AddEmbed(await FancyWarnEmbedAsync(warning, true, 0xFEC13D, false, targetUser.Id))
                     .WithAllowedMentions(Mentions.None)
             );
 

@@ -122,7 +122,7 @@ namespace Cliptok.Commands.InteractionCommands
             await LogChannelHelper.LogMessageAsync("mod",
                 new DiscordMessageBuilder()
                     .WithContent($"{Program.cfgjson.Emoji.Information} Warnings from {sourceUser.Mention} were {operationText}transferred to {targetUser.Mention} by `{DiscordHelpers.UniqueUsername(ctx.User)}`")
-                    .WithEmbed(await WarningHelpers.GenerateWarningsEmbedAsync(targetUser))
+                    .AddEmbed(await WarningHelpers.GenerateWarningsEmbedAsync(targetUser))
            );
         }
 
@@ -227,7 +227,7 @@ namespace Cliptok.Commands.InteractionCommands
                         new DiscordMessageBuilder()
                             .WithContent($"{Program.cfgjson.Emoji.Deleted} Warning deleted:" +
                             $"`{StringHelpers.Pad(warnId)}` (belonging to {targetUser.Mention}, deleted by {ctx.Member.Mention})")
-                            .WithEmbed(await FancyWarnEmbedAsync(warning, true, 0xf03916, true, targetUser.Id))
+                            .AddEmbed(await FancyWarnEmbedAsync(warning, true, 0xf03916, true, targetUser.Id))
                             .WithAllowedMentions(Mentions.None)
                         );
                 }
@@ -281,7 +281,7 @@ namespace Cliptok.Commands.InteractionCommands
                     new DiscordMessageBuilder()
                         .WithContent($"{Program.cfgjson.Emoji.Information} Warning edited:" +
                         $"`{StringHelpers.Pad(warnId)}` (belonging to {user.Mention})")
-                        .WithEmbed(await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), true, userID: user.Id))
+                        .AddEmbed(await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), true, userID: user.Id))
                     );
             }
         }

@@ -89,12 +89,12 @@
 
         public static async Task<DiscordMessage> LogMessageAsync(string key, string content, DiscordEmbed embed)
         {
-            return await LogMessageAsync(key, new DiscordMessageBuilder().WithContent(content).WithEmbed(embed));
+            return await LogMessageAsync(key, new DiscordMessageBuilder().WithContent(content).AddEmbed(embed));
         }
 
         public static async Task<DiscordMessage> LogMessageAsync(string key, DiscordEmbed embed)
         {
-            return await LogMessageAsync(key, new DiscordMessageBuilder().WithEmbed(embed));
+            return await LogMessageAsync(key, new DiscordMessageBuilder().AddEmbed(embed));
         }
         public static async Task<DiscordMessage> LogMessageAsync(string key, DiscordMessageBuilder message)
         {
@@ -142,7 +142,7 @@
 
             if (hasteResult.IsSuccess)
             {
-                msg.WithEmbed(new DiscordEmbedBuilder().WithDescription($"[`📄 View online`]({Program.cfgjson.HastebinEndpoint}/raw/{hasteResult.Key})"));
+                msg.AddEmbed(new DiscordEmbedBuilder().WithDescription($"[`📄 View online`]({Program.cfgjson.HastebinEndpoint}/raw/{hasteResult.Key})"));
             }
 
             return await LogMessageAsync(key, msg);

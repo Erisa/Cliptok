@@ -461,7 +461,7 @@ namespace Cliptok.Events
                             }
 
                             embed.AddField("Message Link", $"https://discord.com/channels/{message.Channel.Guild.Id}/{message.Channel.Id}/{message.Id}");
-                            var logOut = await LogChannelHelper.LogMessageAsync("support", new DiscordMessageBuilder().WithEmbed(embed));
+                            var logOut = await LogChannelHelper.LogMessageAsync("support", new DiscordMessageBuilder().AddEmbed(embed));
                             _ = logOut.CreateReactionAsync(DiscordEmoji.FromName(client, ":CliptokAcknowledge:", true));
                         }
                     }
@@ -601,7 +601,7 @@ namespace Cliptok.Events
                             await LogChannelHelper.LogMessageAsync("messages",
                                 new DiscordMessageBuilder()
                                     .WithContent($"{Program.cfgjson.Emoji.Deleted} Deleted non-feedback post from {message.Author.Mention} in {message.Channel.Parent.Mention}:")
-                                    .WithEmbed(new DiscordEmbedBuilder()
+                                    .AddEmbed(new DiscordEmbedBuilder()
                                         .WithAuthor(
                                             $"{DiscordHelpers.UniqueUsername(message.Author)} in #{message.Channel.Parent.Name}",
                                             null, await LykosAvatarMethods.UserOrMemberAvatarURL(message.Author, message.Channel.Guild))

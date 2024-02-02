@@ -36,7 +36,7 @@
             if (channelOverride == default)
                 await LogChannelHelper.LogMessageAsync(logChannelKey, content, embed);
             else
-                await channelOverride.SendMessageAsync(new DiscordMessageBuilder().WithContent(content).WithEmbed(embed).WithAllowedMentions(Mentions.None));
+                await channelOverride.SendMessageAsync(new DiscordMessageBuilder().WithContent(content).AddEmbed(embed).WithAllowedMentions(Mentions.None));
         }
 
     }

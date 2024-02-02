@@ -56,7 +56,7 @@
                     .AddField("Context", $"{reminderObject.MessageLink}", true);
 
                     var msg = new DiscordMessageBuilder()
-                        .WithEmbed(embed)
+                        .AddEmbed(embed)
                         .WithContent($"<@{reminderObject.UserID}>, you asked to be reminded of something:");
 
                     if (DmFallback)

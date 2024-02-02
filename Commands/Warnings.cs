@@ -137,7 +137,7 @@ namespace Cliptok.Commands
                         new DiscordMessageBuilder()
                             .WithContent($"{Program.cfgjson.Emoji.Deleted} Warning deleted:" +
                             $"`{StringHelpers.Pad(warnId)}` (belonging to {targetUser.Mention}, deleted by {ctx.Member.Mention})")
-                            .WithEmbed(await FancyWarnEmbedAsync(warning, true, 0xf03916, true, targetUser.Id))
+                            .AddEmbed(await FancyWarnEmbedAsync(warning, true, 0xf03916, true, targetUser.Id))
                             .WithAllowedMentions(Mentions.None)
                         );
                 }
@@ -227,7 +227,7 @@ namespace Cliptok.Commands
                     new DiscordMessageBuilder()
                         .WithContent($"{Program.cfgjson.Emoji.Information} Warning edited:" +
                         $"`{StringHelpers.Pad(warnId)}` (belonging to {targetUser.Mention})")
-                        .WithEmbed(await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId), true, userID: targetUser.Id))
+                        .AddEmbed(await FancyWarnEmbedAsync(GetWarning(targetUser.Id, warnId), true, userID: targetUser.Id))
                     );
             }
         }
