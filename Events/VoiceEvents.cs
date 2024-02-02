@@ -59,7 +59,7 @@
                     List<DiscordMessage> messages = new();
                     try
                     {
-                        var firstMsg = (await e.Before.Channel.GetMessagesAsync(1)).FirstOrDefault();
+                        var firstMsg = (await e.Before.Channel.GetMessagesAsync(1).ToListAsync()).FirstOrDefault();
                         if (firstMsg == default)
                             return;
 
@@ -68,9 +68,9 @@
                         // delete all the messages from the channel
                         while (true)
                         {
-                            var newmsgs = (await e.Before.Channel.GetMessagesBeforeAsync(lastMsgId, 100)).ToList();
+                            var newmsgs = await e.Before.Channel.GetMessagesBeforeAsync(lastMsgId, 100).ToListAsync();
                             messages.AddRange(newmsgs);
-                            if (newmsgs.Count < 100)
+                            if (newmsgs.Count() < 100)
                                 break;
                             else
                                 lastMsgId = newmsgs.Last().Id;
