@@ -312,7 +312,7 @@
                 if (dmMessage is not null)
                 {
                     var guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
-                    await dmMessage.ModifyAsync($"{Program.cfgjson.Emoji.Success} You were warned in **{guild.Name}**, but the warning was revoked by a Moderator.");
+                    await dmMessage.ModifyAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} You were warned in **{guild.Name}**, but the warning was revoked by a Moderator."), suppressEmbeds: true);
                 }
 
                 Program.db.HashDelete(userID.ToString(), warning.WarningId);
