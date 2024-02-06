@@ -34,7 +34,8 @@
     "directx",
     "winadmins",
     "minecraft",
-    "intel"
+    "intel",
+    "excel"
   ],
   "inviteIDExclusion": [
     150662382874525696,
@@ -60,7 +61,8 @@
     675491639804035089,
     114211522384756737,
     834949385535750214,
-    554824368740630529
+    554824368740630529,
+    924393747112919090
   ],
   "warningDaysThreshold": 30,
   "autoMuteThresholds": {
