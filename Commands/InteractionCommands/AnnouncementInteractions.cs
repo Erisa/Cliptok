@@ -40,6 +40,11 @@
                 return;
             }
 
+            if (insiderChannel1 == insiderChannel2)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Both insider channels cannot be the same! Simply set one instead.", ephemeral: true);
+            }
+
             if (windowsVersion == 10 && insiderChannel1 != "RP")
             {
                 await ctx.RespondAsync(text: $"{Program.cfgjson.Emoji.Error} Windows 10 only has a Release Preview Channel.", ephemeral: true);
@@ -128,7 +133,7 @@
                 {
                     pingMsgString += $"\n\nDiscuss it here: {threadChannel.Mention}";
                 }
-                else if (insiderChannel1 == "Canary" && Program.cfgjson.InsiderCanaryThread != 0 && autothreadName == "Build {0} ({1})" && !canaryCreateNewThread)
+                else if (insiderChannel1 == "Canary" && insiderChannel2 == "" && Program.cfgjson.InsiderCanaryThread != 0 && autothreadName == "Build {0} ({1})" && !canaryCreateNewThread)
                 {
                     threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderCanaryThread);
                     pingMsgString += $"\n\nDiscuss it here: {threadChannel.Mention}";
@@ -165,7 +170,7 @@
                 {
                     noPingMsgString += $"\n\nDiscuss it here: {threadChannel.Mention}";
                 }
-                else if (insiderChannel1 == "Canary" && Program.cfgjson.InsiderCanaryThread != 0 && autothreadName == "Build {0} ({1})" && !canaryCreateNewThread)
+                else if (insiderChannel1 == "Canary" && insiderChannel2 == "" &&  Program.cfgjson.InsiderCanaryThread != 0 && autothreadName == "Build {0} ({1})" && !canaryCreateNewThread)
                 {
                     threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderCanaryThread);
                     noPingMsgString += $"\n\nDiscuss it here: {threadChannel.Mention}";
