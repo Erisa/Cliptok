@@ -197,7 +197,7 @@
                     .AddField($"Attachment", $"[{message.Attachments[0].FileName}]({message.Attachments[0].Url})");
 
             if (jumplink)
-                embed.AddField("Message Link", $"{message.JumpLink}");
+                embed.AddField("Message Link", $"{MessageLink(message)}");
 
 
             if (message.ReferencedMessage is not null)
