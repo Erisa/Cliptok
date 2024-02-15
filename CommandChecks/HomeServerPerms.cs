@@ -1,6 +1,4 @@
-﻿using System.Formats.Tar;
-
-namespace Cliptok.CommandChecks
+﻿namespace Cliptok.CommandChecks
 {
     public class ServerPerms
     {
