@@ -316,5 +316,7 @@
   "insiderCommandLockedToChannel": 187649467611086849,
   "dmAutoresponseTimeLimit": 6,
   "autoDeleteEmptyThreads": true,
-  "insiderCanaryThread": 1082394217168523315
+  "insiderCanaryThread": 1082394217168523315,
+  "tqsMutedRole": 1206705643369795664,
+  "tqsMuteDurationHours": 2
 }
