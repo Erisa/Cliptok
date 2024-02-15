@@ -12,6 +12,7 @@ namespace Cliptok.Commands
 
             // todo: store per-guild
             DiscordRole mutedRole = ctx.Guild.GetRole(Program.cfgjson.MutedRole);
+            DiscordRole tqsMutedRole = ctx.Guild.GetRole(Program.cfgjson.TqsMutedRole);
 
             DiscordMember member = default;
             try
@@ -23,7 +24,7 @@ namespace Cliptok.Commands
                 Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, exception: ex, message: "Failed to unmute {user} in {server} because they weren't in the server.", $"{DiscordHelpers.UniqueUsername(targetUser)}", ctx.Guild.Name);
             }
 
-            if ((await Program.db.HashExistsAsync("mutes", targetUser.Id)) || (member != default && member.Roles.Contains(mutedRole)))
+            if ((await Program.db.HashExistsAsync("mutes", targetUser.Id)) || (member != default && (member.Roles.Contains(mutedRole) || member.Roles.Contains(tqsMutedRole))))
             {
                 await MuteHelpers.UnmuteUserAsync(targetUser, reason);
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Information} Successfully unmuted **{DiscordHelpers.UniqueUsername(targetUser)}**.");
@@ -92,6 +93,48 @@ namespace Cliptok.Commands
                 reason = "No reason specified.";
 
             _ = MuteHelpers.MuteUserAsync(targetUser, reason, ctx.User.Id, ctx.Guild, ctx.Channel, muteDuration, true);
+        }
+
+        [Command("tqsmute")]
+        [Description(
+            "Temporarily mutes a user, preventing them from sending messages in #tech-support and related channels until they're unmuted.")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TechnicalQueriesSlayer)]
+        public async Task TqsMuteCmd(
+            CommandContext ctx, [Description("The user to mute")] DiscordUser targetUser,
+            [RemainingText, Description("The reason for the mute")] string reason = "No reason specified.")
+        {
+            // Only allow usage in #tech-support, #tech-support-forum, and their threads
+            if (ctx.Channel.Id != Program.cfgjson.TechSupportChannel &&
+                ctx.Channel.Id != Program.cfgjson.SupportForumId &&
+                ctx.Channel.Parent.Id != Program.cfgjson.TechSupportChannel &&
+                ctx.Channel.Parent.Id != Program.cfgjson.SupportForumId)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command can only be used in <#{Program.cfgjson.TechSupportChannel}>, <#{Program.cfgjson.SupportForumId}>, and threads in those channels!");
+                return;
+            }
+            
+            DiscordMember targetMember = default;
+            try
+            {
+                targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
+            }
+            catch (DSharpPlus.Exceptions.NotFoundException)
+            {
+                // blah
+            }
+
+            if (targetMember != default && GetPermLevel(ctx.Member) == ServerPermLevel.TechnicalQueriesSlayer && (GetPermLevel(targetMember) >= ServerPermLevel.TechnicalQueriesSlayer || targetMember.IsBot))
+            {
+                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, you cannot mute other TQS or staff members.");
+                return;
+            }
+
+            await ctx.Message.DeleteAsync();
+
+            // mute duration is static for TQS mutes
+            TimeSpan muteDuration = TimeSpan.FromHours(Program.cfgjson.TqsMuteDurationHours);
+
+            MuteHelpers.MuteUserAsync(targetUser, reason, ctx.User.Id, ctx.Guild, ctx.Channel, muteDuration, true, true);
         }
     }
 }
