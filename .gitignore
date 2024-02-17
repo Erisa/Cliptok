@@ -2,7 +2,6 @@ Properties/*
 config.*.json
 .env
 *.env
-.github/*
 Lists/Private/*
 Lists/Private
 data/*
