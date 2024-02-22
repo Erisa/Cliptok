@@ -109,6 +109,18 @@
                 return;
             }
             
+            // Check if the user is already muted; disallow TQS-mute if so
+            
+            DiscordRole mutedRole = ctx.Guild.GetRole(Program.cfgjson.MutedRole);
+            DiscordRole tqsMutedRole = ctx.Guild.GetRole(Program.cfgjson.TqsMutedRole);
+            
+            if (await Program.db.HashExistsAsync("mutes", targetUser.Id) || ctx.Member.Roles.Contains(mutedRole) || ctx.Member.Roles.Contains(tqsMutedRole))
+            {
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, that user is already muted."));
+                return;
+            }
+            
+            // Get member
             DiscordMember targetMember = default;
             try
             {
@@ -119,6 +131,7 @@
                 // blah
             }
 
+            // Check if user to be muted is staff or TQS, and disallow if so
             if (targetMember != default && GetPermLevel(ctx.Member) == ServerPermLevel.TechnicalQueriesSlayer && (GetPermLevel(targetMember) >= ServerPermLevel.TechnicalQueriesSlayer || targetMember.IsBot))
             {
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, you cannot mute other TQS or staff members."));
