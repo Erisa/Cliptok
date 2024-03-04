@@ -223,7 +223,7 @@
                     {
                         if (isTqsMute)
                         {
-                            output.dmMessage = await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been temporarily muted in **tech support channels only** in **{guild.Name}** for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** pending action from a Moderator." +
+                            output.dmMessage = await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been temporarily muted, in **tech support channels only**, in **{guild.Name}** for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** pending action from a Moderator." +
                                 $"\nReason: **{reason}**" +
                                 $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>");
                         }

@@ -95,7 +95,7 @@
         public async Task TqsMuteSlashCommand(
             InteractionContext ctx,
             [Option("user", "The user to mute.")] DiscordUser targetUser,
-            [Option("reason", "The reason for the mute.")] string reason = "No reason specified.")
+            [Option("reason", "The reason for the mute.")] string reason)
         {
             await ctx.DeferAsync(ephemeral: true);
             
