@@ -41,7 +41,7 @@
         [Command("announce")]
         [Description("Announces something in the current channel, pinging an Insider role in the process.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task AnnounceCmd(CommandContext ctx, [Description("'canary', 'dev','beta','rp', 'rp10, 'patch', 'rpbeta', 'betadev'")] string roleName, [RemainingText, Description("The announcement message to send.")] string announcementMessage)
+        public async Task AnnounceCmd(CommandContext ctx, [Description("'canary', 'dev','beta','rp', 'rp10, 'patch', 'rpbeta', 'betadev', 'candev'")] string roleName, [RemainingText, Description("The announcement message to send.")] string announcementMessage)
         {
             DiscordRole discordRole;
 
@@ -101,6 +101,27 @@
                 }
 
                 await betaRole.ModifyAsync(mentionable: false);
+                await devRole.ModifyAsync(mentionable: false);
+            }
+            else if (roleName == "candev")
+            {
+                var canaryRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles["canary"]);
+                var devRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles["dev"]);
+
+                await canaryRole.ModifyAsync(mentionable: true);
+                await devRole.ModifyAsync(mentionable: true);
+
+                try
+                {
+                    await ctx.Message.DeleteAsync();
+                    await ctx.Channel.SendMessageAsync($"{canaryRole.Mention} {devRole.Mention}\n{announcementMessage}");
+                }
+                catch
+                {
+                    // We still need to remember to make it unmentionable even if the msg fails.
+                }
+
+                await canaryRole.ModifyAsync(mentionable: false);
                 await devRole.ModifyAsync(mentionable: false);
             }
             else
