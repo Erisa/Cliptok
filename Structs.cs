@@ -286,6 +286,12 @@
 
         [JsonProperty("insiderCanaryThread")]
         public ulong InsiderCanaryThread { get; set; } = 0;
+        
+        [JsonProperty("tqsMutedRole")]
+        public ulong TqsMutedRole { get; private set; }
+        
+        [JsonProperty("tqsMuteDurationHours")]
+        public int TqsMuteDurationHours { get; private set; }
 
     }
 

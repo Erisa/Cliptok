@@ -16,6 +16,7 @@
             Tier8,
             TierS,
             TierX,
+            TechnicalQueriesSlayer,
             TrialModerator,
             Moderator,
             Admin,
@@ -38,6 +39,8 @@
                 return ServerPermLevel.Muted;
             else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TrialModRole)))
                 return ServerPermLevel.TrialModerator;
+            else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TqsRoleId)))
+                return ServerPermLevel.TechnicalQueriesSlayer;
             else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[9])))
                 return ServerPermLevel.TierX;
             else if (target.Roles.Contains(target.Guild.GetRole(Program.cfgjson.TierRoles[8])))

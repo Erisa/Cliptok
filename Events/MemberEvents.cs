@@ -127,12 +127,13 @@ namespace Cliptok.Events
                 return;
 
             var muteRole = e.Guild.GetRole(cfgjson.MutedRole);
+            var tqsMuteRole = e.Guild.GetRole(cfgjson.TqsMutedRole);
             var userMute = await db.HashGetAsync("mutes", e.Member.Id);
 
-            if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole))
+            if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole) & !e.Member.Roles.Contains(tqsMuteRole))
                 db.HashDeleteAsync("mutes", e.Member.Id);
 
-            if (e.Member.Roles.Contains(muteRole) && userMute.IsNull)
+            if ((e.Member.Roles.Contains(muteRole) || e.Member.Roles.Contains(tqsMuteRole)) && userMute.IsNull)
             {
                 MemberPunishment newMute = new()
                 {
@@ -146,7 +147,7 @@ namespace Cliptok.Events
                 db.HashSetAsync("mutes", e.Member.Id, JsonConvert.SerializeObject(newMute));
             }
 
-            if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole))
+            if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole) && !e.Member.Roles.Contains(tqsMuteRole))
                 db.HashDeleteAsync("mutes", e.Member.Id);
 
             string rolesStr = "None";

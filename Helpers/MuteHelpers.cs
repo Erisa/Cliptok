@@ -101,11 +101,13 @@
         }
 
         // Only to be used on naughty users.
-        public static async Task<(DiscordMessage? dmMessage, DiscordMessage? chatMessage)> MuteUserAsync(DiscordUser naughtyUser, string reason, ulong moderatorId, DiscordGuild guild, DiscordChannel channel = null, TimeSpan muteDuration = default, bool alwaysRespond = false)
+        public static async Task<(DiscordMessage? dmMessage, DiscordMessage? chatMessage)> MuteUserAsync(DiscordUser naughtyUser, string reason, ulong moderatorId, DiscordGuild guild, DiscordChannel channel = null, TimeSpan muteDuration = default, bool alwaysRespond = false, bool isTqsMute = false)
         {
             bool permaMute = false;
             DateTime? actionTime = DateTime.Now;
-            DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
+            DiscordRole mutedRole = isTqsMute
+                ? guild.GetRole(Program.cfgjson.TqsMutedRole)
+                : guild.GetRole(Program.cfgjson.MutedRole);
             DateTime? expireTime = actionTime + muteDuration;
             DiscordMember moderator = await guild.GetMemberAsync(moderatorId);
 
@@ -131,27 +133,31 @@
             {
                 try
                 {
-                    string fullReason = $"[Mute by {DiscordHelpers.UniqueUsername(moderator)}]: {reason}";
+                    string fullReason = $"[{(isTqsMute ? "TQS " : "")}Mute by {DiscordHelpers.UniqueUsername(moderator)}]: {reason}";
                     await naughtyMember.GrantRoleAsync(mutedRole, fullReason);
-                    try
+                    
+                    // for global mutes, issue timeout & kick from any voice channel; does not apply to TQS mutes as they are not server-wide
+                    if (!isTqsMute)
                     {
                         try
                         {
-                            await naughtyMember.TimeoutAsync(expireTime + TimeSpan.FromSeconds(10), fullReason);
+                            try
+                            {
+                                await naughtyMember.TimeoutAsync(expireTime + TimeSpan.FromSeconds(10), fullReason);
+                            }
+                            catch (Exception e)
+                            {
+                                Program.discord.Logger.LogError(e, "Failed to issue timeout to {user}", naughtyMember.Id);
+                            }
+
+                            // Remove the member from any Voice Channel they're currently in.
+                            await naughtyMember.ModifyAsync(x => x.VoiceChannel = null);
                         }
-                        catch (Exception e)
+                        catch (DSharpPlus.Exceptions.UnauthorizedException)
                         {
-                            Program.discord.Logger.LogError(e, "Failed to issue timeout to {user}", naughtyMember.Id);
+                            // do literally nothing. who cares?
                         }
-
-                        // Remove the member from any Voice Channel they're currently in.
-                        await naughtyMember.ModifyAsync(x => x.VoiceChannel = null);
                     }
-                    catch (DSharpPlus.Exceptions.UnauthorizedException)
-                    {
-                        // do literally nothing. who cares?
-                    }
-
                 }
                 catch
                 {
@@ -170,12 +176,32 @@
                 }
                 else
                 {
-                    await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder()
-                        .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** by {moderator.Mention}." +
-                            $"\nReason: **{reason}**" +
-                            $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>")
-                        .WithAllowedMentions(Mentions.None)
-                    );
+                    // if TQS mute, log to investigations channel also & make it clear in regular mod logs that it's a TQS mute
+                    if (isTqsMute)
+                    {
+                        await LogChannelHelper.LogMessageAsync("investigations", new DiscordMessageBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was TQS-muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** by {moderator.Mention}." +
+                                $"\nReason: **{reason}**" +
+                                $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>")
+                            .WithAllowedMentions(Mentions.None)
+                        );
+                        
+                        await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was TQS-muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** by {moderator.Mention}." +
+                                         $"\nReason: **{reason}**" +
+                                         $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>")
+                            .WithAllowedMentions(Mentions.None)
+                        );
+                    }
+                    else
+                    {
+                        await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** by {moderator.Mention}." +
+                                         $"\nReason: **{reason}**" +
+                                         $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>")
+                            .WithAllowedMentions(Mentions.None)
+                        );
+                    }
                 }
             }
             catch (Exception ex)
@@ -195,9 +221,18 @@
 
                     else
                     {
-                        output.dmMessage = await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}** for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}**!" +
-                            $"\nReason: **{reason}**" +
-                            $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>");
+                        if (isTqsMute)
+                        {
+                            output.dmMessage = await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been temporarily muted, in **tech support channels only**, in **{guild.Name}** for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** pending action from a Moderator." +
+                                $"\nReason: **{reason}**" +
+                                $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>");
+                        }
+                        else
+                        {
+                            output.dmMessage = await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}** for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}**!" +
+                                $"\nReason: **{reason}**" +
+                                $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>");
+                        }
                     }
                 }
                 catch (DSharpPlus.Exceptions.UnauthorizedException)
@@ -208,7 +243,16 @@
                         if (muteDuration == default)
                             output.chatMessage = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} has been muted: **{reason}**");
                         else
-                            output.chatMessage = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} has been muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}**: **{reason}**");
+                        {
+                            if (isTqsMute)
+                            {
+                                output.chatMessage = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} has been temporarily muted, in tech support channels only, for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** pending action from a Moderator: **{reason}**");
+                            }
+                            else
+                            {
+                                output.chatMessage = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} has been muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}**: **{reason}**");
+                            }
+                        }
                     }
                 }
             }
@@ -219,7 +263,16 @@
                 if (muteDuration == default)
                     output.chatMessage = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} has been muted: **{reason}**");
                 else
-                    output.chatMessage = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} has been muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}**: **{reason}**");
+                {
+                    if (isTqsMute)
+                    {
+                        output.chatMessage = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} has been temporarily muted, in tech support channels only, for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** pending action from a Moderator: **{reason}**");
+                    }
+                    else
+                    {
+                        output.chatMessage = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} has been muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}**: **{reason}**");
+                    }
+                }
             }
 
             MemberPunishment newMute = new()
@@ -255,10 +308,12 @@
         {
             var muteDetailsJson = await Program.db.HashGetAsync("mutes", targetUser.Id);
             bool success = false;
+            bool wasTqsMute = false;
             DiscordGuild guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
 
             // todo: store per-guild
             DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
+            DiscordRole tqsMutedRole = guild.GetRole(Program.cfgjson.TqsMutedRole);
             DiscordMember member = default;
             try
             {
@@ -282,7 +337,20 @@
                 // Perhaps we could be catching something specific, but this should do for now.
                 try
                 {
-                    await member.RevokeRoleAsync(role: mutedRole, reason);
+                    // Try to revoke standard Muted role first. If it fails, the user might just be TQS-muted.
+                    // Try removing TQS mute role regardless of whether we could successfully remove the standard
+                    // muted role.
+                    // If both attempts fail, do standard failure error handling.
+                    try
+                    {
+                        await member.RevokeRoleAsync(role: mutedRole, reason);
+                    }
+                    finally
+                    {
+                        await member.RevokeRoleAsync(role: tqsMutedRole, reason);
+                        wasTqsMute = true; // only true if TQS mute role was found & removed
+                    }
+                    
                     foreach (var role in member.Roles)
                     {
                         if (role.Name == "Muted" && role.Id != Program.cfgjson.MutedRole)
@@ -310,7 +378,11 @@
                 }
                 try
                 {
-                    await member.TimeoutAsync(until: null, reason: reason);
+                    // only try to remove timeout for non-TQS mutes
+                    // TQS mutes are not server-wide so this would fail every time for TQS mutes,
+                    // and we don't want to log a failure for every removed TQS mute
+                    if (!wasTqsMute)
+                        await member.TimeoutAsync(until: null, reason: reason);
                 }
                 catch (Exception ex)
                 {
