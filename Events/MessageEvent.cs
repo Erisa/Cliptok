@@ -129,7 +129,7 @@ namespace Cliptok.Events
                 // handle #giveaways
                 if (!isAnEdit && message.Author.Id == Program.cfgjson.GiveawayBot && message.Channel.Id == Program.cfgjson.GiveawaysChannel && message.Content == Program.cfgjson.GiveawayTriggerMessage)
                 {
-                    string giveawayTitle = message.Embeds[0].Author.Name;
+                    string giveawayTitle = message.Embeds[0].Title;
 
                     if (giveawayTitle.Length > 100)
                     {
