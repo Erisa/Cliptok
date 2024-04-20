@@ -8,6 +8,12 @@
         [RequirePermissions(Permissions.KickMembers), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task KickCmd(CommandContext ctx, DiscordUser target, [RemainingText] string reason = "No reason specified.")
         {
+            if (target.IsBot)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} To prevent accidents, I won't kick bots. If you really need to do this, do it manually in Discord.");
+                return;
+            }
+
             reason = reason.Replace("`", "\\`").Replace("*", "\\*");
 
             DiscordMember member;

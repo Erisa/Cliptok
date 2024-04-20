@@ -147,6 +147,12 @@ namespace Cliptok.Commands.InteractionCommands
         [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.KickMembers)]
         public async Task KickCmd(InteractionContext ctx, [Option("user", "The user you want to kick from the server.")] DiscordUser target, [Option("reason", "The reason for kicking this user.")] string reason = "No reason specified.")
         {
+            if (target.IsBot)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} To prevent accidents, I won't kick bots. If you really need to do this, do it manually in Discord.");
+                return;
+            }
+
             reason = reason.Replace("`", "\\`").Replace("*", "\\*");
 
             DiscordMember member;
