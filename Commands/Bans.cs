@@ -48,6 +48,13 @@ namespace Cliptok.Commands
          [Description("The user you wish to ban. Accepts many formats")] DiscordUser targetMember,
          [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling' NOTE: Add 'appeal' to the start of the reason to include an appeal link")] string timeAndReason = "No reason specified.")
         {
+
+            if (targetMember.IsBot)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} To prevent accidents, I won't ban bots. If you really need to do this, do it manually in Discord.");
+                return;
+            }
+
             bool appealable = false;
             bool timeParsed = false;
 

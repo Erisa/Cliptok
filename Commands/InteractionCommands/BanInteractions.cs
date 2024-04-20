@@ -24,14 +24,21 @@ namespace Cliptok.Commands.InteractionCommands
             if (keepMessages)
                 messageDeleteDays = 0;
 
+            if (user.IsBot)
+            {
+                webhookOut.Content = $"{Program.cfgjson.Emoji.Error} To prevent accidents, I won't ban bots. If you really need to do this, do it manually in Discord.";
+                await ctx.EditResponseAsync(webhookOut);
+                return;
+            }
+
             DiscordMember targetMember;
 
             try
             {
                 targetMember = await ctx.Guild.GetMemberAsync(user.Id);
-                if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && (GetPermLevel(targetMember) >= ServerPermLevel.TrialModerator || targetMember.IsBot))
+                if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && (GetPermLevel(targetMember) >= ServerPermLevel.TrialModerator))
                 {
-                    webhookOut.Content = $"{Program.cfgjson.Emoji.Error} As a Trial Moderator you cannot perform moderation actions on other staff members or bots.";
+                    webhookOut.Content = $"{Program.cfgjson.Emoji.Error} As a Trial Moderator you cannot perform moderation actions on other staff members.";
                     await ctx.EditResponseAsync(webhookOut);
                     return;
                 }
