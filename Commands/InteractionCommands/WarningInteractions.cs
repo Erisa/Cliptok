@@ -140,7 +140,8 @@ namespace Cliptok.Commands.InteractionCommands
 
                 var user = await ctx.Client.GetUserAsync((ulong)useroption.Value);
 
-                var warnings = Program.db.HashGetAll(user.Id.ToString()).ToDictionary(
+                var warnings = Program.db.HashGetAll(user.Id.ToString())
+                    .Where(x => JsonConvert.DeserializeObject<UserWarning>(x.Value).Type == WarningType.Warning).ToDictionary(
                    x => x.Name.ToString(),
                   x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
                  ).OrderByDescending(x => x.Value.WarningId);
@@ -183,6 +184,12 @@ namespace Cliptok.Commands.InteractionCommands
 
             UserWarning warningObject = GetWarning(user.Id, warnId);
 
+            if (warningObject.Type == WarningType.Note)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note get` instead, or make sure you've got the right warning ID.", ephemeral: true);
+                return;
+            }
+
             if (warningObject is null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.", ephemeral: true);
             else
@@ -210,6 +217,13 @@ namespace Cliptok.Commands.InteractionCommands
             }
 
             UserWarning warning = GetWarning(targetUser.Id, warnId);
+            
+            if (warning.Type == WarningType.Note)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note remove` instead, or make sure you've got the right warning ID.", ephemeral: true);
+                return;
+            }
+            
             if (warning is null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
@@ -265,6 +279,13 @@ namespace Cliptok.Commands.InteractionCommands
             }
 
             var warningObject = GetWarning(user.Id, warnId);
+            
+            if (warningObject.Type == WarningType.Note)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note edit` instead, or make sure you've got the right warning ID.", ephemeral: true);
+                return;
+            }
+            
             if (warningObject is null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && warningObject.ModUserId != ctx.User.Id && warningObject.ModUserId != ctx.Client.CurrentUser.Id)

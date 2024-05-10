@@ -4,7 +4,8 @@
     {
         public static async Task<DiscordEmbed> GenerateWarningsEmbedAsync(DiscordUser targetUser)
         {
-            var warningsOutput = Program.db.HashGetAll(targetUser.Id.ToString()).ToDictionary(
+            var warningsOutput = Program.db.HashGetAll(targetUser.Id.ToString())
+                .Where(x => JsonConvert.DeserializeObject<UserWarning>(x.Value).Type == WarningType.Warning).ToDictionary(
                 x => x.Name.ToString(),
                 x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
             );
