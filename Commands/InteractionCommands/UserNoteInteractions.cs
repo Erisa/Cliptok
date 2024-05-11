@@ -123,9 +123,9 @@ namespace Cliptok.Commands.InteractionCommands
                 await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().AddEmbed(await GenerateUserNotesEmbedAsync(user)).AsEphemeral(!showPublicly));
             }
             
-            [SlashCommand("show", "Show the details of a specific note for a user.")]
+            [SlashCommand("details", "Show the details of a specific note for a user.")]
             public async Task ShowUserNoteAsync(InteractionContext ctx,
-                [Option("user", "The user whose note to show.")] DiscordUser user,
+                [Option("user", "The user whose note to show details for.")] DiscordUser user,
                 [Autocomplete(typeof(NotesAutocompleteProvider))] [Option("note", "The note to show.")] string targetNote,
                 [Option("public", "Whether to show the note in public chat. Default: false")] bool showPublicly = false)
             {
