@@ -210,7 +210,8 @@
                 {
                     MessageId = contextMessage.Id,
                     ChannelId = contextMessage.ChannelId
-                }
+                },
+                Type = WarningType.Warning
             };
 
             if (dmMessage is not null)

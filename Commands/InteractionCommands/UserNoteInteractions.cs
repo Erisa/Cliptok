@@ -31,7 +31,8 @@ namespace Cliptok.Commands.InteractionCommands
                     ShowAllMods = showAllMods,
                     ShowOnce = showOnce,
                     NoteId = noteId,
-                    Timestamp = DateTime.Now
+                    Timestamp = DateTime.Now,
+                    Type = WarningType.Note
                 };
                 
                 await Program.db.HashSetAsync(user.Id.ToString(), note.NoteId, JsonConvert.SerializeObject(note));
@@ -106,6 +107,7 @@ namespace Cliptok.Commands.InteractionCommands
                 note.ShowOnWarn = showOnWarn;
                 note.ShowAllMods = showAllMods;
                 note.ShowOnce = showOnce;
+                note.Type = WarningType.Note;
                 
                 await Program.db.HashSetAsync(user.Id.ToString(), note.NoteId, JsonConvert.SerializeObject(note));
                 
