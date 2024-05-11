@@ -52,7 +52,7 @@ namespace Cliptok.Commands.InteractionCommands
                 {
                     note = JsonConvert.DeserializeObject<UserNote>(await Program.db.HashGetAsync(user.Id.ToString(), Convert.ToInt64(targetNote)));
                 }
-                catch (ArgumentNullException)
+                catch
                 {
                     await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I couldn't find that note! Make sure you've got the right ID.").AsEphemeral());
                     return;
@@ -88,7 +88,7 @@ namespace Cliptok.Commands.InteractionCommands
                 {
                     note = JsonConvert.DeserializeObject<UserNote>(await Program.db.HashGetAsync(user.Id.ToString(), Convert.ToInt64(targetNote)));
                 }
-                catch (ArgumentNullException)
+                catch
                 {
                     await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I couldn't find that note! Make sure you've got the right ID.").AsEphemeral());
                     return;
@@ -146,7 +146,7 @@ namespace Cliptok.Commands.InteractionCommands
                 {
                     note = JsonConvert.DeserializeObject<UserNote>(await Program.db.HashGetAsync(user.Id.ToString(), Convert.ToInt64(targetNote)));
                 }
-                catch (ArgumentNullException)
+                catch
                 {
                     await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I couldn't find that note! Make sure you've got the right ID.").AsEphemeral());
                     return;
