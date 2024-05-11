@@ -1,6 +1,4 @@
-﻿using Cliptok.Enums;
-
-namespace Cliptok
+﻿namespace Cliptok
 {
     public class UserWarning
     {
