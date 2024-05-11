@@ -36,7 +36,7 @@ namespace Cliptok.Helpers
                     null
                 )
                 .WithAuthor(
-                    $"Relevant Notes for {DiscordHelpers.UniqueUsername(user)}",
+                    (showOnlyWarningNotes || notesToUse != default ? "Relevant " : "") + $"Notes for {DiscordHelpers.UniqueUsername(user)}",
                     null,
                     await LykosAvatarMethods.UserOrMemberAvatarURL(user, Program.homeGuild, "png")
                 );
