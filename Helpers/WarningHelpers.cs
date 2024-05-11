@@ -263,6 +263,29 @@
             {
                 await MuteHelpers.MuteUserAsync(targetUser, $"Automatic permanent mute after {warnsSinceThreshold} warnings in the past {acceptedThreshold} {thresholdSpan}.", modUser.Id, guild, channel);
             }
+            
+            // If warning was not automatic (not issued by a bot) and target user has notes to be shown on warn, alert the responsible moderator
+
+            if (!modUser.IsBot)
+            {
+                // Get notes
+                var notes = Program.db.HashGetAll(targetUser.Id.ToString())
+                    .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note).ToDictionary(
+                        x => x.Name.ToString(),
+                        x => JsonConvert.DeserializeObject<UserNote>(x.Value)
+                    );
+                
+                // Get notes set to notify on warn
+                var notesToNotifyFor = notes.Where(x => x.Value.ShowOnWarn).ToDictionary(x => x.Key, x => x.Value);
+                
+                // Alert moderator
+                if (notesToNotifyFor.Count != 0)
+                {
+                    var alertChannel = await Program.discord.GetChannelAsync(Program.cfgjson.InvestigationsChannelId);
+                    var msg = new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Muted} {modUser.Mention}, {targetUser.Mention} has notes set to show when they are issued a warning!").AddEmbed(await UserNoteHelpers.GenerateUserNotesEmbedAsync(targetUser, true)).WithAllowedMentions(Mentions.All);
+                    await alertChannel.SendMessageAsync(msg);
+                }
+            }
 
             return warning;
         }

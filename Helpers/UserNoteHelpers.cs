@@ -2,13 +2,17 @@ namespace Cliptok.Helpers
 {
     public class UserNoteHelpers
     {
-        public static async Task<DiscordEmbed> GenerateUserNotesEmbedAsync(DiscordUser user)
+        public static async Task<DiscordEmbed> GenerateUserNotesEmbedAsync(DiscordUser user, bool showOnlyWarningNotes = false)
         {
             var notes = Program.db.HashGetAll(user.Id.ToString())
                 .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note).ToDictionary(
                     x => x.Name.ToString(),
                     x => JsonConvert.DeserializeObject<UserNote>(x.Value)
                 );
+            
+            // Filter to 'show on warn' notes if requested
+            if (showOnlyWarningNotes)
+                notes = notes.Where(x => x.Value.ShowOnWarn).ToDictionary(x => x.Key, x => x.Value);
             
             var keys = notes.Keys.OrderByDescending(note => Convert.ToInt64(note));
             string str = "";
@@ -22,7 +26,7 @@ namespace Cliptok.Helpers
                     null
                 )
                 .WithAuthor(
-                    $"Notes for {DiscordHelpers.UniqueUsername(user)}",
+                    $"Relevant Notes for {DiscordHelpers.UniqueUsername(user)}",
                     null,
                     await LykosAvatarMethods.UserOrMemberAvatarURL(user, Program.homeGuild, "png")
                 );
