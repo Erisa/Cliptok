@@ -137,11 +137,11 @@ namespace Cliptok.Events
                         );
                     
                     // Filter to notes set to notify on modmail
-                    var notesToNotify = notes.Where(x => x.Value.ShowOnModmail).ToList();
+                    var notesToNotify = notes.Where(x => x.Value.ShowOnModmail).ToDictionary(x => x.Key, x => x.Value);
                     
                     // If there are notes, build embed and add to message
                     if (notesToNotify.Count != 0)
-                        memberWarnInfo.AddEmbed(await UserNoteHelpers.GenerateUserNotesEmbedAsync(modmailMember));
+                        memberWarnInfo.AddEmbed(await UserNoteHelpers.GenerateUserNotesEmbedAsync(modmailMember, notesToUse: notesToNotify));
                     
                     // If message was built (if user is muted OR if user has notes to show on modmail), send it
                     if (memberWarnInfo.Embeds.Count != 0) // todo: this is probably not the best way to check this?

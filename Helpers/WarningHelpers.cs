@@ -278,11 +278,14 @@
                 // Get notes set to notify on warn
                 var notesToNotifyFor = notes.Where(x => x.Value.ShowOnWarn).ToDictionary(x => x.Key, x => x.Value);
                 
-                // Alert moderator
+                // Get relevant notes ('show all mods' is true, or mod is responsible for note & warning)
+                notesToNotifyFor = notesToNotifyFor.Where(x => x.Value.ShowAllMods || x.Value.ModUserId == modUser.Id).ToDictionary(x => x.Key, x => x.Value);
+                
+                // Alert moderator if there are relevant notes
                 if (notesToNotifyFor.Count != 0)
                 {
                     var alertChannel = await Program.discord.GetChannelAsync(Program.cfgjson.InvestigationsChannelId);
-                    var msg = new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Muted} {modUser.Mention}, {targetUser.Mention} has notes set to show when they are issued a warning!").AddEmbed(await UserNoteHelpers.GenerateUserNotesEmbedAsync(targetUser, true)).WithAllowedMentions(Mentions.All);
+                    var msg = new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Muted} {modUser.Mention}, {targetUser.Mention} has notes set to show when they are issued a warning!").AddEmbed(await UserNoteHelpers.GenerateUserNotesEmbedAsync(targetUser, true, notesToNotifyFor)).WithAllowedMentions(Mentions.All);
                     await alertChannel.SendMessageAsync(msg);
                 }
             }

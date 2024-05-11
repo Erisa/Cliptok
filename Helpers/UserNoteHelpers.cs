@@ -2,17 +2,27 @@ namespace Cliptok.Helpers
 {
     public class UserNoteHelpers
     {
-        public static async Task<DiscordEmbed> GenerateUserNotesEmbedAsync(DiscordUser user, bool showOnlyWarningNotes = false)
+        public static async Task<DiscordEmbed> GenerateUserNotesEmbedAsync(DiscordUser user, bool showOnlyWarningNotes = false, Dictionary<string,UserNote> notesToUse = default)
         {
-            var notes = Program.db.HashGetAll(user.Id.ToString())
-                .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note).ToDictionary(
-                    x => x.Name.ToString(),
-                    x => JsonConvert.DeserializeObject<UserNote>(x.Value)
-                );
+            Dictionary<string, UserNote> notes;
             
-            // Filter to 'show on warn' notes if requested
-            if (showOnlyWarningNotes)
-                notes = notes.Where(x => x.Value.ShowOnWarn).ToDictionary(x => x.Key, x => x.Value);
+            // If provided with a set of notes, use them instead
+            if (notesToUse == default)
+            {
+                notes = Program.db.HashGetAll(user.Id.ToString())
+                    .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note).ToDictionary(
+                        x => x.Name.ToString(),
+                        x => JsonConvert.DeserializeObject<UserNote>(x.Value)
+                    );
+            
+                // Filter to 'show on warn' notes if requested
+                if (showOnlyWarningNotes)
+                    notes = notes.Where(x => x.Value.ShowOnWarn).ToDictionary(x => x.Key, x => x.Value);
+            }
+            else
+            {
+                notes = notesToUse;
+            }
             
             var keys = notes.Keys.OrderByDescending(note => Convert.ToInt64(note));
             string str = "";
