@@ -119,11 +119,33 @@ namespace Cliptok.Events
                         return;
                     }
 
+                    DiscordMessageBuilder memberWarnInfo = new();
+
                     DiscordRole muted = message.Channel.Guild.GetRole(Program.cfgjson.MutedRole);
                     if (modmailMember.Roles.Contains(muted))
                     {
-                        await channel.SendMessageAsync(new DiscordMessageBuilder().AddEmbed(await WarningHelpers.GenerateWarningsEmbedAsync(modmailMember)).AddEmbed(await MuteHelpers.MuteStatusEmbed(modmailMember, message.Channel.Guild)));
+                        memberWarnInfo.AddEmbed(await WarningHelpers.GenerateWarningsEmbedAsync(modmailMember)).AddEmbed(await MuteHelpers.MuteStatusEmbed(modmailMember, message.Channel.Guild));
                     }
+                    
+                    // Add notes to message if any exist & are set to show on modmail
+                    
+                    // Get user notes
+                    var notes = Program.db.HashGetAll(modmailMember.Id.ToString())
+                        .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note).ToDictionary(
+                            x => x.Name.ToString(),
+                            x => JsonConvert.DeserializeObject<UserNote>(x.Value)
+                        );
+                    
+                    // Filter to notes set to notify on modmail
+                    var notesToNotify = notes.Where(x => x.Value.ShowOnModmail).ToList();
+                    
+                    // If there are notes, build embed and add to message
+                    if (notesToNotify.Count != 0)
+                        memberWarnInfo.AddEmbed(await UserNoteHelpers.GenerateUserNotesEmbedAsync(modmailMember));
+                    
+                    // If message was built (if user is muted OR if user has notes to show on modmail), send it
+                    if (memberWarnInfo.Embeds.Count != 0) // todo: this is probably not the best way to check this?
+                        await message.Channel.SendMessageAsync(memberWarnInfo);
                 }
 
                 // handle #giveaways
