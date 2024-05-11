@@ -288,6 +288,10 @@
                     var msg = new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Muted} {modUser.Mention}, {targetUser.Mention} has notes set to show when they are issued a warning!").AddEmbed(await UserNoteHelpers.GenerateUserNotesEmbedAsync(targetUser, true, notesToNotifyFor)).WithAllowedMentions(Mentions.All);
                     await alertChannel.SendMessageAsync(msg);
                 }
+                
+                // If any notes were shown & set to show only once, delete them now
+                foreach (var note in notesToNotifyFor.Where(note => note.Value.ShowOnce))
+                    await Program.db.HashDeleteAsync(targetUser.Id.ToString(), note.Key);
             }
 
             return warning;

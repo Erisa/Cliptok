@@ -146,6 +146,10 @@ namespace Cliptok.Events
                     // If message was built (if user is muted OR if user has notes to show on modmail), send it
                     if (memberWarnInfo.Embeds.Count != 0) // todo: this is probably not the best way to check this?
                         await message.Channel.SendMessageAsync(memberWarnInfo);
+                    
+                    // If any notes were shown & set to show only once, delete them now
+                    foreach (var note in notesToNotify.Where(note => note.Value.ShowOnce))
+                        await Program.db.HashDeleteAsync(modmailMember.Id.ToString(), note.Key);
                 }
 
                 // handle #giveaways
