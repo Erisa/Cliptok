@@ -29,7 +29,7 @@ namespace Cliptok
         public MessageReference DmMessageReference { get; set; } = default;
 
         [JsonProperty("type")]
-        public WarningType Type { get; set; } = WarningType.Warning;
+        public WarningType Type { get; set; }
     }
 
     public class MessageReference
@@ -599,7 +599,7 @@ namespace Cliptok
         public DateTime Timestamp { get; set; }
 
         [JsonProperty("type")]
-        public WarningType Type { get; set; } = WarningType.Note;
+        public WarningType Type { get; set; }
     }
 
 }
