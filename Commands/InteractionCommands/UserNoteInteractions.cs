@@ -76,8 +76,8 @@ namespace Cliptok.Commands.InteractionCommands
             public async Task EditUserNoteAsync(InteractionContext ctx,
                 [Option("user", "The user to edit a note for.")] DiscordUser user,
                 [Autocomplete(typeof(NotesAutocompleteProvider))] [Option("note", "The note to edit.")] string targetNote,
-                [Option("new_note", "The new note text.")] string newNoteText,
-                [Option("show_on_modmail", "Whether to show the note when the user opens a modmail thread. Default: false")] bool showOnModmail = false,
+                [Option("new_text", "The new note text. Leave empty to not change.")] string newNoteText = default,
+                [Option("show_on_modmail", "Whether to show the note when the user opens a modmail thread. Default: true")] bool showOnModmail = true,
                 [Option("show_on_warn", "Whether to show the note when the user is warned. Default: true")] bool showOnWarn = true,
                 [Option("show_all_mods", "Whether to show this note to all mods, versus just yourself. Default: true")] bool showAllMods = true,
                 [Option("show_once", "Whether to show this note once and then discard it. Default: false")] bool showOnce = false)
@@ -91,6 +91,17 @@ namespace Cliptok.Commands.InteractionCommands
                 catch (ArgumentNullException)
                 {
                     await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I couldn't find that note! Make sure you've got the right ID.").AsEphemeral());
+                    return;
+                }
+                
+                // If new text is not provided, use old text
+                if (newNoteText == default)
+                    newNoteText = note.NoteText;
+                
+                // If no changes are made, refuse the request
+                if (note.NoteText == newNoteText && note.ShowOnModmail == showOnModmail && note.ShowOnWarn == showOnWarn && note.ShowAllMods == showAllMods && note.ShowOnce == showOnce)
+                {
+                    await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You didn't change anything about the note!").AsEphemeral());
                     return;
                 }
                 
