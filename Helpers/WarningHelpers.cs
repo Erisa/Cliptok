@@ -220,6 +220,10 @@
                 };
 
             Program.db.HashSet(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
+            
+            // If warning is automatic (if responsible moderator is a bot), add to list so the context message can be more-easily deleted later
+            if (modUser.IsBot)
+                Program.db.HashSet("automaticWarnings", warningId, JsonConvert.SerializeObject(warning));
 
             LogChannelHelper.LogMessageAsync("mod",
                 new DiscordMessageBuilder()

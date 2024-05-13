@@ -292,6 +292,9 @@
         
         [JsonProperty("tqsMuteDurationHours")]
         public int TqsMuteDurationHours { get; private set; }
+        
+        [JsonProperty("autoWarnMsgAutoDeleteDays")]
+        public int AutoWarnMsgAutoDeleteDays { get; private set; }
 
     }
 
