@@ -64,6 +64,8 @@
 
         public static async Task<bool> CheckAutomaticWarningsAsync()
         {
+            if (Program.cfgjson.AutoWarnMsgAutoDeleteDays == 0)
+                return false;
             Dictionary<string, UserWarning> warnList = Program.db.HashGetAll("automaticWarnings").ToDictionary(
                 x => x.Name.ToString(),
                 x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
