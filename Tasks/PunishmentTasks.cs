@@ -61,6 +61,38 @@
                 return success;
             }
         }
+
+        public static async Task<bool> CheckAutomaticWarningsAsync()
+        {
+            if (Program.cfgjson.AutoWarnMsgAutoDeleteDays == 0)
+                return false;
+
+            Dictionary<string, UserWarning> warnList = Program.db.HashGetAll("automaticWarnings").ToDictionary(
+                x => x.Name.ToString(),
+                x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
+            );
+
+            if (warnList is null | warnList.Keys.Count == 0)
+                return false;
+            else
+            {
+                // The success value will be changed later if any of the message deletes are successful.
+                bool success = false;
+                foreach (KeyValuePair<string, UserWarning> entry in warnList)
+                {
+                    UserWarning warn = entry.Value;
+                    if (DateTime.Now > warn.WarnTimestamp.AddDays(Program.cfgjson.AutoWarnMsgAutoDeleteDays))
+                    {
+                        var contextMessage = await DiscordHelpers.GetMessageFromReferenceAsync(warn.ContextMessageReference);
+                        await contextMessage.DeleteAsync();
+                        Program.db.HashDelete("automaticWarnings", warn.WarningId);
+                        success = true;
+                    }
+                }
+                Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked automatic warnings at {time} with result: {result}", DateTime.Now, success);
+                return success;
+            }
+        }
     }
 
 }

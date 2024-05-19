@@ -161,11 +161,12 @@
                 var msg = await ctx.RespondAsync("Checking for pending scheduled tasks...");
                 bool bans = await Tasks.PunishmentTasks.CheckBansAsync();
                 bool mutes = await Tasks.PunishmentTasks.CheckMutesAsync();
+                bool warns = await Tasks.PunishmentTasks.CheckAutomaticWarningsAsync();
                 bool reminders = await Tasks.ReminderTasks.CheckRemindersAsync();
                 bool raidmode = await Tasks.RaidmodeTasks.CheckRaidmodeAsync(ctx.Guild.Id);
                 bool unlocks = await Tasks.LockdownTasks.CheckUnlocksAsync();
 
-                await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nReminders check result: `{reminders}`\nRaidmode check result: `{raidmode}`\nUnlocks check result: `{unlocks}`");
+                await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nAutomatic warning message check result: `{warns}`\nReminders check result: `{reminders}`\nRaidmode check result: `{raidmode}`\nUnlocks check result: `{unlocks}`");
             }
 
             [Command("sh")]
