@@ -28,9 +28,7 @@
                     }
 
                 }
-#if DEBUG
                 Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked bans at {time} with result: {result}", DateTime.Now, success);
-#endif
                 return success;
             }
         }
@@ -55,9 +53,7 @@
                         success = true;
                     }
                 }
-#if DEBUG
                 Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked mutes at {time} with result: {result}", DateTime.Now, success);
-#endif
                 return success;
             }
         }
