@@ -66,10 +66,12 @@
         {
             if (Program.cfgjson.AutoWarnMsgAutoDeleteDays == 0)
                 return false;
+
             Dictionary<string, UserWarning> warnList = Program.db.HashGetAll("automaticWarnings").ToDictionary(
                 x => x.Name.ToString(),
                 x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
             );
+
             if (warnList is null | warnList.Keys.Count == 0)
                 return false;
             else
@@ -87,9 +89,7 @@
                         success = true;
                     }
                 }
-#if DEBUG
                 Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked automatic warnings at {time} with result: {result}", DateTime.Now, success);
-#endif
                 return success;
             }
         }
