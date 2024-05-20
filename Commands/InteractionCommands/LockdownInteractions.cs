@@ -26,7 +26,6 @@ namespace Cliptok.Commands.InteractionCommands
                     }
 
                     var thread = (DiscordThreadChannel)ctx.Channel;
-                    await Program.db.SetRemoveAsync("openthreads", thread.Id);
 
                     await thread.ModifyAsync(a =>
                     {

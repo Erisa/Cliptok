@@ -146,7 +146,6 @@ namespace Cliptok
             discord.ClientErrored += ErrorEvents.ClientError;
             discord.SocketErrored += ErrorEvents.Discord_SocketErrored;
             discord.ThreadCreated += ThreadEvents.Discord_ThreadCreated;
-            discord.ThreadUpdated += ThreadEvents.Discord_ThreadUpdated;
             discord.ThreadDeleted += ThreadEvents.Discord_ThreadDeleted;
             discord.ThreadListSynced += ThreadEvents.Discord_ThreadListSynced;
             discord.ThreadMemberUpdated += ThreadEvents.Discord_ThreadMemberUpdated;

@@ -15,30 +15,6 @@ namespace Cliptok.Events
             return Task.CompletedTask;
         }
 
-        public static async Task<Task> Discord_ThreadUpdated(DiscordClient client, ThreadUpdateEventArgs e)
-        {
-            client.Logger.LogDebug(eventId: CliptokEventID, "Thread created in {servername}. Thread Name: {threadname}", e.Guild.Name, e.ThreadAfter.Name);
-
-            // in case we end up in random guilds
-            if (e.Guild.Id != cfgjson.ServerID)
-                return Task.CompletedTask;
-
-            if (
-                db.SetContains("openthreads", e.ThreadAfter.Id)
-                && e.ThreadAfter.ThreadMetadata.IsArchived
-                && e.ThreadAfter.ThreadMetadata.IsLocked != true
-            )
-            {
-                await e.ThreadAfter.ModifyAsync(a =>
-                {
-                    a.IsArchived = false;
-                    a.AuditLogReason = "Auto unarchiving thread due to enabled keepalive state.";
-                });
-            }
-
-            return Task.CompletedTask;
-        }
-
         public static Task Discord_ThreadDeleted(DiscordClient client, ThreadDeleteEventArgs e)
         {
             client.Logger.LogDebug(eventId: CliptokEventID, "Thread deleted in {servername}. Thread Name: {threadname}", e.Guild.Name, e.Thread.Name ?? "Unknown");

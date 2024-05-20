@@ -16,7 +16,6 @@ namespace Cliptok.Commands
             if (ctx.Channel.Type is ChannelType.PublicThread or ChannelType.PrivateThread or ChannelType.NewsThread)
             {
                 var thread = (DiscordThreadChannel)ctx.Channel;
-                await Program.db.SetRemoveAsync("openthreads", thread.Id);
 
                 await thread.ModifyAsync(a =>
                 {
