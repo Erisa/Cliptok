@@ -87,6 +87,8 @@
                         return;
                     }
 
+                    messages.Reverse();
+
                     await LogChannelHelper.LogDeletedMessagesAsync(
                         "messages",
                         $"{Program.cfgjson.Emoji.Deleted} Automatically purged **{messages.Count}** messages from {e.Before.Channel.Mention}.",
