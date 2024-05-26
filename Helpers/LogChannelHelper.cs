@@ -133,7 +133,7 @@
 
         public static async Task<DiscordMessageBuilder> CreateDumpMessageAsync(string content, List<DiscordMessage> messages, DiscordChannel channel)
         {
-            string messageLog = await DiscordHelpers.CompileMessagesAsync(messages.AsEnumerable().Reverse().ToList(), channel);
+            string messageLog = await DiscordHelpers.CompileMessagesAsync(messages.AsEnumerable().ToList(), channel);
 
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(messageLog));
             var msg = new DiscordMessageBuilder().WithContent(content).AddFile("messages.txt", stream);
