@@ -131,7 +131,7 @@
             }
         }
 
-        public static async Task<DiscordMessage> LogDeletedMessagesAsync(string key, string content, List<DiscordMessage> messages, DiscordChannel channel)
+        public static async Task<DiscordMessageBuilder> CreateDumpMessageAsync(string content, List<DiscordMessage> messages, DiscordChannel channel)
         {
             string messageLog = await DiscordHelpers.CompileMessagesAsync(messages.AsEnumerable().Reverse().ToList(), channel);
 
@@ -144,8 +144,13 @@
             {
                 msg.AddEmbed(new DiscordEmbedBuilder().WithDescription($"[`📄 View online`]({Program.cfgjson.HastebinEndpoint}/raw/{hasteResult.Key})"));
             }
+            return msg;
+        }
 
-            return await LogMessageAsync(key, msg);
+        public static async Task<DiscordMessage> LogDeletedMessagesAsync(string key, string content, List<DiscordMessage> messages, DiscordChannel channel)
+        {
+
+            return await LogMessageAsync(key, await CreateDumpMessageAsync(content, messages, channel));
         }
 
     }

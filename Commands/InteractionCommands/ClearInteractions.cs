@@ -16,10 +16,11 @@
             [Option("humans_only", "Optionally filter the deletion to only humans.")] bool humansOnly = false,
             [Option("attachments_only", "Optionally filter the deletion to only messages with attachments.")] bool attachmentsOnly = false,
             [Option("stickers_only", "Optionally filter the deletion to only messages with stickers.")] bool stickersOnly = false,
-            [Option("links_only", "Optionally filter the deletion to only messages containing links.")] bool linksOnly = false
+            [Option("links_only", "Optionally filter the deletion to only messages containing links.")] bool linksOnly = false,
+            [Option("dry_run", "Don't actually delete the messages, just output what would be deleted.")] bool dryRun = false
         )
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(!dryRun));
 
             // If all args are unset
             if (count == 0 && upTo == "" && user == default && ignoreMods == false && match == "" && botsOnly == false && humansOnly == false && attachmentsOnly == false && stickersOnly == false && linksOnly == false)
@@ -238,6 +239,15 @@
             }
 
             // All filters checked. 'messages' is now our final list of messages to delete.
+
+            if (dryRun)
+            {
+                var msg = await LogChannelHelper.CreateDumpMessageAsync($"{Program.cfgjson.Emoji.Information} **{messagesToClear.Count}** messages would have been deleted, but are instead logged below.",
+                    messagesToClear,
+                    ctx.Channel);
+                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent(msg.Content).AddFiles(msg.Files).AddEmbeds(msg.Embeds).AsEphemeral(false));
+                return;
+            }
 
             // Warn the mod if we're going to be deleting 50 or more messages.
             if (messagesToClear.Count >= 50)
