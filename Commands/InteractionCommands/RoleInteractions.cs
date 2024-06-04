@@ -21,6 +21,7 @@
                 [Choice("Windows 11 Insiders (Beta)", "insiderBeta")]
                 [Choice("Windows 11 Insiders (Release Preview)", "insiderRP")]
                 [Choice("Windows 10 Insiders (Release Preview)", "insider10RP")]
+                [Choice("Windows 10 Insiders (Beta)", "insider10Beta")]
                 [Choice("Patch Tuesday", "patchTuesday")]
                 [Choice("Giveaways", "giveaways")]
                 [Option("role", "The role to opt into.")] string role)
@@ -34,6 +35,7 @@
                     "insiderBeta" => Program.cfgjson.UserRoles.InsiderBeta,
                     "insiderRP" => Program.cfgjson.UserRoles.InsiderRP,
                     "insider10RP" => Program.cfgjson.UserRoles.Insider10RP,
+                    "insider10Beta" => Program.cfgjson.UserRoles.Insider10Beta,
                     "patchTuesday" => Program.cfgjson.UserRoles.PatchTuesday,
                     "giveaways" => Program.cfgjson.UserRoles.Giveaways,
                     _ => throw new NotSupportedException()
@@ -53,6 +55,7 @@
                 [Choice("Windows 11 Insiders (Beta)", "insiderBeta")]
                 [Choice("Windows 11 Insiders (Release Preview)", "insiderRP")]
                 [Choice("Windows 10 Insiders (Release Preview)", "insider10RP")]
+                [Choice("Windows 10 Insiders (Beta)", "insider10Beta")]
                 [Choice("Patch Tuesday", "patchTuesday")]
                 [Choice("Giveaways", "giveaways")]
                 [Option("role", "The role to opt out of.")] string role)
@@ -66,6 +69,7 @@
                     "insiderBeta" => Program.cfgjson.UserRoles.InsiderBeta,
                     "insiderRP" => Program.cfgjson.UserRoles.InsiderRP,
                     "insider10RP" => Program.cfgjson.UserRoles.Insider10RP,
+                    "insider10Beta" => Program.cfgjson.UserRoles.Insider10Beta,
                     "patchTuesday" => Program.cfgjson.UserRoles.PatchTuesday,
                     "giveaways" => Program.cfgjson.UserRoles.Giveaways,
                     _ => throw new NotSupportedException()
