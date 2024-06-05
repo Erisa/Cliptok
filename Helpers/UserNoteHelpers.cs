@@ -83,13 +83,13 @@ namespace Cliptok.Helpers
                     null,
                     await LykosAvatarMethods.UserOrMemberAvatarURL(user, Program.homeGuild, "png")
                 )
-                .AddField("Note ID", StringHelpers.Pad(note.NoteId))
-                .AddField("Show on Modmail", note.ShowOnModmail ? "Yes" : "No")
-                .AddField("Show on Warn", note.ShowOnWarn ? "Yes" : "No")
-                .AddField("Show all Mods", note.ShowAllMods ? "Yes" : "No")
-                .AddField("Show Once", note.ShowOnce ? "Yes" : "No")
-                .AddField("Responsible moderator", $"<@{note.ModUserId}>")
-                .AddField("Time", $"<t:{TimeHelpers.ToUnixTimestamp(note.Timestamp)}:f>");
+                .AddField("Note ID", StringHelpers.Pad(note.NoteId), true)
+                .AddField("Show on Modmail", note.ShowOnModmail ? "Yes" : "No", true)
+                .AddField("Show on Warn", note.ShowOnWarn ? "Yes" : "No", true)
+                .AddField("Show all Mods", note.ShowAllMods ? "Yes" : "No", true)
+                .AddField("Show Once", note.ShowOnce ? "Yes" : "No", true)
+                .AddField("Responsible moderator", $"<@{note.ModUserId}>", true)
+                .AddField("Time", $"<t:{TimeHelpers.ToUnixTimestamp(note.Timestamp)}:f>", true);
 
             return embed;
         }
