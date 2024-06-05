@@ -67,6 +67,31 @@ namespace Cliptok.Helpers
 
             return embed;
         }
+
+        public static async Task<DiscordEmbed> GenerateUserNoteSimpleEmbedAsync(UserNote note, DiscordUser user)
+        {
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                .WithDescription($"**Note**\n{note.NoteText}")
+                .WithColor(new DiscordColor(0xFEC13D))
+                .WithTimestamp(DateTime.Now)
+                .WithFooter(
+                    $"User ID: {user.Id}",
+                    null
+                )
+                .WithAuthor(
+                    $"Note for {DiscordHelpers.UniqueUsername(user)}",
+                    null,
+                    await LykosAvatarMethods.UserOrMemberAvatarURL(user, Program.homeGuild, "png")
+                )
+                .AddField("Note ID", StringHelpers.Pad(note.NoteId), true)
+                .AddField("Responsible moderator", $"<@{note.ModUserId}>", true)
+                .AddField("Time", $"<t:{TimeHelpers.ToUnixTimestamp(note.Timestamp)}:f>", true);
+
+            if (note.ShowOnce)
+                embed.AddField("Showing Once Only", "This note was set to show only once. It has now been deleted!");
+            
+            return embed;
+        }
         
         public static async Task<DiscordEmbed> GenerateUserNoteDetailEmbedAsync(UserNote note, DiscordUser user)
         {

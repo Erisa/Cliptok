@@ -141,10 +141,18 @@ namespace Cliptok.Events
                     
                     // If there are notes, build embed and add to message
                     if (notesToNotify.Count != 0)
+                    {
                         memberWarnInfo.AddEmbed(await UserNoteHelpers.GenerateUserNotesEmbedAsync(modmailMember, notesToUse: notesToNotify));
+                        
+                        // For any notes set to show once, show the full note content in its own embed because it will not be able to be fetched manually
+                        foreach (var note in notesToNotify)
+                            if (memberWarnInfo.Embeds.Count < 10) // Limit to 10 embeds; this probably won't be an issue because we probably won't have that many 'show once' notes
+                                if (note.Value.ShowOnce)
+                                    memberWarnInfo.AddEmbed(await UserNoteHelpers.GenerateUserNoteSimpleEmbedAsync(note.Value, modmailMember));
+                    }
                     
                     // If message was built (if user is muted OR if user has notes to show on modmail), send it
-                    if (memberWarnInfo.Embeds.Count != 0) // todo: this is probably not the best way to check this?
+                    if (memberWarnInfo.Embeds.Count != 0)
                         await message.Channel.SendMessageAsync(memberWarnInfo);
                     
                     // If any notes were shown & set to show only once, delete them now

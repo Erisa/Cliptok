@@ -286,6 +286,13 @@
                 {
                     var alertChannel = await Program.discord.GetChannelAsync(Program.cfgjson.InvestigationsChannelId);
                     var msg = new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Muted} {modUser.Mention}, {targetUser.Mention} has notes set to show when they are issued a warning!").AddEmbed(await UserNoteHelpers.GenerateUserNotesEmbedAsync(targetUser, true, notesToNotifyFor)).WithAllowedMentions(Mentions.All);
+                    
+                    // For any notes set to show once, show the full note content in its own embed because it will not be able to be fetched manually
+                    foreach (var note in notesToNotifyFor)
+                        if (msg.Embeds.Count < 10) // Limit to 10 embeds; this probably won't be an issue because we probably won't have that many 'show once' notes
+                            if (note.Value.ShowOnce)
+                                msg.AddEmbed(await UserNoteHelpers.GenerateUserNoteSimpleEmbedAsync(note.Value, targetUser));
+                    
                     await alertChannel.SendMessageAsync(msg);
                 }
                 
