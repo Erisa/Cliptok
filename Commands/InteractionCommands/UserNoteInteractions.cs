@@ -77,10 +77,10 @@ namespace Cliptok.Commands.InteractionCommands
                 [Option("user", "The user to edit a note for.")] DiscordUser user,
                 [Autocomplete(typeof(NotesAutocompleteProvider))] [Option("note", "The note to edit.")] string targetNote,
                 [Option("new_text", "The new note text. Leave empty to not change.")] string newNoteText = default,
-                [Option("show_on_modmail", "Whether to show the note when the user opens a modmail thread. Default: true")] bool showOnModmail = true,
-                [Option("show_on_warn", "Whether to show the note when the user is warned. Default: true")] bool showOnWarn = true,
-                [Option("show_all_mods", "Whether to show this note to all mods, versus just yourself. Default: true")] bool showAllMods = true,
-                [Option("show_once", "Whether to show this note once and then discard it. Default: false")] bool showOnce = false)
+                [Option("show_on_modmail", "Whether to show the note when the user opens a modmail thread.")] bool? showOnModmail = null,
+                [Option("show_on_warn", "Whether to show the note when the user is warned.")] bool? showOnWarn = null,
+                [Option("show_all_mods", "Whether to show this note to all mods, versus just yourself.")] bool? showAllMods = null,
+                [Option("show_once", "Whether to show this note once and then discard it.")] bool? showOnce = null)
             {
                 // Get note
                 UserNote note;
@@ -99,7 +99,7 @@ namespace Cliptok.Commands.InteractionCommands
                     newNoteText = note.NoteText;
                 
                 // If no changes are made, refuse the request
-                if (note.NoteText == newNoteText && note.ShowOnModmail == showOnModmail && note.ShowOnWarn == showOnWarn && note.ShowAllMods == showAllMods && note.ShowOnce == showOnce)
+                if (note.NoteText == newNoteText && showOnModmail is null && showOnWarn is null && showAllMods is null && showOnce is null)
                 {
                     await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You didn't change anything about the note!").AsEphemeral());
                     return;
@@ -112,12 +112,22 @@ namespace Cliptok.Commands.InteractionCommands
                     return;
                 }
                 
+                // For any options the user didn't provide, use options from the note
+                if (showOnModmail is null)
+                    showOnModmail = note.ShowOnModmail;
+                if (showOnWarn is null)
+                    showOnWarn = note.ShowOnWarn;
+                if (showAllMods is null)
+                    showAllMods = note.ShowAllMods;
+                if (showOnce is null)
+                    showOnce = note.ShowOnce;
+                
                 // Assemble new note
                 note.NoteText = newNoteText;
-                note.ShowOnModmail = showOnModmail;
-                note.ShowOnWarn = showOnWarn;
-                note.ShowAllMods = showAllMods;
-                note.ShowOnce = showOnce;
+                note.ShowOnModmail = (bool)showOnModmail;
+                note.ShowOnWarn = (bool)showOnWarn;
+                note.ShowAllMods = (bool)showAllMods;
+                note.ShowOnce = (bool)showOnce;
                 note.Type = WarningType.Note;
                 
                 await Program.db.HashSetAsync(user.Id.ToString(), note.NoteId, JsonConvert.SerializeObject(note));
