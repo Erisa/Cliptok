@@ -69,6 +69,10 @@ namespace Cliptok.Commands.InteractionCommands
             {
                 roleKey1 = "rp10";
             }
+            else if (windowsVersion == 10 && insiderChannel1 == "Beta")
+            {
+                roleKey1 = "beta10";
+            }
             else
             {
                 roleKey1 = insiderChannel1.ToLower();
@@ -108,6 +112,10 @@ namespace Cliptok.Commands.InteractionCommands
                 if (windowsVersion == 10 && insiderChannel2 == "RP")
                 {
                     roleKey2 = "rp10";
+                }
+                else if (windowsVersion == 10 && insiderChannel2 == "Beta")
+                {
+                    roleKey2 = "beta10";
                 }
                 else
                 {
