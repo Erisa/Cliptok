@@ -41,7 +41,7 @@
         [Command("announce")]
         [Description("Announces something in the current channel, pinging an Insider role in the process.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task AnnounceCmd(CommandContext ctx, [Description("'canary', 'dev','beta','rp', 'rp10, 'patch', 'rpbeta', 'betadev', 'candev'")] string roleName, [RemainingText, Description("The announcement message to send.")] string announcementMessage)
+        public async Task AnnounceCmd(CommandContext ctx, [Description("'canary', 'dev', 'beta', 'beta10', 'rp', 'rp10', 'patch', 'rpbeta', 'rpbeta10', 'betadev', 'candev'")] string roleName, [RemainingText, Description("The announcement message to send.")] string announcementMessage)
         {
             DiscordRole discordRole;
 
@@ -82,6 +82,27 @@
                 await betaRole.ModifyAsync(mentionable: false);
             }
             // this is rushed pending an actual solution
+            else if (roleName == "rpbeta10")
+            {
+                var rpRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles["rp10"]);
+                var betaRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles["beta10"]);
+
+                await rpRole.ModifyAsync(mentionable: true);
+                await betaRole.ModifyAsync(mentionable: true);
+
+                try
+                {
+                    await ctx.Message.DeleteAsync();
+                    await ctx.Channel.SendMessageAsync($"{rpRole.Mention} {betaRole.Mention}\n{announcementMessage}");
+                }
+                catch
+                {
+                    // We still need to remember to make it unmentionable even if the msg fails.
+                }
+
+                await rpRole.ModifyAsync(mentionable: false);
+                await betaRole.ModifyAsync(mentionable: false);
+            }
             else if (roleName == "betadev")
             {
                 var betaRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles["beta"]);
