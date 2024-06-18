@@ -79,10 +79,18 @@
                     UserWarning warn = entry.Value;
                     if (DateTime.Now > warn.WarnTimestamp.AddDays(Program.cfgjson.AutoWarnMsgAutoDeleteDays))
                     {
-                        var contextMessage = await DiscordHelpers.GetMessageFromReferenceAsync(warn.ContextMessageReference);
-                        await contextMessage.DeleteAsync();
-                        Program.db.HashDelete("automaticWarnings", warn.WarningId);
-                        success = true;
+                        try
+                        {
+                            var contextMessage = await DiscordHelpers.GetMessageFromReferenceAsync(warn.ContextMessageReference);
+                            await contextMessage.DeleteAsync();
+                            Program.db.HashDelete("automaticWarnings", warn.WarningId);
+                            success = true;
+                        }
+                        catch (NullReferenceException)
+                        {
+                            // it's fine. trust me. we'll live.
+                            continue;
+                        }
                     }
                 }
                 Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked automatic warnings at {time} with result: {result}", DateTime.Now, success);
