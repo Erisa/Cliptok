@@ -61,6 +61,7 @@ namespace Cliptok
                 .WriteTo.Console(outputTemplate: logFormat, theme: AnsiConsoleTheme.Literate)
                 .WriteTo.TextWriter(outputCapture, outputTemplate: logFormat)
                 .WriteTo.DiscordSink(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information, outputTemplate: logFormat)
+                .Filter.ByExcluding(log => { return log.ToString().Contains("DSharpPlus.Exceptions.NotFoundException: Not found: NotFound"); })
                 .CreateLogger();
 
             var logFactory = new LoggerFactory().AddSerilog();
