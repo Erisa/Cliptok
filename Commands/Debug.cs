@@ -1,4 +1,7 @@
-﻿namespace Cliptok.Commands
+﻿using Serilog.Events;
+using Serilog.Formatting;
+
+namespace Cliptok.Commands
 {
     internal class Debug : BaseCommandModule
     {
@@ -230,6 +233,40 @@
                 {
                     await ctx.RespondAsync($"Logs:```\n{result}```");
                 }
+            }
+
+            [Command("dumpwarnings"), Description("Dump all warning data. EXTREMELY computationally expensive, use with caution.")]
+            [IsBotOwner]
+            [RequireHomeserverPerm(ServerPermLevel.Moderator)]
+            public async Task MostWarningsCmd(CommandContext ctx)
+            {
+                await DiscordHelpers.SafeTyping(ctx.Channel);
+
+                var server = Program.redis.GetServer(Program.redis.GetEndPoints()[0]);
+                var keys = server.Keys();
+
+                Dictionary<string, Dictionary<long, MemberPunishment>> warningdata = new();
+                foreach (var key in keys)
+                {
+                    if (ulong.TryParse(key.ToString(), out ulong number))
+                    {
+                        var warnings = Program.db.HashGetAll(key);
+                        Dictionary<long, MemberPunishment> warningdict = new(); 
+                        foreach(var warning in warnings)
+                        {
+                            var warnobject = JsonConvert.DeserializeObject<MemberPunishment>(warning.Value);
+                            warningdict[(long)warning.Name] = warnobject;
+                        }
+                        warningdata[key.ToString()] = warningdict;
+                    }
+                }
+                StringWriter dummyWriter = new();
+                dummyWriter.Flush();
+
+                var output = JsonConvert.SerializeObject(warningdata, Formatting.Indented);
+                dummyWriter.Write(output);
+                var stream = new MemoryStream(Encoding.UTF8.GetBytes(dummyWriter.ToString()));
+                await ctx.RespondAsync(new DiscordMessageBuilder().AddFile("warnings.json", stream).WithContent("I'm not so sure this was a good idea.."));
             }
 
             [Group("overrides")]
