@@ -123,7 +123,7 @@ namespace Cliptok
 #endif
                 LoggerFactory = logFactory,
                 Intents = DiscordIntents.All,
-                LogUnknownEvents = false
+                LogUnknownEvents = false,
             });
 
             var slash = discord.UseSlashCommands();

@@ -48,7 +48,15 @@
             try
             {
                 var channel = await Program.discord.GetChannelAsync(messageReference.ChannelId);
-                return await channel.GetMessageAsync(messageReference.MessageId);
+                DiscordMessage message;
+                try
+                {
+                    message = await channel.GetMessageAsync(messageReference.MessageId);
+                    return message;
+                } catch
+                {
+                    return null;
+                }
             }
             catch (Exception ex)
             {
