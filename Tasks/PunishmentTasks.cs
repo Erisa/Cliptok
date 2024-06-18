@@ -89,6 +89,7 @@
                         catch (NullReferenceException)
                         {
                             // it's fine. trust me. we'll live.
+                            Program.db.HashDelete("automaticWarnings", warn.WarningId);
                             continue;
                         }
                     }
