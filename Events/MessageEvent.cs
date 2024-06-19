@@ -193,59 +193,8 @@ namespace Cliptok.Events
                             continue;
                         }
                         else
-                        {
-                            // Map of Cyrillic to Latin characters, to catch attempted bypasses using Cyrillic lookalikes
-                            // <string, string> is <Cyrillic, Latin>
-                            Dictionary<string, string> alphabetMap = new()
-                            {
-                                { "А", "A" },
-                                { "В", "B" },
-                                { "С", "C" },
-                                { "Е", "E" },
-                                { "Ԍ", "G" },
-                                { "Н", "H" },
-                                { "І", "I" },
-                                { "Ӏ", "I" },
-                                { "ӏ", "I" },
-                                { "Ј", "J" },
-                                { "К", "K" },
-                                { "М", "M" },
-                                { "О", "O" },
-                                { "Р", "P" },
-                                { "Ѕ", "S" },
-                                { "Т", "T" },
-                                { "Ѵ", "V" },
-                                { "Ԝ", "W" },
-                                { "Х", "X" },
-                                { "Ү", "Y" },
-                                { "ү", "Y" },
-                                { "а", "a" },
-                                { "Ь", "b" },
-                                { "с", "c" },
-                                { "ԁ", "d" },
-                                { "е", "e" },
-                                { "ҽ", "e" },
-                                { "һ", "h" },
-                                { "і", "i" },
-                                { "ј", "j" },
-                                { "о", "o" },
-                                { "р", "p" },
-                                { "ԛ", "q" },
-                                { "г", "r" },
-                                { "ѕ", "s" },
-                                { "ѵ", "v" },
-                                { "ѡ", "w" },
-                                { "х", "x" },
-                                { "у", "y" },
-                                { "У", "y" }
-                            };
-                            
-                            // Replace any Cyrillic letters found in message with Latin characters, if in the dictionary
-                            string msgContent = message.Content;
-                            foreach (var letter in alphabetMap)
-                                msgContent = msgContent.Replace(letter.Key, letter.Value);
-                            
-                            (bool success, string flaggedWord) = Checks.ListChecks.CheckForNaughtyWords(msgContent.ToLower(), listItem);
+                        {                                                        
+                            (bool success, string flaggedWord) = Checks.ListChecks.CheckForNaughtyWords(message.Content.ToLower(), listItem);
                             if (success)
                             {
                                 string reason = listItem.Reason;
