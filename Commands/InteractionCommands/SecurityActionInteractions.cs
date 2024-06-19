@@ -42,10 +42,12 @@ namespace Cliptok.Commands.InteractionCommands
 
             // respond
             if (setActionsResponse.IsSuccessStatusCode)
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully paused DMs for **{TimeHelpers.TimeToPrettyFormat(t.Subtract(ctx.Interaction.CreationTimestamp.DateTime.ToLocalTime()), false)}**!");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully paused DMs until <t:{TimeHelpers.ToUnixTimestamp(t)}>!");
             else
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Something went wrong and I wasn't able to pause DMs! Discord returned status code `{setActionsResponse.StatusCode}`.");
-        }
+            {
+                ctx.Client.Logger.LogError("Failed to set Security Actions.\nPayload: {payload}\nResponse: {statuscode} {body}", newSecurityActions.ToString(), (int)setActionsResponse.StatusCode, await setActionsResponse.Content.ReadAsStringAsync());
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Something went wrong and I wasn't able to unpause DMs! Discord returned status code `{setActionsResponse.StatusCode}`.");
+            }
 
         [SlashCommand("unpausedms", "Unpause DMs between server members.", defaultPermission: false)]
         [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.ModerateMembers)]
@@ -88,7 +90,9 @@ namespace Cliptok.Commands.InteractionCommands
             if (setActionsResponse.IsSuccessStatusCode)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully unpaused DMs!");
             else
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Something went wrong and I wasn't able to unpause DMs! Discord returned status code `{setActionsResponse.StatusCode}`.");
-        }
+            {
+                ctx.Client.Logger.LogError("Failed to set Security Actions.\nPayload: {payload}\nResponse: {statuscode} {body}", newSecurityActions.ToString(), (int)setActionsResponse.StatusCode, await setActionsResponse.Content.ReadAsStringAsync());
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Something went wrong and I wasn't able to pause DMs! Discord returned status code `{setActionsResponse.StatusCode}`.");
+            }
     }
 }

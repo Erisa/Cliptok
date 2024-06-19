@@ -4,7 +4,7 @@ namespace Cliptok.Helpers
     {
         public static async Task<JToken> GetCurrentSecurityActions(ulong guildId)
         {
-            using HttpRequestMessage getActionsRequest = new(HttpMethod.Get, $"https://discord.com/api/v9/guilds/{guildId}");
+            using HttpRequestMessage getActionsRequest = new(HttpMethod.Get, $"https://discord.com/api/v{Program.discord.GatewayVersion}/guilds/{guildId}");
             getActionsRequest.Headers.Authorization = new AuthenticationHeaderValue("Bot", Environment.GetEnvironmentVariable("CLIPTOK_TOKEN") ?? Program.cfgjson.Core.Token);
             
             var getActionsResponse = await Program.httpClient.SendAsync(getActionsRequest);
@@ -15,7 +15,7 @@ namespace Cliptok.Helpers
         {
             // create & send request
             
-            using HttpRequestMessage setActionsRequest = new(HttpMethod.Put, $"https://discord.com/api/v9/guilds/{guildId}/incident-actions");
+            using HttpRequestMessage setActionsRequest = new(HttpMethod.Put, $"https://discord.com/api/v{Program.discord.GatewayVersion}/guilds/{guildId}/incident-actions");
             setActionsRequest.Headers.Authorization = new AuthenticationHeaderValue("Bot", Environment.GetEnvironmentVariable("CLIPTOK_TOKEN") ?? Program.cfgjson.Core.Token);
             
             setActionsRequest.Content = new StringContent(newSecurityActions, Encoding.UTF8, "application/json");

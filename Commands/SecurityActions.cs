@@ -60,8 +60,10 @@ namespace Cliptok.Commands
             if (setActionsResponse.IsSuccessStatusCode)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully paused DMs for **{TimeHelpers.TimeToPrettyFormat(t.Subtract(ctx.Message.Timestamp.DateTime), false)}**!");
             else
+            {
+                ctx.Client.Logger.LogError("Failed to set Security Actions.\nPayload: {payload}\nResponse: {statuscode} {body}", newSecurityActions.ToString(), (int)setActionsResponse.StatusCode, await setActionsResponse.Content.ReadAsStringAsync());
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Something went wrong and I wasn't able to pause DMs! Discord returned status code `{setActionsResponse.StatusCode}`.");
-        }
+            }
 
         [Command("unpausedms")]
         [Description("Unpause DMs between server members.")]
@@ -105,7 +107,9 @@ namespace Cliptok.Commands
             if (setActionsResponse.IsSuccessStatusCode)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully unpaused DMs!");
             else
+            {
+                ctx.Client.Logger.LogError("Failed to set Security Actions.\nPayload: {payload}\nResponse: {statuscode} {body}", newSecurityActions.ToString(), (int)setActionsResponse.StatusCode, await setActionsResponse.Content.ReadAsStringAsync());
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Something went wrong and I wasn't able to unpause DMs! Discord returned status code `{setActionsResponse.StatusCode}`.");
-        }
+            }
     }
 }
