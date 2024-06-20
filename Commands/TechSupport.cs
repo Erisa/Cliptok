@@ -9,13 +9,20 @@
         {
             await ctx.Message.DeleteAsync();
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                .WithTitle("**__Need Help Or Have a Problem?__**")
-                .WithDescription(
-                $"You're probably looking for <#{Program.cfgjson.TechSupportChannel}> or <#{Program.cfgjson.SupportForumId}>!\n\n" +
-                $"Once there, please be sure to provide **plenty of details**, ping the <@&{Program.cfgjson.CommunityTechSupportRoleID}> role, and *be patient!*\n\n" +
-                $"Look under the `🔧 Support` category for the appropriate channel for your issue. See <#413274922413195275> for more info."
-                )
                 .WithColor(13920845);
+            if (ctx.Channel.Id == Program.cfgjson.TechSupportChannel || ctx.Channel.ParentId == Program.cfgjson.SupportForumId)
+            {
+                embed.Title = "**__Need help?__**";
+                embed.Description = $"You are in the right place! Please state your question with *plenty of detail* and mention the <@&{Program.cfgjson.CommunityTechSupportRoleID}> role and someone may be able to help you.\n\n" +
+                                   $"Details includes error codes and other specific information.";
+            }
+            else
+            {
+                embed.Title = "**__Need Help Or Have a Problem?__**";
+                embed.Description = $"You're probably looking for <#{Program.cfgjson.TechSupportChannel}> or <#{Program.cfgjson.SupportForumId}>!\n\n" +
+                                   $"Once there, please be sure to provide **plenty of details**, ping the <@&{Program.cfgjson.CommunityTechSupportRoleID}> role, and *be patient!*\n\n" +
+                                   $"Look under the `🔧 Support` category for the appropriate channel for your issue. See <#413274922413195275> for more info.";
+            }
 
             if (user != default)
             {
