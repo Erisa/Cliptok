@@ -52,17 +52,11 @@ namespace Cliptok
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var logFormat = "[{Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{Level}] {Message}{NewLine}{Exception}";
 
-            Log.Logger = new LoggerConfiguration()
-#if DEBUG
-                .MinimumLevel.Debug()
-#else
-                .MinimumLevel.Information()
-#endif
+            var loggerConfig = new LoggerConfiguration()
                 .WriteTo.Console(outputTemplate: logFormat, theme: AnsiConsoleTheme.Literate)
                 .WriteTo.TextWriter(outputCapture, outputTemplate: logFormat)
                 .WriteTo.DiscordSink(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information, outputTemplate: logFormat)
-                .Filter.ByExcluding(log => { return log.ToString().Contains("DSharpPlus.Exceptions.NotFoundException: Not found: NotFound"); })
-                .CreateLogger();
+                .Filter.ByExcluding(log => { return log.ToString().Contains("DSharpPlus.Exceptions.NotFoundException: Not found: NotFound"); });
 
             var logFactory = new LoggerFactory().AddSerilog();
 
@@ -79,6 +73,30 @@ namespace Cliptok
                 json = await sr.ReadToEndAsync();
 
             cfgjson = JsonConvert.DeserializeObject<ConfigJson>(json);
+
+            switch (cfgjson.LogLevel)
+            {
+                case Level.Information:
+                    loggerConfig.MinimumLevel.Information();
+                    break;
+                case Level.Warning:
+                    loggerConfig.MinimumLevel.Warning();
+                    break;
+                case Level.Error:
+                    loggerConfig.MinimumLevel.Error();
+                    break;
+                case Level.Debug:
+                    loggerConfig.MinimumLevel.Debug();
+                    break;
+                case Level.Verbose:
+                    loggerConfig.MinimumLevel.Verbose();
+                    break;
+                default:
+                    loggerConfig.MinimumLevel.Information();
+                    break;
+            }
+
+            Log.Logger = loggerConfig.CreateLogger();
 
             hasteUploader = new HasteBinClient(cfgjson.HastebinEndpoint);
 
