@@ -169,8 +169,12 @@ namespace Cliptok.Commands.InteractionCommands
             [Option("public", "Whether to show the output publicly.")] bool publicWarnings = false
         )
         {
-            long warnId = default;
+            if (warning.Contains(' '))
+            {
+                warning = warning.Split(' ')[0];
+            }
 
+            long warnId;
             try
             {
                 warnId = Convert.ToInt64(warning);
@@ -197,8 +201,12 @@ namespace Cliptok.Commands.InteractionCommands
             [Option("public", "Whether to show the output publicly. Default: false")] bool showPublic = false
         )
         {
-            long warnId = default;
+            if (warningId.Contains(' '))
+            {
+                warningId = warningId.Split(' ')[0];
+            }
 
+            long warnId;
             try
             {
                 warnId = Convert.ToInt64(warningId);
@@ -246,8 +254,12 @@ namespace Cliptok.Commands.InteractionCommands
             [Option("new_reason", "The new reason for the warning")] string reason,
             [Option("public", "Whether to show the output publicly. Default: false")] bool showPublic = false)
         {
-            long warnId = default;
+            if (warning.Contains(' '))
+            {
+                warning = warning.Split(' ')[0];
+            }
 
+            long warnId;
             try
             {
                 warnId = Convert.ToInt64(warning);
