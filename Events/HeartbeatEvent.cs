@@ -2,7 +2,7 @@
 {
     public class HeartbeatEvent
     {
-        public static async Task OnHeartbeat(DiscordClient client, HeartbeatEventArgs e)
+        public static async Task OnHeartbeat(DiscordClient client, HeartbeatedEventArgs e)
         {
             if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("UPTIME_KUMA_PUSH_URL")) && client.IsConnected)
             {

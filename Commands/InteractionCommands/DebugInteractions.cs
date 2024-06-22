@@ -6,7 +6,7 @@ namespace Cliptok.Commands.InteractionCommands
     {
         [SlashCommand("scamcheck", "Check if a link or message is known to the anti-phishing API.", defaultPermission: false)]
         [Description("Check if a link or message is known to the anti-phishing API.")]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(Permissions.ModerateMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
         public async Task ScamCheck(InteractionContext ctx, [Option("input", "Domain or message content to scan.")] string content)
         {
             var urlMatches = Constants.RegexConstants.url_rx.Matches(content);
@@ -49,7 +49,7 @@ namespace Cliptok.Commands.InteractionCommands
         }
 
         [SlashCommand("tellraw", "You know what you're here for.", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.ModerateMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
         public async Task TellRaw(InteractionContext ctx, [Option("input", "???")] string input, [Option("reply_msg_id", "ID of message to use in a reply context.")] string replyID = "0", [Option("pingreply", "Ping pong.")] bool pingreply = true, [Option("channel", "Either mention or ID. Not a name.")] string discordChannel = default)
         {
             DiscordChannel channelObj = default;

@@ -54,7 +54,7 @@
             try
             {
                 string logOut;
-                await guild.BanMemberAsync(targetUserId, deleteDays, reason);
+                await guild.BanMemberAsync(targetUserId, TimeSpan.FromDays(deleteDays), reason);
                 if (permaBan)
                 {
                     if (appealable)
@@ -87,7 +87,7 @@
 
         public static async Task FindModmailThreadAndSendMessage(DiscordGuild guild, string searchText, string messageToSend)
         {
-            var matchPair = guild.Channels.FirstOrDefault(c => c.Value.Type == ChannelType.Text && c.Value.Topic is not null && c.Value.Topic.EndsWith(searchText));
+            var matchPair = guild.Channels.FirstOrDefault(c => c.Value.Type == DiscordChannelType.Text && c.Value.Topic is not null && c.Value.Topic.EndsWith(searchText));
             var channel = matchPair.Value;
 
             if (channel != default)
@@ -143,7 +143,7 @@
         {
             try
             {
-                await targetGuild.BanMemberAsync(targetUserId, 7, reason);
+                await targetGuild.BanMemberAsync(targetUserId, TimeSpan.FromDays(7), reason);
                 return true;
             }
             catch

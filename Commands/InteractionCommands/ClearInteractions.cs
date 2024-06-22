@@ -5,7 +5,7 @@
         public static Dictionary<ulong, List<DiscordMessage>> MessagesToClear = new();
 
         [SlashCommand("clear", "Delete many messages from the current channel.", defaultPermission: false)]
-        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequireBotPermissions(Permissions.ManageMessages), SlashCommandPermissions(Permissions.ModerateMembers)]
+        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequireBotPermissions(DiscordPermissions.ManageMessages), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
         public async Task ClearSlashCommand(InteractionContext ctx,
             [Option("count", "The number of messages to consider for deletion. Required if you don't use the 'up_to' argument.")] long count = 0,
             [Option("up_to", "Optionally delete messages up to (not including) this one. Accepts IDs and links.")] string upTo = "",
@@ -20,7 +20,7 @@
             [Option("dry_run", "Don't actually delete the messages, just output what would be deleted.")] bool dryRun = false
         )
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(!dryRun));
+            await ctx.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(!dryRun));
 
             // If all args are unset
             if (count == 0 && upTo == "" && user == default && ignoreMods == false && match == "" && botsOnly == false && humansOnly == false && attachmentsOnly == false && stickersOnly == false && linksOnly == false)
@@ -252,7 +252,7 @@
             // Warn the mod if we're going to be deleting 50 or more messages.
             if (messagesToClear.Count >= 50)
             {
-                DiscordButtonComponent confirmButton = new(ButtonStyle.Danger, "clear-confirm-callback", "Delete Messages");
+                DiscordButtonComponent confirmButton = new(DiscordButtonStyle.Danger, "clear-confirm-callback", "Delete Messages");
                 DiscordMessage confirmationMessage = await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Muted} You're about to delete {messagesToClear.Count} messages. Are you sure?").AddComponents(confirmButton).AsEphemeral(true));
 
                 MessagesToClear.Add(confirmationMessage.Id, messagesToClear);

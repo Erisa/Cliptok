@@ -186,14 +186,14 @@
                 foreach (var sticker in message.Stickers)
                 {
                     string fieldValue = $"[{sticker.Name}]({sticker.StickerUrl})";
-                    if (sticker.FormatType is StickerFormat.APNG or StickerFormat.LOTTIE)
+                    if (sticker.FormatType is DiscordStickerFormat.APNG or DiscordStickerFormat.LOTTIE)
                     {
                         fieldValue += " (Animated)";
                     }
 
                     embed.AddField($"Sticker", fieldValue);
 
-                    if (message.Attachments.Count == 0 && message.Stickers.Count == 1 && sticker.FormatType is not StickerFormat.LOTTIE)
+                    if (message.Attachments.Count == 0 && message.Stickers.Count == 1 && sticker.FormatType is not DiscordStickerFormat.LOTTIE)
                     {
                         embed.WithImageUrl(sticker.StickerUrl.Replace("cdn.discordapp.com", "media.discordapp.net") + "?size=160");
                     }

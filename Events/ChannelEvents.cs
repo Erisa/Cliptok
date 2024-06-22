@@ -2,7 +2,7 @@
 {
     public class ChannelEvents
     {
-        public static async Task ChannelUpdated(DiscordClient _, ChannelUpdateEventArgs e)
+        public static async Task ChannelUpdated(DiscordClient _, ChannelUpdatedEventArgs e)
         {
             Task.Run(async () =>
             {
@@ -64,7 +64,7 @@
                 foreach (var overwrite in currentChannelOverwrites)
                 {
                     // Ignore role overrides because we aren't storing those
-                    if (overwrite.Type == OverwriteType.Role) continue;
+                    if (overwrite.Type == DiscordOverwriteType.Role) continue;
 
                     // If the current channel overwrites are not in the db, add them to the db.
 

@@ -4,14 +4,14 @@ namespace Cliptok.Events
 {
     public class InteractionEvents
     {
-        public static async Task ComponentInteractionCreateEvent(DiscordClient _, ComponentInteractionCreateEventArgs e)
+        public static async Task ComponentInteractionCreateEvent(DiscordClient _, ComponentInteractionCreatedEventArgs e)
         {
             // Edits need a webhook rather than interaction..?
             DiscordWebhookBuilder webhookOut;
 
             if (e.Id == "line-limit-deleted-message-callback")
             {
-                await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
                 var text = await db.HashGetAsync("deletedMessageReferences", e.Message.Id);
                 if (text.IsNullOrEmpty)
@@ -36,12 +36,12 @@ namespace Cliptok.Events
 
                 if (!messagesToClear.ContainsKey(e.Message.Id))
                 {
-                    await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                    await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
                         new DiscordInteractionResponseBuilder().WithContent($"{cfgjson.Emoji.Error} These messages have already been deleted!").AsEphemeral(true));
                     return;
                 }
 
-                await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
                 List<DiscordMessage> messages = messagesToClear.GetValueOrDefault(e.Message.Id);
 
@@ -68,7 +68,7 @@ namespace Cliptok.Events
             }
             else
             {
-                await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Unknown interaction. I don't know what you are asking me for.").AsEphemeral(true));
+                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Unknown interaction. I don't know what you are asking me for.").AsEphemeral(true));
             }
 
         }
@@ -86,7 +86,7 @@ namespace Cliptok.Events
                             levelText = $"naught but a thing, my dear human. Congratulations, you win {rand.Next(1, 10)} bonus points.";
 
                         await e.Context.CreateResponseAsync(
-                            InteractionResponseType.ChannelMessageWithSource,
+                            DiscordInteractionResponseType.ChannelMessageWithSource,
                             new DiscordInteractionResponseBuilder().WithContent(
                                 $"{cfgjson.Emoji.NoPermissions} Invalid permission level to use command **{e.Context.CommandName}**!\n" +
                                 $"Required: `{att.TargetLvl}`\n" +
@@ -111,7 +111,7 @@ namespace Cliptok.Events
                             levelText = $"naught but a thing, my dear human. Congratulations, you win {rand.Next(1, 10)} bonus points.";
 
                         await e.Context.CreateResponseAsync(
-                            InteractionResponseType.ChannelMessageWithSource,
+                            DiscordInteractionResponseType.ChannelMessageWithSource,
                             new DiscordInteractionResponseBuilder().WithContent(
                                 $"{cfgjson.Emoji.NoPermissions} Invalid permission level to use command **{e.Context.CommandName}**!\n" +
                                 $"Required: `{att.TargetLvl}`\n" +

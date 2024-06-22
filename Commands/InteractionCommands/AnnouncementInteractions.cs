@@ -6,7 +6,7 @@ namespace Cliptok.Commands.InteractionCommands
     {
         [SlashCommand("announcebuild", "Announce a Windows Insider build in the current channel.", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [SlashCommandPermissions(Permissions.ModerateMembers)]
+        [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
         public async Task AnnounceBuildSlashCommand(InteractionContext ctx,
             [Choice("Windows 10", 10)]
             [Choice("Windows 11", 11)]
@@ -217,7 +217,7 @@ namespace Cliptok.Commands.InteractionCommands
                     threadBrackets = "10 RP";
 
                 string threadName = string.Format(autothreadName, buildNumber, threadBrackets);
-                threadChannel = await messageSent.CreateThreadAsync(threadName, AutoArchiveDuration.Week, "Creating thread for Insider build.");
+                threadChannel = await messageSent.CreateThreadAsync(threadName, DiscordAutoArchiveDuration.Week, "Creating thread for Insider build.");
 
                 var initialMsg = await threadChannel.SendMessageAsync($"{blogLink}");
                 await initialMsg.PinAsync();
@@ -238,7 +238,7 @@ namespace Cliptok.Commands.InteractionCommands
                 if (insiderChannel2 != "")
                     await insiderRole2.ModifyAsync(mentionable: false);
 
-                if (announcementChannel.Type is ChannelType.News)
+                if (announcementChannel.Type is DiscordChannelType.News)
                     await announcementChannel.CrosspostMessageAsync(msg);
             }
 

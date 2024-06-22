@@ -323,7 +323,7 @@ namespace Cliptok.Commands
                     foreach (var overwrite in channel.PermissionOverwrites)
                     {
                         // Ignore role overrides
-                        if (overwrite.Type == OverwriteType.Role) continue;
+                        if (overwrite.Type == DiscordOverwriteType.Role) continue;
 
                         // Get user's current overrides from db
                         var userOverrides = await Program.db.HashGetAsync("overrides", overwrite.Id.ToString());

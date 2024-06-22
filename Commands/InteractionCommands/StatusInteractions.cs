@@ -4,7 +4,7 @@
     {
         [SlashCommandGroup("status", "Status commands")]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [SlashCommandPermissions(Permissions.ModerateMembers)]
+        [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
 
         public class StatusSlashCommands
         {
@@ -13,13 +13,13 @@
             public async Task StatusSetCommand(
                 InteractionContext ctx,
                 [Option("text", "The text to use for the status.")] string statusText,
-                [Choice("Custom", (long)ActivityType.Custom)]
-                [Choice("Playing", (long)ActivityType.Playing)]
-                [Choice("Streaming", (long)ActivityType.Streaming)]
-                [Choice("Listening to", (long)ActivityType.ListeningTo)]
-                [Choice("Watching", (long)ActivityType.Watching)]
-                [Choice("Competing", (long)ActivityType.Competing)]
-                [Option("type", "Defaults to custom. The type of status to use.")]  long statusType = (long)ActivityType.Custom
+                [Choice("Custom", (long)DiscordActivityType.Custom)]
+                [Choice("Playing", (long)DiscordActivityType.Playing)]
+                [Choice("Streaming", (long)DiscordActivityType.Streaming)]
+                [Choice("Listening to", (long)DiscordActivityType.ListeningTo)]
+                [Choice("Watching", (long)DiscordActivityType.Watching)]
+                [Choice("Competing", (long)DiscordActivityType.Competing)]
+                [Option("type", "Defaults to custom. The type of status to use.")]  long statusType = (long)DiscordActivityType.Custom
             )
             {
                 if (statusText.Length > 128)
@@ -30,9 +30,9 @@
                 await Program.db.StringSetAsync("config:status", statusText);
                 await Program.db.StringSetAsync("config:status_type", statusType);
 
-                await ctx.Client.UpdateStatusAsync(new DiscordActivity(statusText, (ActivityType)statusType));
+                await ctx.Client.UpdateStatusAsync(new DiscordActivity(statusText, (DiscordActivityType)statusType));
 
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Status has been updated!\nType: `{((ActivityType)statusType).ToString()}`\nText: `{statusText}`");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Status has been updated!\nType: `{((DiscordActivityType)statusType).ToString()}`\nText: `{statusText}`");
             }
 
             [SlashCommand("clear", "Clear Cliptoks status.", defaultPermission: false)]

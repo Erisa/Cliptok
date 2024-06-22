@@ -6,7 +6,7 @@ namespace Cliptok.Commands.InteractionCommands
     {
         [SlashCommand("warn", "Formally warn a user, usually for breaking the server rules.", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [SlashCommandPermissions(Permissions.ModerateMembers)]
+        [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
         public async Task WarnSlashCommand(InteractionContext ctx,
          [Option("user", "The user to warn.")] DiscordUser user,
          [Option("reason", "The reason they're being warned.")] string reason,
@@ -16,7 +16,7 @@ namespace Cliptok.Commands.InteractionCommands
         {
             // Initial response to avoid the 3 second timeout, will edit later.
             var eout = new DiscordInteractionResponseBuilder().AsEphemeral(true);
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, eout);
+            await ctx.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, eout);
 
             // Edits need a webhook rather than interaction..?
             DiscordWebhookBuilder webhookOut;
@@ -67,12 +67,12 @@ namespace Cliptok.Commands.InteractionCommands
             if (!publicWarnings)
                 eout.AsEphemeral(true);
 
-            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, eout);
+            await ctx.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, eout);
         }
 
         [SlashCommand("transfer_warnings", "Transfer warnings from one user to another.", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.Moderator)]
-        [SlashCommandPermissions(Permissions.ModerateMembers)]
+        [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
         public async Task TransferWarningsSlashCommand(InteractionContext ctx,
             [Option("source_user", "The user currently holding the warnings.")] DiscordUser sourceUser,
             [Option("target_user", "The user receiving the warnings.")] DiscordUser targetUser,
@@ -162,7 +162,7 @@ namespace Cliptok.Commands.InteractionCommands
         }
 
         [SlashCommand("warndetails", "Search for a warning and return its details.", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(Permissions.ModerateMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
         public async Task WarndetailsSlashCommand(InteractionContext ctx,
             [Option("user", "The user to fetch a warning for.")] DiscordUser user,
             [Autocomplete(typeof(WarningsAutocompleteProvider)), Option("warning", "Type to search! Find the warning you want to fetch.")] string warning,
@@ -190,7 +190,7 @@ namespace Cliptok.Commands.InteractionCommands
         }
 
         [SlashCommand("delwarn", "Search for a warning and delete it!", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(Permissions.ModerateMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
         public async Task DelwarnSlashCommand(InteractionContext ctx,
             [Option("user", "The user to delete a warning for.")] DiscordUser targetUser,
             [Autocomplete(typeof(WarningsAutocompleteProvider))][Option("warning", "Type to search! Find the warning you want to delete.")] string warningId,
@@ -239,7 +239,7 @@ namespace Cliptok.Commands.InteractionCommands
         }
 
         [SlashCommand("editwarn", "Search for a warning and edit it!", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(Permissions.ModerateMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
         public async Task EditWarnSlashCommand(InteractionContext ctx,
             [Option("user", "The user to fetch a warning for.")] DiscordUser user,
             [Autocomplete(typeof(WarningsAutocompleteProvider))][Option("warning", "Type to search! Find the warning you want to edit.")] string warning,
