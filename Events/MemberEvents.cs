@@ -81,7 +81,7 @@ namespace Cliptok.Events
             {
                 if (db.HashExists(IdAutoBanSet.Name, e.Member.Id))
                 {
-                    return;
+                    continue;
                 }
 
                 if (e.Member.Id > IdAutoBanSet.LowerBound && e.Member.Id < IdAutoBanSet.UpperBound)
