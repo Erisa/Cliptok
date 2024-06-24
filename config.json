@@ -323,5 +323,6 @@
   "insiderCanaryThread": 1082394217168523315,
   "tqsMutedRole": 752821045408563230,
   "tqsMuteDurationHours": 2,
-  "autoWarnMsgAutoDeleteDays": 3
+  "autoWarnMsgAutoDeleteDays": 3,
+  "logLevel": "Information"
 }

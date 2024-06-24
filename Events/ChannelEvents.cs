@@ -35,19 +35,13 @@
                         // Delay to allow leave to complete first
                         await Task.Delay(500);
 
-                        // Try to fetch member. If it fails, they are not in the guild.
-                        try
-                        {
-                            await e.Guild.GetMemberAsync((ulong)userOverwrites.Name);
-                        }
-                        catch
-                        {
-                            // Failed to fetch user. They probably left or were otherwise removed from the server.
-                            // Preserve overrides.
-                            return;
-                        }
+                        // Try to fetch member. If it fails, they are not in the guild. If this is a voice channel, remove the override.
+                        // (if they are not in the guild & this is not a voice channel, skip; otherwise, code below handles removal)
+                        if (!e.Guild.Members.ContainsKey((ulong)userOverwrites.Name) && e.ChannelAfter.Type != ChannelType.Voice)
+                            continue;
 
                         // User could be fetched, so they are in the server and their override was removed. Remove from db.
+                        // (or user could not be fetched & this is a voice channel; remove)
 
                         var overrides = await Program.db.HashGetAsync("overrides", userOverwrites.Name);
                         var dict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(overrides);
