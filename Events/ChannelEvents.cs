@@ -37,7 +37,7 @@
 
                         // Try to fetch member. If it fails, they are not in the guild. If this is a voice channel, remove the override.
                         // (if they are not in the guild & this is not a voice channel, skip; otherwise, code below handles removal)
-                        if (!e.Guild.Members.ContainsKey((ulong)userOverwrites.Name) && e.ChannelAfter.Type != ChannelType.Voice)
+                        if (!e.Guild.Members.ContainsKey((ulong)userOverwrites.Name) && e.ChannelAfter.Type != DiscordChannelType.Voice)
                             continue;
 
                         // User could be fetched, so they are in the server and their override was removed. Remove from db.
