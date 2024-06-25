@@ -141,6 +141,12 @@ namespace Cliptok
                 logging.AddSerilog();
             });
 
+            discordBuilder.ConfigureGatewayClient(clientConfig =>
+            {
+                clientConfig.LogUnknownEvents = false;
+                clientConfig.LogUnknownAuditlogs = false;
+            });
+
             discord = discordBuilder.Build();
 
             var slash = discord.UseSlashCommands();
