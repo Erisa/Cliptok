@@ -2,7 +2,7 @@
 {
     internal class UnbanEvent
     {
-        public static async Task OnUnban(DiscordClient client, GuildBanRemoveEventArgs e)
+        public static async Task OnUnban(DiscordClient client, GuildBanRemovedEventArgs e)
         {
             if (e.Guild.Id != Program.cfgjson.ServerID)
                 return;

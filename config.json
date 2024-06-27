@@ -19,6 +19,7 @@
     "canary": 434426594271166474,
     "dev": 1082364328474329179,
     "beta": 643712828217360394,
+    "beta10": 1247617691997438082,
     "rp": 288729239921098752,
     "rp10": 910319453491839069,
     "patch": 445773142233710594
@@ -232,6 +233,7 @@
     "insiderBeta": 643712828217360394,
     "insiderRP": 288729239921098752,
     "insider10RP": 910319453491839069,
+    "insider10Beta": 1247617691997438082,
     "patchTuesday": 445773142233710594,
     "giveaways": 1169336992455200820
   },
@@ -320,5 +322,7 @@
   "autoDeleteEmptyThreads": true,
   "insiderCanaryThread": 1082394217168523315,
   "tqsMutedRole": 752821045408563230,
-  "tqsMuteDurationHours": 2
+  "tqsMuteDurationHours": 2,
+  "autoWarnMsgAutoDeleteDays": 3,
+  "logLevel": "Information"
 }

@@ -1,3 +1,8 @@
+using DSharpPlus.Extensions;
+using DSharpPlus.Net;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Serilog.Configuration;
 using System.Reflection;
 
 namespace Cliptok
@@ -52,18 +57,11 @@ namespace Cliptok
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var logFormat = "[{Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{Level}] {Message}{NewLine}{Exception}";
 
-            Log.Logger = new LoggerConfiguration()
-#if DEBUG
-                .MinimumLevel.Debug()
-#else
-                .MinimumLevel.Information()
-#endif
+            var loggerConfig = new LoggerConfiguration()
                 .WriteTo.Console(outputTemplate: logFormat, theme: AnsiConsoleTheme.Literate)
                 .WriteTo.TextWriter(outputCapture, outputTemplate: logFormat)
                 .WriteTo.DiscordSink(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information, outputTemplate: logFormat)
-                .CreateLogger();
-
-            var logFactory = new LoggerFactory().AddSerilog();
+                .Filter.ByExcluding(log => { return log.ToString().Contains("DSharpPlus.Exceptions.NotFoundException: Not found: NotFound"); });
 
             string token;
             var json = "";
@@ -78,6 +76,30 @@ namespace Cliptok
                 json = await sr.ReadToEndAsync();
 
             cfgjson = JsonConvert.DeserializeObject<ConfigJson>(json);
+
+            switch (cfgjson.LogLevel)
+            {
+                case Level.Information:
+                    loggerConfig.MinimumLevel.Information();
+                    break;
+                case Level.Warning:
+                    loggerConfig.MinimumLevel.Warning();
+                    break;
+                case Level.Error:
+                    loggerConfig.MinimumLevel.Error();
+                    break;
+                case Level.Debug:
+                    loggerConfig.MinimumLevel.Debug();
+                    break;
+                case Level.Verbose:
+                    loggerConfig.MinimumLevel.Verbose();
+                    break;
+                default:
+                    loggerConfig.MinimumLevel.Information();
+                    break;
+            }
+
+            Log.Logger = loggerConfig.CreateLogger();
 
             hasteUploader = new HasteBinClient(cfgjson.HastebinEndpoint);
 
@@ -111,20 +133,21 @@ namespace Cliptok
 
             // Migration away from a broken attempt at a key in the past.
             db.KeyDelete("messages");
+            
+            DiscordClientBuilder discordBuilder = DiscordClientBuilder.CreateDefault(token, DiscordIntents.All);
 
-            discord = new DiscordClient(new DiscordConfiguration
+            discordBuilder.ConfigureLogging(logging =>
             {
-                Token = token,
-                TokenType = TokenType.Bot,
-#if DEBUG
-                MinimumLogLevel = LogLevel.Debug,
-#else
-                MinimumLogLevel = LogLevel.Information,
-#endif
-                LoggerFactory = logFactory,
-                Intents = DiscordIntents.All,
-                LogUnknownEvents = false
+                logging.AddSerilog();
             });
+
+            discordBuilder.ConfigureGatewayClient(clientConfig =>
+            {
+                clientConfig.LogUnknownEvents = false;
+                clientConfig.LogUnknownAuditlogs = false;
+            });
+
+            discord = discordBuilder.Build();
 
             var slash = discord.UseSlashCommands();
             slash.SlashCommandErrored += InteractionEvents.SlashCommandErrorEvent;
@@ -143,10 +166,7 @@ namespace Cliptok
             discord.MessageReactionAdded += ReactionEvent.OnReaction;
             discord.GuildMemberUpdated += MemberEvents.GuildMemberUpdated;
             discord.UserUpdated += MemberEvents.UserUpdated;
-            discord.ClientErrored += ErrorEvents.ClientError;
-            discord.SocketErrored += ErrorEvents.Discord_SocketErrored;
             discord.ThreadCreated += ThreadEvents.Discord_ThreadCreated;
-            discord.ThreadUpdated += ThreadEvents.Discord_ThreadUpdated;
             discord.ThreadDeleted += ThreadEvents.Discord_ThreadDeleted;
             discord.ThreadListSynced += ThreadEvents.Discord_ThreadListSynced;
             discord.ThreadMemberUpdated += ThreadEvents.Discord_ThreadMemberUpdated;
@@ -185,6 +205,7 @@ namespace Cliptok
                     [
                         Tasks.PunishmentTasks.CheckMutesAsync(),
                         Tasks.PunishmentTasks.CheckBansAsync(),
+                        Tasks.PunishmentTasks.CheckAutomaticWarningsAsync(),
                         Tasks.ReminderTasks.CheckRemindersAsync(),
                         Tasks.RaidmodeTasks.CheckRaidmodeAsync(cfgjson.ServerID),
                         Tasks.LockdownTasks.CheckUnlocksAsync(),

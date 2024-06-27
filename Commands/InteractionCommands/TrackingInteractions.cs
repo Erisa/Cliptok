@@ -3,7 +3,7 @@
     internal class TrackingInteractions : ApplicationCommandModule
     {
         [SlashCommandGroup("tracking", "Commands to manage message tracking of users", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(Permissions.ModerateMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
         public class PermadehoistSlashCommands
         {
             [SlashCommand("add", "Track a users messages.")]
@@ -29,7 +29,7 @@
                 }
                 else
                 {
-                    var thread = await LogChannelHelper.ChannelCache["investigations"].CreateThreadAsync(DiscordHelpers.UniqueUsername(discordUser), AutoArchiveDuration.Week, ChannelType.PublicThread);
+                    var thread = await LogChannelHelper.ChannelCache["investigations"].CreateThreadAsync(DiscordHelpers.UniqueUsername(discordUser), DiscordAutoArchiveDuration.Week, DiscordChannelType.PublicThread);
                     await Program.db.HashSetAsync("trackingThreads", discordUser.Id, thread.Id);
                     await thread.SendMessageAsync($"{Program.cfgjson.Emoji.On} Now tracking {discordUser.Mention} in this thread! :eyes:");
                     await thread.AddThreadMemberAsync(ctx.Member);

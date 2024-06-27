@@ -3,24 +3,10 @@
     internal class RoleInteractions : ApplicationCommandModule
     {
         [SlashCommand("grant", "Grant a user Tier 1, bypassing any verification requirements.", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(Permissions.ModerateMembers)]
-        public async Task SlashGrant(InteractionContext ctx, [Option("user", "The user to grant Tier 1 to.")] DiscordUser user)
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        public async Task SlashGrant(InteractionContext ctx, [Option("user", "The user to grant Tier 1 to.")] DiscordUser _)
         {
-            DiscordMember member = default;
-            try
-            {
-                member = await ctx.Guild.GetMemberAsync(user.Id);
-            }
-            catch (Exception)
-            {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user does not appear to be in the server!");
-                return;
-            }
-
-            var tierOne = ctx.Guild.GetRole(Program.cfgjson.TierRoles[0]);
-
-            await member.GrantRoleAsync(tierOne, $"/grant used by {DiscordHelpers.UniqueUsername(ctx.User)}");
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {member.Mention} can now access the server(?)\n**WARNING**: This probably did not work due to recent Discord changes. Please use a desktop or web Discord client, right click the user and click \"Verify Member\" if available.");
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command is deprecated and no longer works. Please right click (or tap and hold on mobile) the user and click \"Verify Member\" if available.");
         }
 
         [HomeServer]
@@ -35,6 +21,7 @@
                 [Choice("Windows 11 Insiders (Beta)", "insiderBeta")]
                 [Choice("Windows 11 Insiders (Release Preview)", "insiderRP")]
                 [Choice("Windows 10 Insiders (Release Preview)", "insider10RP")]
+                [Choice("Windows 10 Insiders (Beta)", "insider10Beta")]
                 [Choice("Patch Tuesday", "patchTuesday")]
                 [Choice("Giveaways", "giveaways")]
                 [Option("role", "The role to opt into.")] string role)
@@ -48,6 +35,7 @@
                     "insiderBeta" => Program.cfgjson.UserRoles.InsiderBeta,
                     "insiderRP" => Program.cfgjson.UserRoles.InsiderRP,
                     "insider10RP" => Program.cfgjson.UserRoles.Insider10RP,
+                    "insider10Beta" => Program.cfgjson.UserRoles.Insider10Beta,
                     "patchTuesday" => Program.cfgjson.UserRoles.PatchTuesday,
                     "giveaways" => Program.cfgjson.UserRoles.Giveaways,
                     _ => throw new NotSupportedException()
@@ -67,6 +55,7 @@
                 [Choice("Windows 11 Insiders (Beta)", "insiderBeta")]
                 [Choice("Windows 11 Insiders (Release Preview)", "insiderRP")]
                 [Choice("Windows 10 Insiders (Release Preview)", "insider10RP")]
+                [Choice("Windows 10 Insiders (Beta)", "insider10Beta")]
                 [Choice("Patch Tuesday", "patchTuesday")]
                 [Choice("Giveaways", "giveaways")]
                 [Option("role", "The role to opt out of.")] string role)
@@ -80,6 +69,7 @@
                     "insiderBeta" => Program.cfgjson.UserRoles.InsiderBeta,
                     "insiderRP" => Program.cfgjson.UserRoles.InsiderRP,
                     "insider10RP" => Program.cfgjson.UserRoles.Insider10RP,
+                    "insider10Beta" => Program.cfgjson.UserRoles.Insider10Beta,
                     "patchTuesday" => Program.cfgjson.UserRoles.PatchTuesday,
                     "giveaways" => Program.cfgjson.UserRoles.Giveaways,
                     _ => throw new NotSupportedException()

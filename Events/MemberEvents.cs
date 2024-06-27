@@ -4,7 +4,7 @@ namespace Cliptok.Events
 {
     public class MemberEvents
     {
-        public static async Task GuildMemberAdded(DiscordClient client, GuildMemberAddEventArgs e)
+        public static async Task GuildMemberAdded(DiscordClient client, GuildMemberAddedEventArgs e)
         {
 
             if (e.Guild.Id != cfgjson.ServerID)
@@ -81,14 +81,14 @@ namespace Cliptok.Events
             {
                 if (db.HashExists(IdAutoBanSet.Name, e.Member.Id))
                 {
-                    return;
+                    continue;
                 }
 
                 if (e.Member.Id > IdAutoBanSet.LowerBound && e.Member.Id < IdAutoBanSet.UpperBound)
                 {
                     await e.Member.SendMessageAsync(banDM);
 
-                    await e.Member.BanAsync(7, "Matching patterns of known raiders, please unban if appealed.");
+                    await e.Member.BanAsync(TimeSpan.FromDays(7), "Matching patterns of known raiders, please unban if appealed.");
 
                     await LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the creation date of the {IdAutoBanSet.Name} DM scam raiders.");
                 }
@@ -120,7 +120,7 @@ namespace Cliptok.Events
             }
         }
 
-        public static async Task GuildMemberRemoved(DiscordClient client, GuildMemberRemoveEventArgs e)
+        public static async Task GuildMemberRemoved(DiscordClient client, GuildMemberRemovedEventArgs e)
         {
 
             if (e.Guild.Id != cfgjson.ServerID)
@@ -191,7 +191,7 @@ namespace Cliptok.Events
             }
         }
 
-        public static async Task GuildMemberUpdated(DiscordClient _, GuildMemberUpdateEventArgs e)
+        public static async Task GuildMemberUpdated(DiscordClient _, GuildMemberUpdatedEventArgs e)
         {
 
             // dont check bots
@@ -233,7 +233,7 @@ namespace Cliptok.Events
                     });
         }
 
-        public static async Task UserUpdated(DiscordClient _, UserUpdateEventArgs e)
+        public static async Task UserUpdated(DiscordClient _, UserUpdatedEventArgs e)
         {
             // dont check bots
             if (e.UserAfter.IsBot)

@@ -14,17 +14,17 @@ namespace Cliptok.Events
 
         static public readonly HttpClient httpClient = new();
 
-        public static async Task MessageCreated(DiscordClient client, MessageCreateEventArgs e)
+        public static async Task MessageCreated(DiscordClient client, MessageCreatedEventArgs e)
         {
             await MessageHandlerAsync(client, e.Message, e.Channel);
         }
 
-        public static async Task MessageUpdated(DiscordClient client, MessageUpdateEventArgs e)
+        public static async Task MessageUpdated(DiscordClient client, MessageUpdatedEventArgs e)
         {
             await MessageHandlerAsync(client, e.Message, e.Channel, true);
         }
 
-        public static async Task MessageDeleted(DiscordClient client, MessageDeleteEventArgs e)
+        public static async Task MessageDeleted(DiscordClient client, MessageDeletedEventArgs e)
         {
             // Delete thread if all messages are deleted
             if (Program.cfgjson.AutoDeleteEmptyThreads && e.Channel is DiscordThreadChannel)
@@ -170,7 +170,7 @@ namespace Cliptok.Events
                         giveawayTitle = StringHelpers.Truncate(giveawayTitle, 100, false);
                     }
 
-                    await message.CreateThreadAsync(giveawayTitle, AutoArchiveDuration.ThreeDays, "Automatically creating giveaway thread.");
+                    await message.CreateThreadAsync(giveawayTitle, DiscordAutoArchiveDuration.ThreeDays, "Automatically creating giveaway thread.");
                 }
 
                 // Skip DMs, external guilds, and messages from bots, beyond this point.
@@ -209,7 +209,7 @@ namespace Cliptok.Events
                     if (message.MentionedUsers.Count > Program.cfgjson.MassMentionBanThreshold)
                     {
                         _ = message.DeleteAsync();
-                        _ = channel.Guild.BanMemberAsync(message.Author.Id, 7, $"Mentioned more than {Program.cfgjson.MassMentionBanThreshold} users in one message.");
+                        _ = channel.Guild.BanMemberAsync(message.Author, TimeSpan.FromDays(7), $"Mentioned more than {Program.cfgjson.MassMentionBanThreshold} users in one message.");
                         string content = $"{Program.cfgjson.Emoji.Banned} {message.Author.Mention} was automatically banned for mentioning **{message.MentionedUsers.Count}** users.";
                         var chatMsg = await channel.SendMessageAsync(content);
                         _ = InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, "Mass mentions (Ban threshold)", DiscordHelpers.MessageLink(chatMsg), content: content);
@@ -227,7 +227,7 @@ namespace Cliptok.Events
                             continue;
                         }
                         else
-                        {
+                        {                                                        
                             (bool success, string flaggedWord) = Checks.ListChecks.CheckForNaughtyWords(message.Content.ToLower(), listItem);
                             if (success)
                             {
@@ -373,7 +373,7 @@ namespace Cliptok.Events
                         if (
                         GetPermLevel(member) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement
                         && (
-                            invite.Channel.Type == ChannelType.Group
+                            invite.Channel.Type == DiscordChannelType.Group
                             || (
                                 !Program.cfgjson.InviteExclusion.Contains(code)
                                 && !Program.cfgjson.InviteIDExclusion.Contains(invite.Guild.Id)
@@ -581,7 +581,7 @@ namespace Cliptok.Events
                         string reason = "Too many lines in a single message";
                         _ = message.DeleteAsync();
 
-                        var button = new DiscordButtonComponent(ButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null);
+                        var button = new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null);
 
                         if (!Program.db.HashExists("linePardoned", message.Author.Id.ToString()))
                         {
@@ -680,7 +680,7 @@ namespace Cliptok.Events
                         if (title.Length > 100)
                             title = StringHelpers.Truncate(title, 100, false);
 
-                        await message.CreateThreadAsync(title, AutoArchiveDuration.Week, "Automatically creating feedback hub thread.");
+                        await message.CreateThreadAsync(title, DiscordAutoArchiveDuration.Week, "Automatically creating feedback hub thread.");
 
                         await Task.Delay(2000);
                         await message.ModifyEmbedSuppressionAsync(true);

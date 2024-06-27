@@ -11,6 +11,7 @@ global using DSharpPlus.EventArgs;
 global using DSharpPlus.SlashCommands;
 global using Microsoft.Extensions.Logging;
 global using Newtonsoft.Json;
+global using Newtonsoft.Json.Linq;
 global using Serilog;
 global using Serilog.Sinks.SystemConsole.Themes;
 global using StackExchange.Redis;

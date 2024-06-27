@@ -28,9 +28,7 @@
                     }
 
                 }
-#if DEBUG
                 Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked bans at {time} with result: {result}", DateTime.Now, success);
-#endif
                 return success;
             }
         }
@@ -55,9 +53,48 @@
                         success = true;
                     }
                 }
-#if DEBUG
                 Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked mutes at {time} with result: {result}", DateTime.Now, success);
-#endif
+                return success;
+            }
+        }
+
+        public static async Task<bool> CheckAutomaticWarningsAsync()
+        {
+            if (Program.cfgjson.AutoWarnMsgAutoDeleteDays == 0)
+                return false;
+
+            Dictionary<string, UserWarning> warnList = Program.db.HashGetAll("automaticWarnings").ToDictionary(
+                x => x.Name.ToString(),
+                x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
+            );
+
+            if (warnList is null | warnList.Keys.Count == 0)
+                return false;
+            else
+            {
+                // The success value will be changed later if any of the message deletes are successful.
+                bool success = false;
+                foreach (KeyValuePair<string, UserWarning> entry in warnList)
+                {
+                    UserWarning warn = entry.Value;
+                    if (DateTime.Now > warn.WarnTimestamp.AddDays(Program.cfgjson.AutoWarnMsgAutoDeleteDays))
+                    {
+                        try
+                        {
+                            var contextMessage = await DiscordHelpers.GetMessageFromReferenceAsync(warn.ContextMessageReference);
+                            await contextMessage.DeleteAsync();
+                            Program.db.HashDelete("automaticWarnings", warn.WarningId);
+                            success = true;
+                        }
+                        catch (NullReferenceException)
+                        {
+                            // it's fine. trust me. we'll live.
+                            Program.db.HashDelete("automaticWarnings", warn.WarningId);
+                            continue;
+                        }
+                    }
+                }
+                Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked automatic warnings at {time} with result: {result}", DateTime.Now, success);
                 return success;
             }
         }

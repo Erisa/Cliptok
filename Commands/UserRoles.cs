@@ -62,7 +62,7 @@ namespace Cliptok.Commands
             {
                 // quick patch to exclude giveaways role
                 if ((ulong)roleId.GetValue(Program.cfgjson.UserRoles, null) == Program.cfgjson.UserRoles.Giveaways)
-                    return;
+                    continue;
 
                 DiscordRole roleToGrant = guild.GetRole((ulong)roleId.GetValue(Program.cfgjson.UserRoles, null));
                 await ctx.Member.RevokeRoleAsync(roleToGrant);

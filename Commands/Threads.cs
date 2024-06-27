@@ -10,14 +10,13 @@
             if (channel == default)
                 channel = ctx.Channel;
 
-            if (channel.Type is not ChannelType.PrivateThread && channel.Type is not ChannelType.PublicThread && channel.Type is not ChannelType.NewsThread)
+            if (channel.Type is not DiscordChannelType.PrivateThread && channel.Type is not DiscordChannelType.PublicThread && channel.Type is not DiscordChannelType.NewsThread)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {channel.Mention} is not a thread!");
                 return;
             }
 
             var thread = (DiscordThreadChannel)channel;
-            await Program.db.SetRemoveAsync("openthreads", thread.Id);
 
             await thread.ModifyAsync(a =>
             {
@@ -34,14 +33,13 @@
             if (channel == default)
                 channel = ctx.Channel;
 
-            if (channel.Type is not ChannelType.PrivateThread && channel.Type is not ChannelType.PublicThread)
+            if (channel.Type is not DiscordChannelType.PrivateThread && channel.Type is not DiscordChannelType.PublicThread)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {channel.Mention} is not a thread!");
                 return;
             }
 
             var thread = (DiscordThreadChannel)channel;
-            await Program.db.SetRemoveAsync("openthreads", thread.Id);
 
             await thread.ModifyAsync(a =>
             {
@@ -58,7 +56,7 @@
             if (channel == default)
                 channel = ctx.Channel;
 
-            if (channel.Type is not ChannelType.PrivateThread && channel.Type is not ChannelType.PublicThread)
+            if (channel.Type is not DiscordChannelType.PrivateThread && channel.Type is not DiscordChannelType.PublicThread)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {channel.Mention} is not a thread!");
                 return;
@@ -72,43 +70,5 @@
                 a.Locked = false;
             });
         }
-
-        [Command("keepalive")]
-        [Description("Toggle whether or not to keep a thread alive permanently until locked.")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public async Task KeepaliveCommand(CommandContext ctx, DiscordChannel channel = default)
-        {
-            if (channel == default)
-                channel = ctx.Channel;
-
-            if (channel.Type is not ChannelType.PrivateThread && channel.Type is not ChannelType.PublicThread)
-            {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {channel.Mention} is not a thread!");
-                return;
-            }
-
-            var thread = (DiscordThreadChannel)(channel);
-
-            if (Program.db.SetContains("openthreads", thread.Id))
-            {
-                await Program.db.SetRemoveAsync("openthreads", thread.Id);
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Off} Thread keepalive for {thread.Mention} has been **disabled**!\nThis thread will close naturally.");
-            }
-            else
-            {
-                if (thread.ThreadMetadata.IsArchived)
-                {
-                    await thread.ModifyAsync(thread =>
-                    {
-                        thread.IsArchived = false;
-                    });
-                }
-
-                await Program.db.SetAddAsync("openthreads", thread.Id);
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.On} Thread keepalive for {thread.Mention} has been **enabled**!\nTo archive this thread: disable keepalive, Lock the thread or use the `archive` command.");
-
-            }
-        }
-
     }
 }

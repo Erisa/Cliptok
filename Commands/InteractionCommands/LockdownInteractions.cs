@@ -5,7 +5,7 @@ namespace Cliptok.Commands.InteractionCommands
         public static bool ongoingLockdown = false;
 
         [SlashCommandGroup("lockdown", "Lock the current channel or all channels in the server, preventing new messages. See also: unlock")]
-        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.Moderator), RequireBotPermissions(Permissions.ManageChannels)]
+        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.Moderator), RequireBotPermissions(DiscordPermissions.ManageChannels)]
         public class LockdownCmds
         {
             [SlashCommand("channel", "Lock the current channel. See also: unlock channel")]
@@ -15,9 +15,9 @@ namespace Cliptok.Commands.InteractionCommands
                 [Option("time", "The length of time to lock the channel for.")] string time = null,
                 [Option("lockthreads", "Whether to lock this channel's threads. Disables sending messages, but does not archive them.")] bool lockThreads = false)
             {
-                await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+                await ctx.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-                if (ctx.Channel.Type is ChannelType.PublicThread or ChannelType.PrivateThread or ChannelType.NewsThread)
+                if (ctx.Channel.Type is DiscordChannelType.PublicThread or DiscordChannelType.PrivateThread or DiscordChannelType.NewsThread)
                 {
                     if (lockThreads)
                     {
@@ -26,7 +26,6 @@ namespace Cliptok.Commands.InteractionCommands
                     }
 
                     var thread = (DiscordThreadChannel)ctx.Channel;
-                    await Program.db.SetRemoveAsync("openthreads", thread.Id);
 
                     await thread.ModifyAsync(a =>
                     {
@@ -72,7 +71,7 @@ namespace Cliptok.Commands.InteractionCommands
                 [Option("time", "The length of time to lock the channels for.")] string time = null,
                 [Option("lockthreads", "Whether to lock threads. Disables sending messages, but does not archive them.")] bool lockThreads = false)
             {
-                await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("test deferred response"));
+                await ctx.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("test deferred response"));
 
                 ongoingLockdown = true;
                 await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Loading} Working on it, please hold..."));
@@ -104,13 +103,13 @@ namespace Cliptok.Commands.InteractionCommands
         }
 
         [SlashCommandGroup("unlock", "Unlock the current channel or all channels in the server, allowing new messages. See also: lockdown")]
-        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.Moderator), RequireBotPermissions(Permissions.ManageChannels)]
+        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.Moderator), RequireBotPermissions(DiscordPermissions.ManageChannels)]
         public class UnlockCmds
         {
             [SlashCommand("channel", "Unlock the current channel. See also: lockdown")]
             public async Task UnlockChannelCommand(InteractionContext ctx, [Option("reason", "The reason for the unlock.")] string reason = "")
             {
-                await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+                await ctx.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
                 var currentChannel = ctx.Channel;
                 if (!Program.cfgjson.LockdownEnabledChannels.Contains(currentChannel.Id))
@@ -134,7 +133,7 @@ namespace Cliptok.Commands.InteractionCommands
             [SlashCommand("all", "Unlock all lockable channels in the server. See also: lockdown all")]
             public async Task UnlockAllCommand(InteractionContext ctx, [Option("reason", "The reason for the unlock.")] string reason = "")
             {
-                await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+                await ctx.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource);
 
                 ongoingLockdown = true;
                 await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Loading} Working on it, please hold..."));

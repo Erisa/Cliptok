@@ -289,14 +289,22 @@
 
         [JsonProperty("insiderCanaryThread")]
         public ulong InsiderCanaryThread { get; set; } = 0;
-        
+
         [JsonProperty("tqsMutedRole")]
         public ulong TqsMutedRole { get; private set; }
-        
+
         [JsonProperty("tqsMuteDurationHours")]
         public int TqsMuteDurationHours { get; private set; }
 
+        [JsonProperty("autoWarnMsgAutoDeleteDays")]
+        public int AutoWarnMsgAutoDeleteDays { get; private set; }
+
+        [JsonProperty("logLevel")]
+        public Level LogLevel { get; private set; } = Level.Information;
+
     }
+
+   public enum Level { Information, Warning, Error, Debug, Verbose }
 
     public class LogChannelConfig
     {
@@ -492,6 +500,9 @@
 
         [JsonProperty("giveaways")]
         public ulong Giveaways { get; private set; }
+
+        [JsonProperty("insider10beta")] 
+        public ulong Insider10Beta { get; private set; }
     }
 
     public class PhishingRequestBody

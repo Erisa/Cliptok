@@ -131,7 +131,7 @@
             try
             {
                 screeningForm = await guild.GetMembershipScreeningFormAsync();
-                rules = screeningForm.Fields.FirstOrDefault(field => field.Type is MembershipScreeningFieldType.Terms).Values;
+                rules = screeningForm.Fields.FirstOrDefault(field => field.Type is DiscordMembershipScreeningFieldType.Terms).Values;
             }
             catch
             {
@@ -222,6 +222,10 @@
                 };
 
             Program.db.HashSet(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
+            
+            // If warning is automatic (if responsible moderator is a bot), add to list so the context message can be more-easily deleted later
+            if (modUser.IsBot)
+                Program.db.HashSet("automaticWarnings", warningId, JsonConvert.SerializeObject(warning));
 
             LogChannelHelper.LogMessageAsync("mod",
                 new DiscordMessageBuilder()

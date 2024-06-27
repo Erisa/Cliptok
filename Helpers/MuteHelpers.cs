@@ -347,8 +347,12 @@
                     }
                     finally
                     {
-                        await member.RevokeRoleAsync(role: tqsMutedRole, reason);
-                        wasTqsMute = true; // only true if TQS mute role was found & removed
+                        // Check member roles for TQS mute role
+                        if (member.Roles.Contains(tqsMutedRole))
+                        {
+                            await member.RevokeRoleAsync(role: tqsMutedRole, reason);
+                            wasTqsMute = true; // only true if TQS mute role was found & removed
+                        }
                     }
                     
                     foreach (var role in member.Roles)
