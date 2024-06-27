@@ -4,7 +4,7 @@ namespace Cliptok.Events
 {
     public class ReactionEvent
     {
-        public static async Task OnReaction(DiscordClient _, MessageReactionAddEventArgs e)
+        public static async Task OnReaction(DiscordClient _, MessageReactionAddedEventArgs e)
         {
             if (e.Emoji.Id != cfgjson.HeartosoftId || e.Channel.IsPrivate || e.Guild.Id != cfgjson.ServerID)
                 return;

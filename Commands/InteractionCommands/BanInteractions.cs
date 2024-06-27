@@ -5,7 +5,7 @@ namespace Cliptok.Commands.InteractionCommands
     internal class BanInteractions : ApplicationCommandModule
     {
         [SlashCommand("ban", "Bans a user from the server, either permanently or temporarily.", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.BanMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(DiscordPermissions.BanMembers)]
         public async Task BanSlashCommand(InteractionContext ctx,
             [Option("user", "The user to ban")] DiscordUser user,
             [Option("reason", "The reason the user is being banned")] string reason,
@@ -16,7 +16,7 @@ namespace Cliptok.Commands.InteractionCommands
         {
             // Initial response to avoid the 3 second timeout, will edit later.
             var eout = new DiscordInteractionResponseBuilder().AsEphemeral(true);
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, eout);
+            await ctx.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, eout);
 
             // Edits need a webhook rather than interaction..?
             DiscordWebhookBuilder webhookOut = new();
@@ -113,7 +113,7 @@ namespace Cliptok.Commands.InteractionCommands
         }
 
         [SlashCommand("unban", "Unbans a user who has been previously banned.", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.BanMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(DiscordPermissions.BanMembers)]
         public async Task SlashUnbanCommand(InteractionContext ctx, [Option("user", "The ID or mention of the user to unban. Ignore the suggestions, IDs work.")] SnowflakeObject userId, [Option("reason", "Used in audit log only currently")] string reason = "No reason specified.")
         {
             DiscordUser targetUser = default;
@@ -144,7 +144,7 @@ namespace Cliptok.Commands.InteractionCommands
         }
 
         [SlashCommand("kick", "Kicks a user, removing them from the server until they rejoin.", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(Permissions.KickMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(DiscordPermissions.KickMembers)]
         public async Task KickCmd(InteractionContext ctx, [Option("user", "The user you want to kick from the server.")] DiscordUser target, [Option("reason", "The reason for kicking this user.")] string reason = "No reason specified.")
         {
             if (target.IsBot)

@@ -10,7 +10,7 @@
             if (channel == default)
                 channel = ctx.Channel;
 
-            if (channel.Type is not ChannelType.PrivateThread && channel.Type is not ChannelType.PublicThread && channel.Type is not ChannelType.NewsThread)
+            if (channel.Type is not DiscordChannelType.PrivateThread && channel.Type is not DiscordChannelType.PublicThread && channel.Type is not DiscordChannelType.NewsThread)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {channel.Mention} is not a thread!");
                 return;
@@ -33,7 +33,7 @@
             if (channel == default)
                 channel = ctx.Channel;
 
-            if (channel.Type is not ChannelType.PrivateThread && channel.Type is not ChannelType.PublicThread)
+            if (channel.Type is not DiscordChannelType.PrivateThread && channel.Type is not DiscordChannelType.PublicThread)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {channel.Mention} is not a thread!");
                 return;
@@ -56,7 +56,7 @@
             if (channel == default)
                 channel = ctx.Channel;
 
-            if (channel.Type is not ChannelType.PrivateThread && channel.Type is not ChannelType.PublicThread)
+            if (channel.Type is not DiscordChannelType.PrivateThread && channel.Type is not DiscordChannelType.PublicThread)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {channel.Mention} is not a thread!");
                 return;

@@ -43,7 +43,7 @@ namespace Cliptok.Commands
         [Command("ban")]
         [Aliases("tempban", "bonk", "isekaitruck")]
         [Description("Bans a user that you have permission to ban, deleting all their messages in the process. See also: bankeep.")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(Permissions.BanMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.BanMembers)]
         public async Task BanCmd(CommandContext ctx,
          [Description("The user you wish to ban. Accepts many formats")] DiscordUser targetMember,
          [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling' NOTE: Add 'appeal' to the start of the reason to include an appeal link")] string timeAndReason = "No reason specified.")
@@ -134,7 +134,7 @@ namespace Cliptok.Commands
         /// Sue me, I beg you.
         [Command("bankeep")]
         [Aliases("bansave")]
-        [Description("Bans a user but keeps their messages around."), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(Permissions.BanMembers)]
+        [Description("Bans a user but keeps their messages around."), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.BanMembers)]
         public async Task BankeepCmd(CommandContext ctx,
         [Description("The user you wish to ban. Accepts many formats")] DiscordUser targetMember,
         [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling' NOTE: Add 'appeal' to the start of the reason to include an appeal link")] string timeAndReason = "No reason specified.")
@@ -216,7 +216,7 @@ namespace Cliptok.Commands
 
         [Command("unban")]
         [Description("Unbans a user who has been previously banned.")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(Permissions.BanMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.BanMembers)]
         public async Task UnbanCmd(CommandContext ctx, [Description("The user to unban, usually a mention or ID")] DiscordUser targetUser, [Description("Used in audit log only currently")] string reason = "No reason specified.")
         {
             if ((await Program.db.HashExistsAsync("bans", targetUser.Id)))

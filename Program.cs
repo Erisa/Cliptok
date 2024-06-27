@@ -1,3 +1,8 @@
+using DSharpPlus.Extensions;
+using DSharpPlus.Net;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Serilog.Configuration;
 using System.Reflection;
 
 namespace Cliptok
@@ -57,8 +62,6 @@ namespace Cliptok
                 .WriteTo.TextWriter(outputCapture, outputTemplate: logFormat)
                 .WriteTo.DiscordSink(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information, outputTemplate: logFormat)
                 .Filter.ByExcluding(log => { return log.ToString().Contains("DSharpPlus.Exceptions.NotFoundException: Not found: NotFound"); });
-
-            var logFactory = new LoggerFactory().AddSerilog();
 
             string token;
             var json = "";
@@ -130,20 +133,21 @@ namespace Cliptok
 
             // Migration away from a broken attempt at a key in the past.
             db.KeyDelete("messages");
+            
+            DiscordClientBuilder discordBuilder = DiscordClientBuilder.CreateDefault(token, DiscordIntents.All).SetLogLevel(LogLevel.Debug);
 
-            discord = new DiscordClient(new DiscordConfiguration
+            discordBuilder.ConfigureLogging(logging =>
             {
-                Token = token,
-                TokenType = TokenType.Bot,
-#if DEBUG
-                MinimumLogLevel = LogLevel.Debug,
-#else
-                MinimumLogLevel = LogLevel.Information,
-#endif
-                LoggerFactory = logFactory,
-                Intents = DiscordIntents.All,
-                LogUnknownEvents = false,
+                logging.AddSerilog();
             });
+
+            discordBuilder.ConfigureGatewayClient(clientConfig =>
+            {
+                clientConfig.LogUnknownEvents = false;
+                clientConfig.LogUnknownAuditlogs = false;
+            });
+
+            discord = discordBuilder.Build();
 
             var slash = discord.UseSlashCommands();
             slash.SlashCommandErrored += InteractionEvents.SlashCommandErrorEvent;
@@ -162,8 +166,6 @@ namespace Cliptok
             discord.MessageReactionAdded += ReactionEvent.OnReaction;
             discord.GuildMemberUpdated += MemberEvents.GuildMemberUpdated;
             discord.UserUpdated += MemberEvents.UserUpdated;
-            discord.ClientErrored += ErrorEvents.ClientError;
-            discord.SocketErrored += ErrorEvents.Discord_SocketErrored;
             discord.ThreadCreated += ThreadEvents.Discord_ThreadCreated;
             discord.ThreadDeleted += ThreadEvents.Discord_ThreadDeleted;
             discord.ThreadListSynced += ThreadEvents.Discord_ThreadListSynced;

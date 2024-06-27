@@ -4,7 +4,7 @@ namespace Cliptok.Events
 {
     public class ReadyEvent
     {
-        public static async Task OnReady(DiscordClient client, SessionReadyEventArgs _)
+        public static async Task OnReady(DiscordClient client, SessionCreatedEventArgs _)
         {
 
             homeGuild = await discord.GetGuildAsync(cfgjson.ServerID);
@@ -23,7 +23,7 @@ namespace Cliptok.Events
 
                 try
                 {
-                    await client.UpdateStatusAsync(new DiscordActivity(statusText, (ActivityType)(long)statusType));
+                    await client.UpdateStatusAsync(new DiscordActivity(statusText, (DiscordActivityType)(long)statusType));
                 }
                 catch (Exception ex)
                 {

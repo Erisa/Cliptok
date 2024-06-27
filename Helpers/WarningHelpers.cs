@@ -130,7 +130,7 @@
             try
             {
                 screeningForm = await guild.GetMembershipScreeningFormAsync();
-                rules = screeningForm.Fields.FirstOrDefault(field => field.Type is MembershipScreeningFieldType.Terms).Values;
+                rules = screeningForm.Fields.FirstOrDefault(field => field.Type is DiscordMembershipScreeningFieldType.Terms).Values;
             }
             catch
             {

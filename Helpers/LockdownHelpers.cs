@@ -11,13 +11,13 @@
 
             DiscordOverwrite[] existingOverwrites = channel.PermissionOverwrites.ToArray();
 
-            await channel.AddOverwriteAsync(channel.Guild.CurrentMember, Permissions.SendMessages, Permissions.None, "Failsafe 1 for Lockdown");
-            await channel.AddOverwriteAsync(channel.Guild.GetRole(Program.cfgjson.ModRole), Permissions.SendMessages, Permissions.None, "Failsafe 2 for Lockdown");
+            await channel.AddOverwriteAsync(channel.Guild.CurrentMember, DiscordPermissions.SendMessages, DiscordPermissions.None, "Failsafe 1 for Lockdown");
+            await channel.AddOverwriteAsync(channel.Guild.GetRole(Program.cfgjson.ModRole), DiscordPermissions.SendMessages, DiscordPermissions.None, "Failsafe 2 for Lockdown");
 
             bool everyoneRoleChanged = false;
             foreach (DiscordOverwrite overwrite in existingOverwrites)
             {
-                if (overwrite.Type == OverwriteType.Role)
+                if (overwrite.Type == DiscordOverwriteType.Role)
                 {
                     DiscordRole role = await overwrite.GetRoleAsync();
 
@@ -25,42 +25,42 @@
                     {
                         if (lockThreads)
                         {
-                            if (overwrite.Denied.HasPermission(Permissions.AccessChannels))
+                            if (overwrite.Denied.HasPermission(DiscordPermissions.AccessChannels))
                             {
-                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.AccessChannels | Permissions.SendMessagesInThreads, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
+                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, DiscordPermissions.None, DiscordPermissions.SendMessages | DiscordPermissions.AccessChannels | DiscordPermissions.SendMessagesInThreads, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
                             }
                             else
                             {
-                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.SendMessagesInThreads, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
+                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, DiscordPermissions.None, DiscordPermissions.SendMessages | DiscordPermissions.SendMessagesInThreads, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
                             }
 
-                            if (overwrite.Allowed.HasPermission(Permissions.SendMessages))
+                            if (overwrite.Allowed.HasPermission(DiscordPermissions.SendMessages))
                             {
-                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), (Permissions)(overwrite.Allowed - Permissions.SendMessages), Permissions.SendMessages | overwrite.Denied, "Reinstating existing overrides for lockdown.");
+                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), (DiscordPermissions)(overwrite.Allowed - DiscordPermissions.SendMessages), DiscordPermissions.SendMessages | overwrite.Denied, "Reinstating existing overrides for lockdown.");
                             }
                             else
                             {
-                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed, Permissions.SendMessages | overwrite.Denied, "Reinstating existing overrides for lockdown.");
+                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed, DiscordPermissions.SendMessages | overwrite.Denied, "Reinstating existing overrides for lockdown.");
                             }
                         }
                         else
                         {
-                            if (overwrite.Denied.HasPermission(Permissions.AccessChannels))
+                            if (overwrite.Denied.HasPermission(DiscordPermissions.AccessChannels))
                             {
-                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.AccessChannels, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
+                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, DiscordPermissions.None, DiscordPermissions.SendMessages | DiscordPermissions.AccessChannels, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
                             }
                             else
                             {
-                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
+                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, DiscordPermissions.None, DiscordPermissions.SendMessages, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
                             }
 
-                            if (overwrite.Allowed.HasPermission(Permissions.SendMessages))
+                            if (overwrite.Allowed.HasPermission(DiscordPermissions.SendMessages))
                             {
-                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), (Permissions)(overwrite.Allowed - Permissions.SendMessages), Permissions.SendMessages | overwrite.Denied, "Reinstating existing overrides for lockdown.");
+                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), (DiscordPermissions)(overwrite.Allowed - DiscordPermissions.SendMessages), DiscordPermissions.SendMessages | overwrite.Denied, "Reinstating existing overrides for lockdown.");
                             }
                             else
                             {
-                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed, Permissions.SendMessages | overwrite.Denied, "Reinstating existing overrides for lockdown.");
+                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed, DiscordPermissions.SendMessages | overwrite.Denied, "Reinstating existing overrides for lockdown.");
                             }
                         }
 
@@ -70,7 +70,7 @@
                     {
                         if (role == channel.Guild.GetRole(Program.cfgjson.ModRole))
                         {
-                            await channel.AddOverwriteAsync(channel.Guild.GetRole(Program.cfgjson.ModRole), overwrite.Allowed | Permissions.SendMessages, Permissions.None, "Reinstating existing overrides for lockdown.");
+                            await channel.AddOverwriteAsync(channel.Guild.GetRole(Program.cfgjson.ModRole), overwrite.Allowed | DiscordPermissions.SendMessages, DiscordPermissions.None, "Reinstating existing overrides for lockdown.");
                         }
                         else
                         {
@@ -88,11 +88,11 @@
             {
                 if (lockThreads)
                 {
-                    await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages | Permissions.SendMessagesInThreads, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
+                    await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, DiscordPermissions.None, DiscordPermissions.SendMessages | DiscordPermissions.SendMessagesInThreads, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
                 }
                 else
                 {
-                    await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, Permissions.None, Permissions.SendMessages, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
+                    await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, DiscordPermissions.None, DiscordPermissions.SendMessages, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
                 }
             }
 
@@ -118,22 +118,22 @@
             var permissions = discordChannel.PermissionOverwrites.ToArray();
             foreach (var permission in permissions)
             {
-                if (permission.Type == OverwriteType.Role)
+                if (permission.Type == DiscordOverwriteType.Role)
                 {
                     DiscordRole role = await permission.GetRoleAsync();
 
                     DiscordOverwriteBuilder newOverwrite;
                     if (
                         (role == discordChannel.Guild.EveryoneRole
-                        && permission.Denied.HasPermission(Permissions.SendMessages))
+                        && permission.Denied.HasPermission(DiscordPermissions.SendMessages))
                         )
                     {
-                        if (permission.Denied.HasPermission(Permissions.SendMessagesInThreads))
+                        if (permission.Denied.HasPermission(DiscordPermissions.SendMessagesInThreads))
                         {
                             newOverwrite = new(discordChannel.Guild.EveryoneRole)
                             {
                                 Allowed = permission.Allowed,
-                                Denied = permission.Denied - Permissions.SendMessages - Permissions.SendMessagesInThreads
+                                Denied = permission.Denied - DiscordPermissions.SendMessages - DiscordPermissions.SendMessagesInThreads
                             };
                         }
                         else
@@ -141,7 +141,7 @@
                             newOverwrite = new(discordChannel.Guild.EveryoneRole)
                             {
                                 Allowed = permission.Allowed,
-                                Denied = (Permissions)(permission.Denied - Permissions.SendMessages)
+                                Denied = (DiscordPermissions)(permission.Denied - DiscordPermissions.SendMessages)
                             };
                         }
 
@@ -153,22 +153,22 @@
                     }
 
                     if (role == discordChannel.Guild.GetRole(Program.cfgjson.ModRole)
-                        && permission.Allowed == Permissions.SendMessages)
+                        && permission.Allowed == DiscordPermissions.SendMessages)
                     {
                         await permission.DeleteAsync();
                     }
 
                     if (role == discordChannel.Guild.GetRole(Program.cfgjson.ModRole)
-                        && permission.Allowed == (Permissions.SendMessages | Permissions.AccessChannels))
+                        && permission.Allowed == (DiscordPermissions.SendMessages | DiscordPermissions.AccessChannels))
                     {
-                        await discordChannel.AddOverwriteAsync(discordChannel.Guild.GetRole(Program.cfgjson.ModRole), (Permissions)(permission.Allowed - Permissions.SendMessages), Permissions.None);
+                        await discordChannel.AddOverwriteAsync(discordChannel.Guild.GetRole(Program.cfgjson.ModRole), (DiscordPermissions)(permission.Allowed - DiscordPermissions.SendMessages), DiscordPermissions.None);
                     }
 
                 }
                 else
                 {
                     var member = await permission.GetMemberAsync();
-                    if ((member == discordMember || member == discordChannel.Guild.CurrentMember) && permission.Allowed == Permissions.SendMessages)
+                    if ((member == discordMember || member == discordChannel.Guild.CurrentMember) && permission.Allowed == DiscordPermissions.SendMessages)
                     {
                         success = true;
                         await permission.DeleteAsync();

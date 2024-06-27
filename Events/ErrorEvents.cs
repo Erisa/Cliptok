@@ -44,18 +44,5 @@ namespace Cliptok.Events
                 await e.Context.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
             }
         }
-
-        public static Task Discord_SocketErrored(DiscordClient client, SocketErrorEventArgs e)
-        {
-            client.Logger.LogError(eventId: CliptokEventID, e.Exception, "A socket error occurred!");
-            return Task.CompletedTask;
-        }
-
-        public static Task ClientError(DiscordClient client, ClientErrorEventArgs e)
-        {
-            client.Logger.LogError(CliptokEventID, e.Exception, "Client threw an exception");
-            return Task.CompletedTask;
-        }
-
     }
 }
