@@ -134,7 +134,7 @@ namespace Cliptok
             // Migration away from a broken attempt at a key in the past.
             db.KeyDelete("messages");
             
-            DiscordClientBuilder discordBuilder = DiscordClientBuilder.CreateDefault(token, DiscordIntents.All).SetLogLevel(LogLevel.Debug);
+            DiscordClientBuilder discordBuilder = DiscordClientBuilder.CreateDefault(token, DiscordIntents.All);
 
             discordBuilder.ConfigureLogging(logging =>
             {
