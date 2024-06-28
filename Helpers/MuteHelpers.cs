@@ -235,8 +235,13 @@
                         }
                     }
                 }
-                catch (DSharpPlus.Exceptions.UnauthorizedException)
+                catch (Exception e)
                 {
+                    if (e is not DSharpPlus.Exceptions.UnauthorizedException)
+                    {
+                        Program.discord.Logger.LogWarning(e, "Failed to send mute DM to user: {user}", naughtyMember.Id);
+                    }
+
                     // A DM failing to send isn't important, but let's put it in chat just so it's somewhere.
                     if (channel is not null)
                     {
