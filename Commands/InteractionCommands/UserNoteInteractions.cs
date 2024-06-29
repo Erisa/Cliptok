@@ -131,6 +131,7 @@ namespace Cliptok.Commands.InteractionCommands
                     showOnce = note.ShowOnce;
                 
                 // Assemble new note
+                note.ModUserId = ctx.User.Id;
                 note.NoteText = newNoteText;
                 note.ShowOnModmail = (bool)showOnModmail;
                 note.ShowOnWarn = (bool)showOnWarn;
