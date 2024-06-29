@@ -194,7 +194,7 @@
                 {
                     // User is already joinwatched, just update note
                     await Program.db.HashSetAsync("joinWatchedUsersNotes", user.Id, note);
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully updated the note for {user.Mention}. Run again with no note to unwatch.");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully updated the note for {user.Mention} (run again with no note to unwatch):\n> {note}");
                     return;
                 }
 
