@@ -37,6 +37,10 @@ namespace Cliptok.Commands.InteractionCommands
                 
                 await Program.db.HashSetAsync(user.Id.ToString(), note.NoteId, JsonConvert.SerializeObject(note));
                 
+                // Log to mod-logs
+                var embed = await GenerateUserNoteDetailEmbedAsync(note, user);
+                await LogChannelHelper.LogMessageAsync("mod", $"{Program.cfgjson.Emoji.Information} New note for {user.Mention}!", embed);
+                
                 // Respond
                 await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Successfully added note!").AsEphemeral());
             }
@@ -67,6 +71,10 @@ namespace Cliptok.Commands.InteractionCommands
                 
                 // Delete note
                 await Program.db.HashDeleteAsync(user.Id.ToString(), note.NoteId);
+                
+                // Log to mod-logs
+                var embed = new DiscordEmbedBuilder(await GenerateUserNoteDetailEmbedAsync(note, user)).WithColor(0xf03916);
+                await LogChannelHelper.LogMessageAsync("mod", $"{Program.cfgjson.Emoji.Deleted} Note deleted: `{note.NoteId}` (belonging to {user.Mention}, deleted by {ctx.User.Mention})", embed);
                 
                 // Respond
                 await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Successfully deleted note!").AsEphemeral());
@@ -131,6 +139,10 @@ namespace Cliptok.Commands.InteractionCommands
                 note.Type = WarningType.Note;
                 
                 await Program.db.HashSetAsync(user.Id.ToString(), note.NoteId, JsonConvert.SerializeObject(note));
+                
+                // Log to mod-logs
+                var embed = await GenerateUserNoteDetailEmbedAsync(note, user);
+                await LogChannelHelper.LogMessageAsync("mod", $"{Program.cfgjson.Emoji.Information} Note edited: `{note.NoteId}` (belonging to {user.Mention})", embed);
                 
                 // Respond
                 await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Successfully edited note!").AsEphemeral());
