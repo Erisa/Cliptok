@@ -25,6 +25,9 @@
 
         [JsonProperty("dmMessageReference")]
         public MessageReference DmMessageReference { get; set; } = default;
+
+        [JsonProperty("type")]
+        public WarningType Type { get; set; }
     }
 
     public class MessageReference
@@ -573,6 +576,39 @@
 
         [JsonProperty("invite")]
         public string Invite { get; set; }
+    }
+
+    public class UserNote
+    {
+        [JsonProperty("targetUserId")]
+        public ulong TargetUserId { get; set; }
+        
+        [JsonProperty("modUserId")]
+        public ulong ModUserId { get; set; }
+        
+        [JsonProperty("noteText")]
+        public string NoteText { get; set; }
+        
+        [JsonProperty("showOnModmail")]
+        public bool ShowOnModmail { get; set; }
+        
+        [JsonProperty("showOnWarn")]
+        public bool ShowOnWarn { get; set; }
+        
+        [JsonProperty("showAllMods")]
+        public bool ShowAllMods { get; set; }
+        
+        [JsonProperty("showOnce")]
+        public bool ShowOnce { get; set; }
+        
+        [JsonProperty("noteId")]
+        public long NoteId { get; set; }
+        
+        [JsonProperty("timestamp")]
+        public DateTime Timestamp { get; set; }
+
+        [JsonProperty("type")]
+        public WarningType Type { get; set; }
     }
 
 }
