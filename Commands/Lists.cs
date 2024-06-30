@@ -193,8 +193,18 @@
                 if (note != "")
                 {
                     // User is already joinwatched, just update note
+                    
+                    // Get current note; if it's the same, do nothing
+                    var currentNote = await Program.db.HashGetAsync("joinWatchedUsersNotes", user.Id);
+                    if (currentNote == note || (string.IsNullOrWhiteSpace(currentNote) && string.IsNullOrWhiteSpace(note)))
+                    {
+                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {user.Mention} is already being watched with the same note! Nothing to do.");
+                        return;
+                    }
+                    
+                    // If note is different, update it
                     await Program.db.HashSetAsync("joinWatchedUsersNotes", user.Id, note);
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully updated the note for {user.Mention}. Run again with no note to unwatch.");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully updated the note for {user.Mention} (run again with no note to unwatch):\n> {note}");
                     return;
                 }
 
