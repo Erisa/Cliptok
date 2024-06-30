@@ -26,13 +26,13 @@ namespace Cliptok.Commands
 
             if ((await Program.db.HashExistsAsync("mutes", targetUser.Id)) || (member != default && (member.Roles.Contains(mutedRole) || member.Roles.Contains(tqsMutedRole))))
             {
-                await MuteHelpers.UnmuteUserAsync(targetUser, reason);
+                await MuteHelpers.UnmuteUserAsync(targetUser, reason, true, ctx.User);
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Information} Successfully unmuted **{DiscordHelpers.UniqueUsername(targetUser)}**.");
             }
             else
                 try
                 {
-                    await MuteHelpers.UnmuteUserAsync(targetUser, reason);
+                    await MuteHelpers.UnmuteUserAsync(targetUser, reason, true, ctx.User);
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} According to Discord that user is not muted, but I tried to unmute them anyway. Hope it works.");
                 }
                 catch (Exception e)

@@ -309,7 +309,7 @@
             return output;
         }
 
-        public static async Task<bool> UnmuteUserAsync(DiscordUser targetUser, string reason = "", bool manual = true)
+        public static async Task<bool> UnmuteUserAsync(DiscordUser targetUser, string reason = "", bool manual = true, DiscordUser modUser = default)
         {
             var muteDetailsJson = await Program.db.HashGetAsync("mutes", targetUser.Id);
             bool success = false;
@@ -400,7 +400,11 @@
 
                 if (success)
                 {
-                    await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Successfully unmuted {targetUser.Mention}!").WithAllowedMentions(Mentions.None));
+                    string unmuteMsg = manual
+                        ? $"{Program.cfgjson.Emoji.Information} {targetUser.Mention} was successfully unmuted by {modUser.Mention}!"
+                        : $"{Program.cfgjson.Emoji.Information} Successfully unmuted {targetUser.Mention}!";
+                    
+                    await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder().WithContent(unmuteMsg).WithAllowedMentions(Mentions.None));
 
                     if (manual && muteDetailsJson.HasValue)
                     {
