@@ -204,9 +204,6 @@
                     
                     // If note is different, update it
                     await Program.db.HashSetAsync("joinWatchedUsersNotes", user.Id, note);
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully updated the note for {user.Mention}:\n> {note}");
-                    
-                    await Program.db.HashSetAsync("joinWatchedUsersNotes", user.Id, note);
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully updated the note for {user.Mention} (run again with no note to unwatch):\n> {note}");
                     return;
                 }
