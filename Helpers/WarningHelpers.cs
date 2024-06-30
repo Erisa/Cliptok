@@ -302,7 +302,14 @@
                 
                 // If any notes were shown & set to show only once, delete them now
                 foreach (var note in notesToNotifyFor.Where(note => note.Value.ShowOnce))
+                {
+                    // Delete note
                     await Program.db.HashDeleteAsync(targetUser.Id.ToString(), note.Key);
+                    
+                    // Log deletion to mod-logs channel
+                    var embed = new DiscordEmbedBuilder(await UserNoteHelpers.GenerateUserNoteDetailEmbedAsync(note.Value, targetUser)).WithColor(0xf03916);
+                    await LogChannelHelper.LogMessageAsync("mod", $"{Program.cfgjson.Emoji.Deleted} Note `{note.Value.NoteId}` was automatically deleted after a warning (belonging to {targetUser.Mention})", embed);
+                }
             }
 
             return warning;

@@ -157,7 +157,14 @@ namespace Cliptok.Events
                     
                     // If any notes were shown & set to show only once, delete them now
                     foreach (var note in notesToNotify.Where(note => note.Value.ShowOnce))
+                    {
+                        // Delete note
                         await Program.db.HashDeleteAsync(modmailMember.Id.ToString(), note.Key);
+                    
+                        // Log deletion to mod-logs channel
+                        var embed = new DiscordEmbedBuilder(await UserNoteHelpers.GenerateUserNoteDetailEmbedAsync(note.Value, modmailMember)).WithColor(0xf03916);
+                        await LogChannelHelper.LogMessageAsync("mod", $"{Program.cfgjson.Emoji.Deleted} Note `{note.Value.NoteId}` was automatically deleted after modmail thread creation (belonging to {modmailMember.Mention})", embed);
+                    }
                 }
 
                 // handle #giveaways
