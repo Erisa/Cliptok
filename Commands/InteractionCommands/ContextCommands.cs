@@ -18,6 +18,13 @@
 
             await ctx.RespondAsync(null, embed, ephemeral: true);
         }
+        
+        [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "Show Notes", defaultPermission: false)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        public async Task ShowNotes(ContextMenuContext ctx)
+        {
+            await ctx.RespondAsync(embed: await UserNoteHelpers.GenerateUserNotesEmbedAsync(ctx.TargetUser), ephemeral: true);
+        }
 
         [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "Show Warnings", defaultPermission: true)]
         public async Task ContextWarnings(ContextMenuContext ctx)

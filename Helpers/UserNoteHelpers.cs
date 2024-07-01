@@ -24,6 +24,13 @@ namespace Cliptok.Helpers
                 notes = notesToUse;
             }
             
+            // If there is only one note in the set to show, just show its details
+            if (notes.Count == 1)
+            {
+                var noteDetailsEmbed = await GenerateUserNoteDetailEmbedAsync(notes.First().Value, user);
+                return new DiscordEmbedBuilder(noteDetailsEmbed).WithFooter($"{noteDetailsEmbed.Footer.Text}\nThis is the user's only note, so it is shown in detail.");
+            }
+            
             var keys = notes.Keys.OrderByDescending(note => Convert.ToInt64(note));
             string str = "";
 
