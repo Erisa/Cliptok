@@ -19,7 +19,7 @@ namespace Cliptok.Commands
             DiscordGuild guild = await Program.discord.GetGuildAsync(ctx.Guild.Id);
             String response = "";
             System.Reflection.PropertyInfo[] roleIds = Program.cfgjson.UserRoles.GetType().GetProperties().Where(predicate).ToArray();
-            
+
             for (int i = 0; i < roleIds.Length; i++)
             {
                 // quick patch to exclude giveaways role

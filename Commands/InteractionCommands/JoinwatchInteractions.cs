@@ -16,7 +16,7 @@ namespace Cliptok.Commands.InteractionCommands
                 if (joinWatchlist.Contains(user.Id))
                 {
                     // User is already watched
-                    
+
                     // Get current note; if it's the same, do nothing
                     var currentNote = await Program.db.HashGetAsync("joinWatchedUsersNotes", user.Id);
                     if (currentNote == note || (string.IsNullOrWhiteSpace(currentNote) && string.IsNullOrWhiteSpace(note)))
@@ -24,9 +24,9 @@ namespace Cliptok.Commands.InteractionCommands
                         await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {user.Mention} is already being watched with the same note! Nothing to do.");
                         return;
                     }
-                    
+
                     // If note is different, update it
-                    
+
                     // If new note is empty, remove instead of changing to empty string!
                     if (string.IsNullOrWhiteSpace(note))
                     {
@@ -36,7 +36,7 @@ namespace Cliptok.Commands.InteractionCommands
                     else
                     {
                         await Program.db.HashSetAsync("joinWatchedUsersNotes", user.Id, note);
-                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully updated the note for {user.Mention}:\n> {note}");   
+                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully updated the note for {user.Mention}:\n> {note}");
                     }
                 }
                 else
@@ -55,14 +55,14 @@ namespace Cliptok.Commands.InteractionCommands
                 [Option("user", "The user to stop watching for joins and leaves of.")] DiscordUser user)
             {
                 var joinWatchlist = await Program.db.ListRangeAsync("joinWatchedUsers");
-                
+
                 // Check user watch status first; error if not watched
                 if (!joinWatchlist.Contains(user.Id))
                 {
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {user.Mention} is not being watched! Nothing to do.");
                     return;
                 }
-                
+
                 Program.db.ListRemove("joinWatchedUsers", joinWatchlist.First(x => x == user.Id));
                 await Program.db.HashDeleteAsync("joinWatchedUsersNotes", user.Id);
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully unwatched {user.Mention}!");
@@ -73,11 +73,11 @@ namespace Cliptok.Commands.InteractionCommands
                 [Option("user", "The user whose joinwatch status to check.")] DiscordUser user)
             {
                 var joinWatchlist = await Program.db.ListRangeAsync("joinWatchedUsers");
-                
+
                 if (joinWatchlist.Contains(user.Id))
                 {
                     var note = await Program.db.HashGetAsync("joinWatchedUsersNotes", user.Id);
-                    
+
                     if (string.IsNullOrWhiteSpace(note))
                         await ctx.RespondAsync($"{Program.cfgjson.Emoji.Information} {user.Mention} is currently being watched, but no note is set.");
                     else

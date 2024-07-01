@@ -53,7 +53,8 @@
                 {
                     message = await channel.GetMessageAsync(messageReference.MessageId);
                     return message;
-                } catch
+                }
+                catch
                 {
                     return null;
                 }

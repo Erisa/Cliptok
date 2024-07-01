@@ -1,7 +1,4 @@
-﻿using Serilog.Events;
-using Serilog.Formatting;
-
-namespace Cliptok.Commands
+﻿namespace Cliptok.Commands
 {
     internal class Debug : BaseCommandModule
     {
@@ -251,8 +248,8 @@ namespace Cliptok.Commands
                     if (ulong.TryParse(key.ToString(), out ulong number))
                     {
                         var warnings = Program.db.HashGetAll(key);
-                        Dictionary<long, MemberPunishment> warningdict = new(); 
-                        foreach(var warning in warnings)
+                        Dictionary<long, MemberPunishment> warningdict = new();
+                        foreach (var warning in warnings)
                         {
                             var warnobject = JsonConvert.DeserializeObject<MemberPunishment>(warning.Value);
                             warningdict[(long)warning.Name] = warnobject;

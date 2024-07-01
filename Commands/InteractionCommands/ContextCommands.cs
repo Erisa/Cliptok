@@ -18,7 +18,7 @@
 
             await ctx.RespondAsync(null, embed, ephemeral: true);
         }
-        
+
         [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "Show Notes", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
         public async Task ShowNotes(ContextMenuContext ctx)

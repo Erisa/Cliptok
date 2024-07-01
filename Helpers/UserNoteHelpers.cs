@@ -2,10 +2,10 @@ namespace Cliptok.Helpers
 {
     public class UserNoteHelpers
     {
-        public static async Task<DiscordEmbed> GenerateUserNotesEmbedAsync(DiscordUser user, bool showOnlyWarningNotes = false, Dictionary<string,UserNote> notesToUse = default)
+        public static async Task<DiscordEmbed> GenerateUserNotesEmbedAsync(DiscordUser user, bool showOnlyWarningNotes = false, Dictionary<string, UserNote> notesToUse = default)
         {
             Dictionary<string, UserNote> notes;
-            
+
             // If provided with a set of notes, use them instead
             if (notesToUse == default)
             {
@@ -14,7 +14,7 @@ namespace Cliptok.Helpers
                         x => x.Name.ToString(),
                         x => JsonConvert.DeserializeObject<UserNote>(x.Value)
                     );
-            
+
                 // Filter to 'show on warn' notes if requested
                 if (showOnlyWarningNotes)
                     notes = notes.Where(x => x.Value.ShowOnWarn).ToDictionary(x => x.Key, x => x.Value);
@@ -23,14 +23,14 @@ namespace Cliptok.Helpers
             {
                 notes = notesToUse;
             }
-            
+
             // If there is only one note in the set to show, just show its details
             if (notes.Count == 1)
             {
                 var noteDetailsEmbed = await GenerateUserNoteDetailEmbedAsync(notes.First().Value, user);
                 return new DiscordEmbedBuilder(noteDetailsEmbed).WithFooter($"{noteDetailsEmbed.Footer.Text}\nThis is the user's only note, so it is shown in detail.");
             }
-            
+
             var keys = notes.Keys.OrderByDescending(note => Convert.ToInt64(note));
             string str = "";
 
@@ -56,16 +56,16 @@ namespace Cliptok.Helpers
                 foreach (string key in keys)
                 {
                     UserNote note = notes[key];
-                    
+
                     var text = note.NoteText;
-                    
+
                     text = text.Replace("`", "\\`").Replace("*", "\\*");
 
                     if (text.Length > 29)
                     {
                         text = StringHelpers.Truncate(text, 29) + "…";
                     }
-                    
+
                     str += $"`{StringHelpers.Pad(note.NoteId)}` **{text}** • <t:{TimeHelpers.ToUnixTimestamp(note.Timestamp)}:R>\n";
                 }
 
@@ -96,10 +96,10 @@ namespace Cliptok.Helpers
 
             if (note.ShowOnce)
                 embed.AddField("Showing Once Only", "This note was set to show only once. It has now been deleted!");
-            
+
             return embed;
         }
-        
+
         public static async Task<DiscordEmbed> GenerateUserNoteDetailEmbedAsync(UserNote note, DiscordUser user)
         {
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()

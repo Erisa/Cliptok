@@ -1,8 +1,3 @@
-using DSharpPlus.Extensions;
-using DSharpPlus.Net;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Serilog.Configuration;
 using System.Reflection;
 
 namespace Cliptok
@@ -133,7 +128,7 @@ namespace Cliptok
 
             // Migration away from a broken attempt at a key in the past.
             db.KeyDelete("messages");
-            
+
             DiscordClientBuilder discordBuilder = DiscordClientBuilder.CreateDefault(token, DiscordIntents.All);
 
             discordBuilder.ConfigureLogging(logging =>

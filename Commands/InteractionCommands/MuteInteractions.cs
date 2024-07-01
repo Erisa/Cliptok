@@ -98,7 +98,7 @@
             [Option("reason", "The reason for the mute.")] string reason)
         {
             await ctx.DeferAsync(ephemeral: true);
-            
+
             // Only allow usage in #tech-support, #tech-support-forum, and their threads
             if (ctx.Channel.Id != Program.cfgjson.TechSupportChannel &&
                 ctx.Channel.Id != Program.cfgjson.SupportForumId &&
@@ -108,18 +108,18 @@
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} This command can only be used in <#{Program.cfgjson.TechSupportChannel}>, <#{Program.cfgjson.SupportForumId}>, and threads in those channels!"));
                 return;
             }
-            
+
             // Check if the user is already muted; disallow TQS-mute if so
-            
+
             DiscordRole mutedRole = ctx.Guild.GetRole(Program.cfgjson.MutedRole);
             DiscordRole tqsMutedRole = ctx.Guild.GetRole(Program.cfgjson.TqsMutedRole);
-            
+
             if (await Program.db.HashExistsAsync("mutes", targetUser.Id) || ctx.Member.Roles.Contains(mutedRole) || ctx.Member.Roles.Contains(tqsMutedRole))
             {
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, that user is already muted."));
                 return;
             }
-            
+
             // Get member
             DiscordMember targetMember = default;
             try

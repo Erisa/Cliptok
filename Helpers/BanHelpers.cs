@@ -173,7 +173,7 @@
             if (await Program.db.HashExistsAsync("bans", user.Id))
             {
                 MemberPunishment ban = JsonConvert.DeserializeObject<MemberPunishment>(Program.db.HashGet("bans", user.Id));
-                
+
                 embedBuilder.WithDescription("User is banned.")
                     .AddField("Banned", ban.ActionTime is null ? "Unknown time (Ban is too old)" : $"<t:{TimeHelpers.ToUnixTimestamp(ban.ActionTime)}:R>", true)
                     .WithColor(new DiscordColor(0xFEC13D));

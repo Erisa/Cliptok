@@ -118,7 +118,8 @@
                         .WithAllowedMentions(Mentions.None)
                );
                 return true;
-            } catch
+            }
+            catch
             {
                 return false;
             }

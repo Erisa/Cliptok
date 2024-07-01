@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace Cliptok.Commands.InteractionCommands
+﻿namespace Cliptok.Commands.InteractionCommands
 {
     internal class AnnouncementInteractions : ApplicationCommandModule
     {
@@ -182,7 +180,7 @@ namespace Cliptok.Commands.InteractionCommands
                 {
                     noPingMsgString += $"\n\nDiscuss it here: {threadChannel.Mention}";
                 }
-                else if (insiderChannel1 == "Canary" && insiderChannel2 == "" &&  Program.cfgjson.InsiderCanaryThread != 0 && autothreadName == "Build {0} ({1})" && !canaryCreateNewThread)
+                else if (insiderChannel1 == "Canary" && insiderChannel2 == "" && Program.cfgjson.InsiderCanaryThread != 0 && autothreadName == "Build {0} ({1})" && !canaryCreateNewThread)
                 {
                     threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderCanaryThread);
                     noPingMsgString += $"\n\nDiscuss it here: {threadChannel.Mention}";

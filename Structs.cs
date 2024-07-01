@@ -304,7 +304,7 @@
 
     }
 
-   public enum Level { Information, Warning, Error, Debug, Verbose }
+    public enum Level { Information, Warning, Error, Debug, Verbose }
 
     public class LogChannelConfig
     {
@@ -501,7 +501,7 @@
         [JsonProperty("giveaways")]
         public ulong Giveaways { get; private set; }
 
-        [JsonProperty("insider10beta")] 
+        [JsonProperty("insider10beta")]
         public ulong Insider10Beta { get; private set; }
     }
 
@@ -582,28 +582,28 @@
     {
         [JsonProperty("targetUserId")]
         public ulong TargetUserId { get; set; }
-        
+
         [JsonProperty("modUserId")]
         public ulong ModUserId { get; set; }
-        
+
         [JsonProperty("noteText")]
         public string NoteText { get; set; }
-        
+
         [JsonProperty("showOnModmail")]
         public bool ShowOnModmail { get; set; }
-        
+
         [JsonProperty("showOnWarn")]
         public bool ShowOnWarn { get; set; }
-        
+
         [JsonProperty("showAllMods")]
         public bool ShowAllMods { get; set; }
-        
+
         [JsonProperty("showOnce")]
         public bool ShowOnce { get; set; }
-        
+
         [JsonProperty("noteId")]
         public long NoteId { get; set; }
-        
+
         [JsonProperty("timestamp")]
         public DateTime Timestamp { get; set; }
 

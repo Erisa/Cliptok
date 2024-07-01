@@ -135,7 +135,7 @@
                 {
                     string fullReason = $"[{(isTqsMute ? "TQS " : "")}Mute by {DiscordHelpers.UniqueUsername(moderator)}]: {reason}";
                     await naughtyMember.GrantRoleAsync(mutedRole, fullReason);
-                    
+
                     // for global mutes, issue timeout & kick from any voice channel; does not apply to TQS mutes as they are not server-wide
                     if (!isTqsMute)
                     {
@@ -185,7 +185,7 @@
                                 $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>")
                             .WithAllowedMentions(Mentions.None)
                         );
-                        
+
                         await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder()
                             .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was TQS-muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** by {moderator.Mention}." +
                                          $"\nReason: **{reason}**" +
@@ -359,7 +359,7 @@
                             wasTqsMute = true; // only true if TQS mute role was found & removed
                         }
                     }
-                    
+
                     foreach (var role in member.Roles)
                     {
                         if (role.Name == "Muted" && role.Id != Program.cfgjson.MutedRole)
@@ -403,7 +403,7 @@
                     string unmuteMsg = manual
                         ? $"{Program.cfgjson.Emoji.Information} {targetUser.Mention} was successfully unmuted by {modUser.Mention}!"
                         : $"{Program.cfgjson.Emoji.Information} Successfully unmuted {targetUser.Mention}!";
-                    
+
                     await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder().WithContent(unmuteMsg).WithAllowedMentions(Mentions.None));
 
                     if (manual && muteDetailsJson.HasValue)

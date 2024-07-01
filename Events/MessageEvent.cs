@@ -126,41 +126,41 @@ namespace Cliptok.Events
                     {
                         memberWarnInfo.AddEmbed(await WarningHelpers.GenerateWarningsEmbedAsync(modmailMember)).AddEmbed(await MuteHelpers.MuteStatusEmbed(modmailMember, message.Channel.Guild));
                     }
-                    
+
                     // Add notes to message if any exist & are set to show on modmail
-                    
+
                     // Get user notes
                     var notes = Program.db.HashGetAll(modmailMember.Id.ToString())
                         .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note).ToDictionary(
                             x => x.Name.ToString(),
                             x => JsonConvert.DeserializeObject<UserNote>(x.Value)
                         );
-                    
+
                     // Filter to notes set to notify on modmail
                     var notesToNotify = notes.Where(x => x.Value.ShowOnModmail).ToDictionary(x => x.Key, x => x.Value);
-                    
+
                     // If there are notes, build embed and add to message
                     if (notesToNotify.Count != 0)
                     {
                         memberWarnInfo.AddEmbed(await UserNoteHelpers.GenerateUserNotesEmbedAsync(modmailMember, notesToUse: notesToNotify));
-                        
+
                         // For any notes set to show once, show the full note content in its own embed because it will not be able to be fetched manually
                         foreach (var note in notesToNotify)
                             if (memberWarnInfo.Embeds.Count < 10) // Limit to 10 embeds; this probably won't be an issue because we probably won't have that many 'show once' notes
                                 if (note.Value.ShowOnce)
                                     memberWarnInfo.AddEmbed(await UserNoteHelpers.GenerateUserNoteSimpleEmbedAsync(note.Value, modmailMember));
                     }
-                    
+
                     // If message was built (if user is muted OR if user has notes to show on modmail), send it
                     if (memberWarnInfo.Embeds.Count != 0)
                         await message.Channel.SendMessageAsync(memberWarnInfo);
-                    
+
                     // If any notes were shown & set to show only once, delete them now
                     foreach (var note in notesToNotify.Where(note => note.Value.ShowOnce))
                     {
                         // Delete note
                         await Program.db.HashDeleteAsync(modmailMember.Id.ToString(), note.Key);
-                    
+
                         // Log deletion to mod-logs channel
                         var embed = new DiscordEmbedBuilder(await UserNoteHelpers.GenerateUserNoteDetailEmbedAsync(note.Value, modmailMember)).WithColor(0xf03916);
                         await LogChannelHelper.LogMessageAsync("mod", $"{Program.cfgjson.Emoji.Deleted} Note `{note.Value.NoteId}` was automatically deleted after modmail thread creation (belonging to {modmailMember.Mention})", embed);
@@ -234,7 +234,7 @@ namespace Cliptok.Events
                             continue;
                         }
                         else
-                        {                                                        
+                        {
                             (bool success, string flaggedWord) = Checks.ListChecks.CheckForNaughtyWords(message.Content.ToLower(), listItem);
                             if (success)
                             {

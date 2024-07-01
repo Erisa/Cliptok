@@ -108,7 +108,7 @@ namespace Cliptok.Commands.InteractionCommands
         {
             await ctx.RespondAsync(embed: await DiscordHelpers.GenerateUserEmbed(user, ctx.Guild), ephemeral: !publicMessage);
         }
-        
+
         [SlashCommand("muteinfo", "Show information about the mute for a user.")]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
@@ -119,7 +119,7 @@ namespace Cliptok.Commands.InteractionCommands
         {
             await ctx.RespondAsync(embed: await MuteHelpers.MuteStatusEmbed(targetUser, ctx.Guild), ephemeral: !isPublic);
         }
-        
+
         [SlashCommand("baninfo", "Show information about the ban for a user.")]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]

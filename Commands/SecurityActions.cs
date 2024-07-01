@@ -12,7 +12,7 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} You must provide an amount of time to pause DMs for!");
                 return;
             }
-            
+
             // need to make our own api calls because D#+ can't do this natively?
 
             // parse time from message
@@ -37,7 +37,7 @@ namespace Cliptok.Commands
                 return;
             }
             var dmsDisabledUntil = t.ToUniversalTime().ToString("o");
-            
+
             // get current security actions to avoid unintentionally resetting invites_disabled_until
             var currentActions = await SecurityActionHelpers.GetCurrentSecurityActions(ctx.Guild.Id);
             JToken invitesDisabledUntil;
@@ -45,7 +45,7 @@ namespace Cliptok.Commands
                 invitesDisabledUntil = null;
             else
                 invitesDisabledUntil = currentActions["invites_disabled_until"];
-            
+
             // create json body
             var newSecurityActions = JsonConvert.SerializeObject(new
             {
@@ -72,7 +72,7 @@ namespace Cliptok.Commands
         public async Task UnpauseDMs(CommandContext ctx)
         {
             // need to make our own api calls because D#+ can't do this natively?
-            
+
             // get current security actions to avoid unintentionally resetting invites_disabled_until
             var currentActions = await SecurityActionHelpers.GetCurrentSecurityActions(ctx.Guild.Id);
             JToken dmsDisabledUntil, invitesDisabledUntil;
@@ -93,14 +93,14 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} DMs are already unpaused!");
                 return;
             }
-            
+
             // create json body
             var newSecurityActions = JsonConvert.SerializeObject(new
             {
                 invites_disabled_until = invitesDisabledUntil,
                 dms_disabled_until = (object)null,
             });
-            
+
             // set actions
             var setActionsResponse = await SecurityActionHelpers.SetCurrentSecurityActions(ctx.Guild.Id, newSecurityActions);
 

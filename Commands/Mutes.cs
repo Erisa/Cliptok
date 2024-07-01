@@ -112,18 +112,18 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command can only be used in <#{Program.cfgjson.TechSupportChannel}>, <#{Program.cfgjson.SupportForumId}>, and threads in those channels!");
                 return;
             }
-            
+
             // Check if the user is already muted; disallow TQS-mute if so
-            
+
             DiscordRole mutedRole = ctx.Guild.GetRole(Program.cfgjson.MutedRole);
             DiscordRole tqsMutedRole = ctx.Guild.GetRole(Program.cfgjson.TqsMutedRole);
-            
+
             if ((await Program.db.HashExistsAsync("mutes", targetUser.Id)) || (ctx.Member != default && (ctx.Member.Roles.Contains(mutedRole) || ctx.Member.Roles.Contains(tqsMutedRole))))
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, that user is already muted.");
                 return;
             }
-            
+
             // Get member
             DiscordMember targetMember = default;
             try

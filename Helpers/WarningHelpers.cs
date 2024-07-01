@@ -222,7 +222,7 @@
                 };
 
             Program.db.HashSet(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
-            
+
             // If warning is automatic (if responsible moderator is a bot), add to list so the context message can be more-easily deleted later
             if (modUser.IsBot)
                 Program.db.HashSet("automaticWarnings", warningId, JsonConvert.SerializeObject(warning));
@@ -267,7 +267,7 @@
             {
                 await MuteHelpers.MuteUserAsync(targetUser, $"Automatic permanent mute after {warnsSinceThreshold} warnings in the past {acceptedThreshold} {thresholdSpan}.", modUser.Id, guild, channel);
             }
-            
+
             // If warning was not automatic (not issued by a bot) and target user has notes to be shown on warn, alert the responsible moderator
 
             if (!modUser.IsBot)
@@ -278,34 +278,34 @@
                         x => x.Name.ToString(),
                         x => JsonConvert.DeserializeObject<UserNote>(x.Value)
                     );
-                
+
                 // Get notes set to notify on warn
                 var notesToNotifyFor = notes.Where(x => x.Value.ShowOnWarn).ToDictionary(x => x.Key, x => x.Value);
-                
+
                 // Get relevant notes ('show all mods' is true, or mod is responsible for note & warning)
                 notesToNotifyFor = notesToNotifyFor.Where(x => x.Value.ShowAllMods || x.Value.ModUserId == modUser.Id).ToDictionary(x => x.Key, x => x.Value);
-                
+
                 // Alert moderator if there are relevant notes
                 if (notesToNotifyFor.Count != 0)
                 {
                     var alertChannel = await Program.discord.GetChannelAsync(Program.cfgjson.InvestigationsChannelId);
                     var msg = new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Muted} {modUser.Mention}, {targetUser.Mention} has notes set to show when they are issued a warning!").AddEmbed(await UserNoteHelpers.GenerateUserNotesEmbedAsync(targetUser, true, notesToNotifyFor)).WithAllowedMentions(Mentions.All);
-                    
+
                     // For any notes set to show once, show the full note content in its own embed because it will not be able to be fetched manually
                     foreach (var note in notesToNotifyFor)
                         if (msg.Embeds.Count < 10) // Limit to 10 embeds; this probably won't be an issue because we probably won't have that many 'show once' notes
                             if (note.Value.ShowOnce)
                                 msg.AddEmbed(await UserNoteHelpers.GenerateUserNoteSimpleEmbedAsync(note.Value, targetUser));
-                    
+
                     await alertChannel.SendMessageAsync(msg);
                 }
-                
+
                 // If any notes were shown & set to show only once, delete them now
                 foreach (var note in notesToNotifyFor.Where(note => note.Value.ShowOnce))
                 {
                     // Delete note
                     await Program.db.HashDeleteAsync(targetUser.Id.ToString(), note.Key);
-                    
+
                     // Log deletion to mod-logs channel
                     var embed = new DiscordEmbedBuilder(await UserNoteHelpers.GenerateUserNoteDetailEmbedAsync(note.Value, targetUser)).WithColor(0xf03916);
                     await LogChannelHelper.LogMessageAsync("mod", $"{Program.cfgjson.Emoji.Deleted} Note `{note.Value.NoteId}` was automatically deleted after a warning (belonging to {targetUser.Mention})", embed);
