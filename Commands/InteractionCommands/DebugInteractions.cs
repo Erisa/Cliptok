@@ -108,5 +108,27 @@ namespace Cliptok.Commands.InteractionCommands
         {
             await ctx.RespondAsync(embed: await DiscordHelpers.GenerateUserEmbed(user, ctx.Guild), ephemeral: !publicMessage);
         }
+        
+        [SlashCommand("muteinfo", "Show information about the mute for a user.")]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        public async Task MuteInfoSlashCommand(
+            InteractionContext ctx,
+            [Option("user", "The user whose mute information to show.")] DiscordUser targetUser,
+            [Option("public", "Whether to show the output publicly. Default: false")] bool isPublic = false)
+        {
+            await ctx.RespondAsync(embed: await MuteHelpers.MuteStatusEmbed(targetUser, ctx.Guild), ephemeral: !isPublic);
+        }
+        
+        [SlashCommand("baninfo", "Show information about the ban for a user.")]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        public async Task BanInfoSlashCommand(
+            InteractionContext ctx,
+            [Option("user", "The user whose ban information to show.")] DiscordUser targetUser,
+            [Option("public", "Whether to show the output publicly. Default: false")] bool isPublic = false)
+        {
+            await ctx.RespondAsync(embed: await BanHelpers.BanStatusEmbed(targetUser, ctx.Guild), ephemeral: !isPublic);
+        }
     }
 }
