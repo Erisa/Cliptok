@@ -153,5 +153,57 @@
 
         }
 
+        public static async Task<DiscordEmbed> BanStatusEmbed(DiscordUser user, DiscordGuild guild)
+        {
+            DiscordMember member = default;
+            DiscordEmbedBuilder embedBuilder = new();
+            var guildBans = await guild.GetBansAsync();
+            var userBan = guildBans.FirstOrDefault(x => x.User.Id == user.Id);
+
+            embedBuilder.WithFooter(
+                    $"User ID: {user.Id}",
+                    null
+                )
+                .WithAuthor(
+                    $"Ban status for {DiscordHelpers.UniqueUsername(user)}",
+                    null,
+                    await LykosAvatarMethods.UserOrMemberAvatarURL(user, Program.homeGuild, "png")
+                );
+
+            if (await Program.db.HashExistsAsync("bans", user.Id))
+            {
+                MemberPunishment ban = JsonConvert.DeserializeObject<MemberPunishment>(Program.db.HashGet("bans", user.Id));
+                
+                embedBuilder.WithDescription("User is banned.")
+                    .AddField("Banned", ban.ActionTime is null ? "Unknown time (Ban is too old)" : $"<t:{TimeHelpers.ToUnixTimestamp(ban.ActionTime)}:R>", true)
+                    .WithColor(new DiscordColor(0xFEC13D));
+
+                if (ban.ExpireTime is null)
+                    embedBuilder.AddField("Ban expires", "Never", true);
+                else
+                    embedBuilder.AddField("Ban expires", $"<t:{TimeHelpers.ToUnixTimestamp(ban.ExpireTime)}:R>", true);
+
+                embedBuilder.AddField("Banned by", $"<@{ban.ModId}>", true);
+
+                embedBuilder.AddField("Reason", ban.Reason is null ? "No reason provided" : ban.Reason, false);
+            }
+            else
+            {
+                if (userBan is null)
+                {
+                    embedBuilder.WithDescription("User is not banned.")
+                        .WithColor(color: DiscordColor.DarkGreen);
+                }
+                else
+                {
+                    embedBuilder.WithDescription($"User was banned without using {Program.discord.CurrentUser.Username}, so limited information is available.")
+                                            .WithColor(new DiscordColor(0xFEC13D));
+                    embedBuilder.AddField("Reason", string.IsNullOrWhiteSpace(userBan.Reason) ? "No reason provided" : userBan.Reason, false);
+                }
+            }
+
+            return embedBuilder.Build();
+        }
+
     }
 }
