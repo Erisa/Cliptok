@@ -141,6 +141,29 @@ namespace Cliptok
                 clientConfig.LogUnknownEvents = false;
                 clientConfig.LogUnknownAuditlogs = false;
             });
+            
+            discordBuilder.ConfigureEventHandlers
+            (
+                builder => builder.HandleComponentInteractionCreated(InteractionEvents.ComponentInteractionCreateEvent)
+                                  .HandleSessionCreated(ReadyEvent.OnReady)
+                                  .HandleMessageCreated(MessageEvent.MessageCreated)
+                                  .HandleMessageUpdated(MessageEvent.MessageUpdated)
+                                  .HandleMessageDeleted(MessageEvent.MessageDeleted)
+                                  .HandleGuildMemberAdded(MemberEvents.GuildMemberAdded)
+                                  .HandleGuildMemberRemoved(MemberEvents.GuildMemberRemoved)
+                                  .HandleMessageReactionAdded(ReactionEvent.OnReaction)
+                                  .HandleGuildMemberUpdated(MemberEvents.GuildMemberUpdated)
+                                  .HandleUserUpdated(MemberEvents.UserUpdated)
+                                  .HandleThreadCreated(ThreadEvents.Discord_ThreadCreated)
+                                  .HandleThreadDeleted(ThreadEvents.Discord_ThreadDeleted)
+                                  .HandleThreadListSynced(ThreadEvents.Discord_ThreadListSynced)
+                                  .HandleThreadMemberUpdated(ThreadEvents.Discord_ThreadMemberUpdated)
+                                  .HandleThreadMembersUpdated(ThreadEvents.Discord_ThreadMembersUpdated)
+                                  .HandleHeartbeated(HeartbeatEvent.OnHeartbeat)
+                                  .HandleGuildBanRemoved(UnbanEvent.OnUnban)
+                                  .HandleVoiceStateUpdated(VoiceEvents.VoiceStateUpdate)
+                                  .HandleChannelUpdated(ChannelEvents.ChannelUpdated)
+            );
 
             discord = discordBuilder.Build();
 
@@ -150,29 +173,6 @@ namespace Cliptok
             var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands" && !t.IsNested);
             foreach (var type in slashCommandClasses)
                 slash.RegisterCommands(type, cfgjson.ServerID); ;
-
-            discord.ComponentInteractionCreated += InteractionEvents.ComponentInteractionCreateEvent;
-            discord.SessionCreated += ReadyEvent.OnReady;
-            discord.MessageCreated += MessageEvent.MessageCreated;
-            discord.MessageUpdated += MessageEvent.MessageUpdated;
-            discord.MessageDeleted += MessageEvent.MessageDeleted;
-            discord.GuildMemberAdded += MemberEvents.GuildMemberAdded;
-            discord.GuildMemberRemoved += MemberEvents.GuildMemberRemoved;
-            discord.MessageReactionAdded += ReactionEvent.OnReaction;
-            discord.GuildMemberUpdated += MemberEvents.GuildMemberUpdated;
-            discord.UserUpdated += MemberEvents.UserUpdated;
-            discord.ThreadCreated += ThreadEvents.Discord_ThreadCreated;
-            discord.ThreadDeleted += ThreadEvents.Discord_ThreadDeleted;
-            discord.ThreadListSynced += ThreadEvents.Discord_ThreadListSynced;
-            discord.ThreadMemberUpdated += ThreadEvents.Discord_ThreadMemberUpdated;
-            discord.ThreadMembersUpdated += ThreadEvents.Discord_ThreadMembersUpdated;
-            discord.Heartbeated += HeartbeatEvent.OnHeartbeat;
-
-            discord.GuildBanRemoved += UnbanEvent.OnUnban;
-
-            discord.VoiceStateUpdated += VoiceEvents.VoiceStateUpdate;
-
-            discord.ChannelUpdated += ChannelEvents.ChannelUpdated;
 
             commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
