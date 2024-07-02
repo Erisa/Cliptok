@@ -141,7 +141,7 @@ namespace Cliptok
                 clientConfig.LogUnknownEvents = false;
                 clientConfig.LogUnknownAuditlogs = false;
             });
-            
+
             discordBuilder.ConfigureEventHandlers
             (
                 builder => builder.HandleComponentInteractionCreated(InteractionEvents.ComponentInteractionCreateEvent)
