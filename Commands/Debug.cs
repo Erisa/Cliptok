@@ -265,6 +265,28 @@
                 var stream = new MemoryStream(Encoding.UTF8.GetBytes(dummyWriter.ToString()));
                 await ctx.RespondAsync(new DiscordMessageBuilder().AddFile("warnings.json", stream).WithContent("I'm not so sure this was a good idea.."));
             }
+            
+            [Command("checkpendingchannelevents")]
+            [Aliases("checkpendingevents", "pendingevents")]
+            [Description("Check pending events to handle in the Channel Update handler.")]
+            [IsBotOwner]
+            public async Task CheckPendingChannelEvents(CommandContext ctx)
+            {
+                var pendingEvents = ChannelEvents.PendingEvents;
+                if (pendingEvents.Count == 0)
+                {
+                    await ctx.RespondAsync("There are no pending events left to handle!");
+                    return;
+                }
+
+                string list = "";
+                foreach (var e in pendingEvents)
+                {
+                    list += $"{e.ToString("o")}\n";
+                }
+
+                await ctx.RespondAsync($"```\n{list}\n```");
+            }
 
             [Group("overrides")]
             [Description("Commands for managing stored permission overrides.")]

@@ -2,8 +2,19 @@
 {
     public class ChannelEvents
     {
+        public static List<DateTime> PendingEvents = new();
+        
         public static async Task ChannelUpdated(DiscordClient _, ChannelUpdatedEventArgs e)
         {
+            // fix race condition when the bot tries to handle multiple Channel Update events in parallel
+            // using DateTime might seem weird, but it's something that is unique for each event
+            var timestamp = DateTime.Now;
+            PendingEvents.Add(timestamp);
+            while (PendingEvents.FirstOrDefault() != default && PendingEvents.FirstOrDefault() != timestamp)
+            {
+                await Task.Delay(500);
+            }
+            
             // Sync channel overwrites with db so that they can be restored when a user leaves & rejoins.
 
             // Get the current channel overwrites
@@ -97,6 +108,8 @@
                     }
                 }
             }
+
+            PendingEvents.Remove(timestamp);
         }
     }
 }
