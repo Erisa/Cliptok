@@ -282,10 +282,26 @@
                 string list = "";
                 foreach (var e in pendingEvents)
                 {
-                    list += $"{e.ToString("o")}\n";
+                    list += $"{e.Key.ToString("o")}, {e.Value}\n";
                 }
-
-                await ctx.RespondAsync($"```\n{list}\n```");
+                
+                if (list.Length > 1990)
+                {
+                    HasteBinResult hasteResult = await Program.hasteUploader.Post(list);
+                    if (hasteResult.IsSuccess)
+                    {
+                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} Output exceeded character limit: {hasteResult.FullUrl}.json");
+                    }
+                    else
+                    {
+                        Console.WriteLine(list);
+                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
+                    }
+                }
+                else
+                {
+                    await ctx.RespondAsync($"```\n{list}\n```");
+                }
             }
 
             [Group("overrides")]
