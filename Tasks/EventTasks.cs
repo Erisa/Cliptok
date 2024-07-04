@@ -41,8 +41,10 @@ namespace Cliptok.Tasks
                             if (overwrite.Key != e.ChannelAfter.Id) continue;
 
                             // (if current overwrite is in the channel, skip)
-                            if (currentChannelOverwrites.Any(
-                                    a => a == overwrite.Value && e.ChannelAfter.Id == overwrite.Key)) continue;
+                            // checking individual properties here because sometimes they are the same but the one from Discord has
+                            // other properties like Discord (DiscordClient) that I don't care about and will wrongly mark the overwrite as different
+                            if (currentChannelOverwrites.Any(a => CompareOverwrites(a, overwrite.Value)))
+                                continue;
 
                             // If it looks like the member left, do NOT remove their overrides.
 
@@ -77,43 +79,53 @@ namespace Cliptok.Tasks
                         if (overwrite.Type == DiscordOverwriteType.Role) continue;
 
                         // If the current channel overwrites are not in the db, add them to the db.
+                        
+                        // Pull out db overwrites into list
+                        
+                        var dbOverwriteRaw = await Program.db.HashGetAllAsync("overrides");
+                        var dbOverwriteList = new List<DiscordOverwrite>();
 
-                        if (dbOverwrites
-                            .Select(dbOverwrite => JsonConvert.DeserializeObject<DiscordOverwrite>(dbOverwrite.Value))
-                            .All(dbOverwriteObj => dbOverwriteObj != overwrite))
+                        foreach (var dbOverwrite in dbOverwriteRaw)
                         {
-                            if ((await Program.db.HashKeysAsync("overrides")).Any(a => a == overwrite.Id.ToString()))
+                            var dict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(dbOverwrite.Value);
+                            dbOverwriteList.AddRange(dict.Values);
+                        }
+                        
+                        // If the overwrite is already in the db, skip
+                        if (dbOverwriteList.Any(dbOverwrite => CompareOverwrites(dbOverwrite, overwrite)))
+                            continue;
+                        
+                        if ((await Program.db.HashKeysAsync("overrides")).Any(a => a == overwrite.Id.ToString()))
+                        {
+                            // User has an overwrite in the db; add this one to their list of overrides without
+                            // touching existing ones
+
+                            var overwrites = await Program.db.HashGetAsync("overrides", overwrite.Id);
+
+                            if (!string.IsNullOrWhiteSpace(overwrites))
                             {
-                                // User has an overwrite in the db; add this one to their list of overrides without
-                                // touching existing ones
+                                var dict =
+                                    JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(overwrites);
 
-                                var overwrites = await Program.db.HashGetAsync("overrides", overwrite.Id);
-
-                                if (!string.IsNullOrWhiteSpace(overwrites))
+                                if (dict is not null)
                                 {
-                                    var dict =
-                                        JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(overwrites);
+                                    dict.Add(e.ChannelAfter.Id, overwrite);
 
-                                    if (dict is not null)
-                                    {
-                                        dict.Add(e.ChannelAfter.Id, overwrite);
-
-                                        if (dict.Count > 0)
-                                            await Program.db.HashSetAsync("overrides", overwrite.Id,
-                                                JsonConvert.SerializeObject(dict));
-                                        else
-                                            await Program.db.HashDeleteAsync("overrides", overwrite.Id);
-                                    }
+                                    if (dict.Count > 0)
+                                        await Program.db.HashSetAsync("overrides", overwrite.Id,
+                                            JsonConvert.SerializeObject(dict));
+                                    else
+                                        await Program.db.HashDeleteAsync("overrides", overwrite.Id);
                                 }
                             }
-                            else
-                            {
-                                // User doesn't have any overrides in db, so store new dictionary
+                        }
+                        else
+                        {
+                            // User doesn't have any overrides in db, so store new dictionary
 
-                                await Program.db.HashSetAsync("overrides",
-                                    overwrite.Id, JsonConvert.SerializeObject(new Dictionary<ulong, DiscordOverwrite>
-                                        { { e.ChannelAfter.Id, overwrite } }));
-                            }
+                            await Program.db.HashSetAsync("overrides",
+                                overwrite.Id, JsonConvert.SerializeObject(new Dictionary<ulong, DiscordOverwrite>
+                                    { { e.ChannelAfter.Id, overwrite } }));
                         }
                     }
                     PendingChannelUpdateEvents.Remove(timestamp);
@@ -131,6 +143,13 @@ namespace Cliptok.Tasks
 
             Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked pending channel update events at {time} with result: {success}", DateTime.Now, success);
             return success;
+        }
+        
+        private static bool CompareOverwrites(DiscordOverwrite a, DiscordOverwrite b)
+        {
+            // Compares two overwrites. ONLY CHECKS PERMISSIONS, ID, TYPE AND CREATION TIME. Ignores other properties!
+            
+            return a.Allowed == b.Allowed && a.Denied == b.Denied && a.Id == b.Id && a.Type == b.Type && a.CreationTimestamp == b.CreationTimestamp;
         }
     }
 }
