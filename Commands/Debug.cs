@@ -361,11 +361,9 @@
                     }
                     else
                     {
-                        await ctx.RespondAsync($"```\n{response}\n```");
+                        await ctx.RespondAsync(new DiscordMessageBuilder().WithContent(response)
+                            .WithAllowedMentions(Mentions.None));
                     }
-
-                    await ctx.RespondAsync(new DiscordMessageBuilder().WithContent(response)
-                        .WithAllowedMentions(Mentions.None));
                 }
 
                 [Command("import")]
