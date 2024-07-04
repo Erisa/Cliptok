@@ -87,7 +87,7 @@
                     var banList = Program.db.HashGetAll("bans").ToDictionary();
                     if (banList is null | banList.Keys.Count == 0)
                     {
-                        await ctx.RespondAsync("No mutes found in database!");
+                        await ctx.RespondAsync("No bans found in database!");
                         return;
                     }
                     else
