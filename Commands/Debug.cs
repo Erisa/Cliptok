@@ -421,6 +421,39 @@
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Overrides for {user.Mention} in {channel.Mention} removed successfully!");
                 }
             }
+            
+            [Command("dumpchanneloverrides")]
+            [Description("Dump all of a channel's overrides. This pulls from Discord, not the database.")]
+            [IsBotOwner]
+            public async Task DumpChannelOverrides(CommandContext ctx,
+                [Description("The channel to dump overrides for.")] DiscordChannel channel)
+            {
+                var overwrites = channel.PermissionOverwrites;
+
+                string output = "";
+                foreach (var overwrite in overwrites)
+                {
+                    output += $"{JsonConvert.SerializeObject(overwrite)}\n";
+                }
+                
+                if (output.Length > 1990)
+                {
+                    HasteBinResult hasteResult = await Program.hasteUploader.Post(output);
+                    if (hasteResult.IsSuccess)
+                    {
+                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} Output exceeded character limit: {hasteResult.FullUrl}.json");
+                    }
+                    else
+                    {
+                        Console.WriteLine(output);
+                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
+                    }
+                }
+                else
+                {
+                    await ctx.RespondAsync($"```\n{output}\n```");
+                }
+            }
 
             [Command("dmchannel")]
             [Description("Create or find a DM channel ID for a user.")]
