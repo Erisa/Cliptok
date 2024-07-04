@@ -193,9 +193,14 @@
                 DiscordMember member = await guild.GetMemberAsync(targetUser.Id);
                 dmMessage = await member.SendMessageAsync(await GenerateWarningDM(reason, channel.Guild, extraWord));
             }
-            catch
+            catch (Exception e)
             {
-                // We failed to DM the user, this isn't important to note.
+                // We failed to DM the user.
+                // Lets log this if it isn't a known cause.
+                if (e is not DSharpPlus.Exceptions.UnauthorizedException)
+                {
+                    Program.discord.Logger.LogWarning(e, "Failed to send mute DM to user: {user}", targetUser.Id);
+                }
             }
 
             UserWarning warning = new()

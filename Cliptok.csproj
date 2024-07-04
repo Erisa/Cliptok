@@ -7,6 +7,7 @@
 		<UserSecretsId>d9345310-5908-4697-8613-28a24d06d183</UserSecretsId>
 	</PropertyGroup>
 
+
 	<ItemGroup>
 		<PackageReference Include="Abyssal.HumanDateParser" Version="2.0.0-20191113.1" />
 		<PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02302" />
