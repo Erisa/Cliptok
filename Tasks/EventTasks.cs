@@ -91,18 +91,16 @@ namespace Cliptok.Tasks
                             // Pull out db overwrites into list
 
                             var dbOverwriteRaw = await Program.db.HashGetAllAsync("overrides");
-                            var dbOverwriteList = new List<DiscordOverwrite>();
+                            var dbOverwriteList = new List<Dictionary<ulong, DiscordOverwrite>>();
 
                             foreach (var dbOverwrite in dbOverwriteRaw)
                             {
-                                var dict =
-                                    JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(
-                                        dbOverwrite.Value);
-                                dbOverwriteList.AddRange(dict.Values);
+                                var dict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(dbOverwrite.Value);
+                                dbOverwriteList.Add(dict);
                             }
-
-                            // If the overwrite is already in the db, skip
-                            if (dbOverwriteList.Any(dbOverwrite => CompareOverwrites(dbOverwrite, overwrite)))
+                            
+                            // If the overwrite is already in the db for this channel, skip
+                            if (dbOverwriteList.Any(dbOverwriteSet => dbOverwriteSet.ContainsKey(e.ChannelAfter.Id) && CompareOverwrites(dbOverwriteSet[e.ChannelAfter.Id], overwrite)))
                                 continue;
 
                             if ((await Program.db.HashKeysAsync("overrides")).Any(a => a == overwrite.Id.ToString()))
