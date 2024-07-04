@@ -48,9 +48,6 @@ namespace Cliptok.Tasks
 
                             // If it looks like the member left, do NOT remove their overrides.
 
-                            // Delay to allow leave to complete first
-                            await Task.Delay(500);
-
                             // Try to fetch member. If it fails, they are not in the guild. If this is a voice channel, remove the override.
                             // (if they are not in the guild & this is not a voice channel, skip; otherwise, code below handles removal)
                             if (!e.Guild.Members.ContainsKey((ulong)userOverwrites.Name) &&
