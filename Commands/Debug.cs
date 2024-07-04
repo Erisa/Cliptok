@@ -165,9 +165,10 @@
                 bool reminders = await Tasks.ReminderTasks.CheckRemindersAsync();
                 bool raidmode = await Tasks.RaidmodeTasks.CheckRaidmodeAsync(ctx.Guild.Id);
                 bool unlocks = await Tasks.LockdownTasks.CheckUnlocksAsync();
-                bool channelEvents = await Tasks.EventTasks.HandlePendingChannelUpdateEventsAsync();
+                bool channelUpdateEvents = await Tasks.EventTasks.HandlePendingChannelUpdateEventsAsync();
+                bool channelDeleteEvents = await Tasks.EventTasks.HandlePendingChannelDeleteEventsAsync();
 
-                await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nAutomatic warning message check result: `{warns}`\nReminders check result: `{reminders}`\nRaidmode check result: `{raidmode}`\nUnlocks check result: `{unlocks}`\nPending channel events check result: `{channelEvents}`");
+                await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nAutomatic warning message check result: `{warns}`\nReminders check result: `{reminders}`\nRaidmode check result: `{raidmode}`\nUnlocks check result: `{unlocks}`\nPending Channel Update events check result: `{channelUpdateEvents}`\nPending Channel Delete events check result: `{channelDeleteEvents}`");
             }
 
             [Command("sh")]

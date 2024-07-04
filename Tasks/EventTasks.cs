@@ -3,9 +3,16 @@ namespace Cliptok.Tasks
     public class EventTasks
     {
         public static Dictionary<DateTime, ChannelUpdatedEventArgs> PendingChannelUpdateEvents = new();
+        public static Dictionary<DateTime, ChannelDeletedEventArgs> PendingChannelDeleteEvents = new();
         
         public static async Task<bool> HandlePendingChannelUpdateEventsAsync()
         {
+            // Wait for there to be no pending Channel Delete events to be handled, to avoid conflicts
+            while (PendingChannelDeleteEvents.Count > 0)
+            {
+                await Task.Delay(500);
+            }
+            
             bool success = false;
 
             try
@@ -152,6 +159,89 @@ namespace Cliptok.Tasks
             }
 
             Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked pending channel update events at {time} with result: {success}", DateTime.Now, success);
+            return success;
+        }
+
+        public static async Task<bool> HandlePendingChannelDeleteEventsAsync()
+        {
+            // Wait for there to be no pending Channel Update events to be handled, to avoid conflicts
+            while (PendingChannelUpdateEvents.Count > 0)
+            {
+                await Task.Delay(500);
+            }
+
+            bool success = false;
+
+            try
+            {
+                foreach (var pendingEvent in PendingChannelDeleteEvents)
+                {
+                    // This is the timestamp on this event, used to identify it / keep events in order in the list
+                    var timestamp = pendingEvent.Key;
+
+                    // This is a set of ChannelDeletedEventArgs for the event we are processing
+                    var e = pendingEvent.Value;
+
+                    try
+                    {
+                        // Purge all overwrites from db for this channel
+                
+                        // Get all overwrites
+                        var dbOverwrites = await Program.db.HashGetAllAsync("overrides");
+                
+                        // Overwrites are stored by user ID, then as a dict with channel ID as key & overwrite as value, so we can't just delete by channel ID.
+                        // We need to loop through all overwrites and delete the ones that match the channel ID, then put everything back together.
+
+                        foreach (var userOverwrites in dbOverwrites)
+                        {
+                            var overwriteDict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(userOverwrites.Value);
+                    
+                            // Now overwriteDict is a dict of this user's overwrites, with channel ID as key & overwrite as value
+                    
+                            // Loop through these; for any with a matching channel ID to the channel that was deleted, remove them
+                            foreach (var overwrite in overwriteDict)
+                            {
+                                if (overwrite.Key == e.Channel.Id)
+                                {
+                                    overwriteDict.Remove(overwrite.Key);
+                                }
+                            }
+                    
+                            // Now we have a modified overwriteDict (ulong, DiscordOverwrite)
+                            // Now we put everything back together
+                            
+                            // If the user now has no overrides, remove them from the db entirely
+                            if (overwriteDict.Count == 0)
+                            {
+                                await Program.db.HashDeleteAsync("overrides", userOverwrites.Name);
+                            }
+                            else
+                            {
+                                // Otherwise, update the user's overrides in the db
+                                await Program.db.HashSetAsync("overrides", userOverwrites.Name, JsonConvert.SerializeObject(overwriteDict));
+                            }
+                        }
+                        
+                        PendingChannelDeleteEvents.Remove(timestamp);
+                        success = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log the exception
+                        Program.discord.Logger.LogWarning(ex,
+                            "Failed to process pending channel delete event for channel {channel}", e.Channel.Id);
+
+                        // Always remove the event from the pending list, even if we failed to process it
+                        PendingChannelDeleteEvents.Remove(timestamp);
+                    }
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                Program.discord.Logger.LogDebug(ex, "Failed to enumerate pending channel delete events; this usually means a Channel Delete event was just added to the list, or one was processed and removed from the list. Will try again on next task run.");
+            }
+            
+            Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked pending channel delete events at {time} with result: {success}", DateTime.Now, success);
             return success;
         }
         

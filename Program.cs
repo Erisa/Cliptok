@@ -163,6 +163,7 @@ namespace Cliptok
                                   .HandleGuildBanRemoved(UnbanEvent.OnUnban)
                                   .HandleVoiceStateUpdated(VoiceEvents.VoiceStateUpdate)
                                   .HandleChannelUpdated(ChannelEvents.ChannelUpdated)
+                                  .HandleChannelDeleted(ChannelEvents.ChannelDeleted)
             );
 
             discord = discordBuilder.Build();
@@ -205,6 +206,7 @@ namespace Cliptok
                         Tasks.RaidmodeTasks.CheckRaidmodeAsync(cfgjson.ServerID),
                         Tasks.LockdownTasks.CheckUnlocksAsync(),
                         Tasks.EventTasks.HandlePendingChannelUpdateEventsAsync(),
+                        Tasks.EventTasks.HandlePendingChannelDeleteEventsAsync(),
                     ];
 
                     // To prevent a future issue if checks take longer than 10 seconds,
