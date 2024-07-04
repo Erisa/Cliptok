@@ -266,7 +266,7 @@
                 var stream = new MemoryStream(Encoding.UTF8.GetBytes(dummyWriter.ToString()));
                 await ctx.RespondAsync(new DiscordMessageBuilder().AddFile("warnings.json", stream).WithContent("I'm not so sure this was a good idea.."));
             }
-            
+
             [Command("checkpendingchannelevents")]
             [Aliases("checkpendingevents", "pendingevents")]
             [Description("Check pending events to handle in the Channel Update handler.")]
@@ -285,7 +285,7 @@
                 {
                     list += $"{e.Key.ToString("o")}, {e.Value.ChannelAfter.Id}\n";
                 }
-                
+
                 if (list.Length > 1990)
                 {
                     HasteBinResult hasteResult = await Program.hasteUploader.Post(list);
@@ -429,6 +429,16 @@
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Overrides for {user.Mention} in {channel.Mention} removed successfully!");
                 }
             }
+
+            [Command("dmchannel")]
+            [Description("Create or find a DM channel ID for a user.")]
+            [IsBotOwner]
+            public async Task GetDMChannel(CommandContext ctx, DiscordUser user)
+            {
+                var dmChannel = await user.CreateDmChannelAsync();
+                await ctx.RespondAsync(dmChannel.Id.ToString());
+            }
+
         }
 
     }
