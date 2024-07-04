@@ -355,48 +355,40 @@
                 public async Task Import(CommandContext ctx,
                     [Description("The channel to import overrides from.")] DiscordChannel channel)
                 {
-                    // Import all overrides for channel to db
-                    foreach (var overwrite in channel.PermissionOverwrites)
+                    // Import overrides
+                    var (success, failedOverwrite) = await ImportOverridesFromChannelAsync(channel);
+                    
+                    if (success)
+                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Overrides for {channel.Mention} imported successfully!");
+                    else
+                        await ctx.RespondAsync(
+                            $"{Program.cfgjson.Emoji.Error} Something went wrong while trying to fetch the overrides for {failedOverwrite}!" +
+                            " There are overrides in the database but I could not parse them. Check the database manually for details.");
+                }
+
+                [Command("importall")]
+                [Description("Import all overrides from all channels to the database.")]
+                public async Task ImportAll(CommandContext ctx)
+                {
+                    var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working...");
+                    
+                    // Get all channels
+                    var channels = await ctx.Guild.GetChannelsAsync();
+
+                    bool anyImportFailed = false;
+
+                    foreach (var channel in channels)
                     {
-                        // Ignore role overrides
-                        if (overwrite.Type == DiscordOverwriteType.Role) continue;
+                        // Import overrides
+                        var (success, failedOverwrite) = await ImportOverridesFromChannelAsync(channel);
 
-                        // Get user's current overrides from db
-                        var userOverrides = await Program.db.HashGetAsync("overrides", overwrite.Id.ToString());
-                        if (string.IsNullOrWhiteSpace(userOverrides))
-                        {
-                            // User doesn't have any overrides in db, so just add the new one
-                            await Program.db.HashSetAsync("overrides", overwrite.Id.ToString(),
-                                JsonConvert.SerializeObject(new Dictionary<ulong, DiscordOverwrite>
-                                {
-                                    { channel.Id, overwrite }
-                                }));
-                        }
-                        else
-                        {
-                            // User has overrides in db, so add the new one to the existing ones
-                            var overwrites =
-                                JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(userOverrides);
-                            if (overwrites is null)
-                            {
-                                await ctx.RespondAsync(
-                                    $"{Program.cfgjson.Emoji.Error} Something went wrong while trying to fetch the overrides for {overwrite.Id}!" +
-                                    " There are overrides in the database but I could not parse them. Check the database manually for details.");
-                                return;
-                            }
-
-                            if (overwrites.ContainsKey(channel.Id))
-                                overwrites[channel.Id] = overwrite;
-                            else
-                                overwrites.Add(channel.Id, overwrite);
-
-                            // Update the db
-                            await Program.db.HashSetAsync("overrides", overwrite.Id.ToString(),
-                                JsonConvert.SerializeObject(overwrites));
-                        }
+                        if (!success) anyImportFailed = true;
                     }
-
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Overrides for {channel.Mention} imported successfully!");
+                    
+                    if (anyImportFailed)
+                        await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} Some overrides failed to import. Most likely this means I found overrides in the database but couldn't parse them. Check the database manually for details.");
+                    else
+                        await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} All overrides imported successfully!");
                 }
 
                 [Command("remove")]
@@ -437,6 +429,52 @@
             {
                 var dmChannel = await user.CreateDmChannelAsync();
                 await ctx.RespondAsync(dmChannel.Id.ToString());
+            }
+
+            private static async Task<(bool success, ulong failedOverwrite)> ImportOverridesFromChannelAsync(DiscordChannel channel)
+            {
+                // Imports overrides from the specified channel to the database. See 'debug overrides import' and 'debug overrides importall'
+                // Return (true, 0) on success, (false, <ID of failed overwrite>) on failure
+                
+                // Import all overrides for channel to db
+                foreach (var overwrite in channel.PermissionOverwrites)
+                {
+                    // Ignore role overrides
+                    if (overwrite.Type == DiscordOverwriteType.Role) continue;
+
+                    // Get user's current overrides from db
+                    var userOverrides = await Program.db.HashGetAsync("overrides", overwrite.Id.ToString());
+                    if (string.IsNullOrWhiteSpace(userOverrides))
+                    {
+                        // User doesn't have any overrides in db, so just add the new one
+                        await Program.db.HashSetAsync("overrides", overwrite.Id.ToString(),
+                            JsonConvert.SerializeObject(new Dictionary<ulong, DiscordOverwrite>
+                            {
+                                { channel.Id, overwrite }
+                            }));
+                    }
+                    else
+                    {
+                        // User has overrides in db, so add the new one to the existing ones
+                        var overwrites =
+                            JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(userOverrides);
+                        if (overwrites is null)
+                        {
+                            return (false, overwrite.Id);
+                        }
+
+                        if (overwrites.ContainsKey(channel.Id))
+                            overwrites[channel.Id] = overwrite;
+                        else
+                            overwrites.Add(channel.Id, overwrite);
+
+                        // Update the db
+                        await Program.db.HashSetAsync("overrides", overwrite.Id.ToString(),
+                            JsonConvert.SerializeObject(overwrites));
+                    }
+                }
+
+                return (true, 0);
             }
 
         }
