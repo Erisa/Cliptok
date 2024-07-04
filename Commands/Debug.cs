@@ -346,6 +346,24 @@
                             $"<#{overwrite.Key}>:\n**Allowed**: {overwrite.Value.Allowed}\n**Denied**: {overwrite.Value.Denied}\n\n";
                     }
 
+                    if (response.Length > 2000)
+                    {
+                        HasteBinResult hasteResult = await Program.hasteUploader.Post(response);
+                        if (hasteResult.IsSuccess)
+                        {
+                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} Output exceeded character limit: {hasteResult.FullUrl}.json");
+                        }
+                        else
+                        {
+                            Console.WriteLine(response);
+                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
+                        }
+                    }
+                    else
+                    {
+                        await ctx.RespondAsync($"```\n{response}\n```");
+                    }
+
                     await ctx.RespondAsync(new DiscordMessageBuilder().WithContent(response)
                         .WithAllowedMentions(Mentions.None));
                 }
