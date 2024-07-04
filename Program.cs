@@ -204,6 +204,7 @@ namespace Cliptok
                         Tasks.ReminderTasks.CheckRemindersAsync(),
                         Tasks.RaidmodeTasks.CheckRaidmodeAsync(cfgjson.ServerID),
                         Tasks.LockdownTasks.CheckUnlocksAsync(),
+                        Tasks.EventTasks.HandlePendingChannelUpdateEventsAsync(),
                     ];
 
                     // To prevent a future issue if checks take longer than 10 seconds,

@@ -165,8 +165,9 @@
                 bool reminders = await Tasks.ReminderTasks.CheckRemindersAsync();
                 bool raidmode = await Tasks.RaidmodeTasks.CheckRaidmodeAsync(ctx.Guild.Id);
                 bool unlocks = await Tasks.LockdownTasks.CheckUnlocksAsync();
+                bool channelEvents = await Tasks.EventTasks.HandlePendingChannelUpdateEventsAsync();
 
-                await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nAutomatic warning message check result: `{warns}`\nReminders check result: `{reminders}`\nRaidmode check result: `{raidmode}`\nUnlocks check result: `{unlocks}`");
+                await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nAutomatic warning message check result: `{warns}`\nReminders check result: `{reminders}`\nRaidmode check result: `{raidmode}`\nUnlocks check result: `{unlocks}`\nPending channel events check result: `{channelEvents}`");
             }
 
             [Command("sh")]
@@ -272,17 +273,17 @@
             [IsBotOwner]
             public async Task CheckPendingChannelEvents(CommandContext ctx)
             {
-                var pendingEvents = ChannelEvents.PendingEvents;
+                var pendingEvents = Tasks.EventTasks.PendingChannelUpdateEvents;
                 if (pendingEvents.Count == 0)
                 {
-                    await ctx.RespondAsync("There are no pending events left to handle!");
+                    await ctx.RespondAsync("There are no pending Channel Update events left to handle!");
                     return;
                 }
 
                 string list = "";
                 foreach (var e in pendingEvents)
                 {
-                    list += $"{e.Key.ToString("o")}, {e.Value}\n";
+                    list += $"{e.Key.ToString("o")}, {e.Value.ChannelAfter.Id}\n";
                 }
                 
                 if (list.Length > 1990)
