@@ -51,7 +51,7 @@
                         }
                         else
                         {
-                            Console.WriteLine(strOut);
+                            Program.discord.Logger.LogError("Error ocurred uploading to Hastebin with status code: {code}\nPayload: {output}", hasteResult.StatusCode, strOut);
                             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
                         }
                     }
@@ -106,7 +106,7 @@
                         }
                         else
                         {
-                            Console.WriteLine(strOut);
+                            Program.discord.Logger.LogError("Error ocurred uploading to Hastebin with status code: {code}\nPayload: {output}", hasteResult.StatusCode, strOut);
                             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
                         }
                     }
@@ -190,16 +190,16 @@
 
                 if (result.Length > 1947)
                 {
-                    HasteBinResult hasteURL = await Program.hasteUploader.Post(result);
-                    if (hasteURL.IsSuccess)
+                    HasteBinResult hasteResult = await Program.hasteUploader.Post(result);
+                    if (hasteResult.IsSuccess)
                     {
                         await msg.ModifyAsync($"Done, but output exceeded character limit! (`{result.Length}`/`1947`)\n" +
-                            $"Full output can be viewed here: https://haste.erisa.uk/{hasteURL.Key}\nProcess exited with code `{finishedShell.proc.ExitCode}`.");
+                            $"Full output can be viewed here: https://haste.erisa.uk/{hasteResult.Key}\nProcess exited with code `{finishedShell.proc.ExitCode}`.");
                     }
                     else
                     {
-                        Console.WriteLine(finishedShell.result);
-                        await msg.ModifyAsync($"Error occurred during upload to Hastebin.\nAction was executed regardless, shell exit code was `{finishedShell.proc.ExitCode}`. Hastebin status code is `{hasteURL.StatusCode}`.\nPlease check the console/log for the command output.");
+                        Program.discord.Logger.LogError("Error ocurred uploading to Hastebin with status code: {code}\nPayload: {output}", hasteResult.StatusCode, finishedShell.result);
+                        await msg.ModifyAsync($"Error occurred during upload to Hastebin.\nAction was executed regardless, shell exit code was `{finishedShell.proc.ExitCode}`. Hastebin status code is `{hasteResult.StatusCode}`.\nPlease check the console/log for the command output.");
                     }
                 }
                 else
@@ -296,7 +296,7 @@
                     }
                     else
                     {
-                        Console.WriteLine(list);
+                        Program.discord.Logger.LogError("Error ocurred uploading to Hastebin with status code: {code}\nPayload: {output}", hasteResult.StatusCode, list);
                         await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
                     }
                 }
