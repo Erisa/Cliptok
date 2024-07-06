@@ -270,23 +270,40 @@
 
             [Command("checkpendingchannelevents")]
             [Aliases("checkpendingevents", "pendingevents")]
-            [Description("Check pending events to handle in the Channel Update handler.")]
+            [Description("Check pending events to handle in the Channel Update and Channel Delete handlers.")]
             [IsBotOwner]
             public async Task CheckPendingChannelEvents(CommandContext ctx)
             {
-                var pendingEvents = Tasks.EventTasks.PendingChannelUpdateEvents;
-                if (pendingEvents.Count == 0)
+                var pendingUpdateEvents = Tasks.EventTasks.PendingChannelUpdateEvents;
+                var pendingDeleteEvents = Tasks.EventTasks.PendingChannelDeleteEvents;
+                
+                if (pendingUpdateEvents.Count == 0 && pendingDeleteEvents.Count == 0)
                 {
-                    await ctx.RespondAsync("There are no pending Channel Update events left to handle!");
+                    await ctx.RespondAsync("There are no pending channel events left to handle!");
                     return;
                 }
 
                 string list = "";
-                foreach (var e in pendingEvents)
+                if (pendingUpdateEvents.Count > 0)
                 {
-                    list += $"{e.Key.ToString("o")}, {e.Value.ChannelAfter.Id}\n";
+                    list += "Channel Update:\n```\n";
+                    foreach (var e in pendingUpdateEvents)
+                    {
+                        list += $"{e.Key.ToString("o")}, {e.Value.ChannelAfter.Id}\n";
+                    }
+                    list += "```";
                 }
 
+                if (pendingDeleteEvents.Count > 0)
+                {
+                    list += "\nChannel Delete:\n```\n";
+                    foreach (var e in pendingDeleteEvents)
+                    {
+                        list += $"{e.Key.ToString("o")}, {e.Value.Channel.Id}\n";
+                    }
+                    list += "```\n";
+                }
+                
                 if (list.Length > 1990)
                 {
                     HasteBinResult hasteResult = await Program.hasteUploader.Post(list);
@@ -302,7 +319,7 @@
                 }
                 else
                 {
-                    await ctx.RespondAsync($"```\n{list}\n```");
+                    await ctx.RespondAsync(list);
                 }
             }
 
