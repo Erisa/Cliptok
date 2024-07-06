@@ -7,12 +7,6 @@ namespace Cliptok.Tasks
         
         public static async Task<bool> HandlePendingChannelUpdateEventsAsync()
         {
-            // Wait for there to be no pending Channel Delete events to be handled, to avoid conflicts
-            while (PendingChannelDeleteEvents.Count > 0)
-            {
-                await Task.Delay(500);
-            }
-            
             bool success = false;
 
             try
@@ -162,12 +156,6 @@ namespace Cliptok.Tasks
 
         public static async Task<bool> HandlePendingChannelDeleteEventsAsync()
         {
-            // Wait for there to be no pending Channel Update events to be handled, to avoid conflicts
-            while (PendingChannelUpdateEvents.Count > 0)
-            {
-                await Task.Delay(500);
-            }
-
             bool success = false;
 
             try
