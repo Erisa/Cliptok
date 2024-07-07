@@ -199,7 +199,7 @@
                 // Lets log this if it isn't a known cause.
                 if (e is not DSharpPlus.Exceptions.UnauthorizedException)
                 {
-                    Program.discord.Logger.LogWarning(e, "Failed to send mute DM to user: {user}", targetUser.Id);
+                    Program.discord.Logger.LogWarning(e, "Failed to send warning DM to user: {user}", targetUser.Id);
                 }
             }
 
