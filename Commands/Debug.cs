@@ -373,7 +373,7 @@
                         }
                         else
                         {
-                            Console.WriteLine(response);
+                            Program.discord.Logger.LogError("Error ocurred uploading to Hastebin with status code: {code}\nPayload: {output}", hasteResult.StatusCode, response);
                             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
                         }
                     }
@@ -479,7 +479,7 @@
                     }
                     else
                     {
-                        Console.WriteLine(output);
+                        Program.discord.Logger.LogError("Error ocurred uploading to Hastebin with status code: {code}\nPayload: {output}", hasteResult.StatusCode, output);
                         await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
                     }
                 }
