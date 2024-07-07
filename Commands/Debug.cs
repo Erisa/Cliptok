@@ -498,6 +498,27 @@
                 await ctx.RespondAsync(dmChannel.Id.ToString());
             }
 
+            [Command("dumpdmchannels")]
+            [Description("Dump all DM channels")]
+            [IsBotOwner]
+            public async Task DumpDMChannels(CommandContext ctx)
+            {
+                var dmChannels = ctx.Client.PrivateChannels;
+
+                var json = JsonConvert.SerializeObject(dmChannels, Formatting.Indented);
+
+                HasteBinResult hasteResult = await Program.hasteUploader.Post(json);
+                if (hasteResult.IsSuccess)
+                {
+                    await ctx.RespondAsync(hasteResult.FullUrl);
+                }
+                else
+                {
+                    Program.discord.Logger.LogError("Error ocurred uploading to Hastebin with status code: {code}\nPayload: {output}", hasteResult.StatusCode, json);
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
+                }
+            }
+
             private static async Task<(bool success, ulong failedOverwrite)> ImportOverridesFromChannelAsync(DiscordChannel channel)
             {
                 // Imports overrides from the specified channel to the database. See 'debug overrides import' and 'debug overrides importall'
