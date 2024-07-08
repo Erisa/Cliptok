@@ -42,23 +42,7 @@
                             strOut += $"{entry.Value}\n";
                         }
                     }
-                    if (strOut.Length > 1930)
-                    {
-                        HasteBinResult hasteResult = await Program.hasteUploader.Post(strOut);
-                        if (hasteResult.IsSuccess)
-                        {
-                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} Output exceeded character limit: {hasteResult.FullUrl}.json");
-                        }
-                        else
-                        {
-                            Program.discord.Logger.LogError("Error ocurred uploading to Hastebin with status code: {code}\nPayload: {output}", hasteResult.StatusCode, strOut);
-                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
-                        }
-                    }
-                    else
-                    {
-                        await ctx.RespondAsync($"```json\n{strOut}\n```");
-                    }
+                    await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(strOut, "json"));
                 }
                 else // if (targetUser != default)
                 {
@@ -97,23 +81,7 @@
                             strOut += $"{entry.Value}\n";
                         }
                     }
-                    if (strOut.Length > 1930)
-                    {
-                        HasteBinResult hasteResult = await Program.hasteUploader.Post(strOut);
-                        if (hasteResult.IsSuccess)
-                        {
-                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} Output exceeded character limit: {hasteResult.FullUrl}.json");
-                        }
-                        else
-                        {
-                            Program.discord.Logger.LogError("Error ocurred uploading to Hastebin with status code: {code}\nPayload: {output}", hasteResult.StatusCode, strOut);
-                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
-                        }
-                    }
-                    else
-                    {
-                        await ctx.RespondAsync($"```json\n{strOut}\n```");
-                    }
+                    await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(strOut, "json"));
                 }
                 else // if (targetUser != default)
                 {
@@ -188,25 +156,11 @@
                 ShellResult finishedShell = RunShellCommand(command);
                 string result = Regex.Replace(finishedShell.result, "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") ?? "DUMMYVALUE", "REDACTED");
 
-                if (result.Length > 1947)
-                {
-                    HasteBinResult hasteResult = await Program.hasteUploader.Post(result);
-                    if (hasteResult.IsSuccess)
-                    {
-                        await msg.ModifyAsync($"Done, but output exceeded character limit! (`{result.Length}`/`1947`)\n" +
-                            $"Full output can be viewed here: https://haste.erisa.uk/{hasteResult.Key}\nProcess exited with code `{finishedShell.proc.ExitCode}`.");
-                    }
-                    else
-                    {
-                        Program.discord.Logger.LogError("Error ocurred uploading to Hastebin with status code: {code}\nPayload: {output}", hasteResult.StatusCode, finishedShell.result);
-                        await msg.ModifyAsync($"Error occurred during upload to Hastebin.\nAction was executed regardless, shell exit code was `{finishedShell.proc.ExitCode}`. Hastebin status code is `{hasteResult.StatusCode}`.\nPlease check the console/log for the command output.");
-                    }
-                }
-                else
-                {
-                    await msg.ModifyAsync($"Done, output: ```\n" +
-                        $"{result}```Process exited with code `{finishedShell.proc.ExitCode}`.");
-                }
+                string msgContent = await StringHelpers.CodeOrHasteBinAsync(result, charLimit: 1947);
+
+                msgContent += $"\nProcess exited with code `{finishedShell.proc.ExitCode}`.";
+
+                await msg.ModifyAsync(msgContent);
             }
 
             [Command("logs")]
@@ -214,24 +168,14 @@
             {
                 await DiscordHelpers.SafeTyping(ctx.Channel);
 
-                string result = Regex.Replace(Program.outputCapture.ToString(), "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT"), "REDACTED");
+                string result = Regex.Replace(Program.outputCapture.ToString(), "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED");
 
-                if (result.Length > 1947)
+                if (Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") is not null)
                 {
-                    HasteBinResult hasteURL = await Program.hasteUploader.Post(result);
-                    if (hasteURL.IsSuccess)
-                    {
-                        await ctx.RespondAsync($"Logs: https://haste.erisa.uk/{hasteURL.Key}");
-                    }
-                    else
-                    {
-                        await ctx.RespondAsync($"Error occurred during upload to Hastebin. Hastebin status code is `{hasteURL.StatusCode}`.\n");
-                    }
+                    result = result.Replace(Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT"), "REDACTED");
                 }
-                else
-                {
-                    await ctx.RespondAsync($"Logs:```\n{result}```");
-                }
+
+                await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(result));
             }
 
             [Command("dumpwarnings"), Description("Dump all warning data. EXTREMELY computationally expensive, use with caution.")]
@@ -304,23 +248,7 @@
                     list += "```\n";
                 }
                 
-                if (list.Length > 1990)
-                {
-                    HasteBinResult hasteResult = await Program.hasteUploader.Post(list);
-                    if (hasteResult.IsSuccess)
-                    {
-                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} Output exceeded character limit: {hasteResult.FullUrl}.json");
-                    }
-                    else
-                    {
-                        Program.discord.Logger.LogError("Error ocurred uploading to Hastebin with status code: {code}\nPayload: {output}", hasteResult.StatusCode, list);
-                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
-                    }
-                }
-                else
-                {
-                    await ctx.RespondAsync(list);
-                }
+                await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(list));
             }
 
             [Group("overrides")]
@@ -366,16 +294,8 @@
 
                     if (response.Length > 2000)
                     {
-                        HasteBinResult hasteResult = await Program.hasteUploader.Post(response);
-                        if (hasteResult.IsSuccess)
-                        {
-                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} Output exceeded character limit: {hasteResult.FullUrl}.json");
-                        }
-                        else
-                        {
-                            Program.discord.Logger.LogError("Error ocurred uploading to Hastebin with status code: {code}\nPayload: {output}", hasteResult.StatusCode, response);
-                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
-                        }
+                        // I am abusing my own helper here. I know for a fact that it will be over the char limit so I know it won't return a code block.
+                        await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(response));
                     }
                     else
                     {
@@ -470,23 +390,7 @@
                     output += $"{JsonConvert.SerializeObject(overwrite)}\n";
                 }
                 
-                if (output.Length > 1990)
-                {
-                    HasteBinResult hasteResult = await Program.hasteUploader.Post(output);
-                    if (hasteResult.IsSuccess)
-                    {
-                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} Output exceeded character limit: {hasteResult.FullUrl}.json");
-                    }
-                    else
-                    {
-                        Program.discord.Logger.LogError("Error ocurred uploading to Hastebin with status code: {code}\nPayload: {output}", hasteResult.StatusCode, output);
-                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
-                    }
-                }
-                else
-                {
-                    await ctx.RespondAsync($"```\n{output}\n```");
-                }
+                await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(output, "json"));
             }
 
             [Command("dmchannel")]
@@ -507,16 +411,7 @@
 
                 var json = JsonConvert.SerializeObject(dmChannels, Formatting.Indented);
 
-                HasteBinResult hasteResult = await Program.hasteUploader.Post(json);
-                if (hasteResult.IsSuccess)
-                {
-                    await ctx.RespondAsync(hasteResult.FullUrl);
-                }
-                else
-                {
-                    Program.discord.Logger.LogError("Error ocurred uploading to Hastebin with status code: {code}\nPayload: {output}", hasteResult.StatusCode, json);
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
-                }
+                await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(json, "json"));
             }
 
             private static async Task<(bool success, ulong failedOverwrite)> ImportOverridesFromChannelAsync(DiscordChannel channel)

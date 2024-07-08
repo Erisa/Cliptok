@@ -522,22 +522,7 @@ namespace Cliptok.Events
                                 DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
                                 var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, message.Channel, " automatically ");
 
-                                string responseToSend = $"```json\n{responseText}\n```";
-                                if (responseToSend.Length > 1940)
-                                {
-                                    try
-                                    {
-                                        HasteBinResult hasteURL = await Program.hasteUploader.Post(responseText);
-                                        if (hasteURL.IsSuccess)
-                                            responseToSend = hasteURL.FullUrl + ".json";
-                                        else
-                                            responseToSend = "Response was too big and Hastebin failed, sorry.";
-                                    }
-                                    catch
-                                    {
-                                        responseToSend = "Response was too big and Hastebin failed, sorry.";
-                                    }
-                                }
+                                string responseToSend = await StringHelpers.CodeOrHasteBinAsync(responseText, "json", 1000, true);
 
                                 (string name, string value, bool inline) extraField = new("API Response", responseToSend, false);
                                 await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField);

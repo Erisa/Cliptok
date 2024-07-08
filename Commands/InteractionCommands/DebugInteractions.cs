@@ -17,29 +17,15 @@ namespace Cliptok.Commands.InteractionCommands
                 string responseToSend;
                 if (match)
                 {
-                    responseToSend = $"Match found:\n```json\n{responseText}\n```";
-
+                    responseToSend = $"Match found:\n`";
                 }
                 else
                 {
-                    responseToSend = $"No valid match found.\nHTTP Status `{(int)httpStatus}`, result:\n```json\n{responseText}\n```";
+                    responseToSend = $"No valid match found.\nHTTP Status `{(int)httpStatus}`, result:\n";
                 }
 
-                if (responseToSend.Length > 1940)
-                {
-                    try
-                    {
-                        HasteBinResult hasteURL = await Program.hasteUploader.Post(responseText);
-                        if (hasteURL.IsSuccess)
-                            responseToSend = hasteURL.FullUrl + ".json";
-                        else
-                            responseToSend = "Response was too big and Hastebin failed, sorry.";
-                    }
-                    catch
-                    {
-                        responseToSend = "Response was too big and Hastebin failed, sorry.";
-                    }
-                }
+                responseToSend += await StringHelpers.CodeOrHasteBinAsync(responseText, "json");
+                
                 await ctx.RespondAsync(responseToSend);
             }
             else
