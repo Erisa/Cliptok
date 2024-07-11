@@ -1,3 +1,6 @@
+using DSharpPlus.Clients;
+using DSharpPlus.Extensions;
+using DSharpPlus.Net.Gateway;
 using System.Reflection;
 
 namespace Cliptok
@@ -9,6 +12,19 @@ namespace Cliptok
 
         [JsonProperty("key")]
         public string Key { get; set; }
+    }
+
+    class GatewayController : IGatewayController
+    {
+        public async ValueTask HeartbeatedAsync(IGatewayClient client)
+        {
+            await HeartbeatEvent.OnHeartbeat(client);
+        }
+
+        public async ValueTask ZombiedAsync(IGatewayClient client)
+        {
+            await Task.CompletedTask;
+        }
     }
 
     class Program : BaseCommandModule
@@ -136,7 +152,12 @@ namespace Cliptok
                 logging.AddSerilog();
             });
 
-            discordBuilder.ConfigureGatewayClient(clientConfig =>
+            discordBuilder.ConfigureServices(services =>
+            {
+                services.Replace<IGatewayController, GatewayController>();
+            });
+
+            discordBuilder.ConfigureExtraFeatures(clientConfig =>
             {
                 clientConfig.LogUnknownEvents = false;
                 clientConfig.LogUnknownAuditlogs = false;
@@ -159,7 +180,6 @@ namespace Cliptok
                                   .HandleThreadListSynced(ThreadEvents.Discord_ThreadListSynced)
                                   .HandleThreadMemberUpdated(ThreadEvents.Discord_ThreadMemberUpdated)
                                   .HandleThreadMembersUpdated(ThreadEvents.Discord_ThreadMembersUpdated)
-                                  .HandleHeartbeated(HeartbeatEvent.OnHeartbeat)
                                   .HandleGuildBanRemoved(UnbanEvent.OnUnban)
                                   .HandleVoiceStateUpdated(VoiceEvents.VoiceStateUpdate)
                                   .HandleChannelUpdated(ChannelEvents.ChannelUpdated)

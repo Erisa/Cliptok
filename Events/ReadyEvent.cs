@@ -134,6 +134,21 @@ namespace Cliptok.Events
                 $"```\n" +
                 $"{commitMessage}\n" +
                 $"```");
+
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("UPTIME_KUMA_PUSH_URL")))
+            {
+                var response = await Program.httpClient.GetAsync(Environment.GetEnvironmentVariable("UPTIME_KUMA_PUSH_URL"));
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    discord.Logger.LogDebug("Heartbeat ping succeeded.");
+                }
+                else
+                {
+                    discord.Logger.LogError("Heartbeat ping sent: {status} {content}", (int)response.StatusCode, await response.Content.ReadAsStringAsync());
+                }
+                return;
+            }
+
         }
 
     }
