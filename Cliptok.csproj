@@ -7,7 +7,7 @@
 		<UserSecretsId>d9345310-5908-4697-8613-28a24d06d183</UserSecretsId>
 
 		<RestoreAdditionalProjectSources>
-			https://nuget.pkg.github.com/Erisa/index.json
+			https://www.myget.org/F/erisa/api/v3/index.json
 		</RestoreAdditionalProjectSources>
 	</PropertyGroup>
 
