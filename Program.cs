@@ -23,6 +23,7 @@ namespace Cliptok
 
         public async ValueTask ZombiedAsync(IGatewayClient client)
         {
+            await client.ReconnectAsync();
             await Task.CompletedTask;
         }
     }
