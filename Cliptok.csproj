@@ -13,9 +13,9 @@
 
 	<ItemGroup>
 		<PackageReference Include="Abyssal.HumanDateParser" Version="2.0.0-20191113.1" />
-		<PackageReference Include="DSharpPlus" Version="5.0.0-Nightly-Erisa-3-294f8244db8ec86723c58c2f16f64020ce790f4f" />
-		<PackageReference Include="DSharpPlus.CommandsNext" Version="5.0.0-Nightly-Erisa-3-294f8244db8ec86723c58c2f16f64020ce790f4f" />
-		<PackageReference Include="DSharpPlus.SlashCommands" Version="5.0.0-Nightly-Erisa-3-294f8244db8ec86723c58c2f16f64020ce790f4f" />
+		<PackageReference Include="DSharpPlus" Version="5.0.0-Nightly-Erisa-4-cdafa7ac6e8f613d1e943099177efefae3ec7782" />
+		<PackageReference Include="DSharpPlus.CommandsNext" Version="5.0.0-Nightly-Erisa-4-cdafa7ac6e8f613d1e943099177efefae3ec7782" />
+		<PackageReference Include="DSharpPlus.SlashCommands" Version="5.0.0-Nightly-Erisa-4-cdafa7ac6e8f613d1e943099177efefae3ec7782" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Serilog" Version="4.0.0" />
 		<PackageReference Include="Serilog.Expressions" Version="5.0.0" />

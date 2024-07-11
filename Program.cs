@@ -16,7 +16,7 @@ namespace Cliptok
 
     class GatewayController : IGatewayController
     {
-        public async ValueTask HeartbeatedAsync(IGatewayClient client)
+        public async Task HeartbeatedAsync(IGatewayClient client)
         {
             await HeartbeatEvent.OnHeartbeat(client);
         }
