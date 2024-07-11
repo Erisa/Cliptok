@@ -6,16 +6,16 @@
 		<LangVersion>12.0</LangVersion>
 		<UserSecretsId>d9345310-5908-4697-8613-28a24d06d183</UserSecretsId>
 
-		<RestoreAdditionalProjectSources>
+		<!-- <RestoreAdditionalProjectSources>
 			https://www.myget.org/F/erisa/api/v3/index.json
-		</RestoreAdditionalProjectSources>
+		</RestoreAdditionalProjectSources> -->
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Abyssal.HumanDateParser" Version="2.0.0-20191113.1" />
-		<PackageReference Include="DSharpPlus" Version="5.0.0-Nightly-Erisa-4-cdafa7ac6e8f613d1e943099177efefae3ec7782" />
-		<PackageReference Include="DSharpPlus.CommandsNext" Version="5.0.0-Nightly-Erisa-4-cdafa7ac6e8f613d1e943099177efefae3ec7782" />
-		<PackageReference Include="DSharpPlus.SlashCommands" Version="5.0.0-Nightly-Erisa-4-cdafa7ac6e8f613d1e943099177efefae3ec7782" />
+		<PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02312" />
+		<PackageReference Include="DSharpPlus.CommandsNext" Version="5.0.0-nightly-02312" />
+		<PackageReference Include="DSharpPlus.SlashCommands" Version="5.0.0-nightly-02312" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Serilog" Version="4.0.0" />
 		<PackageReference Include="Serilog.Expressions" Version="5.0.0" />
