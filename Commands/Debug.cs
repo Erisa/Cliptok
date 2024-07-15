@@ -414,6 +414,24 @@
                 await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(json, "json"));
             }
 
+            [Command("searchmembers")]
+            [Description("Search member list with a regex. Restricted to bot owners bc regexes are scary.")]
+            [IsBotOwner]
+            public async Task SearchMembersCmd(CommandContext ctx, string regex)
+            {
+                var rx = new Regex(regex);
+
+                var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it. This will take a while.");
+                var discordMembers = await ctx.Guild.GetAllMembersAsync().ToListAsync();
+
+                var matchedMembers = discordMembers.Where(discordMember => discordMember.Username is not null && rx.IsMatch(discordMember.Username)).ToList();
+
+                Dictionary<ulong, string> memberIdsTonames = matchedMembers.Select(member => new KeyValuePair<ulong, string>(member.Id, member.Username)).ToDictionary(x => x.Key, x => x.Value);
+
+                _ = msg.DeleteAsync();
+                await ctx.Channel.SendMessageAsync(await StringHelpers.CodeOrHasteBinAsync(JsonConvert.SerializeObject(memberIdsTonames, Formatting.Indented), "json"));
+            }
+
             private static async Task<(bool success, ulong failedOverwrite)> ImportOverridesFromChannelAsync(DiscordChannel channel)
             {
                 // Imports overrides from the specified channel to the database. See 'debug overrides import' and 'debug overrides importall'
