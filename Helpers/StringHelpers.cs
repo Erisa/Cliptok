@@ -31,7 +31,8 @@
 
         public static async Task<string> CodeOrHasteBinAsync(string input, string language = "", int charLimit = 1930, bool plain = false)
         {
-            if (input.Length > charLimit)
+            bool inputHasCodeBlock = input.Contains("```");
+            if (input.Length > charLimit || inputHasCodeBlock)
             {
                 HasteBinResult hasteResult = await Program.hasteUploader.Post(input);
                 if (hasteResult.IsSuccess)
@@ -44,6 +45,8 @@
 
                     if (plain)
                         return hasteUrl;
+                    else if (inputHasCodeBlock)
+                        return $"{Program.cfgjson.Emoji.Warning} Output contained a code block, so it was uploaded to Hastebin to avoid formatting issues: {hasteUrl}";
                     else
                         return $"{Program.cfgjson.Emoji.Warning} Output exceeded character limit: {hasteUrl}";
                 }

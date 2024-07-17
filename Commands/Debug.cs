@@ -506,11 +506,7 @@
                 }
 
                 var rawMsgData = JsonConvert.SerializeObject(message, Formatting.Indented);
-                if (rawMsgData.Contains("```"))
-                    // janky way of forcing an upload to hastebin because I can't be bothered fixing how messages with code blocks break
-                    await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(rawMsgData, "json", 1, true));
-                else
-                    await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(rawMsgData, "json"));
+                await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(rawMsgData, "json"));
             }
 
             private static async Task<(bool success, ulong failedOverwrite)> ImportOverridesFromChannelAsync(DiscordChannel channel)
