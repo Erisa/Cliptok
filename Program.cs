@@ -18,13 +18,13 @@ namespace Cliptok
     {
         public async Task HeartbeatedAsync(IGatewayClient client)
         {
-            await HeartbeatEvent.OnHeartbeat(client);
+            HeartbeatEvent.OnHeartbeat(client);
         }
 
         public async ValueTask ZombiedAsync(IGatewayClient client)
         {
+            Program.discord.Logger.LogWarning("Gateway entered zombied state. Attempted to reconnect.");
             await client.ReconnectAsync();
-            await Task.CompletedTask;
         }
     }
 
