@@ -45,7 +45,7 @@
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Both insider channels cannot be the same! Simply set one instead.", ephemeral: true);
             }
 
-            List<string> validWindows10Channels = ["RP", "Beta"];
+            List<string> validWindows10Channels = ["RP", "Beta", ""];
 
             if (windowsVersion == 10 && (!validWindows10Channels.Contains(insiderChannel1) || !validWindows10Channels.Contains(insiderChannel2)))
             {
