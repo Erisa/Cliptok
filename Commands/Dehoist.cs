@@ -66,7 +66,7 @@
         }
 
         [Command("massdehoist")]
-        [Description("Dehoist everyone on the server who has a bad name. WARNING: This is a computationally expensive operation.")]
+        [Description("Dehoist everyone on the server who has a bad name. This may take a while and can exhaust rate limits.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task MassDehoist(CommandContext ctx)
         {
