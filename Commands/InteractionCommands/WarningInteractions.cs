@@ -188,14 +188,10 @@ namespace Cliptok.Commands.InteractionCommands
 
             UserWarning warningObject = GetWarning(user.Id, warnId);
 
-            if (warningObject.Type == WarningType.Note)
-            {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note details` instead, or make sure you've got the right warning ID.", ephemeral: true);
-                return;
-            }
-
             if (warningObject is null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.", ephemeral: true);
+            else if (warningObject.Type == WarningType.Note)
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note details` instead, or make sure you've got the right warning ID.", ephemeral: true);
             else
                 await ctx.RespondAsync(null, await FancyWarnEmbedAsync(warningObject, true, userID: user.Id), ephemeral: !publicWarnings);
         }
@@ -226,14 +222,12 @@ namespace Cliptok.Commands.InteractionCommands
 
             UserWarning warning = GetWarning(targetUser.Id, warnId);
 
-            if (warning.Type == WarningType.Note)
-            {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note delete` instead, or make sure you've got the right warning ID.", ephemeral: true);
-                return;
-            }
-
             if (warning is null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
+            else if (warning.Type == WarningType.Note)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note delete` instead, or make sure you've got the right warning ID.", ephemeral: true);
+            }
             else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!", ephemeral: true);
@@ -292,14 +286,12 @@ namespace Cliptok.Commands.InteractionCommands
 
             var warningObject = GetWarning(user.Id, warnId);
 
-            if (warningObject.Type == WarningType.Note)
-            {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note edit` instead, or make sure you've got the right warning ID.", ephemeral: true);
-                return;
-            }
-
             if (warningObject is null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
+            else if (warningObject.Type == WarningType.Note)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note edit` instead, or make sure you've got the right warning ID.", ephemeral: true);
+            }
             else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && warningObject.ModUserId != ctx.User.Id && warningObject.ModUserId != ctx.Client.CurrentUser.Id)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!", ephemeral: true);
