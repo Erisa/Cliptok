@@ -223,7 +223,7 @@ namespace Cliptok.Commands.InteractionCommands
             UserWarning warning = GetWarning(targetUser.Id, warnId);
 
             if (warning is null)
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.", ephemeral: true);
             else if (warning.Type == WarningType.Note)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note delete` instead, or make sure you've got the right warning ID.", ephemeral: true);
@@ -287,7 +287,7 @@ namespace Cliptok.Commands.InteractionCommands
             var warningObject = GetWarning(user.Id, warnId);
 
             if (warningObject is null)
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.", ephemeral: true);
             else if (warningObject.Type == WarningType.Note)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note edit` instead, or make sure you've got the right warning ID.", ephemeral: true);
