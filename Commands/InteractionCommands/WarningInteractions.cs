@@ -80,6 +80,12 @@ namespace Cliptok.Commands.InteractionCommands
             [Option("force_override", "DESTRUCTIVE OPERATION: Whether to OVERRIDE and DELETE the target users existing warnings.")] bool forceOverride = false
         )
         {
+            if (sourceUser == targetUser)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} The source and target users cannot be the same!");
+                return;
+            }
+            
             var sourceWarnings = await Program.db.HashGetAllAsync(sourceUser.Id.ToString());
             var targetWarnings = await Program.db.HashGetAllAsync(targetUser.Id.ToString());
 
