@@ -190,7 +190,7 @@ namespace Cliptok.Commands.InteractionCommands
 
             if (warningObject.Type == WarningType.Note)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note get` instead, or make sure you've got the right warning ID.", ephemeral: true);
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note details` instead, or make sure you've got the right warning ID.", ephemeral: true);
                 return;
             }
 
@@ -228,7 +228,7 @@ namespace Cliptok.Commands.InteractionCommands
 
             if (warning.Type == WarningType.Note)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note remove` instead, or make sure you've got the right warning ID.", ephemeral: true);
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note delete` instead, or make sure you've got the right warning ID.", ephemeral: true);
                 return;
             }
 
