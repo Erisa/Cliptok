@@ -258,7 +258,7 @@ namespace Cliptok.Commands
             {
                 if (ulong.TryParse(key.ToString(), out ulong number))
                 {
-                    counts[key.ToString()] = Program.db.HashGetAll(key).Length;
+                    counts[key.ToString()] = Program.db.HashGetAll(key).Count(x => JsonConvert.DeserializeObject<UserWarning>(x.Value.ToString()).Type == WarningType.Warning);
                 }
             }
 
@@ -298,6 +298,8 @@ namespace Cliptok.Commands
 
                     foreach (var warning in warningsOutput)
                     {
+                        if (warning.Value.Type != WarningType.Warning) continue;
+                        
                         var day = warning.Value.WarnTimestamp.ToString("yyyy-MM-dd");
                         if (!counts.ContainsKey(day))
                         {
