@@ -276,9 +276,9 @@
                         await LogChannelHelper.LogMessageAsync("investigations", new DiscordMessageBuilder()
                             .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was TQS-muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** by {moderator.Mention}." +
                                 $"\nReason: **{reason}**" +
-                                $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>")
+                                $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>" +
+                                $"\n-# Context: {(await DiscordHelpers.GetMessageFromReferenceAsync(newMute.ContextMessageReference)).JumpLink}")
                             .WithAllowedMentions(Mentions.None)
-                            .AddEmbed(new DiscordEmbedBuilder().WithDescription($"[`🔗 Jump to mute`]({(await DiscordHelpers.GetMessageFromReferenceAsync(newMute.ContextMessageReference)).JumpLink})"))
                         );
 
                         await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder()
