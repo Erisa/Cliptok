@@ -114,12 +114,6 @@
             DiscordRole mutedRole = ctx.Guild.GetRole(Program.cfgjson.MutedRole);
             DiscordRole tqsMutedRole = ctx.Guild.GetRole(Program.cfgjson.TqsMutedRole);
 
-            if (await Program.db.HashExistsAsync("mutes", targetUser.Id) || ctx.Member.Roles.Contains(mutedRole) || ctx.Member.Roles.Contains(tqsMutedRole))
-            {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, that user is already muted."));
-                return;
-            }
-
             // Get member
             DiscordMember targetMember = default;
             try
@@ -129,6 +123,12 @@
             catch (DSharpPlus.Exceptions.NotFoundException)
             {
                 // blah
+            }
+            
+            if (await Program.db.HashExistsAsync("mutes", targetUser.Id) || (targetMember is not null && (targetMember.Roles.Contains(mutedRole) || targetMember.Roles.Contains(tqsMutedRole))))
+            {
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, that user is already muted."));
+                return;
             }
 
             // Check if user to be muted is staff or TQS, and disallow if so
