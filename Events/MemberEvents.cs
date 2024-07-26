@@ -203,9 +203,6 @@ namespace Cliptok.Events
                 return;
 
             // if they are auto banned, don't progress any further
-            if (await ScamHelpers.CheckAvatarsAsync(e.Member))
-                return;
-
             if (await ScamHelpers.UsernameCheckAsync(e.Member))
                 return;
 
