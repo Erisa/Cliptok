@@ -6,6 +6,7 @@ namespace Cliptok.Events
     {
         public static async Task GuildMemberAdded(DiscordClient client, GuildMemberAddedEventArgs e)
         {
+            client.Logger.LogDebug("Got a member added event for {member}", e.Member.Id); 
 
             if (e.Guild.Id != cfgjson.ServerID)
                 return;
@@ -122,6 +123,7 @@ namespace Cliptok.Events
 
         public static async Task GuildMemberRemoved(DiscordClient client, GuildMemberRemovedEventArgs e)
         {
+            client.Logger.LogDebug("Got a member removed event for {member}", e.Member.Id);
 
             if (e.Guild.Id != cfgjson.ServerID)
                 return;
@@ -191,8 +193,9 @@ namespace Cliptok.Events
             }
         }
 
-        public static async Task GuildMemberUpdated(DiscordClient _, GuildMemberUpdatedEventArgs e)
+        public static async Task GuildMemberUpdated(DiscordClient client, GuildMemberUpdatedEventArgs e)
         {
+            client.Logger.LogDebug("Got a member updated event for {member}", e.Member.Id);
 
             // dont check bots
             if (e.Member.IsBot)
@@ -230,8 +233,10 @@ namespace Cliptok.Events
                     });
         }
 
-        public static async Task UserUpdated(DiscordClient _, UserUpdatedEventArgs e)
+        public static async Task UserUpdated(DiscordClient client, UserUpdatedEventArgs e)
         {
+            client.Logger.LogDebug("Got a user updated event for {member}", e.UserAfter.Id);
+
             // dont check bots
             if (e.UserAfter.IsBot)
                 return;

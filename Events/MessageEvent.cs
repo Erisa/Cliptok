@@ -16,16 +16,22 @@ namespace Cliptok.Events
 
         public static async Task MessageCreated(DiscordClient client, MessageCreatedEventArgs e)
         {
+            client.Logger.LogDebug("Got a message create event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
+
             await MessageHandlerAsync(client, e.Message, e.Channel);
         }
 
         public static async Task MessageUpdated(DiscordClient client, MessageUpdatedEventArgs e)
         {
+            client.Logger.LogDebug("Got a message update event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
+
             await MessageHandlerAsync(client, e.Message, e.Channel, true);
         }
 
         public static async Task MessageDeleted(DiscordClient client, MessageDeletedEventArgs e)
         {
+            client.Logger.LogDebug("Got a message delete event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
+            
             // Delete thread if all messages are deleted
             if (Program.cfgjson.AutoDeleteEmptyThreads && e.Channel is DiscordThreadChannel)
             {
