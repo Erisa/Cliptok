@@ -32,7 +32,8 @@ namespace Cliptok.Events
         {
             if (e.Message is null)
             {
-                client.Logger.LogDebug("Got a message delete event but the message was null!");
+                client.Logger.LogError("Got a message delete event but the message was null!");
+                return;
             } else if (e.Message.Author is null)
             {
                 client.Logger.LogDebug("Got a message delete event for a message with no author: {message}", DiscordHelpers.MessageLink(e.Message));
