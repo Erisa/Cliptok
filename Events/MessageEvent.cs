@@ -30,8 +30,17 @@ namespace Cliptok.Events
 
         public static async Task MessageDeleted(DiscordClient client, MessageDeletedEventArgs e)
         {
-            client.Logger.LogDebug("Got a message delete event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
-            
+            if (e.Message is null)
+            {
+                client.Logger.LogDebug("Got a message delete event but the message was null!");
+            } else if (e.Message.Author is null)
+            {
+                client.Logger.LogDebug("Got a message delete event for a message with no author: {message}", DiscordHelpers.MessageLink(e.Message));
+            } else
+            {
+                client.Logger.LogDebug("Got a message delete event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
+            }
+
             // Delete thread if all messages are deleted
             if (Program.cfgjson.AutoDeleteEmptyThreads && e.Channel is DiscordThreadChannel)
             {
