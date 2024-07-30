@@ -15,7 +15,7 @@ namespace Cliptok.Commands.InteractionCommands
                 [Option("time", "The length of time to lock the channel for.")] string time = null,
                 [Option("lockthreads", "Whether to lock this channel's threads. Disables sending messages, but does not archive them.")] bool lockThreads = false)
             {
-                await ctx.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+                await ctx.DeferAsync(ephemeral: true);
 
                 if (ctx.Channel.Type is DiscordChannelType.PublicThread or DiscordChannelType.PrivateThread or DiscordChannelType.NewsThread)
                 {
@@ -71,7 +71,7 @@ namespace Cliptok.Commands.InteractionCommands
                 [Option("time", "The length of time to lock the channels for.")] string time = null,
                 [Option("lockthreads", "Whether to lock threads. Disables sending messages, but does not archive them.")] bool lockThreads = false)
             {
-                await ctx.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("test deferred response"));
+                await ctx.DeferAsync();
 
                 ongoingLockdown = true;
                 await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Loading} Working on it, please hold..."));
@@ -109,7 +109,7 @@ namespace Cliptok.Commands.InteractionCommands
             [SlashCommand("channel", "Unlock the current channel. See also: lockdown")]
             public async Task UnlockChannelCommand(InteractionContext ctx, [Option("reason", "The reason for the unlock.")] string reason = "")
             {
-                await ctx.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+                await ctx.DeferAsync(ephemeral: true);
 
                 var currentChannel = ctx.Channel;
                 if (!Program.cfgjson.LockdownEnabledChannels.Contains(currentChannel.Id))

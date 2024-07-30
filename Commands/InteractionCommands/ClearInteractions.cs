@@ -20,7 +20,7 @@
             [Option("dry_run", "Don't actually delete the messages, just output what would be deleted.")] bool dryRun = false
         )
         {
-            await ctx.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(!dryRun));
+            await ctx.DeferAsync(ephemeral: !dryRun);
 
             // If all args are unset
             if (count == 0 && upTo == "" && user == default && ignoreMods == false && match == "" && botsOnly == false && humansOnly == false && attachmentsOnly == false && stickersOnly == false && linksOnly == false)

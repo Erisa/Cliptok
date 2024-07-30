@@ -57,6 +57,8 @@
             [Option("reason", "The reason for the unmute.")] string reason = "No reason specified."
             )
         {
+            await ctx.DeferAsync(ephemeral: false);
+
             reason = $"[Manual unmute by {DiscordHelpers.UniqueUsername(ctx.User)}]: {reason}";
 
             // todo: store per-guild
@@ -75,18 +77,18 @@
             if ((await Program.db.HashExistsAsync("mutes", targetUser.Id)) || (member != default && member.Roles.Contains(mutedRole)))
             {
                 await MuteHelpers.UnmuteUserAsync(targetUser, reason, true, ctx.User);
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Information} Successfully unmuted **{DiscordHelpers.UniqueUsername(targetUser)}**.");
+                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Successfully unmuted **{DiscordHelpers.UniqueUsername(targetUser)}**."));
             }
             else
                 try
                 {
                     await MuteHelpers.UnmuteUserAsync(targetUser, reason, true, ctx.User);
-                    await ctx.CreateResponseAsync($"{Program.cfgjson.Emoji.Warning} According to Discord that user is not muted, but I tried to unmute them anyway. Hope it works.");
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Warning} According to Discord that user is not muted, but I tried to unmute them anyway. Hope it works."));
                 }
                 catch (Exception e)
                 {
                     Program.discord.Logger.LogError(e, "An error occurred unmuting {user}", targetUser.Id);
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be muted, *and* an error occurred while attempting to unmute them anyway. Please contact the bot owner, the error has been logged.");
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be muted, *and* an error occurred while attempting to unmute them anyway. Please contact the bot owner, the error has been logged."));
                 }
         }
 
