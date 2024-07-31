@@ -2,6 +2,8 @@
 {
     internal class Debug : BaseCommandModule
     {
+        public static Dictionary<ulong, PendingUserOverride> OverridesPendingAddition = new();
+        
         [Group("debug")]
         [Aliases("troubleshoot", "unbug", "bugn't", "helpsomethinghasgoneverywrong")]
         [Description("Commands and things for fixing the bot in the unlikely event that it breaks a bit.")]
@@ -343,6 +345,40 @@
                         await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} Some overrides failed to import. Most likely this means I found overrides in the database but couldn't parse them. Check the database manually for details.");
                     else
                         await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} All overrides imported successfully!");
+                }
+
+                [Command("add")]
+                [Description("Insert an override into the db. Useful if you want to add an override for a user who has left.")]
+                [IsBotOwner]
+                public async Task Add(CommandContext ctx,
+                    [Description("The user to add an override for.")] DiscordUser user,
+                    [Description("The channel to add the override to.")] DiscordChannel channel,
+                    [Description("Allowed permissions. Use a permission integer. See https://discordlookup.com/permissions-calculator.")] int allowedPermissions,
+                    [Description("Denied permissions. Use a permission integer. See https://discordlookup.com/permissions-calculator.")] int deniedPermissions)
+                {
+                    // Confirm permission overrides before we do anything.
+                    var parsedAllowedPerms = (DiscordPermissions)allowedPermissions;
+                    var parsedDeniedPerms = (DiscordPermissions)deniedPermissions;
+
+                    var confirmButton = new DiscordButtonComponent(DiscordButtonStyle.Success, "debug-overrides-add-confirm-callback", "Yes");
+                    var cancelButton = new DiscordButtonComponent(DiscordButtonStyle.Danger, "debug-overrides-add-cancel-callback", "No");
+                    
+                    var confirmationMessage = await ctx.RespondAsync(new DiscordMessageBuilder().WithContent(
+                            $"{Program.cfgjson.Emoji.ShieldHelp} Just to confirm, you want to add the following override for {user.Mention} to {channel.Mention}?\n" +
+                            $"**Allowed:** {parsedAllowedPerms}\n" +
+                            $"**Denied:** {parsedDeniedPerms}\n")
+                        .AddComponents([confirmButton, cancelButton]));
+                    
+                    OverridesPendingAddition.Add(confirmationMessage.Id, new PendingUserOverride
+                    {
+                        ChannelId = channel.Id,
+                        Overwrite = new MockUserOverwrite
+                        {
+                            Id = user.Id,
+                            Allowed = parsedAllowedPerms,
+                            Denied = parsedDeniedPerms
+                        }
+                    });
                 }
 
                 [Command("remove")]

@@ -66,6 +66,140 @@ namespace Cliptok.Events
 
                 await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent($"{cfgjson.Emoji.Success} Done!").AsEphemeral(true));
             }
+            else if (e.Id == "debug-overrides-add-confirm-callback")
+            {
+                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredMessageUpdate);
+                
+                var overridesPendingAddition = Commands.Debug.OverridesPendingAddition;
+                if (!overridesPendingAddition.ContainsKey(e.Message.Id))
+                {
+                    await e.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{cfgjson.Emoji.Error} {e.User.Mention}, this action has already been completed!").WithReply(e.Message.Id));
+                    
+                    // Remove buttons from original message so this doesn't happen again
+                    var originalMsgWithoutButtons = new DiscordMessageBuilder(e.Message);
+                    originalMsgWithoutButtons.ClearComponents();
+                    await e.Message.ModifyAsync(originalMsgWithoutButtons);
+                    
+                    return;
+                }
+                
+                // Get override data
+                var pendingOverride = overridesPendingAddition.GetValueOrDefault(e.Message.Id);
+                var mockOverwrite = pendingOverride.Overwrite;
+                var channelId = pendingOverride.ChannelId;
+                
+                // This is really cursed, but it effectively converts our mock DiscordOverwrite into an actual one so that it can be added to the current list of overwrites.
+                // Since the mock overwrite serializes into the same format as a DiscordOverwrite, we can serialize it and then deserialize it back to DiscordOverwrite to convert it.
+                var newOverwrite = JsonConvert.DeserializeObject<DiscordOverwrite>(JsonConvert.SerializeObject(mockOverwrite));
+
+                // Get current overrides for user in db
+                var userOverwrites = await db.HashGetAsync("overrides", mockOverwrite.Id);
+                if (userOverwrites.IsNullOrEmpty)
+                {
+                    // No overwrites for this user yet, create a list and add to it
+                    
+                    var overwrites = new Dictionary<string, DiscordOverwrite> { { channelId.ToString(), newOverwrite } };
+                    await db.HashSetAsync("overrides", mockOverwrite.Id, JsonConvert.SerializeObject(overwrites));
+                }
+                else
+                {
+                    // Overwrites for user exist, add to them
+                    
+                    var overwrites = JsonConvert.DeserializeObject<Dictionary<string, DiscordOverwrite>>(userOverwrites);
+                    if (overwrites.ContainsKey(channelId.ToString()))
+                    {
+                        // Require extra confirmation for merging permissions!
+                        var mergeConfirmResponse = new DiscordMessageBuilder()
+                            .WithContent($"{cfgjson.Emoji.Warning} **Caution:** This user already has an override for <#{channelId}>! Do you want to merge the permissions? Here are their **current** permissions:\n**Allowed:** {overwrites[channelId.ToString()].Allowed}\n**Denied:** {overwrites[channelId.ToString()].Denied}")
+                            .AddComponents(new DiscordButtonComponent(DiscordButtonStyle.Danger, "debug-overrides-add-merge-confirm-callback", "Merge"), new DiscordButtonComponent(DiscordButtonStyle.Primary, "debug-overrides-add-cancel-callback", "Cancel"));
+                        
+                        await e.Message.ModifyAsync(mergeConfirmResponse);
+                        return;
+                    }
+                    else
+                    {
+                        overwrites.Add(channelId.ToString(), newOverwrite);   
+                    }
+                    // Update db
+                    await db.HashSetAsync("overrides", mockOverwrite.Id, JsonConvert.SerializeObject(overwrites));
+                }
+                
+                // Remove from db so the override is not added again
+                overridesPendingAddition.Remove(e.Message.Id);
+
+                // Respond
+                await e.Message.ModifyAsync(new DiscordMessageBuilder().WithContent($"{cfgjson.Emoji.Success} Successfully added the following override for <@{newOverwrite.Id}> to <#{pendingOverride.ChannelId}>!\n**Allowed:** {newOverwrite.Allowed}\n**Denied:** {newOverwrite.Denied}"));
+            }
+            else if (e.Id == "debug-overrides-add-cancel-callback")
+            {
+                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredMessageUpdate);
+                
+                var overridesPendingAddition = Commands.Debug.OverridesPendingAddition;
+                if (!overridesPendingAddition.ContainsKey(e.Message.Id))
+                {
+                    await e.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{cfgjson.Emoji.Error} {e.User.Mention}, this action has already been completed!").WithReply(e.Message.Id));
+                    
+                    // Remove buttons from original message so this doesn't happen again
+                    var originalMsgWithoutButtons = new DiscordMessageBuilder(e.Message);
+                    originalMsgWithoutButtons.ClearComponents();
+                    await e.Message.ModifyAsync(originalMsgWithoutButtons);
+                    
+                    return;
+                }
+                
+                await e.Message.ModifyAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Cancelled! Nothing was changed."));
+                overridesPendingAddition.Remove(e.Message.Id);
+            }
+            else if (e.Id == "debug-overrides-add-merge-confirm-callback")
+            {
+                // User already has an overwrite for the requested channel!
+                // Merge the permissions of the current & new overrides.
+                
+                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredMessageUpdate);
+                
+                var overridesPendingAddition = Commands.Debug.OverridesPendingAddition;
+                if (!overridesPendingAddition.ContainsKey(e.Message.Id))
+                {
+                    await e.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{cfgjson.Emoji.Error} {e.User.Mention}, this action has already been completed!").WithReply(e.Message.Id));
+                    
+                    // Remove buttons from original message so this doesn't happen again
+                    var originalMsgWithoutButtons = new DiscordMessageBuilder(e.Message);
+                    originalMsgWithoutButtons.ClearComponents();
+                    await e.Message.ModifyAsync(originalMsgWithoutButtons);
+                    
+                    return;
+                }
+
+                // Get new override data
+                var pendingOverride = overridesPendingAddition.GetValueOrDefault(e.Message.Id);
+                var mockOverwrite = pendingOverride.Overwrite;
+                var channelId = pendingOverride.ChannelId;
+                var newOverwrite = JsonConvert.DeserializeObject<DiscordOverwrite>(JsonConvert.SerializeObject(mockOverwrite));
+                
+                // Existing override data
+                var userOverwrites = await db.HashGetAsync("overrides", mockOverwrite.Id);
+                var overwrites = JsonConvert.DeserializeObject<Dictionary<string, DiscordOverwrite>>(userOverwrites);
+                        
+                // Merge permissions
+                var existingOverwrite = overwrites[channelId.ToString()];
+                var newMockOverwrite = new MockUserOverwrite
+                {
+                    Id = mockOverwrite.Id,
+                    Allowed = newOverwrite.Allowed | existingOverwrite.Allowed,
+                    Denied = newOverwrite.Denied | existingOverwrite.Denied
+                };
+                
+                // Cursed conversion again
+                newOverwrite = JsonConvert.DeserializeObject<DiscordOverwrite>(JsonConvert.SerializeObject(newMockOverwrite));
+                
+                overwrites[channelId.ToString()] = newOverwrite;
+                
+                // Update db
+                await db.HashSetAsync("overrides", mockOverwrite.Id, JsonConvert.SerializeObject(overwrites));
+                
+                // Respond
+                await e.Message.ModifyAsync(new DiscordMessageBuilder().WithContent($"{cfgjson.Emoji.Success} Override successfully added. <@{newOverwrite.Id}> already had an override in <#{pendingOverride.ChannelId}>, so here are their new permissions:\n**Allowed:** {newOverwrite.Allowed}\n**Denied:** {newOverwrite.Denied}"));
+            }
             else
             {
                 await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Unknown interaction. I don't know what you are asking me for.").AsEphemeral(true));
