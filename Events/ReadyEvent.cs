@@ -8,7 +8,10 @@ namespace Cliptok.Events
         {
 
             homeGuild = await discord.GetGuildAsync(cfgjson.ServerID);
-            await LogChannelHelper.UnpackLogConfigAsync(cfgjson);
+
+            if (!LogChannelHelper.ready)
+                await LogChannelHelper.UnpackLogConfigAsync(cfgjson);
+
             var fetchResult = await APIs.ServerAPI.FetchMaliciousServersList();
             if (fetchResult is not null)
             {
