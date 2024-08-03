@@ -33,7 +33,6 @@ namespace Cliptok.Helpers
                                 .AddField("Infringing name", member.Username)
                                 .AddField("API Response", $"```json\n{apiResult.responseString}\n```")
                                 .WithColor(new DiscordColor(0xf03916));
-                            var investigations = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
                             await LogChannelHelper.LogMessageAsync("username", $"{cfgjson.Emoji.Warning} {member.Mention} was flagged by the experimental username API.", embed);
                         }
                         else
@@ -75,8 +74,7 @@ namespace Cliptok.Helpers
                         .AddField("Infringing name", member.Username)
                         .AddField("Matching pattern", username)
                         .WithColor(new DiscordColor(0xf03916));
-                    var investigations = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
-                    await investigations.SendMessageAsync($"{cfgjson.Emoji.Banned} {member.Mention} was banned for matching blocked username patterns.", embed);
+                    await LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Banned} {member.Mention} was banned for matching blocked username patterns.", embed);
                     result = true;
                     break;
                 }

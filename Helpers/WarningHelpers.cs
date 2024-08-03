@@ -293,7 +293,6 @@
                 // Alert moderator if there are relevant notes
                 if (notesToNotifyFor.Count != 0)
                 {
-                    var alertChannel = await Program.discord.GetChannelAsync(Program.cfgjson.InvestigationsChannelId);
                     var msg = new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Muted} {modUser.Mention}, {targetUser.Mention} has notes set to show when they are issued a warning!").AddEmbed(await UserNoteHelpers.GenerateUserNotesEmbedAsync(targetUser, true, notesToNotifyFor)).WithAllowedMentions(Mentions.All);
 
                     // For any notes set to show once, show the full note content in its own embed because it will not be able to be fetched manually
@@ -302,7 +301,7 @@
                             if (note.Value.ShowOnce)
                                 msg.AddEmbed(await UserNoteHelpers.GenerateUserNoteSimpleEmbedAsync(note.Value, targetUser));
 
-                    await alertChannel.SendMessageAsync(msg);
+                    await LogChannelHelper.LogMessageAsync("investigations", msg);
                 }
 
                 // If any notes were shown & set to show only once, delete them now
