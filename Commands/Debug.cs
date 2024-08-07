@@ -410,6 +410,61 @@
 
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Overrides for {user.Mention} in {channel.Mention} removed successfully!");
                 }
+
+                // This is the same as what happens on GuildMemberAdded. Command is here to allow for manual sync/apply if needed.
+                [Command("apply")]
+                [Description("Apply a user's overrides from the db.")]
+                [IsBotOwner]
+                public async Task Apply(CommandContext ctx,
+                    [Description("The user whose overrides to apply.")] DiscordUser user)
+                {
+                    var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
+                    
+                    // Try fetching member to determine whether they are in the server. If they are not, we can't apply overrides for them.
+                    DiscordMember member;
+                    try
+                    {
+                        member = await ctx.Guild.GetMemberAsync(user.Id);
+                    }
+                    catch (DSharpPlus.Exceptions.NotFoundException)
+                    {
+                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user isn't in the server! I can't apply overrides for them.");
+                        return;
+                    }
+                    
+                    var userOverwrites = await Program.db.HashGetAsync("overrides", member.Id.ToString());
+                    if (string.IsNullOrWhiteSpace(userOverwrites))
+                    {
+                        // User has no overrides saved
+                        await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} {user.Mention} has no overrides to apply!");
+                        return;
+                    }
+                    var dictionary = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(userOverwrites);
+                    if (dictionary is null)
+                    {
+                        // User has no overrides saved
+                        await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} {user.Mention} has no overrides to apply!");
+                        return;
+                    }
+
+                    foreach (var overwrite in dictionary)
+                    {
+                        DiscordChannel channel;
+                        try
+                        {
+                            channel = await Program.discord.GetChannelAsync(overwrite.Key);
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+
+                        await channel.AddOverwriteAsync(member, overwrite.Value.Allowed, overwrite.Value.Denied,
+                            "Restoring saved overrides for member.");
+                    }
+
+                    await msg.ModifyAsync(x => x.Content = $"{Program.cfgjson.Emoji.Success} Successfully applied {dictionary.Count} overrides for {user.Mention}!");
+                }
             }
             
             [Command("dumpchanneloverrides")]
