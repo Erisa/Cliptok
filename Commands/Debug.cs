@@ -446,6 +446,7 @@
                         await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} {user.Mention} has no overrides to apply!");
                         return;
                     }
+                    var numAppliedOverrides = dictionary.Count;
 
                     foreach (var overwrite in dictionary)
                     {
@@ -459,11 +460,19 @@
                             continue;
                         }
 
-                        await channel.AddOverwriteAsync(member, overwrite.Value.Allowed, overwrite.Value.Denied,
-                            "Restoring saved overrides for member.");
+                        try
+                        {
+                            await channel.AddOverwriteAsync(member, overwrite.Value.Allowed, overwrite.Value.Denied, "Restoring saved overrides for member.");
+                        }
+                        catch (DSharpPlus.Exceptions.UnauthorizedException)
+                        {
+                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I don't have permission to add overrides in {channel.Mention}! Continuing...");
+                            numAppliedOverrides--;
+                        }
+                        
                     }
 
-                    await msg.ModifyAsync(x => x.Content = $"{Program.cfgjson.Emoji.Success} Successfully applied {dictionary.Count} overrides for {user.Mention}!");
+                    await msg.ModifyAsync(x => x.Content = $"{Program.cfgjson.Emoji.Success} Successfully applied {numAppliedOverrides}/{dictionary.Count} overrides for {user.Mention}!");
                 }
             }
             
