@@ -9,7 +9,16 @@ namespace Cliptok.Events
             Program.discord.Logger.LogDebug("Heartbeat ping: {ping}", client.Ping.TotalMicroseconds);
             if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("UPTIME_KUMA_PUSH_URL")) && client.IsConnected)
             {
-                var response = await Program.httpClient.GetAsync(Environment.GetEnvironmentVariable("UPTIME_KUMA_PUSH_URL") + client.Ping.TotalMicroseconds);
+                HttpResponseMessage response;
+                try
+                {
+                    response = await Program.httpClient.GetAsync(Environment.GetEnvironmentVariable("UPTIME_KUMA_PUSH_URL") + client.Ping.TotalMicroseconds);
+                }
+                catch (Exception ex)
+                {
+                    Program.discord.Logger.LogError(ex, "Uptime Kuma push failed during heartbeat event!");
+                    return;
+                }
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     Program.discord.Logger.LogDebug("Heartbeat ping succeeded.");
