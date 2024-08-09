@@ -76,6 +76,18 @@
                     logOut += $"\nChannel: {channel.Mention}";
 
                 _ = FindModmailThreadAndSendMessage(guild, $"User ID: {targetUserId}", logOut);
+                
+                // Remove user message tracking
+                if (await Program.db.SetContainsAsync("trackedUsers", targetUserId))
+                {
+                    await Program.db.SetRemoveAsync("trackedUsers", targetUserId);
+                    var channelId = Program.db.HashGet("trackingThreads", targetUserId);
+                    DiscordThreadChannel thread = (DiscordThreadChannel)await Program.discord.GetChannelAsync((ulong)channelId);
+                    await thread.ModifyAsync(thread =>
+                    {
+                        thread.IsArchived = true;
+                    });
+                }
             }
             catch
             {
@@ -144,6 +156,19 @@
             try
             {
                 await targetGuild.BanMemberAsync(targetUserId, TimeSpan.FromDays(7), reason);
+                
+                // Remove user message tracking
+                if (await Program.db.SetContainsAsync("trackedUsers", targetUserId))
+                {
+                    await Program.db.SetRemoveAsync("trackedUsers", targetUserId);
+                    var channelId = Program.db.HashGet("trackingThreads", targetUserId);
+                    DiscordThreadChannel thread = (DiscordThreadChannel)await Program.discord.GetChannelAsync((ulong)channelId);
+                    await thread.ModifyAsync(thread =>
+                    {
+                        thread.IsArchived = true;
+                    });
+                }
+                
                 return true;
             }
             catch
