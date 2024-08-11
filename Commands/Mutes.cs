@@ -128,7 +128,7 @@ namespace Cliptok.Commands
             {
                 // blah
             }
-            
+
             if (await Program.db.HashExistsAsync("mutes", targetUser.Id) || (targetMember != default && (targetMember.Roles.Contains(mutedRole) || targetMember.Roles.Contains(tqsMutedRole))))
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, that user is already muted.");

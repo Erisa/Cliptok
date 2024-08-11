@@ -6,7 +6,7 @@ namespace Cliptok.Events
     {
         public static async Task GuildMemberAdded(DiscordClient client, GuildMemberAddedEventArgs e)
         {
-            client.Logger.LogDebug("Got a member added event for {member}", e.Member.Id); 
+            client.Logger.LogDebug("Got a member added event for {member}", e.Member.Id);
 
             if (e.Guild.Id != cfgjson.ServerID)
                 return;

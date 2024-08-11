@@ -258,7 +258,7 @@
                     MessageId = output.dmMessage.Id,
                     ChannelId = output.dmMessage.ChannelId
                 };
-            
+
             try
             {
                 if (permaMute)

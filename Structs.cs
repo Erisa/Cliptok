@@ -615,7 +615,7 @@
     {
         [JsonProperty("channelId")]
         public ulong ChannelId { get; set; }
-        
+
         [JsonProperty("overwrite")]
         public MockUserOverwrite Overwrite { get; set; }
     }
@@ -624,10 +624,10 @@
     {
         [JsonProperty("type")]
         public int Type { get; } = 1;
-        
+
         [JsonProperty("allow")]
         public DiscordPermissions Allowed { get; set; }
-        
+
         [JsonProperty("deny")]
         public DiscordPermissions Denied { get; set; }
 

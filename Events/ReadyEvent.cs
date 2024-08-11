@@ -1,5 +1,4 @@
-﻿using System.Runtime.ExceptionServices;
-using static Cliptok.Program;
+﻿using static Cliptok.Program;
 
 namespace Cliptok.Events
 {
@@ -14,7 +13,8 @@ namespace Cliptok.Events
             {
                 if (!LogChannelHelper.ready)
                     await LogChannelHelper.UnpackLogConfigAsync(cfgjson);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 client.Logger.LogCritical(e, "Fatal error unpacking log config!");
                 Environment.Exit(1);

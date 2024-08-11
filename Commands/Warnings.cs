@@ -190,7 +190,7 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else if (warning.Type == WarningType.Note)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note details` instead, or make sure you've got the right warning ID.");                
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note details` instead, or make sure you've got the right warning ID.");
             }
             else
                 await ctx.RespondAsync(null, await FancyWarnEmbedAsync(warning, true, userID: targetUser.Id));
@@ -299,7 +299,7 @@ namespace Cliptok.Commands
                     foreach (var warning in warningsOutput)
                     {
                         if (warning.Value.Type != WarningType.Warning) continue;
-                        
+
                         var day = warning.Value.WarnTimestamp.ToString("yyyy-MM-dd");
                         if (!counts.ContainsKey(day))
                         {

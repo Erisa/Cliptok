@@ -25,7 +25,7 @@ namespace Cliptok.Commands.InteractionCommands
                 }
 
                 responseToSend += await StringHelpers.CodeOrHasteBinAsync(responseText, "json");
-                
+
                 await ctx.RespondAsync(responseToSend);
             }
             else

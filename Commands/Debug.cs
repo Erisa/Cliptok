@@ -3,7 +3,7 @@
     internal class Debug : BaseCommandModule
     {
         public static Dictionary<ulong, PendingUserOverride> OverridesPendingAddition = new();
-        
+
         [Group("debug")]
         [Aliases("troubleshoot", "unbug", "bugn't", "helpsomethinghasgoneverywrong")]
         [Description("Commands and things for fixing the bot in the unlikely event that it breaks a bit.")]
@@ -222,7 +222,7 @@
             {
                 var pendingUpdateEvents = Tasks.EventTasks.PendingChannelUpdateEvents;
                 var pendingDeleteEvents = Tasks.EventTasks.PendingChannelDeleteEvents;
-                
+
                 if (pendingUpdateEvents.Count == 0 && pendingDeleteEvents.Count == 0)
                 {
                     await ctx.RespondAsync("There are no pending channel events left to handle!");
@@ -249,7 +249,7 @@
                     }
                     list += "```\n";
                 }
-                
+
                 await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(list));
             }
 
@@ -313,7 +313,7 @@
                 {
                     // Import overrides
                     var (success, failedOverwrite) = await ImportOverridesFromChannelAsync(channel);
-                    
+
                     if (success)
                         await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Overrides for {channel.Mention} imported successfully!");
                     else
@@ -327,7 +327,7 @@
                 public async Task ImportAll(CommandContext ctx)
                 {
                     var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working...");
-                    
+
                     // Get all channels
                     var channels = await ctx.Guild.GetChannelsAsync();
 
@@ -340,7 +340,7 @@
 
                         if (!success) anyImportFailed = true;
                     }
-                    
+
                     if (anyImportFailed)
                         await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} Some overrides failed to import. Most likely this means I found overrides in the database but couldn't parse them. Check the database manually for details.");
                     else
@@ -362,13 +362,13 @@
 
                     var confirmButton = new DiscordButtonComponent(DiscordButtonStyle.Success, "debug-overrides-add-confirm-callback", "Yes");
                     var cancelButton = new DiscordButtonComponent(DiscordButtonStyle.Danger, "debug-overrides-add-cancel-callback", "No");
-                    
+
                     var confirmationMessage = await ctx.RespondAsync(new DiscordMessageBuilder().WithContent(
                             $"{Program.cfgjson.Emoji.ShieldHelp} Just to confirm, you want to add the following override for {user.Mention} to {channel.Mention}?\n" +
                             $"**Allowed:** {parsedAllowedPerms}\n" +
                             $"**Denied:** {parsedDeniedPerms}\n")
                         .AddComponents([confirmButton, cancelButton]));
-                    
+
                     OverridesPendingAddition.Add(confirmationMessage.Id, new PendingUserOverride
                     {
                         ChannelId = channel.Id,
@@ -419,7 +419,7 @@
                     [Description("The user whose overrides to apply.")] DiscordUser user)
                 {
                     var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
-                    
+
                     // Try fetching member to determine whether they are in the server. If they are not, we can't apply overrides for them.
                     DiscordMember member;
                     try
@@ -431,7 +431,7 @@
                         await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user isn't in the server! I can't apply overrides for them.");
                         return;
                     }
-                    
+
                     var userOverwrites = await Program.db.HashGetAsync("overrides", member.Id.ToString());
                     if (string.IsNullOrWhiteSpace(userOverwrites))
                     {
@@ -469,13 +469,13 @@
                             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I don't have permission to add overrides in {channel.Mention}! Continuing...");
                             numAppliedOverrides--;
                         }
-                        
+
                     }
 
                     await msg.ModifyAsync(x => x.Content = $"{Program.cfgjson.Emoji.Success} Successfully applied {numAppliedOverrides}/{dictionary.Count} overrides for {user.Mention}!");
                 }
             }
-            
+
             [Command("dumpchanneloverrides")]
             [Description("Dump all of a channel's overrides. This pulls from Discord, not the database.")]
             [IsBotOwner]
@@ -489,7 +489,7 @@
                 {
                     output += $"{JsonConvert.SerializeObject(overwrite)}\n";
                 }
-                
+
                 await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(output, "json"));
             }
 
@@ -542,7 +542,7 @@
                 if (Constants.RegexConstants.discord_link_rx.IsMatch(msgLinkOrId))
                 {
                     // Assume the user provided a message link. Extract channel and message IDs to get message content.
-                    
+
                     // Pattern to extract channel and message IDs from URL
                     var idPattern = new Regex(@"(?:.*\/)([0-9]+)\/([0-9]+)$");
 
@@ -560,7 +560,7 @@
                         await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't fetch the channel from your message link! Please try again.");
                         return;
                     }
-                    
+
                     // Get message ID
                     var targetMessage = Convert.ToUInt64(idPattern.Match(msgLinkOrId).Groups[2].ToString().Replace("/", ""));
 
@@ -613,7 +613,7 @@
             {
                 // Imports overrides from the specified channel to the database. See 'debug overrides import' and 'debug overrides importall'
                 // Return (true, 0) on success, (false, <ID of failed overwrite>) on failure
-                
+
                 // Import all overrides for channel to db
                 foreach (var overwrite in channel.PermissionOverwrites)
                 {

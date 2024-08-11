@@ -20,10 +20,12 @@ namespace Cliptok.Events
             {
                 client.Logger.LogError("Got a message create event but the message was null!");
                 return;
-            } else if (e.Message.Author is null)
+            }
+            else if (e.Message.Author is null)
             {
                 client.Logger.LogDebug("Got a message create event for a message with no author: {message}", DiscordHelpers.MessageLink(e.Message));
-            } else
+            }
+            else
             {
                 client.Logger.LogDebug("Got a message create event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
             }
@@ -37,10 +39,12 @@ namespace Cliptok.Events
             {
                 client.Logger.LogError("Got a message update event but the message was null!");
                 return;
-            } else if (e.Message.Author is null)
+            }
+            else if (e.Message.Author is null)
             {
                 client.Logger.LogDebug("Got a message update event for a message with no author: {message}", DiscordHelpers.MessageLink(e.Message));
-            } else
+            }
+            else
             {
                 client.Logger.LogDebug("Got a message update event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
             }
@@ -54,10 +58,12 @@ namespace Cliptok.Events
             {
                 client.Logger.LogError("Got a message delete event but the message was null!");
                 return;
-            } else if (e.Message.Author is null)
+            }
+            else if (e.Message.Author is null)
             {
                 client.Logger.LogDebug("Got a message delete event for a message with no author: {message}", DiscordHelpers.MessageLink(e.Message));
-            } else
+            }
+            else
             {
                 client.Logger.LogDebug("Got a message delete event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
             }

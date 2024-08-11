@@ -87,7 +87,7 @@ namespace Cliptok.Commands.InteractionCommands
                 await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} The source and target users cannot be the same!"));
                 return;
             }
-            
+
             var sourceWarnings = await Program.db.HashGetAllAsync(sourceUser.Id.ToString());
             var targetWarnings = await Program.db.HashGetAllAsync(targetUser.Id.ToString());
 

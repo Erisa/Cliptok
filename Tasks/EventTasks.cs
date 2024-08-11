@@ -4,7 +4,7 @@ namespace Cliptok.Tasks
     {
         public static Dictionary<DateTime, ChannelUpdatedEventArgs> PendingChannelUpdateEvents = new();
         public static Dictionary<DateTime, ChannelDeletedEventArgs> PendingChannelDeleteEvents = new();
-        
+
         public static async Task<bool> HandlePendingChannelUpdateEventsAsync()
         {
             bool success = false;
@@ -92,7 +92,7 @@ namespace Cliptok.Tasks
                                 var dict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(dbOverwrite.Value);
                                 dbOverwriteList.Add(dict);
                             }
-                            
+
                             // If the overwrite is already in the db for this channel, skip
                             if (dbOverwriteList.Any(dbOverwriteSet => dbOverwriteSet.ContainsKey(e.ChannelAfter.Id) && CompareOverwrites(dbOverwriteSet[e.ChannelAfter.Id], overwrite)))
                                 continue;
@@ -171,19 +171,19 @@ namespace Cliptok.Tasks
                     try
                     {
                         // Purge all overwrites from db for this channel
-                
+
                         // Get all overwrites
                         var dbOverwrites = await Program.db.HashGetAllAsync("overrides");
-                
+
                         // Overwrites are stored by user ID, then as a dict with channel ID as key & overwrite as value, so we can't just delete by channel ID.
                         // We need to loop through all overwrites and delete the ones that match the channel ID, then put everything back together.
 
                         foreach (var userOverwrites in dbOverwrites)
                         {
                             var overwriteDict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(userOverwrites.Value);
-                    
+
                             // Now overwriteDict is a dict of this user's overwrites, with channel ID as key & overwrite as value
-                    
+
                             // Loop through these; for any with a matching channel ID to the channel that was deleted, remove them
                             foreach (var overwrite in overwriteDict)
                             {
@@ -192,10 +192,10 @@ namespace Cliptok.Tasks
                                     overwriteDict.Remove(overwrite.Key);
                                 }
                             }
-                    
+
                             // Now we have a modified overwriteDict (ulong, DiscordOverwrite)
                             // Now we put everything back together
-                            
+
                             // If the user now has no overrides, remove them from the db entirely
                             if (overwriteDict.Count == 0)
                             {
@@ -207,7 +207,7 @@ namespace Cliptok.Tasks
                                 await Program.db.HashSetAsync("overrides", userOverwrites.Name, JsonConvert.SerializeObject(overwriteDict));
                             }
                         }
-                        
+
                         PendingChannelDeleteEvents.Remove(timestamp);
                         success = true;
                     }
@@ -226,15 +226,15 @@ namespace Cliptok.Tasks
             {
                 Program.discord.Logger.LogDebug(ex, "Failed to enumerate pending channel delete events; this usually means a Channel Delete event was just added to the list, or one was processed and removed from the list. Will try again on next task run.");
             }
-            
+
             Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked pending channel delete events at {time} with result: {success}", DateTime.Now, success);
             return success;
         }
-        
+
         private static bool CompareOverwrites(DiscordOverwrite a, DiscordOverwrite b)
         {
             // Compares two overwrites. ONLY CHECKS PERMISSIONS, ID, TYPE AND CREATION TIME. Ignores other properties!
-            
+
             return a.Allowed == b.Allowed && a.Denied == b.Denied && a.Id == b.Id && a.Type == b.Type && a.CreationTimestamp == b.CreationTimestamp;
         }
     }
