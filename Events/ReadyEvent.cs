@@ -1,4 +1,5 @@
-﻿using static Cliptok.Program;
+﻿using System.Runtime.ExceptionServices;
+using static Cliptok.Program;
 
 namespace Cliptok.Events
 {
@@ -9,8 +10,15 @@ namespace Cliptok.Events
 
             homeGuild = await discord.GetGuildAsync(cfgjson.ServerID);
 
-            if (!LogChannelHelper.ready)
-                await LogChannelHelper.UnpackLogConfigAsync(cfgjson);
+            try
+            {
+                if (!LogChannelHelper.ready)
+                    await LogChannelHelper.UnpackLogConfigAsync(cfgjson);
+            } catch (Exception e)
+            {
+                client.Logger.LogCritical(e, "Fatal error unpacking log config!");
+                Environment.Exit(1);
+            }
 
             var fetchResult = await APIs.ServerAPI.FetchMaliciousServersList();
             if (fetchResult is not null)
