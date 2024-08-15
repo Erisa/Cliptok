@@ -8,7 +8,18 @@ namespace Cliptok.Events
         {
 
             homeGuild = await discord.GetGuildAsync(cfgjson.ServerID);
-            await LogChannelHelper.UnpackLogConfigAsync(cfgjson);
+
+            try
+            {
+                if (!LogChannelHelper.ready)
+                    await LogChannelHelper.UnpackLogConfigAsync(cfgjson);
+            }
+            catch (Exception e)
+            {
+                client.Logger.LogCritical(e, "Fatal error unpacking log config!");
+                Environment.Exit(1);
+            }
+
             var fetchResult = await APIs.ServerAPI.FetchMaliciousServersList();
             if (fetchResult is not null)
             {
@@ -134,6 +145,30 @@ namespace Cliptok.Events
                 $"```\n" +
                 $"{commitMessage}\n" +
                 $"```");
+
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("UPTIME_KUMA_PUSH_URL")))
+            {
+                HttpResponseMessage response;
+                try
+                {
+                    response = await Program.httpClient.GetAsync(Environment.GetEnvironmentVariable("UPTIME_KUMA_PUSH_URL"));
+                }
+                catch (Exception ex)
+                {
+                    discord.Logger.LogError(ex, "Uptime Kuma push failed during startup!");
+                    return;
+                }
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    discord.Logger.LogDebug("Heartbeat ping succeeded.");
+                }
+                else
+                {
+                    discord.Logger.LogError("Heartbeat ping sent: {status} {content}", (int)response.StatusCode, await response.Content.ReadAsStringAsync());
+                }
+                return;
+            }
+
         }
 
     }

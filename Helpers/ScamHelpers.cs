@@ -33,7 +33,6 @@ namespace Cliptok.Helpers
                                 .AddField("Infringing name", member.Username)
                                 .AddField("API Response", $"```json\n{apiResult.responseString}\n```")
                                 .WithColor(new DiscordColor(0xf03916));
-                            var investigations = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
                             await LogChannelHelper.LogMessageAsync("username", $"{cfgjson.Emoji.Warning} {member.Mention} was flagged by the experimental username API.", embed);
                         }
                         else
@@ -75,78 +74,13 @@ namespace Cliptok.Helpers
                         .AddField("Infringing name", member.Username)
                         .AddField("Matching pattern", username)
                         .WithColor(new DiscordColor(0xf03916));
-                    var investigations = await discord.GetChannelAsync(cfgjson.InvestigationsChannelId);
-                    await investigations.SendMessageAsync($"{cfgjson.Emoji.Banned} {member.Mention} was banned for matching blocked username patterns.", embed);
+                    await LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Banned} {member.Mention} was banned for matching blocked username patterns.", embed);
                     result = true;
                     break;
                 }
             }
 
             return result;
-        }
-
-        public static async Task<bool> CheckAvatarsAsync(DiscordMember member)
-        {
-            if (Environment.GetEnvironmentVariable("RAVY_API_TOKEN") is null || Environment.GetEnvironmentVariable("RAVY_API_TOKEN") == "goodluckfindingone")
-                return false;
-
-            string usedHash;
-            string usedUrl;
-
-            if (member.AvatarHash is null)
-                return false;
-
-            // turns out checking guild avatars isn't important
-
-            //               if (member.GuildAvatarHash is not null)
-            //               {
-            //                   usedHash = member.GuildAvatarHash;
-            //                   usedUrl = member.GuildAvatarUrl;
-            //               } else
-            //               {
-            usedHash = member.AvatarHash;
-            usedUrl = member.GetAvatarUrl(ImageFormat.Png);
-            //                }
-
-            if (usedHash.StartsWith("a_"))
-                return false;
-
-            if (db.SetContains("safeavatarstore", usedHash))
-            {
-                discord.Logger.LogDebug("Unnecessary avatar check skipped for {member}", member.Id);
-                return false;
-            }
-
-            var (httpStatus, responseString, avatarResponse) = await APIs.AvatarAPI.CheckAvatarUrlAsync(usedUrl);
-
-            if (httpStatus == HttpStatusCode.OK && avatarResponse is not null)
-            {
-                discord.Logger.LogDebug("Avatar check for {member}: {status} {response}", member.Id, httpStatus, responseString);
-
-                if (avatarResponse.Matched && avatarResponse.Key != "logo" && avatarResponse.Key != "clyde")
-                {
-                    var embed = new DiscordEmbedBuilder()
-                        .WithDescription($"API Response:\n```json\n{responseString}\n```")
-                        .WithAuthor($"{DiscordHelpers.UniqueUsername(member)}", null, usedUrl)
-                        .WithFooter($"User ID: {member.Id}")
-                        .WithImageUrl(await LykosAvatarMethods.UserOrMemberAvatarURL(member, member.Guild, "default", 256));
-
-                    await LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Banned} {member.Mention} has been appeal-banned for an infringing avatar.", embed);
-                    await BanHelpers.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot/compromised accounts. Please appeal if you are human.", discord.CurrentUser.Id, member.Guild, 7, appealable: true);
-                    return true;
-                }
-                else if (!avatarResponse.Matched)
-                {
-                    await db.SetAddAsync("safeavatarstore", usedHash);
-                    return false;
-                }
-            }
-            else
-            {
-                discord.Logger.LogError("Avatar check for {member}: {status} {response}", member.Id, httpStatus, responseString);
-            }
-
-            return false;
         }
     }
 }

@@ -101,9 +101,8 @@
 
         }
 
-        public static async Task UserJoined(DiscordClient _, VoiceStateUpdatedEventArgs e)
+        public static async Task UserJoined(DiscordClient client, VoiceStateUpdatedEventArgs e)
         {
-
             if (Program.cfgjson.IgnoredVoiceChannels.Contains(e.After.Channel.Id))
                 return;
 
@@ -155,7 +154,7 @@
             }
         }
 
-        public static async Task UserLeft(DiscordClient _, VoiceStateUpdatedEventArgs e)
+        public static async Task UserLeft(DiscordClient client, VoiceStateUpdatedEventArgs e)
         {
             if (Program.cfgjson.IgnoredVoiceChannels.Contains(e.Before.Channel.Id))
                 return;

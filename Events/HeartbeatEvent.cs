@@ -1,19 +1,31 @@
-﻿namespace Cliptok.Events
+﻿using DSharpPlus.Net.Gateway;
+
+namespace Cliptok.Events
 {
     public class HeartbeatEvent
     {
-        public static async Task OnHeartbeat(DiscordClient client, HeartbeatedEventArgs e)
+        public static async Task OnHeartbeat(IGatewayClient client)
         {
+            Program.discord.Logger.LogDebug("Heartbeat ping: {ping}", client.Ping.TotalMilliseconds);
             if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("UPTIME_KUMA_PUSH_URL")) && client.IsConnected)
             {
-                var response = await Program.httpClient.GetAsync(Environment.GetEnvironmentVariable("UPTIME_KUMA_PUSH_URL") + client.Ping);
+                HttpResponseMessage response;
+                try
+                {
+                    response = await Program.httpClient.GetAsync(Environment.GetEnvironmentVariable("UPTIME_KUMA_PUSH_URL") + client.Ping.TotalMicroseconds);
+                }
+                catch (Exception ex)
+                {
+                    Program.discord.Logger.LogError(ex, "Uptime Kuma push failed during heartbeat event!");
+                    return;
+                }
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    client.Logger.LogDebug("Heartbeat ping succeeded.");
+                    Program.discord.Logger.LogDebug("Heartbeat ping succeeded.");
                 }
                 else
                 {
-                    client.Logger.LogError("Heartbeat ping sent: {status} {content}", (int)response.StatusCode, await response.Content.ReadAsStringAsync());
+                    Program.discord.Logger.LogError("Heartbeat ping sent: {status} {content}", (int)response.StatusCode, await response.Content.ReadAsStringAsync());
                 }
                 return;
             }

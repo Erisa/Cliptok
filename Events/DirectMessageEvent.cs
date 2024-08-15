@@ -25,7 +25,8 @@
                     if (msgBefore.Author.Id == Program.discord.CurrentUser.Id &&
                         (msgBefore.Content.Contains("You were warned") ||
                             msgBefore.Content.Contains("You have been muted") ||
-                            msgBefore.Content.Contains("You were automatically warned")))
+                            msgBefore.Content.Contains("You were automatically warned") ||
+                            msgBefore.Content.Contains("You have been temporarily muted")))
                     {
                         await message.RespondAsync(
                             $"{Program.cfgjson.Emoji.Information} If you wish to discuss moderator actions, **please contact**" +

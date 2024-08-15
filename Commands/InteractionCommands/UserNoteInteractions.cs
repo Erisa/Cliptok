@@ -17,7 +17,7 @@ namespace Cliptok.Commands.InteractionCommands
                 [Option("show_all_mods", "Whether to show this note to all mods, versus just yourself. Default: true")] bool showAllMods = true,
                 [Option("show_once", "Whether to show this note once and then discard it. Default: false")] bool showOnce = false)
             {
-                await ctx.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral());
+                await ctx.DeferAsync();
 
                 // Assemble new note
                 long noteId = Program.db.StringIncrement("totalWarnings");

@@ -1,3 +1,5 @@
+using DSharpPlus.Extensions;
+using DSharpPlus.Net.Gateway;
 using System.Reflection;
 
 namespace Cliptok
@@ -9,6 +11,20 @@ namespace Cliptok
 
         [JsonProperty("key")]
         public string Key { get; set; }
+    }
+
+    class GatewayController : IGatewayController
+    {
+        public async Task HeartbeatedAsync(IGatewayClient client)
+        {
+            HeartbeatEvent.OnHeartbeat(client);
+        }
+
+        public async ValueTask ZombiedAsync(IGatewayClient client)
+        {
+            Program.discord.Logger.LogWarning("Gateway entered zombied state. Attempted to reconnect.");
+            await client.ReconnectAsync();
+        }
     }
 
     class Program : BaseCommandModule
@@ -136,7 +152,12 @@ namespace Cliptok
                 logging.AddSerilog();
             });
 
-            discordBuilder.ConfigureGatewayClient(clientConfig =>
+            discordBuilder.ConfigureServices(services =>
+            {
+                services.Replace<IGatewayController, GatewayController>();
+            });
+
+            discordBuilder.ConfigureExtraFeatures(clientConfig =>
             {
                 clientConfig.LogUnknownEvents = false;
                 clientConfig.LogUnknownAuditlogs = false;
@@ -159,33 +180,40 @@ namespace Cliptok
                                   .HandleThreadListSynced(ThreadEvents.Discord_ThreadListSynced)
                                   .HandleThreadMemberUpdated(ThreadEvents.Discord_ThreadMemberUpdated)
                                   .HandleThreadMembersUpdated(ThreadEvents.Discord_ThreadMembersUpdated)
-                                  .HandleHeartbeated(HeartbeatEvent.OnHeartbeat)
                                   .HandleGuildBanRemoved(UnbanEvent.OnUnban)
                                   .HandleVoiceStateUpdated(VoiceEvents.VoiceStateUpdate)
                                   .HandleChannelUpdated(ChannelEvents.ChannelUpdated)
+                                  .HandleChannelDeleted(ChannelEvents.ChannelDeleted)
                                   .HandleAutoModerationRuleExecuted(AutoModEvents.AutoModerationRuleExecuted)
             );
 
-            discord = discordBuilder.Build();
+#pragma warning disable CS0618 // Type or member is obsolete
+            discordBuilder.UseSlashCommands(slash =>
+            {
+                slash.SlashCommandErrored += InteractionEvents.SlashCommandErrorEvent;
+                slash.ContextMenuErrored += InteractionEvents.ContextCommandErrorEvent;
 
-            var slash = discord.UseSlashCommands();
-            slash.SlashCommandErrored += InteractionEvents.SlashCommandErrorEvent;
-            slash.ContextMenuErrored += InteractionEvents.ContextCommandErrorEvent;
-            var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands" && !t.IsNested);
-            foreach (var type in slashCommandClasses)
-                slash.RegisterCommands(type, cfgjson.ServerID); ;
+                var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands" && !t.IsNested);
+                foreach (var type in slashCommandClasses)
+                    slash.RegisterCommands(type, cfgjson.ServerID); ;
+            });
+#pragma warning restore CS0618 // Type or member is obsolete
 
-            commands = discord.UseCommandsNext(new CommandsNextConfiguration
+            discordBuilder.UseCommandsNext(commands =>
+            {
+                var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands" && !t.IsNested);
+                foreach (var type in commandClasses)
+                    commands.RegisterCommands(type);
+
+                commands.CommandErrored += ErrorEvents.CommandsNextService_CommandErrored;
+            }, new CommandsNextConfiguration
             {
                 StringPrefixes = cfgjson.Core.Prefixes
             });
 
-            var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands" && !t.IsNested);
-            foreach (var type in commandClasses)
-                commands.RegisterCommands(type);
-
-            commands.CommandErrored += ErrorEvents.CommandsNextService_CommandErrored;
-
+            // TODO(erisa): At some point we might be forced to ConnectAsync() the builder directly
+            // and then we will need to rework some other pieces that rely on Program.discord
+            discord = discordBuilder.Build();
             await discord.ConnectAsync();
 
             await ReadyEvent.OnStartup(discord);
@@ -205,6 +233,8 @@ namespace Cliptok
                         Tasks.ReminderTasks.CheckRemindersAsync(),
                         Tasks.RaidmodeTasks.CheckRaidmodeAsync(cfgjson.ServerID),
                         Tasks.LockdownTasks.CheckUnlocksAsync(),
+                        Tasks.EventTasks.HandlePendingChannelUpdateEventsAsync(),
+                        Tasks.EventTasks.HandlePendingChannelDeleteEventsAsync(),
                     ];
 
                     // To prevent a future issue if checks take longer than 10 seconds,

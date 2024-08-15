@@ -16,16 +16,58 @@ namespace Cliptok.Events
 
         public static async Task MessageCreated(DiscordClient client, MessageCreatedEventArgs e)
         {
+            if (e.Message is null)
+            {
+                client.Logger.LogError("Got a message create event but the message was null!");
+                return;
+            }
+            else if (e.Message.Author is null)
+            {
+                client.Logger.LogDebug("Got a message create event for a message with no author: {message}", DiscordHelpers.MessageLink(e.Message));
+            }
+            else
+            {
+                client.Logger.LogDebug("Got a message create event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
+            }
+
             await MessageHandlerAsync(client, e.Message, e.Channel);
         }
 
         public static async Task MessageUpdated(DiscordClient client, MessageUpdatedEventArgs e)
         {
+            if (e.Message is null)
+            {
+                client.Logger.LogError("Got a message update event but the message was null!");
+                return;
+            }
+            else if (e.Message.Author is null)
+            {
+                client.Logger.LogDebug("Got a message update event for a message with no author: {message}", DiscordHelpers.MessageLink(e.Message));
+            }
+            else
+            {
+                client.Logger.LogDebug("Got a message update event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
+            }
+
             await MessageHandlerAsync(client, e.Message, e.Channel, true);
         }
 
         public static async Task MessageDeleted(DiscordClient client, MessageDeletedEventArgs e)
         {
+            if (e.Message is null)
+            {
+                client.Logger.LogError("Got a message delete event but the message was null!");
+                return;
+            }
+            else if (e.Message.Author is null)
+            {
+                client.Logger.LogDebug("Got a message delete event for a message with no author: {message}", DiscordHelpers.MessageLink(e.Message));
+            }
+            else
+            {
+                client.Logger.LogDebug("Got a message delete event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
+            }
+
             // Delete thread if all messages are deleted
             if (Program.cfgjson.AutoDeleteEmptyThreads && e.Channel is DiscordThreadChannel)
             {
@@ -88,6 +130,9 @@ namespace Cliptok.Events
             try
             {
                 if (message.Timestamp is not null && message.Timestamp.Value.Year < (DateTime.Now.Year - 2))
+                    return;
+
+                if (isAnEdit && message.BaseMessage is not null && (message.BaseMessage.EditedTimestamp is null || message.BaseMessage.EditedTimestamp == message.BaseMessage.CreationTimestamp))
                     return;
 
                 if (message.Author is null || message.Author.Id == client.CurrentUser.Id)
@@ -557,22 +602,7 @@ namespace Cliptok.Events
                                 DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
                                 var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, message.Channel, " automatically ");
 
-                                string responseToSend = $"```json\n{responseText}\n```";
-                                if (responseToSend.Length > 1940)
-                                {
-                                    try
-                                    {
-                                        HasteBinResult hasteURL = await Program.hasteUploader.Post(responseText);
-                                        if (hasteURL.IsSuccess)
-                                            responseToSend = hasteURL.FullUrl + ".json";
-                                        else
-                                            responseToSend = "Response was too big and Hastebin failed, sorry.";
-                                    }
-                                    catch
-                                    {
-                                        responseToSend = "Response was too big and Hastebin failed, sorry.";
-                                    }
-                                }
+                                string responseToSend = await StringHelpers.CodeOrHasteBinAsync(responseText, "json", 1000, true);
 
                                 (string name, string value, bool inline) extraField = new("API Response", responseToSend, false);
                                 await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField, wasAutoModBlock: wasAutoModBlock);

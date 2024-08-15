@@ -76,6 +76,7 @@
                         {
                             msg.WithContent($"<@{reminderObject.UserID}>, you asked to be reminded of something:");
                             msg.WithReply(null, false, false);
+                            msg.WithAllowedMentions(Mentions.All);
                             await channel.SendMessageAsync(msg);
                         }
                     }

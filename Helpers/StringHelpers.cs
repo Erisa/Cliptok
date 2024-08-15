@@ -28,5 +28,41 @@
             else
                 return $"{Program.cfgjson.Emoji.Warning} {user.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**";
         }
+
+        public static async Task<string> CodeOrHasteBinAsync(string input, string language = "", int charLimit = 1930, bool plain = false)
+        {
+            bool inputHasCodeBlock = input.Contains("```");
+            if (input.Length > charLimit || inputHasCodeBlock)
+            {
+                HasteBinResult hasteResult = await Program.hasteUploader.Post(input);
+                if (hasteResult.IsSuccess)
+                {
+                    var hasteUrl = hasteResult.FullUrl;
+                    if (language != "")
+                    {
+                        hasteUrl = hasteUrl + "." + language;
+                    }
+
+                    if (plain)
+                        return hasteUrl;
+                    else if (inputHasCodeBlock)
+                        return $"{Program.cfgjson.Emoji.Warning} Output contained a code block, so it was uploaded to Hastebin to avoid formatting issues: {hasteUrl}";
+                    else
+                        return $"{Program.cfgjson.Emoji.Warning} Output exceeded character limit: {hasteUrl}";
+                }
+                else
+                {
+                    Program.discord.Logger.LogError("Error ocurred uploading to Hastebin with status code: {code}\nPayload: {output}", hasteResult.StatusCode, input);
+                    if (plain)
+                        return "Error, check logs.";
+
+                    return $"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.";
+                }
+            }
+            else
+            {
+                return $"```{language}\n{input}\n```";
+            }
+        }
     }
 }

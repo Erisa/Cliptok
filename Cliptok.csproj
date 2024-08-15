@@ -5,19 +5,23 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<LangVersion>12.0</LangVersion>
 		<UserSecretsId>d9345310-5908-4697-8613-28a24d06d183</UserSecretsId>
+
+		<!-- <RestoreAdditionalProjectSources>
+			https://www.myget.org/F/erisa/api/v3/index.json
+		</RestoreAdditionalProjectSources> -->
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Abyssal.HumanDateParser" Version="2.0.0-20191113.1" />
-		<PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02302" />
-		<PackageReference Include="DSharpPlus.CommandsNext" Version="5.0.0-nightly-02302" />
-		<PackageReference Include="DSharpPlus.SlashCommands" Version="5.0.0-nightly-02302" />
+		<PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02351" />
+		<PackageReference Include="DSharpPlus.CommandsNext" Version="5.0.0-nightly-02351" />
+		<PackageReference Include="DSharpPlus.SlashCommands" Version="5.0.0-nightly-02351" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="Serilog" Version="4.0.0" />
+		<PackageReference Include="Serilog" Version="4.0.1" />
 		<PackageReference Include="Serilog.Expressions" Version="5.0.0" />
 		<PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-		<PackageReference Include="Serilog.Sinks.TextWriter" Version="2.1.0" />
+		<PackageReference Include="Serilog.Sinks.TextWriter" Version="3.0.0" />
 		<PackageReference Include="StackExchange.Redis" Version="2.8.0" />
 		<PackageReference Include="System.Linq" Version="4.3.0" />
 		<PackageReference Include="System.Linq.Async" Version="6.0.1" />

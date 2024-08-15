@@ -122,6 +122,10 @@ namespace Cliptok.Commands
             UserWarning warning = GetWarning(targetUser.Id, warnId);
             if (warning is null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
+            else if (warning.Type == WarningType.Note)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note delete` instead, or make sure you've got the right warning ID.");
+            }
             else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!");
@@ -161,7 +165,7 @@ namespace Cliptok.Commands
         )
         {
             UserWarning warning = GetWarning(targetUser.Id, warnId);
-            if (warning is null)
+            if (warning is null || warning.Type == WarningType.Note)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
             else
                 await ctx.RespondAsync(null, await FancyWarnEmbedAsync(warning, userID: targetUser.Id));
@@ -184,6 +188,10 @@ namespace Cliptok.Commands
 
             if (warning is null)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
+            else if (warning.Type == WarningType.Note)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note details` instead, or make sure you've got the right warning ID.");
+            }
             else
                 await ctx.RespondAsync(null, await FancyWarnEmbedAsync(warning, true, userID: targetUser.Id));
 
@@ -213,6 +221,10 @@ namespace Cliptok.Commands
             var warning = GetWarning(targetUser.Id, warnId);
             if (warning is null)
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
+            else if (warning.Type == WarningType.Note)
+            {
+                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Try using `/note edit` instead, or make sure you've got the right warning ID.");
+            }
             else if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
             {
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!");
@@ -246,7 +258,7 @@ namespace Cliptok.Commands
             {
                 if (ulong.TryParse(key.ToString(), out ulong number))
                 {
-                    counts[key.ToString()] = Program.db.HashGetAll(key).Length;
+                    counts[key.ToString()] = Program.db.HashGetAll(key).Count(x => JsonConvert.DeserializeObject<UserWarning>(x.Value.ToString()).Type == WarningType.Warning);
                 }
             }
 
@@ -286,6 +298,8 @@ namespace Cliptok.Commands
 
                     foreach (var warning in warningsOutput)
                     {
+                        if (warning.Value.Type != WarningType.Warning) continue;
+
                         var day = warning.Value.WarnTimestamp.ToString("yyyy-MM-dd");
                         if (!counts.ContainsKey(day))
                         {

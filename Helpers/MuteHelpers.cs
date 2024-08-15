@@ -165,51 +165,6 @@
                 }
             }
 
-            try
-            {
-                if (permaMute)
-                {
-                    await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder()
-                        .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted by {moderator.Mention}.\nReason: **{reason}**")
-                        .WithAllowedMentions(Mentions.None)
-                    );
-                }
-                else
-                {
-                    // if TQS mute, log to investigations channel also & make it clear in regular mod logs that it's a TQS mute
-                    if (isTqsMute)
-                    {
-                        await LogChannelHelper.LogMessageAsync("investigations", new DiscordMessageBuilder()
-                            .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was TQS-muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** by {moderator.Mention}." +
-                                $"\nReason: **{reason}**" +
-                                $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>")
-                            .WithAllowedMentions(Mentions.None)
-                        );
-
-                        await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder()
-                            .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was TQS-muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** by {moderator.Mention}." +
-                                         $"\nReason: **{reason}**" +
-                                         $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>")
-                            .WithAllowedMentions(Mentions.None)
-                        );
-                    }
-                    else
-                    {
-                        await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder()
-                            .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** by {moderator.Mention}." +
-                                         $"\nReason: **{reason}**" +
-                                         $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>")
-                            .WithAllowedMentions(Mentions.None)
-                        );
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Program.discord.Logger.LogError(ex, "thing");
-            }
-
-
             if (naughtyMember != default)
             {
                 try
@@ -303,6 +258,51 @@
                     MessageId = output.dmMessage.Id,
                     ChannelId = output.dmMessage.ChannelId
                 };
+
+            try
+            {
+                if (permaMute)
+                {
+                    await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted by {moderator.Mention}.\nReason: **{reason}**")
+                        .WithAllowedMentions(Mentions.None)
+                    );
+                }
+                else
+                {
+                    // if TQS mute, log to investigations channel also & make it clear in regular mod logs that it's a TQS mute
+                    if (isTqsMute)
+                    {
+                        await LogChannelHelper.LogMessageAsync("investigations", new DiscordMessageBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was TQS-muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** by {moderator.Mention}." +
+                                $"\nReason: **{reason}**" +
+                                $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>" +
+                                $"\n-# Context: {(await DiscordHelpers.GetMessageFromReferenceAsync(newMute.ContextMessageReference)).JumpLink}")
+                            .WithAllowedMentions(Mentions.None)
+                        );
+
+                        await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was TQS-muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** by {moderator.Mention}." +
+                                         $"\nReason: **{reason}**" +
+                                         $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>")
+                            .WithAllowedMentions(Mentions.None)
+                        );
+                    }
+                    else
+                    {
+                        await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.Muted} {naughtyUser.Mention} was successfully muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** by {moderator.Mention}." +
+                                         $"\nReason: **{reason}**" +
+                                         $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>")
+                            .WithAllowedMentions(Mentions.None)
+                        );
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Program.discord.Logger.LogError(ex, "thing");
+            }
 
             await Program.db.HashSetAsync("mutes", naughtyUser.Id, JsonConvert.SerializeObject(newMute));
 
