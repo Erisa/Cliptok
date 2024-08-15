@@ -163,6 +163,7 @@ namespace Cliptok
                                   .HandleGuildBanRemoved(UnbanEvent.OnUnban)
                                   .HandleVoiceStateUpdated(VoiceEvents.VoiceStateUpdate)
                                   .HandleChannelUpdated(ChannelEvents.ChannelUpdated)
+                                  .HandleAutoModerationRuleExecuted(AutoModEvents.AutoModerationRuleExecuted)
             );
 
             discord = discordBuilder.Build();
