@@ -6,7 +6,7 @@ namespace Cliptok.Events
     {
         public static async Task OnHeartbeat(IGatewayClient client)
         {
-            Program.discord.Logger.LogDebug("Heartbeat ping: {ping}", client.Ping.TotalMilliseconds);
+            Program.discord.Logger.LogDebug("Heartbeat ping: {ping}", client.Ping.Milliseconds);
             if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("UPTIME_KUMA_PUSH_URL")) && client.IsConnected)
             {
                 HttpResponseMessage response;
