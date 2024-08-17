@@ -132,7 +132,7 @@ namespace Cliptok.Events
                 if (message.Timestamp is not null && message.Timestamp.Value.Year < (DateTime.Now.Year - 2))
                     return;
 
-                if (isAnEdit && message.BaseMessage is not null && (message.BaseMessage.EditedTimestamp is null || message.BaseMessage.EditedTimestamp == message.BaseMessage.CreationTimestamp))
+                if (isAnEdit && message.BaseMessage is not null && (message.BaseMessage.EditedTimestamp is null || message.BaseMessage.EditedTimestamp == message.BaseMessage.CreationTimestamp || message.BaseMessage.EditedTimestamp < DateTimeOffset.Now - TimeSpan.FromDays(1)))
                     return;
 
                 if (message.Author is null || message.Author.Id == client.CurrentUser.Id)
