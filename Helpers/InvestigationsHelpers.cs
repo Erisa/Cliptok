@@ -36,7 +36,7 @@
 
             if (content == default)
                 if (wasAutoModBlock)
-                    content = $"{Program.cfgjson.Emoji.Denied} Detected infringing message (blocked by AutoMod) by {infringingMessage.Author.Mention} in {infringingMessage.Channel.Mention}:";
+                    content = $"{Program.cfgjson.Emoji.Denied} Detected infringing AutoMod message by {infringingMessage.Author.Mention} in {infringingMessage.Channel.Mention}:";
                 else
                     content = $"{Program.cfgjson.Emoji.Denied} Deleted infringing message by {infringingMessage.Author.Mention} in {infringingMessage.Channel.Mention}:";
 
