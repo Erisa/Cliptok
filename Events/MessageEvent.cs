@@ -672,7 +672,9 @@ namespace Cliptok.Events
                                 output = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, your message was deleted for containing too many lines.\n" +
                                          $"Please consider using a Pastebin-style website or <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid further punishment.";
                             DiscordMessageBuilder messageBuilder = new();
-                            messageBuilder.WithContent(output).AddComponents(button);
+                            messageBuilder.WithContent(output);
+                            if (!wasAutoModBlock)
+                                messageBuilder.AddComponents(button);
                             DiscordMessage msg = await message.Channel.SendMessageAsync(messageBuilder);
                             await Program.db.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
                             await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, DiscordHelpers.MessageLink(msg), wasAutoModBlock: wasAutoModBlock);
@@ -683,7 +685,9 @@ namespace Cliptok.Events
                             string output = $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**\n" +
                                 $"Please consider using a Pastebin-style website or <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.";
                             DiscordMessageBuilder messageBuilder = new();
-                            messageBuilder.WithContent(output).AddComponents(button);
+                            messageBuilder.WithContent(output);
+                            if (!wasAutoModBlock)
+                                messageBuilder.AddComponents(button);
 
                             DiscordMessage msg = await message.Channel.SendMessageAsync(messageBuilder);
                             var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, message.Channel, " automatically ");
