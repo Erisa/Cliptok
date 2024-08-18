@@ -518,7 +518,10 @@ namespace Cliptok.Events
                                 if (Program.cfgjson.UnrestrictedEmojiChannels.Count > 0)
                                     msgOut = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, if you want to play around with lots of emoji, please use <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.");
                                 else
-                                    msgOut = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention} Your message was automatically deleted for mass emoji.");
+                                    if (wasAutoModBlock)
+                                        msgOut = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention} Your message contained too many emoji.");
+                                    else
+                                        msgOut = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention} Your message was automatically deleted for mass emoji.");
 
                                 await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, DiscordHelpers.MessageLink(msgOut), wasAutoModBlock: wasAutoModBlock);
                                 return;
@@ -661,8 +664,13 @@ namespace Cliptok.Events
                         if (!Program.db.HashExists("linePardoned", message.Author.Id.ToString()))
                         {
                             await Program.db.HashSetAsync("linePardoned", member.Id.ToString(), false);
-                            string output = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, your message was deleted for containing too many lines.\n" +
-                                $"Please consider using a Pastebin-style website or <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid further punishment.";
+                            string output;
+                            if (wasAutoModBlock)
+                                output = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, your message contained too many lines.\n" +
+                                         $"Please consider using a Pastebin-style website or <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid further punishment.";
+                            else
+                                output = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, your message was deleted for containing too many lines.\n" +
+                                         $"Please consider using a Pastebin-style website or <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid further punishment.";
                             DiscordMessageBuilder messageBuilder = new();
                             messageBuilder.WithContent(output).AddComponents(button);
                             DiscordMessage msg = await message.Channel.SendMessageAsync(messageBuilder);
