@@ -659,8 +659,6 @@ namespace Cliptok.Events
                         if (!wasAutoModBlock)
                             _ = message.DeleteAsync();
 
-                        var button = new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null);
-
                         if (!Program.db.HashExists("linePardoned", message.Author.Id.ToString()))
                         {
                             await Program.db.HashSetAsync("linePardoned", member.Id.ToString(), false);
@@ -673,10 +671,17 @@ namespace Cliptok.Events
                                          $"Please consider using a Pastebin-style website or <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid further punishment.";
                             DiscordMessageBuilder messageBuilder = new();
                             messageBuilder.WithContent(output);
+                            DiscordMessage msg;
                             if (!wasAutoModBlock)
-                                messageBuilder.AddComponents(button);
-                            DiscordMessage msg = await message.Channel.SendMessageAsync(messageBuilder);
-                            await Program.db.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
+                            {
+                                messageBuilder.AddComponents(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
+                                msg = await message.Channel.SendMessageAsync(messageBuilder);
+                                await Program.db.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
+                            }
+                            else
+                            {
+                                msg = await message.Channel.SendMessageAsync(messageBuilder);
+                            }
                             await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, DiscordHelpers.MessageLink(msg), wasAutoModBlock: wasAutoModBlock);
                             return;
                         }
@@ -686,12 +691,19 @@ namespace Cliptok.Events
                                 $"Please consider using a Pastebin-style website or <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.";
                             DiscordMessageBuilder messageBuilder = new();
                             messageBuilder.WithContent(output);
+                            DiscordMessage msg;
                             if (!wasAutoModBlock)
-                                messageBuilder.AddComponents(button);
+                            {
+                                messageBuilder.AddComponents(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
+                                msg = await message.Channel.SendMessageAsync(messageBuilder);
+                                await Program.db.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
+                            }
+                            else
+                            {
+                                msg = await message.Channel.SendMessageAsync(messageBuilder);
+                            }
 
-                            DiscordMessage msg = await message.Channel.SendMessageAsync(messageBuilder);
                             var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, message.Channel, " automatically ");
-                            await Program.db.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
                             await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, wasAutoModBlock: wasAutoModBlock);
 
                             return;
