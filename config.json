@@ -259,7 +259,6 @@
     "ref": "main",
     "workflowId": "append-lists-txt.yml"
   },
-  "feedbackHubChannelId": 865734819995582464,
   "everyoneFilter": true,
   "logChannels": {
     "mod": {

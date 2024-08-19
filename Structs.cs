@@ -227,9 +227,6 @@
         [JsonProperty("gitListDirectory")]
         public string GitListDirectory { get; private set; }
 
-        [JsonProperty("feedbackHubChannelId")]
-        public ulong FeedbackHubChannelId { get; private set; } = 0;
-
         [JsonProperty("dmLogChannelId")]
         public ulong DmLogChannelId { get; private set; } = 0;
 

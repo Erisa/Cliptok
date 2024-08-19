@@ -757,37 +757,6 @@ namespace Cliptok.Events
                         }
                     }
 
-                    // feedback hub text channel
-                    if (!isAnEdit && message.Channel.Id == Program.cfgjson.FeedbackHubChannelId)
-                    {
-                        var captures = bold_rx.Match(message.Content).Groups[1].Captures;
-
-                        if (captures is null || captures.Count == 0 || (!message.Content.Contains("aka.ms/") && !message.Content.Contains("feedback-hub:")))
-                        {
-                            if (GetPermLevel(member) >= ServerPermLevel.TrialModerator)
-                            {
-                                return;
-                            }
-
-                            await message.DeleteAsync();
-                            var msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {message.Author.Mention}, please read the pinned messages in this channel and follow the message format given.");
-                            await Task.Delay(5000);
-                            await msg.DeleteAsync();
-                        }
-                        else
-                        {
-                            var title = captures[0].Value;
-
-                            if (title.Length > 100)
-                                title = StringHelpers.Truncate(title, 100, false);
-
-                            await message.BaseMessage.CreateThreadAsync(title, DiscordAutoArchiveDuration.Week,"Automatically creating feedback hub thread.");
-
-                            await Task.Delay(2000);
-                            await message.BaseMessage.ModifyEmbedSuppressionAsync(true);
-                        }
-                    }
-
                     // Check the passive lists AFTER all other checks.
                     if (GetPermLevel(member) >= ServerPermLevel.TrialModerator)
                         return;
