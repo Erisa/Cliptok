@@ -1,3 +1,4 @@
+using DSharpPlus.Clients;
 using DSharpPlus.Extensions;
 using DSharpPlus.Net.Gateway;
 using System.Reflection;
@@ -187,33 +188,26 @@ namespace Cliptok
                                   .HandleAutoModerationRuleExecuted(AutoModEvents.AutoModerationRuleExecuted)
             );
 
-#pragma warning disable CS0618 // Type or member is obsolete
-            discordBuilder.UseSlashCommands(slash =>
-            {
-                slash.SlashCommandErrored += InteractionEvents.SlashCommandErrorEvent;
-                slash.ContextMenuErrored += InteractionEvents.ContextCommandErrorEvent;
+            discord = discordBuilder.Build();
 
-                var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands" && !t.IsNested);
-                foreach (var type in slashCommandClasses)
-                    slash.RegisterCommands(type, cfgjson.ServerID); ;
-            });
-#pragma warning restore CS0618 // Type or member is obsolete
+            var slash = discord.UseSlashCommands();
+            slash.SlashCommandErrored += InteractionEvents.SlashCommandErrorEvent;
+            slash.ContextMenuErrored += InteractionEvents.ContextCommandErrorEvent;
+            var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands" && !t.IsNested);
+            foreach (var type in slashCommandClasses)
+                slash.RegisterCommands(type, cfgjson.ServerID); ;
 
-            discordBuilder.UseCommandsNext(commands =>
-            {
-                var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands" && !t.IsNested);
-                foreach (var type in commandClasses)
-                    commands.RegisterCommands(type);
-
-                commands.CommandErrored += ErrorEvents.CommandsNextService_CommandErrored;
-            }, new CommandsNextConfiguration
+            commands = discord.UseCommandsNext(new CommandsNextConfiguration
             {
                 StringPrefixes = cfgjson.Core.Prefixes
             });
 
-            // TODO(erisa): At some point we might be forced to ConnectAsync() the builder directly
-            // and then we will need to rework some other pieces that rely on Program.discord
-            discord = discordBuilder.Build();
+            var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands" && !t.IsNested);
+            foreach (var type in commandClasses)
+                commands.RegisterCommands(type);
+
+            commands.CommandErrored += ErrorEvents.CommandsNextService_CommandErrored;
+
             await discord.ConnectAsync();
 
             await ReadyEvent.OnStartup(discord);
