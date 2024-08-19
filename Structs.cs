@@ -149,12 +149,6 @@
         [JsonProperty("heartosoftId")]
         public ulong HeartosoftId { get; private set; }
 
-        [JsonProperty("noHeartosoftId")]
-        public ulong NoHeartosoftId { get; private set; }
-
-        [JsonProperty("restrictedHeartosoftPhrases")]
-        public List<string> RestrictedHeartosoftPhrases { get; private set; }
-
         [JsonProperty("autoDehoistCharacters")]
         public string AutoDehoistCharacters { get; private set; }
 
