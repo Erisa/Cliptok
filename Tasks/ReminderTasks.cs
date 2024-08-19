@@ -26,7 +26,7 @@
                         var guild = Program.homeGuild;
                         var member = await guild.GetMemberAsync(reminderObject.UserID);
 
-                        if (GetPermLevel(member) >= ServerPermLevel.TrialModerator)
+                        if ((await GetPermLevelAsync(member)) >= ServerPermLevel.TrialModerator)
                         {
                             channel = await Program.discord.GetChannelAsync(Program.cfgjson.HomeChannel);
                         }

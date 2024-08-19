@@ -26,7 +26,7 @@ namespace Cliptok.Commands
                 if ((ulong)roleIds[i].GetValue(Program.cfgjson.UserRoles, null) == Program.cfgjson.UserRoles.Giveaways)
                     continue;
 
-                DiscordRole roleToGrant = guild.GetRole((ulong)roleIds[i].GetValue(Program.cfgjson.UserRoles, null));
+                DiscordRole roleToGrant = await guild.GetRoleAsync((ulong)roleIds[i].GetValue(Program.cfgjson.UserRoles, null));
                 await ctx.Member.GrantRoleAsync(roleToGrant);
 
                 if (roleIds.Length == 1)
@@ -64,7 +64,7 @@ namespace Cliptok.Commands
                 if ((ulong)roleId.GetValue(Program.cfgjson.UserRoles, null) == Program.cfgjson.UserRoles.Giveaways)
                     continue;
 
-                DiscordRole roleToGrant = guild.GetRole((ulong)roleId.GetValue(Program.cfgjson.UserRoles, null));
+                DiscordRole roleToGrant = await guild.GetRoleAsync((ulong)roleId.GetValue(Program.cfgjson.UserRoles, null));
                 await ctx.Member.RevokeRoleAsync(roleToGrant);
             }
 

@@ -57,7 +57,7 @@ namespace Cliptok.Events
             if (await db.HashExistsAsync("mutes", e.Member.Id))
             {
                 // todo: store per-guild
-                DiscordRole mutedRole = e.Guild.GetRole(cfgjson.MutedRole);
+                DiscordRole mutedRole = await e.Guild.GetRoleAsync(cfgjson.MutedRole);
                 await e.Member.GrantRoleAsync(mutedRole, "Reapplying mute on join: possible mute evasion.");
             }
             else if (e.Member.CommunicationDisabledUntil is not null)
@@ -105,8 +105,8 @@ namespace Cliptok.Events
             if (e.Guild.Id != cfgjson.ServerID)
                 return;
 
-            var muteRole = e.Guild.GetRole(cfgjson.MutedRole);
-            var tqsMuteRole = e.Guild.GetRole(cfgjson.TqsMutedRole);
+            var muteRole = await e.Guild.GetRoleAsync(cfgjson.MutedRole);
+            var tqsMuteRole = await e.Guild.GetRoleAsync(cfgjson.TqsMutedRole);
             var userMute = await db.HashGetAsync("mutes", e.Member.Id);
 
             if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole) & !e.Member.Roles.Contains(tqsMuteRole))
@@ -186,7 +186,7 @@ namespace Cliptok.Events
             if (await ScamHelpers.UsernameCheckAsync(e.Member))
                 return;
 
-            var muteRole = e.Guild.GetRole(cfgjson.MutedRole);
+            var muteRole = await e.Guild.GetRoleAsync(cfgjson.MutedRole);
             var userMute = await db.HashGetAsync("mutes", e.Member.Id);
 
             // If they're externally unmuted, untrack it?

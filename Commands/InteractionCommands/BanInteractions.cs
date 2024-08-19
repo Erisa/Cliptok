@@ -36,7 +36,7 @@ namespace Cliptok.Commands.InteractionCommands
             try
             {
                 targetMember = await ctx.Guild.GetMemberAsync(user.Id);
-                if (GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && (GetPermLevel(targetMember) >= ServerPermLevel.TrialModerator))
+                if ((await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && ((await GetPermLevelAsync(targetMember)) >= ServerPermLevel.TrialModerator))
                 {
                     webhookOut.Content = $"{Program.cfgjson.Emoji.Error} As a Trial Moderator you cannot perform moderation actions on other staff members.";
                     await ctx.EditResponseAsync(webhookOut);

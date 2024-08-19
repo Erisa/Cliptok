@@ -17,7 +17,7 @@
 
             if (Program.cfgjson.AnnouncementRoles.ContainsKey(roleName))
             {
-                discordRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles[roleName]);
+                discordRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[roleName]);
                 await discordRole.ModifyAsync(mentionable: true);
                 try
                 {
@@ -47,7 +47,7 @@
 
             if (Program.cfgjson.AnnouncementRoles.ContainsKey(roleName))
             {
-                discordRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles[roleName]);
+                discordRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[roleName]);
                 await discordRole.ModifyAsync(mentionable: true);
                 try
                 {
@@ -62,8 +62,8 @@
             }
             else if (roleName == "rpbeta")
             {
-                var rpRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles["rp"]);
-                var betaRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles["beta"]);
+                var rpRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles["rp"]);
+                var betaRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles["beta"]);
 
                 await rpRole.ModifyAsync(mentionable: true);
                 await betaRole.ModifyAsync(mentionable: true);
@@ -84,8 +84,8 @@
             // this is rushed pending an actual solution
             else if (roleName == "rpbeta10")
             {
-                var rpRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles["rp10"]);
-                var betaRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles["beta10"]);
+                var rpRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles["rp10"]);
+                var betaRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles["beta10"]);
 
                 await rpRole.ModifyAsync(mentionable: true);
                 await betaRole.ModifyAsync(mentionable: true);
@@ -105,8 +105,8 @@
             }
             else if (roleName == "betadev")
             {
-                var betaRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles["beta"]);
-                var devRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles["dev"]);
+                var betaRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles["beta"]);
+                var devRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles["dev"]);
 
                 await betaRole.ModifyAsync(mentionable: true);
                 await devRole.ModifyAsync(mentionable: true);
@@ -126,8 +126,8 @@
             }
             else if (roleName == "candev")
             {
-                var canaryRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles["canary"]);
-                var devRole = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles["dev"]);
+                var canaryRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles["canary"]);
+                var devRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles["dev"]);
 
                 await canaryRole.ModifyAsync(mentionable: true);
                 await devRole.ModifyAsync(mentionable: true);

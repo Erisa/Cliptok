@@ -41,7 +41,7 @@
                     _ => throw new NotSupportedException()
                 };
 
-                var roleData = ctx.Guild.GetRole(roleId);
+                var roleData = await ctx.Guild.GetRoleAsync(roleId);
 
                 await member.GrantRoleAsync(roleData, $"/roles grant used by {DiscordHelpers.UniqueUsername(ctx.User)}");
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} The role {roleData.Mention} has been successfully granted!", ephemeral: true, mentions: false);
@@ -75,7 +75,7 @@
                     _ => throw new NotSupportedException()
                 };
 
-                var roleData = ctx.Guild.GetRole(roleId);
+                var roleData = await ctx.Guild.GetRoleAsync(roleId);
 
                 await member.RevokeRoleAsync(roleData, $"/roles remove used by {DiscordHelpers.UniqueUsername(ctx.User)}");
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} The role {roleData.Mention} has been successfully removed!", ephemeral: true, mentions: false);
