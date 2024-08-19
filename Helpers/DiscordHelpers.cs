@@ -26,6 +26,10 @@
 
         public static string MessageLink(DiscordMessage msg)
         {
+            return MessageLink(new MockDiscordMessage(msg));
+        }
+        public static string MessageLink(MockDiscordMessage msg)
+        {
             return $"https://discord.com/channels/{(msg.Channel.IsPrivate ? "@me" : msg.Channel.Guild.Id)}/{msg.Channel.Id}/{msg.Id}";
         }
 

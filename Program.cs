@@ -184,6 +184,7 @@ namespace Cliptok
                                   .HandleVoiceStateUpdated(VoiceEvents.VoiceStateUpdate)
                                   .HandleChannelUpdated(ChannelEvents.ChannelUpdated)
                                   .HandleChannelDeleted(ChannelEvents.ChannelDeleted)
+                                  .HandleAutoModerationRuleExecuted(AutoModEvents.AutoModerationRuleExecuted)
             );
 
 #pragma warning disable CS0618 // Type or member is obsolete
