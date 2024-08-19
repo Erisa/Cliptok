@@ -11,8 +11,8 @@ namespace Cliptok.Commands
             reason = $"[Manual unmute by {DiscordHelpers.UniqueUsername(ctx.User)}]: {reason}";
 
             // todo: store per-guild
-            DiscordRole mutedRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.MutedRole);
-            DiscordRole tqsMutedRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.TqsMutedRole);
+            DiscordRole mutedRole = ctx.Guild.GetRole(Program.cfgjson.MutedRole);
+            DiscordRole tqsMutedRole = ctx.Guild.GetRole(Program.cfgjson.TqsMutedRole);
 
             DiscordMember member = default;
             try
@@ -60,7 +60,7 @@ namespace Cliptok.Commands
                 // is this worth logging?
             }
 
-            if (targetMember != default && ((await GetPermLevelAsync(ctx.Member))) == ServerPermLevel.TrialModerator && ((await GetPermLevelAsync(targetMember)) >= ServerPermLevel.TrialModerator || targetMember.IsBot))
+            if (targetMember != default && GetPermLevel(ctx.Member) == ServerPermLevel.TrialModerator && (GetPermLevel(targetMember) >= ServerPermLevel.TrialModerator || targetMember.IsBot))
             {
                 await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
                 return;
@@ -115,8 +115,8 @@ namespace Cliptok.Commands
 
             // Check if the user is already muted; disallow TQS-mute if so
 
-            DiscordRole mutedRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.MutedRole);
-            DiscordRole tqsMutedRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.TqsMutedRole);
+            DiscordRole mutedRole = ctx.Guild.GetRole(Program.cfgjson.MutedRole);
+            DiscordRole tqsMutedRole = ctx.Guild.GetRole(Program.cfgjson.TqsMutedRole);
 
             // Get member
             DiscordMember targetMember = default;
@@ -136,7 +136,7 @@ namespace Cliptok.Commands
             }
 
             // Check if user to be muted is staff or TQS, and disallow if so
-            if (targetMember != default && (await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TechnicalQueriesSlayer && ((await GetPermLevelAsync(targetMember)) >= ServerPermLevel.TechnicalQueriesSlayer || targetMember.IsBot))
+            if (targetMember != default && GetPermLevel(ctx.Member) == ServerPermLevel.TechnicalQueriesSlayer && (GetPermLevel(targetMember) >= ServerPermLevel.TechnicalQueriesSlayer || targetMember.IsBot))
             {
                 await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, you cannot mute other TQS or staff members.");
                 return;

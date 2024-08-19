@@ -169,7 +169,7 @@
                 .WithTitle($"User information for {DiscordHelpers.UniqueUsername(user)}")
                 .AddField("User", member.Mention, true)
                 .AddField("User ID", member.Id.ToString(), true)
-                .AddField($"{Program.discord.CurrentUser.Username} permission level", (await GetPermLevelAsync(member)).ToString(), false);
+                .AddField($"{Program.discord.CurrentUser.Username} permission level", GetPermLevel(member).ToString(), false);
 
             if (!guildNull)
                 embed.AddField("Roles", rolesStr, false);

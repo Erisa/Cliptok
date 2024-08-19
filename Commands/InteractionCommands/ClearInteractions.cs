@@ -135,7 +135,7 @@
                         continue;
                     }
 
-                    if ((await GetPermLevelAsync(member)) >= ServerPermLevel.TrialModerator)
+                    if (GetPermLevel(member) >= ServerPermLevel.TrialModerator)
                     {
                         messagesToClear.Remove(message);
                     }

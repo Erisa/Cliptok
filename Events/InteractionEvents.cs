@@ -214,7 +214,7 @@ namespace Cliptok.Events
                 foreach (var check in slex.FailedChecks)
                     if (check is SlashRequireHomeserverPermAttribute att && e.Context.CommandName != "edit")
                     {
-                        var level = (await GetPermLevelAsync(e.Context.Member));
+                        var level = GetPermLevel(e.Context.Member);
                         var levelText = level.ToString();
                         if (level == ServerPermLevel.Nothing && rand.Next(1, 100) == 69)
                             levelText = $"naught but a thing, my dear human. Congratulations, you win {rand.Next(1, 10)} bonus points.";
@@ -239,7 +239,7 @@ namespace Cliptok.Events
                 foreach (var check in slex.FailedChecks)
                     if (check is SlashRequireHomeserverPermAttribute att && e.Context.CommandName != "edit")
                     {
-                        var level = (await GetPermLevelAsync(e.Context.Member));
+                        var level = GetPermLevel(e.Context.Member);
                         var levelText = level.ToString();
                         if (level == ServerPermLevel.Nothing && rand.Next(1, 100) == 69)
                             levelText = $"naught but a thing, my dear human. Congratulations, you win {rand.Next(1, 10)} bonus points.";

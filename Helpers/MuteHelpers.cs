@@ -106,8 +106,8 @@
             bool permaMute = false;
             DateTime? actionTime = DateTime.Now;
             DiscordRole mutedRole = isTqsMute
-                ? await guild.GetRoleAsync(Program.cfgjson.TqsMutedRole)
-                : await guild.GetRoleAsync(Program.cfgjson.MutedRole);
+                ? guild.GetRole(Program.cfgjson.TqsMutedRole)
+                : guild.GetRole(Program.cfgjson.MutedRole);
             DateTime? expireTime = actionTime + muteDuration;
             DiscordMember moderator = await guild.GetMemberAsync(moderatorId);
 
@@ -317,8 +317,8 @@
             DiscordGuild guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
 
             // todo: store per-guild
-            DiscordRole mutedRole = await guild.GetRoleAsync(Program.cfgjson.MutedRole);
-            DiscordRole tqsMutedRole = await guild.GetRoleAsync(Program.cfgjson.TqsMutedRole);
+            DiscordRole mutedRole = guild.GetRole(Program.cfgjson.MutedRole);
+            DiscordRole tqsMutedRole = guild.GetRole(Program.cfgjson.TqsMutedRole);
             DiscordMember member = default;
             try
             {
