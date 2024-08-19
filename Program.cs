@@ -20,11 +20,19 @@ namespace Cliptok
             HeartbeatEvent.OnHeartbeat(client);
         }
 
-        public async ValueTask ZombiedAsync(IGatewayClient client)
+        public async Task ZombiedAsync(IGatewayClient client)
         {
             Program.discord.Logger.LogWarning("Gateway entered zombied state. Attempted to reconnect.");
             await client.ReconnectAsync();
         }
+
+        public async Task ReconnectRequestedAsync(IGatewayClient _) { }
+        public async Task ReconnectFailedAsync(IGatewayClient _) { }
+
+        public async Task SessionInvalidatedAsync(IGatewayClient _) { }
+
+
+
     }
 
     class Program : BaseCommandModule

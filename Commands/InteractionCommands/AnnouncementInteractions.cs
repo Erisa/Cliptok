@@ -76,7 +76,7 @@
                 roleKey1 = insiderChannel1.ToLower();
             }
 
-            DiscordRole insiderRole1 = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles[roleKey1]);
+            DiscordRole insiderRole1 = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[roleKey1]);
             DiscordRole insiderRole2 = default;
 
             StringBuilder channelString = new();
@@ -120,7 +120,7 @@
                     roleKey2 = insiderChannel2.ToLower();
                 }
 
-                insiderRole2 = ctx.Guild.GetRole(Program.cfgjson.AnnouncementRoles[roleKey2]);
+                insiderRole2 = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[roleKey2]);
             }
 
             string pingMsgBareString = $"{insiderRole1.Mention}{(insiderChannel2 != "" ? $" {insiderRole2.Mention}\n" : " - ")}Hi Insiders!\n\n" +

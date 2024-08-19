@@ -74,7 +74,7 @@ namespace Cliptok.Events
                 try
                 {
                     var member = await e.Guild.GetMemberAsync(e.Message.Author.Id);
-                    if (GetPermLevel(member) >= ServerPermLevel.TrialModerator)
+                    if ((await GetPermLevelAsync(member)) >= ServerPermLevel.TrialModerator)
                         return;
                 }
                 catch
@@ -184,7 +184,7 @@ namespace Cliptok.Events
 
                         DiscordMessageBuilder memberWarnInfo = new();
 
-                        DiscordRole muted = message.Channel.Guild.GetRole(Program.cfgjson.MutedRole);
+                        DiscordRole muted = await message.Channel.Guild.GetRoleAsync(Program.cfgjson.MutedRole);
                         if (modmailMember.Roles.Contains(muted))
                         {
                             memberWarnInfo.AddEmbed(await WarningHelpers.GenerateWarningsEmbedAsync(modmailMember)).AddEmbed(await MuteHelpers.MuteStatusEmbed(modmailMember, message.Channel.Guild));
@@ -269,7 +269,7 @@ namespace Cliptok.Events
                     return;
 
                 // Skip messages from moderators beyond this point.
-                if (GetPermLevel(member) < ServerPermLevel.TrialModerator)
+                if ((await GetPermLevelAsync(member)) < ServerPermLevel.TrialModerator)
                 {
                     if (!limitFilters)
                     {
@@ -336,7 +336,7 @@ namespace Cliptok.Events
                                     // still warn anyway
                                 }
 
-                                if (listItem.Name == "autoban.txt" && GetPermLevel(member) < ServerPermLevel.Tier4)
+                                if (listItem.Name == "autoban.txt" && (await GetPermLevelAsync(member)) < ServerPermLevel.Tier4)
                                 {
                                     if (!wasAutoModBlock)
                                         _ = message.DeleteAsync();
@@ -364,7 +364,7 @@ namespace Cliptok.Events
                     // Unapproved invites
                     string checkedMessage = message.Content.Replace('\\', '/');
 
-                    if (GetPermLevel(member) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && checkedMessage.Contains("dsc.gg/") ||
+                    if ((await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && checkedMessage.Contains("dsc.gg/") ||
                         checkedMessage.Contains("invite.gg/")
                         )
                     {
@@ -397,7 +397,7 @@ namespace Cliptok.Events
 
                     var inviteMatches = invite_rx.Matches(checkedMessage);
 
-                    if (GetPermLevel(member) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && inviteMatches.Count > 3)
+                    if ((await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && inviteMatches.Count > 3)
                     {
                         string reason = "Sent too many invites";
                         await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock);
@@ -422,7 +422,7 @@ namespace Cliptok.Events
                         if (maliciousCache == default)
                         {
 
-                            if (GetPermLevel(member) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && disallowedInviteCodes.Contains(code))
+                            if ((await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && disallowedInviteCodes.Contains(code))
                             {
                                 if (!wasAutoModBlock)
                                     _ = message.DeleteAsync();
@@ -477,7 +477,7 @@ namespace Cliptok.Events
 
 
                         if (
-                        GetPermLevel(member) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement
+                        (await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement
                         && (
                             invite.Channel.Type == DiscordChannelType.Group
                             || (
@@ -545,7 +545,7 @@ namespace Cliptok.Events
 
                             string reason = "Mass emoji";
 
-                            if (GetPermLevel(member) == ServerPermLevel.Nothing && !Program.db.HashExists("emojiPardoned", message.Author.Id.ToString()))
+                            if ((await GetPermLevelAsync(member)) == ServerPermLevel.Nothing && !Program.db.HashExists("emojiPardoned", message.Author.Id.ToString()))
                             {
                                 await Program.db.HashSetAsync("emojiPardoned", member.Id.ToString(), false);
                                 DiscordMessage msgOut;
@@ -677,7 +677,7 @@ namespace Cliptok.Events
                     }
 
                     // Mass mentions
-                    if (message.MentionedUsers is not null && message.MentionedUsers.Count >= Program.cfgjson.MassMentionThreshold && GetPermLevel(member) < ServerPermLevel.Tier3)
+                    if (message.MentionedUsers is not null && message.MentionedUsers.Count >= Program.cfgjson.MassMentionThreshold && (await GetPermLevelAsync(member)) < ServerPermLevel.Tier3)
                     {
                         if (wasAutoModBlock)
                         {
@@ -712,7 +712,7 @@ namespace Cliptok.Events
                     if (!Program.cfgjson.LineLimitExcludedChannels.Contains(channel.Id)
                         && (channel.ParentId is null || !Program.cfgjson.LineLimitExcludedChannels.Contains((ulong)channel.ParentId))
                         && (lineCount >= Program.cfgjson.IncreasedLineLimit
-                        || (lineCount >= Program.cfgjson.LineLimit && GetPermLevel(member) < (ServerPermLevel)Program.cfgjson.LineLimitTier)))
+                        || (lineCount >= Program.cfgjson.LineLimit && (await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.LineLimitTier)))
                     {
                         if (wasAutoModBlock)
                         {
@@ -782,7 +782,7 @@ namespace Cliptok.Events
                 if (!limitFilters)
                 {
                     // feedback hub forum
-                    if (GetPermLevel(member) < ServerPermLevel.TrialModerator && !isAnEdit && message.Channel.IsThread && message.Channel.ParentId == Program.cfgjson.FeedbackHubForum && !Program.db.SetContains("processedFeedbackHubThreads", message.Channel.Id))
+                    if ((await GetPermLevelAsync(member)) < ServerPermLevel.TrialModerator && !isAnEdit && message.Channel.IsThread && message.Channel.ParentId == Program.cfgjson.FeedbackHubForum && !Program.db.SetContains("processedFeedbackHubThreads", message.Channel.Id))
                     {
                         var thread = (DiscordThreadChannel)message.Channel;
                         Program.db.SetAdd("processedFeedbackHubThreads", thread.Id);
@@ -825,7 +825,7 @@ namespace Cliptok.Events
                     }
 
                     // Check the passive lists AFTER all other checks.
-                    if (GetPermLevel(member) >= ServerPermLevel.TrialModerator)
+                    if ((await GetPermLevelAsync(member)) >= ServerPermLevel.TrialModerator)
                         return;
 
                     foreach (var listItem in Program.cfgjson.WordListList)
