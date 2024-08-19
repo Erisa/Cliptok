@@ -188,9 +188,6 @@
         [JsonProperty("modmailCategory")]
         public ulong ModmailCategory { get; private set; }
 
-        [JsonProperty("autoBanIds")]
-        public List<AutoBanIdSet> AutoBanIds { get; private set; }
-
         [JsonProperty("lineLimit")]
         public int LineLimit { get; private set; }
 
@@ -346,19 +343,6 @@
         [JsonProperty("channelId")]
         public ulong? ChannelId { get; private set; }
     }
-
-    public class AutoBanIdSet
-    {
-        [JsonProperty("name")]
-        public string Name { get; private set; }
-
-        [JsonProperty("upperBound")]
-        public ulong UpperBound { get; private set; }
-
-        [JsonProperty("lowerBound")]
-        public ulong LowerBound { get; private set; }
-    }
-
     public class EmojiJson
     {
         [JsonProperty("noPermissions")]

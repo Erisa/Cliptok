@@ -72,29 +72,6 @@ namespace Cliptok.Events
                     var _ = BanHelpers.BanSilently(e.Guild, e.Member.Id, "Secret sauce");
                     await LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Banned} Raid-banned {e.Member.Mention} for matching avatar: {e.Member.AvatarUrl.Replace("1024", "128")}");
                 }
-
-                string banDM = $"You have been automatically banned from **{e.Guild.Name}** for matching patterns of known raiders.\n" +
-                    $"Please send an appeal and you will be unbanned as soon as possible: {cfgjson.AppealLink}\n" +
-                    $"The requirements for appeal can be ignored in this case. Sorry for any inconvenience caused.";
-
-                foreach (var IdAutoBanSet in cfgjson.AutoBanIds)
-                {
-                    if (db.HashExists(IdAutoBanSet.Name, e.Member.Id))
-                    {
-                        continue;
-                    }
-
-                    if (e.Member.Id > IdAutoBanSet.LowerBound && e.Member.Id < IdAutoBanSet.UpperBound)
-                    {
-                        await e.Member.SendMessageAsync(banDM);
-
-                        await e.Member.BanAsync(TimeSpan.FromDays(7), "Matching patterns of known raiders, please unban if appealed.");
-
-                        await LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Banned} Automatically appeal-banned {e.Member.Mention} for matching the creation date of the {IdAutoBanSet.Name} DM scam raiders.");
-                    }
-
-                    db.HashSet(IdAutoBanSet.Name, e.Member.Id, true);
-                }
             }
 
             // Restore user overrides stored in db (if there are any)
