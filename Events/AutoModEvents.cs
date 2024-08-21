@@ -8,6 +8,8 @@ namespace Cliptok.Events
             {
                 // AutoMod blocked a message. Pass it to the message handler to run it through some filters anyway.
                 
+                Program.discord.Logger.LogDebug("Got an AutoMod Message Block event in channel {channelId} by user {userId}", e.Rule.ChannelId, e.Rule.UserId);
+                
                 var author = await client.GetUserAsync(e.Rule.UserId);
                 var channel = await client.GetChannelAsync(e.Rule.ChannelId!.Value);
                 
