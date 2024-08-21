@@ -4,6 +4,8 @@ namespace Cliptok.Events
     {
         public static async Task AutoModerationRuleExecuted(DiscordClient client, AutoModerationRuleExecutedEventArgs e)
         {
+            Program.discord.Logger.LogDebug("Got an AutoMod Rule Executed event with action type {actionType} in channel {channelId} by user {userId}", e.Rule.Action.Type, e.Rule.ChannelId, e.Rule.UserId);
+            
             if (e.Rule.Action.Type == DiscordRuleActionType.BlockMessage)
             {
                 // AutoMod blocked a message. Pass it to the message handler to run it through some filters anyway.
