@@ -134,6 +134,10 @@ namespace Cliptok.Tasks
                         PendingChannelUpdateEvents.Remove(timestamp);
                         success = true;
                     }
+                    catch (InvalidOperationException ex)
+                    {
+                        Program.discord.Logger.LogDebug(ex, "Failed to enumerate channel overwrites for channel {channel}; this usually means the permissions were changed while processing a channel event. Will try again on next task run.", e.ChannelAfter.Id);
+                    }
                     catch (Exception ex)
                     {
                         // Log the exception
