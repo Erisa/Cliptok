@@ -1,5 +1,6 @@
 using DSharpPlus.Extensions;
 using DSharpPlus.Net.Gateway;
+using Serilog.Sinks.Grafana.Loki;
 using System.Reflection;
 
 namespace Cliptok
@@ -116,6 +117,11 @@ namespace Cliptok
                 default:
                     loggerConfig.MinimumLevel.Information();
                     break;
+            }
+
+            if (cfgjson.LokiURL is not null && cfgjson.LokiServiceName is not null)
+            {
+                loggerConfig.WriteTo.GrafanaLoki(cfgjson.LokiURL, [new LokiLabel { Key = "app", Value = cfgjson.LokiServiceName }]);
             }
 
             Log.Logger = loggerConfig.CreateLogger();

@@ -53,3 +53,17 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 30 --label-enable
     restart: always
+  tailscale:
+    image: tailscale/tailscale:latest
+    volumes:
+      - ./data/ts-state:/var/lib/tailscale
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+      - TS_EXTRA_ARGS=--hostname=cliptok --accept-dns=false --accept-routes=false # i'm not having my tailnet misconfigurations break cliptok
+    cap_add:
+      - net_admin
+      - sys_module
+    restart: always
+    network_mode: service:bot

@@ -290,6 +290,11 @@
         [JsonProperty("logLevel")]
         public Level LogLevel { get; private set; } = Level.Information;
 
+        [JsonProperty("lokiURL")]
+        public string LokiURL { get; private set; } = null;
+
+        [JsonProperty("lokiServiceName")]
+        public string LokiServiceName { get; private set; } = null;
     }
 
     public enum Level { Information, Warning, Error, Debug, Verbose }
