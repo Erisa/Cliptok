@@ -79,7 +79,6 @@ namespace Cliptok
 
             var loggerConfig = new LoggerConfiguration()
                 .WriteTo.Console(outputTemplate: logFormat, theme: AnsiConsoleTheme.Literate)
-                .WriteTo.TextWriter(outputCapture, outputTemplate: logFormat)
                 .WriteTo.DiscordSink(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information, outputTemplate: logFormat)
                 .Filter.ByExcluding(log => { return log.ToString().Contains("DSharpPlus.Exceptions.NotFoundException: Not found: NotFound"); });
 
@@ -118,6 +117,9 @@ namespace Cliptok
                     loggerConfig.MinimumLevel.Information();
                     break;
             }
+
+            if (cfgjson.LogLevel is not Level.Verbose)
+                loggerConfig.WriteTo.TextWriter(outputCapture, outputTemplate: logFormat);
 
             if (cfgjson.LokiURL is not null && cfgjson.LokiServiceName is not null)
             {
