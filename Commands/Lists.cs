@@ -213,7 +213,7 @@
 
         [Command("appealblock")]
         [Aliases("superduperban", "ablock")]
-        [Description("Watch for joins and leaves of a given user. Output goes to #investigations.")]
+        [Description("Prevents a user from submitting ban appeals.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task AppealBlock(
             CommandContext ctx,
