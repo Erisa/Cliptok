@@ -126,7 +126,11 @@
             }
             catch (Exception ex)
             {
-                Program.discord.Logger.LogError(Program.LogChannelErrorID, ex, "Error ocurred trying to send message to key {key}", key);
+                EventId eventId = Program.CliptokEventID;
+                if (key == "errors")
+                    eventId = Program.LogChannelErrorID;
+
+                Program.discord.Logger.LogError(eventId, ex, "Error ocurred trying to send message to key {key}", key);
                 return null;
             }
         }
