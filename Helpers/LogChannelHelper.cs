@@ -126,7 +126,7 @@
             }
             catch (Exception ex)
             {
-                Program.discord.Logger.LogError(ex, "Error ocurred trying to send message to key {key}", key);
+                Program.discord.Logger.LogError(Program.LogChannelErrorID, ex, "Error ocurred trying to send message to key {key}", key);
                 return null;
             }
         }

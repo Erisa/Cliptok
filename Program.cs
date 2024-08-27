@@ -45,6 +45,8 @@ namespace Cliptok
         public static ConnectionMultiplexer redis;
         public static IDatabase db;
         internal static EventId CliptokEventID { get; } = new EventId(1000, "Cliptok");
+        internal static EventId LogChannelErrorID { get; } = new EventId(1001, "LogChannelError");
+
 
         public static string[] avatars;
 
@@ -78,9 +80,11 @@ namespace Cliptok
             var logFormat = "[{Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{Level}] {Message}{NewLine}{Exception}";
 
             var loggerConfig = new LoggerConfiguration()
-                .WriteTo.Console(outputTemplate: logFormat, theme: AnsiConsoleTheme.Literate)
+                .WriteTo.Logger(lc =>
+                    lc.Filter.ByExcluding("EventId.Id = 1001")
                 .WriteTo.DiscordSink(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information, outputTemplate: logFormat)
-                .Filter.ByExcluding(log => { return log.ToString().Contains("DSharpPlus.Exceptions.NotFoundException: Not found: NotFound"); });
+                )
+                .WriteTo.Console(outputTemplate: logFormat, theme: AnsiConsoleTheme.Literate);
 
             string token;
             var json = "";
