@@ -295,6 +295,9 @@
 
         [JsonProperty("lokiServiceName")]
         public string LokiServiceName { get; private set; } = null;
+
+        [JsonProperty("voiceChannelPurge")]
+        public bool VoiceChannelPurge { get; private set; } = true;
     }
 
     public enum Level { Information, Warning, Error, Debug, Verbose }
