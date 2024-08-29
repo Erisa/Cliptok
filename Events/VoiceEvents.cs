@@ -39,7 +39,8 @@
                 if (PendingPurge.Contains(e.Before.Channel.Id))
                     return;
 
-                PendingPurge.Add(e.Before.Channel.Id);
+                if (Program.cfgjson.VoiceChannelPurge)
+                    PendingPurge.Add(e.Before.Channel.Id);
 
                 for (int i = 0; i <= 12; i++)
                 {
