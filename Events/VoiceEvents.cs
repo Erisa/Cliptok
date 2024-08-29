@@ -54,7 +54,7 @@
                     }
                 }
 
-                if (e.Guild.Channels[e.Before.Channel.Id].Users.Count == 0)
+                if (e.Guild.Channels[e.Before.Channel.Id].Users.Count == 0 && Program.cfgjson.VoiceChannelPurge)
                 {
                     List<DiscordMessage> messages = new();
                     try
