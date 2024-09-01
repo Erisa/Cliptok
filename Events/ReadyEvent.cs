@@ -42,7 +42,7 @@ namespace Cliptok.Events
                 }
             }
 
-            client.Logger.LogInformation(CliptokEventID, "Logged in as {user}", $"{DiscordHelpers.UniqueUsername(client.CurrentUser)}");
+            client.Logger.LogDebug(CliptokEventID, "Ready event: logged in as {user}", $"{DiscordHelpers.UniqueUsername(client.CurrentUser)}");
         }
 
         public static async Task OnStartup(DiscordClient client)
@@ -170,6 +170,7 @@ namespace Cliptok.Events
                 return;
             }
 
+            client.Logger.LogInformation(CliptokEventID, "Startup event complete, logged in as {user}", $"{DiscordHelpers.UniqueUsername(client.CurrentUser)}");
         }
 
     }
