@@ -300,7 +300,7 @@
         public bool VoiceChannelPurge { get; private set; } = true;
         
         [JsonProperty("forumChannelAutoWarnFallbackChannel")]
-        public ulong ForumChannelAutoWarnFallbackChannel { get; private set; }
+        public ulong ForumChannelAutoWarnFallbackChannel { get; private set; } = 0;
     }
 
     public enum Level { Information, Warning, Error, Debug, Verbose }

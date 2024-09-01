@@ -112,7 +112,10 @@ namespace Cliptok.Events
                 _ = message.DeleteAsync();
             else
                 if (channel.Type is DiscordChannelType.GuildForum)
-                    channel = await client.GetChannelAsync(Program.cfgjson.ForumChannelAutoWarnFallbackChannel);
+                    if (Program.cfgjson.ForumChannelAutoWarnFallbackChannel == 0)
+                        Program.discord.Logger.LogWarning("A warning in forum channel {channelId} was attempted, but may fail due to the fallback channel not being set. Please set 'forumChannelAutoWarnFallbackChannel' in config.json to avoid this.", channel.Id);
+                    else
+                        channel = Program.ForumChannelAutoWarnFallbackChannel;
 
             try
             {
@@ -147,7 +150,8 @@ namespace Cliptok.Events
                 if (wasAutoModBlock)
                 {
                     Program.discord.Logger.LogDebug("Processing AutoMod-blocked message in {channelId} by user {userId}", channel.Id, message.Author.Id);
-                    if (channel.Type == DiscordChannelType.GuildForum) channel = await client.GetChannelAsync(Program.cfgjson.ForumChannelAutoWarnFallbackChannel);
+                    if (channel.Type == DiscordChannelType.GuildForum && Program.cfgjson.ForumChannelAutoWarnFallbackChannel != 0)
+                        channel = Program.ForumChannelAutoWarnFallbackChannel;
                 }
                 else
                 {
