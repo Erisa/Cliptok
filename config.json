@@ -320,5 +320,6 @@
   "logLevel": "Debug",
   "lokiURL": "http://100.79.19.82:3100",
   "lokiServiceName": "cliptok",
-  "voiceChannelPurge":  true
+  "voiceChannelPurge":  true,
+  "forumChannelAutoWarnFallbackChannel": 150662382874525696
 }
