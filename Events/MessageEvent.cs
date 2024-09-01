@@ -111,7 +111,7 @@ namespace Cliptok.Events
             if (!wasAutoModBlock)
                 _ = message.DeleteAsync();
             else
-                if (channel.Type == DiscordChannelType.GuildForum)
+                if (channel.Type is DiscordChannelType.GuildForum)
                     channel = await client.GetChannelAsync(Program.cfgjson.ForumChannelAutoWarnFallbackChannel);
 
             try
