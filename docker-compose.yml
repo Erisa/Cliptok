@@ -1,4 +1,3 @@
-version: '2.3'
 services:
   bot:
     image: ghcr.io/erisa/cliptok
