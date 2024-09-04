@@ -197,6 +197,25 @@ namespace Cliptok.Events
             if (differrence > 10 && !userMute.IsNull && !e.Member.Roles.Contains(muteRole))
                 db.HashDeleteAsync("mutes", e.Member.Id);
 
+            // Nickname lock check
+            var nicknamelock = await db.HashGetAsync("nicknamelock", e.Member.Id);
+
+            if (nicknamelock.HasValue)
+            {
+                if (e.Member.DisplayName != nicknamelock)
+                {
+                    var oldName = e.Member.DisplayName;
+                    await e.Member.ModifyAsync(a =>
+                    {
+                        a.Nickname = nicknamelock.ToString();
+                        a.AuditLogReason = "Nickname lock applied, reverting nickname change. Nice try though.";
+                    });
+                    await LogChannelHelper.LogMessageAsync("nicknames", $"{cfgjson.Emoji.MessageEdit} Reverted nickname change from {e.Member.Mention}: `{oldName}`");
+                }
+                // We don't want to run the dehoist checks on locked nicknames, else it may cause a fight between the two.
+                return;
+            }
+
             DehoistHelpers.CheckAndDehoistMemberAsync(e.Member);
 
             // Persist permadehoists
@@ -219,6 +238,25 @@ namespace Cliptok.Events
                 return;
 
             var member = await homeGuild.GetMemberAsync(e.UserAfter.Id);
+
+            // Nickname lock check
+            var nicknamelock = await db.HashGetAsync("nicknamelock", member.Id);
+
+            if (nicknamelock.HasValue)
+            {
+                if (member.DisplayName != nicknamelock)
+                {
+                    var oldName = member.DisplayName;
+                    await member.ModifyAsync(async a =>
+                    {
+                        a.Nickname = nicknamelock.ToString();
+                        a.AuditLogReason = "Nickname lock applied, reverting nickname change. Nice try though.";
+                    });
+                    await LogChannelHelper.LogMessageAsync("nicknames", $"{cfgjson.Emoji.MessageEdit} Reverted nickname change from {member.Mention}: `{oldName}`");
+                }
+                // We don't want to run the dehoist checks on locked nicknames, else it may cause a fight between the two.
+                return;
+            }
 
             DehoistHelpers.CheckAndDehoistMemberAsync(member);
             ScamHelpers.UsernameCheckAsync(member); ;

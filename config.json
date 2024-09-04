@@ -286,6 +286,9 @@
     },
     "mentions": {
       "channelId": 1018252827254063224
+    },
+    "nicknames": {
+      "channelId": 1280688061528674314
     }
   },
   "botOwners": [
