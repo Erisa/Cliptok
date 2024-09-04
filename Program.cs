@@ -63,6 +63,8 @@ namespace Cliptok
         static public readonly HttpClient httpClient = new();
 
         public static List<ServerApiResponseJson> serverApiList = new();
+        
+        public static DiscordChannel ForumChannelAutoWarnFallbackChannel;
 
         public static void UpdateLists()
         {
@@ -239,6 +241,9 @@ namespace Cliptok
             await discord.ConnectAsync();
 
             await ReadyEvent.OnStartup(discord);
+            
+            if (cfgjson.ForumChannelAutoWarnFallbackChannel != 0)
+                ForumChannelAutoWarnFallbackChannel = await discord.GetChannelAsync(cfgjson.ForumChannelAutoWarnFallbackChannel);
 
             // Only wait 3 seconds before the first set of tasks.
             await Task.Delay(3000);
