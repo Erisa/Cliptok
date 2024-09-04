@@ -33,7 +33,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile.multiarch
           platforms: linux/amd64
           push: false
           tags: |
