@@ -101,6 +101,13 @@
         {
             await ctx.DeferAsync(ephemeral: true);
 
+            // only work if TQS mute role is configured
+            if (Program.cfgjson.TqsMutedRole == 0)
+            {
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} TQS mutes are not configured, so this command does nothing. Please contact the bot maintainer if this is unexpected."));
+                return;
+            }
+
             // Only allow usage in #tech-support, #tech-support-forum, and their threads
             if (ctx.Channel.Id != Program.cfgjson.TechSupportChannel &&
                 ctx.Channel.Id != Program.cfgjson.SupportForumId &&

@@ -106,7 +106,11 @@ namespace Cliptok.Events
                 return;
 
             var muteRole = await e.Guild.GetRoleAsync(cfgjson.MutedRole);
-            var tqsMuteRole = await e.Guild.GetRoleAsync(cfgjson.TqsMutedRole);
+
+            DiscordRole tqsMuteRole = default;
+            if (cfgjson.TqsMutedRole != 0)
+                tqsMuteRole = await e.Guild.GetRoleAsync(cfgjson.TqsMutedRole);
+
             var userMute = await db.HashGetAsync("mutes", e.Member.Id);
 
             if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole) & !e.Member.Roles.Contains(tqsMuteRole))

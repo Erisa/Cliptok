@@ -12,7 +12,9 @@ namespace Cliptok.Commands
 
             // todo: store per-guild
             DiscordRole mutedRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.MutedRole);
-            DiscordRole tqsMutedRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.TqsMutedRole);
+            DiscordRole tqsMutedRole = default;
+            if (Program.cfgjson.TqsMutedRole != 0)
+                tqsMutedRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.TqsMutedRole);
 
             DiscordMember member = default;
             try
@@ -103,6 +105,12 @@ namespace Cliptok.Commands
             CommandContext ctx, [Description("The user to mute")] DiscordUser targetUser,
             [RemainingText, Description("The reason for the mute")] string reason = "No reason specified.")
         {
+            if (Program.cfgjson.TqsMutedRole == 0)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} TQS mutes are not configured, so this command does nothing. Please contact the bot maintainer if this is unexpected.");
+                return;
+            }
+
             // Only allow usage in #tech-support, #tech-support-forum, and their threads
             if (ctx.Channel.Id != Program.cfgjson.TechSupportChannel &&
                 ctx.Channel.Id != Program.cfgjson.SupportForumId &&

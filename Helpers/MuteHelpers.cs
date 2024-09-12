@@ -318,7 +318,10 @@
 
             // todo: store per-guild
             DiscordRole mutedRole = await guild.GetRoleAsync(Program.cfgjson.MutedRole);
-            DiscordRole tqsMutedRole = await guild.GetRoleAsync(Program.cfgjson.TqsMutedRole);
+            DiscordRole tqsMutedRole = default;
+            if (Program.cfgjson.TqsMutedRole != 0)
+                tqsMutedRole = await Program.homeGuild.GetRoleAsync(Program.cfgjson.TqsMutedRole);
+
             DiscordMember member = default;
             try
             {

@@ -279,7 +279,7 @@
         public ulong InsiderCanaryThread { get; set; } = 0;
 
         [JsonProperty("tqsMutedRole")]
-        public ulong TqsMutedRole { get; private set; }
+        public ulong TqsMutedRole { get; private set; } = 0;
 
         [JsonProperty("tqsMuteDurationHours")]
         public int TqsMuteDurationHours { get; private set; }
