@@ -11,7 +11,8 @@ namespace Cliptok.Commands.InteractionCommands
             [Option("reason", "The reason the user is being banned")] string reason,
             [Option("keep_messages", "Whether to keep the users messages when banning")] bool keepMessages = false,
             [Option("time", "The length of time the user is banned for")] string time = null,
-            [Option("appeal_link", "Whether to show the user an appeal URL in the DM")] bool appealable = false
+            [Option("appeal_link", "Whether to show the user an appeal URL in the DM")] bool appealable = false,
+            [Option("compromised_account", "Whether to include special instructions for compromised accounts")] bool compromisedAccount = false
         )
         {
             // Initial response to avoid the 3 second timeout, will edit later.
@@ -78,7 +79,7 @@ namespace Cliptok.Commands.InteractionCommands
 
             if (member is null)
             {
-                await BanHelpers.BanFromServerAsync(user.Id, reason, ctx.User.Id, ctx.Guild, messageDeleteDays, ctx.Channel, banDuration, appealable);
+                await BanFromServerAsync(user.Id, reason, ctx.User.Id, ctx.Guild, messageDeleteDays, ctx.Channel, banDuration, appealable, compromisedAccount);
             }
             else
             {
@@ -86,7 +87,7 @@ namespace Cliptok.Commands.InteractionCommands
                 {
                     if (DiscordHelpers.AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
                     {
-                        await BanHelpers.BanFromServerAsync(user.Id, reason, ctx.User.Id, ctx.Guild, messageDeleteDays, ctx.Channel, banDuration, appealable);
+                        await BanFromServerAsync(user.Id, reason, ctx.User.Id, ctx.Guild, messageDeleteDays, ctx.Channel, banDuration, appealable, compromisedAccount);
                     }
                     else
                     {
