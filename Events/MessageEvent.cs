@@ -83,7 +83,7 @@ namespace Cliptok.Events
             string warnMsgReason = $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**";
             if (!wasAutoModBlock)
             {
-                msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, warnMsgReason, wasAutoModBlock, true);
+                msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, warnMsgReason, wasAutoModBlock, 1);
             }
             else
             {
@@ -339,7 +339,7 @@ namespace Cliptok.Events
 
                                 match = true;
 
-                                DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock, true);
+                                DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock, 1);
                                 var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
                                 await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField: ("Match", flaggedWord, true), wasAutoModBlock: wasAutoModBlock);
                                 return;
@@ -378,7 +378,7 @@ namespace Cliptok.Events
                             // still warn anyway
                         }
 
-                        DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{{Program.cfgjson.Emoji.Denied}} {{message.Author.Mention}} was automatically warned: **{{reason.Replace(\"`\", \"\\\\`\").Replace(\"*\", \"\\\\*\")}}**", wasAutoModBlock, true);
+                        DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{{Program.cfgjson.Emoji.Denied}} {{message.Author.Mention}} was automatically warned: **{{reason.Replace(\"`\", \"\\\\`\").Replace(\"*\", \"\\\\*\")}}**", wasAutoModBlock, 1);
                         var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
                         await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, wasAutoModBlock: wasAutoModBlock);
                         match = true;

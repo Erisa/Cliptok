@@ -243,12 +243,12 @@
             return new DiscordMessageBuilder().AddEmbeds(embeds.AsEnumerable());
         }
         
-        public static async Task<bool> DoEmptyThreadCleanupAsync(DiscordChannel channel, DiscordMessage message, bool wasAutoWarn = false)
+        public static async Task<bool> DoEmptyThreadCleanupAsync(DiscordChannel channel, DiscordMessage message, int minMessages = 0)
         {
-            return await DoEmptyThreadCleanupAsync(channel, new MockDiscordMessage(message), wasAutoWarn);
+            return await DoEmptyThreadCleanupAsync(channel, new MockDiscordMessage(message), minMessages);
         }
         
-        public static async Task<bool> DoEmptyThreadCleanupAsync(DiscordChannel channel, MockDiscordMessage message, bool wasAutoWarn = false)
+        public static async Task<bool> DoEmptyThreadCleanupAsync(DiscordChannel channel, MockDiscordMessage message, int minMessages = 0)
         {
             // Delete thread if all messages are deleted.
             // Otherwise, do nothing.
@@ -271,7 +271,7 @@
                 IReadOnlyList<DiscordMessage> messages;
                 try
                 {
-                    messages = await channel.GetMessagesAsync(wasAutoWarn ? 2 : 1).ToListAsync();
+                    messages = await channel.GetMessagesAsync(minMessages + 1).ToListAsync();
                 }
                 catch (DSharpPlus.Exceptions.NotFoundException ex)
                 {
@@ -281,7 +281,7 @@
 
                 // If this is coming after an automatic warning, 1 message in the thread is okay;
                 // this is the message that triggered the warning, and we can just delete the thread.
-                if (messages.Count == (wasAutoWarn ? 1 : 0))
+                if (messages.Count == minMessages)
                 {
                     await channel.DeleteAsync("All messages in thread were deleted.");
                     return true;
@@ -291,12 +291,12 @@
             return false;
         }
         
-        public static async Task ThreadChannelAwareDeleteMessageAsync(DiscordMessage message, bool wasAutoWarn = false)
+        public static async Task ThreadChannelAwareDeleteMessageAsync(DiscordMessage message, int minMessages = 0)
         {
-            await ThreadChannelAwareDeleteMessageAsync(new MockDiscordMessage(message), wasAutoWarn);
+            await ThreadChannelAwareDeleteMessageAsync(new MockDiscordMessage(message), minMessages);
         }
         
-        public static async Task<bool> ThreadChannelAwareDeleteMessageAsync(MockDiscordMessage message, bool wasAutoWarn = false)
+        public static async Task<bool> ThreadChannelAwareDeleteMessageAsync(MockDiscordMessage message, int minMessages = 0)
         {
             // Deletes a message in a thread channel, or if it is the last message, deletes the thread instead.
             // If this is not a thread channel, just deletes the message.
@@ -305,7 +305,7 @@
             
             if (message.Channel.Type == DiscordChannelType.GuildForum || message.Channel.Parent.Type == DiscordChannelType.GuildForum)
             {
-                wasThreadDeleted = await DoEmptyThreadCleanupAsync(message.Channel, message, wasAutoWarn);
+                wasThreadDeleted = await DoEmptyThreadCleanupAsync(message.Channel, message, minMessages);
                 if (!wasThreadDeleted)
                     await message.DeleteAsync();
             }

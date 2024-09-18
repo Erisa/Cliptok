@@ -390,12 +390,12 @@
             }
         }
         
-        public static async Task<DiscordMessage> SendPublicWarningMessageAndDeleteInfringingMessageAsync(DiscordMessage infringingMessage, string warningMessageContent, bool wasAutoModBlock = false, bool wasAutoWarn = false)
+        public static async Task<DiscordMessage> SendPublicWarningMessageAndDeleteInfringingMessageAsync(DiscordMessage infringingMessage, string warningMessageContent, bool wasAutoModBlock = false, int minMessages = 0)
         {
-            return await SendPublicWarningMessageAndDeleteInfringingMessageAsync(new MockDiscordMessage(infringingMessage), warningMessageContent, wasAutoModBlock, wasAutoWarn);
+            return await SendPublicWarningMessageAndDeleteInfringingMessageAsync(new MockDiscordMessage(infringingMessage), warningMessageContent, wasAutoModBlock, minMessages);
         }
         
-        public static async Task<DiscordMessage> SendPublicWarningMessageAndDeleteInfringingMessageAsync(MockDiscordMessage infringingMessage, string warningMessageContent, bool wasAutoModBlock = false, bool wasAutoWarn = false)
+        public static async Task<DiscordMessage> SendPublicWarningMessageAndDeleteInfringingMessageAsync(MockDiscordMessage infringingMessage, string warningMessageContent, bool wasAutoModBlock = false, int minMessages = 0)
         {
             // If this is a `GuildForum` channel, delete the thread if it is empty (empty = 1 message left if `isAutoWarn`, otherwise 0); if not empty, just delete the infringing message.
             // Then, based on whether the thread was deleted, send the warning message into the thread or into the configured fallback channel.
@@ -412,7 +412,7 @@
             
             if (!wasAutoModBlock)
             {
-                if (await DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(infringingMessage, wasAutoWarn))
+                if (await DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(infringingMessage, minMessages))
                     targetChannel = await Program.discord.GetChannelAsync(Program.cfgjson.ForumChannelAutoWarnFallbackChannel);
             }
             var warningMessage = await targetChannel.SendMessageAsync(warningMessageContent);
