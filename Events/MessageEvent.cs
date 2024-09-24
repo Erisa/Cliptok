@@ -456,7 +456,7 @@ namespace Cliptok.Events
                             break;
                         }
 
-                        if (invite == default)
+                        if (invite == default || invite.Channel is null)
                         {
                             continue;
                         }
