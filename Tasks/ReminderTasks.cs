@@ -75,7 +75,7 @@
                         catch (DSharpPlus.Exceptions.BadRequestException)
                         {
                             msg.WithContent($"<@{reminderObject.UserID}>, you asked to be reminded of something:");
-                            msg.WithReply(null, false, false);
+                            msg.WithReply(null);
                             msg.WithAllowedMentions(Mentions.All);
                             await channel.SendMessageAsync(msg);
                         }
