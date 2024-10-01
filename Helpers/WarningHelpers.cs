@@ -197,6 +197,10 @@
             {
                 // We failed to DM the user.
                 // Lets log this if it isn't a known cause.
+                if (e is DSharpPlus.Exceptions.NotFoundException)
+                {
+                    Program.discord.Logger.LogWarning(e, "Failed to send warning DM to user because they are not in the server: {user}", targetUser.Id);
+                }
                 if (e is not DSharpPlus.Exceptions.UnauthorizedException)
                 {
                     Program.discord.Logger.LogWarning(e, "Failed to send warning DM to user: {user}", targetUser.Id);
