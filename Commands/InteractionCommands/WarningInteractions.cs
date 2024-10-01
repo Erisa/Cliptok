@@ -314,15 +314,16 @@ namespace Cliptok.Commands.InteractionCommands
             else
             {
                 await ctx.DeferAsync(ephemeral: !showPublic);
-
+                
+                await EditWarning(user, warnId, ctx.User, reason);
+                
                 await LogChannelHelper.LogMessageAsync("mod",
                     new DiscordMessageBuilder()
                         .WithContent($"{Program.cfgjson.Emoji.Information} Warning edited:" +
                         $"`{StringHelpers.Pad(warnId)}` (belonging to {user.Mention})")
                         .AddEmbed(await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), true, userID: user.Id))
                 );
-
-                await EditWarning(user, warnId, ctx.User, reason);
+                
                 await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Successfully edited warning `{StringHelpers.Pad(warnId)}` (belonging to {user.Mention})")
                     .AddEmbed(await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), userID: user.Id)));
             }
