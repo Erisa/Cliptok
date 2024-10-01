@@ -2,12 +2,12 @@
 {
     public static class BaseContextExtensions
     {
-        public static async Task PrepareResponseAsync(this BaseContext ctx)
+        public static async Task PrepareResponseAsync(this CommandContext ctx)
         {
-            await ctx.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource);
+            await ctx.DeferResponseAsync();
         }
 
-        public static async Task RespondAsync(this BaseContext ctx, string text = null, DiscordEmbed embed = null, bool ephemeral = false, bool mentions = true, params DiscordComponent[] components)
+        public static async Task RespondAsync(this CommandContext ctx, string text = null, DiscordEmbed embed = null, bool ephemeral = false, bool mentions = true, params DiscordComponent[] components)
         {
             DiscordInteractionResponseBuilder response = new();
 
@@ -18,10 +18,10 @@
             response.AsEphemeral(ephemeral);
             response.AddMentions(mentions ? Mentions.All : Mentions.None);
 
-            await ctx.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, response);
+            await ctx.RespondAsync(response);
         }
 
-        public static async Task EditAsync(this BaseContext ctx, string text = null, DiscordEmbed embed = null, params DiscordComponent[] components)
+        public static async Task EditAsync(this CommandContext ctx, string text = null, DiscordEmbed embed = null, params DiscordComponent[] components)
         {
             DiscordWebhookBuilder response = new();
 
@@ -32,7 +32,7 @@
             await ctx.EditResponseAsync(response);
         }
 
-        public static async Task FollowAsync(this BaseContext ctx, string text = null, DiscordEmbed embed = null, bool ephemeral = false, params DiscordComponent[] components)
+        public static async Task FollowAsync(this CommandContext ctx, string text = null, DiscordEmbed embed = null, bool ephemeral = false, params DiscordComponent[] components)
         {
             DiscordFollowupMessageBuilder response = new();
 
@@ -44,7 +44,7 @@
 
             response.AsEphemeral(ephemeral);
 
-            await ctx.FollowUpAsync(response);
+            await ctx.FollowupAsync(response);
         }
     }
 }

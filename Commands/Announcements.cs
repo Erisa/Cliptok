@@ -1,13 +1,14 @@
 ﻿namespace Cliptok.Commands
 {
-    internal class Announcements : BaseCommandModule
+    internal class Announcements
     {
 
         [Command("editannounce")]
         [Description("Edit an announcement, preserving the ping highlight.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task EditAnnounce(
-            CommandContext ctx,
+            TextCommandContext ctx,
             [Description("The ID of the message to edit.")] ulong messageId,
             [Description("The short name for the role to ping.")] string roleName,
             [RemainingText, Description("The new message content, excluding the ping.")] string content
@@ -40,8 +41,9 @@
 
         [Command("announce")]
         [Description("Announces something in the current channel, pinging an Insider role in the process.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task AnnounceCmd(CommandContext ctx, [Description("'canary', 'dev', 'beta', 'beta10', 'rp', 'rp10', 'patch', 'rpbeta', 'rpbeta10', 'betadev', 'candev'")] string roleName, [RemainingText, Description("The announcement message to send.")] string announcementMessage)
+        public async Task AnnounceCmd(TextCommandContext ctx, [Description("'canary', 'dev', 'beta', 'beta10', 'rp', 'rp10', 'patch', 'rpbeta', 'rpbeta10', 'betadev', 'candev'")] string roleName, [RemainingText, Description("The announcement message to send.")] string announcementMessage)
         {
             DiscordRole discordRole;
 

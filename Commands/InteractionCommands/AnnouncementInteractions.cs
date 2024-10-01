@@ -1,37 +1,32 @@
 ﻿namespace Cliptok.Commands.InteractionCommands
 {
-    internal class AnnouncementInteractions : ApplicationCommandModule
+    internal class AnnouncementInteractions
     {
-        [SlashCommand("announcebuild", "Announce a Windows Insider build in the current channel.", defaultPermission: false)]
+        [Command("announcebuild")]
+        [Description("Announce a Windows Insider build in the current channel.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
-        public async Task AnnounceBuildSlashCommand(InteractionContext ctx,
-            [Choice("Windows 10", 10)]
-            [Choice("Windows 11", 11)]
-            [Option("windows_version", "The Windows version to announce a build of. Must be either 10 or 11.")] long windowsVersion,
+        [RequirePermissions(DiscordPermissions.ModerateMembers)]
+        public async Task AnnounceBuildSlashCommand(SlashCommandContext ctx,
+            [SlashChoiceProvider(typeof(WindowsVersionChoiceProvider))]
+            [Parameter("windows_version"), Description("The Windows version to announce a build of. Must be either 10 or 11.")] long windowsVersion,
 
-            [Option("build_number", "Windows build number, including any decimals (Decimals are optional). Do not include the word Build.")] string buildNumber,
+            [Parameter("build_number"), Description("Windows build number, including any decimals (Decimals are optional). Do not include the word Build.")] string buildNumber,
 
-            [Option("blog_link", "The link to the Windows blog entry relating to this build.")] string blogLink,
+            [Parameter("blog_link"), Description("The link to the Windows blog entry relating to this build.")] string blogLink,
 
-            [Choice("Canary Channel", "Canary")]
-            [Choice("Dev Channel", "Dev")]
-            [Choice("Beta Channel", "Beta")]
-            [Choice("Release Preview Channel", "RP")]
-            [Option("insider_role1", "The first insider role to ping.")] string insiderChannel1,
+            [SlashChoiceProvider(typeof(WindowsInsiderChannelChoiceProvider))]
+            [Parameter("insider_role1"), Description("The first insider role to ping.")] string insiderChannel1, // TODO(#202): test choices!!!
 
-            [Choice("Canary Channel", "Canary")]
-            [Choice("Dev Channel", "Dev")]
-            [Choice("Beta Channel", "Beta")]
-            [Choice("Release Preview Channel", "RP")]
-            [Option("insider_role2", "The second insider role to ping.")] string insiderChannel2 = "",
+            [SlashChoiceProvider(typeof(WindowsInsiderChannelChoiceProvider))]
+            [Parameter("insider_role2"), Description("The second insider role to ping.")] string insiderChannel2 = "", // TODO(#202): test choices!!!
 
-            [Option("canary_create_new_thread", "Enable this option if you want to create a new Canary thread for some reason")] bool canaryCreateNewThread = false,
-            [Option("thread", "The thread to mention in the announcement.")] DiscordChannel threadChannel = default,
-            [Option("flavour_text", "Extra text appended on the end of the main line, replacing :WindowsInsider: or :Windows10:")] string flavourText = "",
-            [Option("autothread_name", "If no thread is given, create a thread with this name.")] string autothreadName = "Build {0} ({1})",
+            [Parameter("canary_create_new_thread"), Description("Enable this option if you want to create a new Canary thread for some reason")] bool canaryCreateNewThread = false,
+            [Parameter("thread"), Description("The thread to mention in the announcement.")] DiscordChannel threadChannel = default,
+            [Parameter("flavour_text"), Description("Extra text appended on the end of the main line, replacing :WindowsInsider: or :Windows10:")] string flavourText = "",
+            [Parameter("autothread_name"), Description("If no thread is given, create a thread with this name.")] string autothreadName = "Build {0} ({1})",
 
-            [Option("lockdown", "Set 0 to not lock. Lock the channel for a certain period of time after announcing the build.")] string lockdownTime = "auto"
+            [Parameter("lockdown"), Description("Set 0 to not lock. Lock the channel for a certain period of time after announcing the build.")] string lockdownTime = "auto"
         )
         {
             if (Program.cfgjson.InsiderCommandLockedToChannel != 0 && ctx.Channel.Id != Program.cfgjson.InsiderCommandLockedToChannel)
@@ -168,7 +163,7 @@
                     await insiderRole2.ModifyAsync(mentionable: true);
 
                 await ctx.RespondAsync(pingMsgString);
-                messageSent = await ctx.GetOriginalResponseAsync();
+                messageSent = await ctx.GetResponseAsync();
 
                 await insiderRole1.ModifyAsync(mentionable: false);
                 if (insiderChannel2 != "")
@@ -202,7 +197,7 @@
                 }
 
                 await ctx.RespondAsync(noPingMsgString);
-                messageSent = await ctx.GetOriginalResponseAsync();
+                messageSent = await ctx.GetResponseAsync();
             }
 
             if (threadChannel == default)
@@ -261,6 +256,32 @@
                 }
 
                 await LockdownHelpers.LockChannelAsync(user: ctx.User, channel: ctx.Channel, duration: lockDuration);
+            }
+        }
+        
+        internal class WindowsVersionChoiceProvider : IChoiceProvider
+        {
+            public async ValueTask<IReadOnlyDictionary<string, object>> ProvideAsync(CommandParameter _)
+            {
+                return new Dictionary<string, object>
+                {
+                    { "Windows 10", "10" },
+                    { "Windows 11", "11" }
+                };
+            }
+        }
+        
+        internal class WindowsInsiderChannelChoiceProvider : IChoiceProvider
+        {
+            public async ValueTask<IReadOnlyDictionary<string, object>> ProvideAsync(CommandParameter _)
+            {
+                return new Dictionary<string, object>
+                {
+                    { "Canary Channel", "Canary" },
+                    { "Dev Channel", "Dev" },
+                    { "Beta Channel", "Beta" },
+                    { "Release Preview Channel", "RP" }
+                };
             }
         }
 

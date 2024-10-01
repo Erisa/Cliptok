@@ -2,22 +2,25 @@ using static Cliptok.Helpers.UserNoteHelpers;
 
 namespace Cliptok.Commands.InteractionCommands
 {
-    internal class UserNoteInteractions : ApplicationCommandModule
+    internal class UserNoteInteractions
     {
-        [SlashCommandGroup("note", "Manage user notes", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        [Command("note")]
+        [Description("Manage user notes")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
         public class UserNoteSlashCommands
         {
-            [SlashCommand("add", "Add a note to a user. Only visible to mods.")]
-            public async Task AddUserNoteAsync(InteractionContext ctx,
-                [Option("user", "The user to add a note for.")] DiscordUser user,
-                [Option("note", "The note to add.")] string noteText,
-                [Option("show_on_modmail", "Whether to show the note when the user opens a modmail thread. Default: true")] bool showOnModmail = true,
-                [Option("show_on_warn", "Whether to show the note when the user is warned. Default: true")] bool showOnWarn = true,
-                [Option("show_all_mods", "Whether to show this note to all mods, versus just yourself. Default: true")] bool showAllMods = true,
-                [Option("show_once", "Whether to show this note once and then discard it. Default: false")] bool showOnce = false)
+            [Command("add")]
+			[Description("Add a note to a user. Only visible to mods.")]
+            public async Task AddUserNoteAsync(SlashCommandContext ctx,
+                [Parameter("user"), Description("The user to add a note for.")] DiscordUser user,
+                [Parameter("note"), Description("The note to add.")] string noteText,
+                [Parameter("show_on_modmail"), Description("Whether to show the note when the user opens a modmail thread. Default: true")] bool showOnModmail = true,
+                [Parameter("show_on_warn"), Description("Whether to show the note when the user is warned. Default: true")] bool showOnWarn = true,
+                [Parameter("show_all_mods"), Description("Whether to show this note to all mods, versus just yourself. Default: true")] bool showAllMods = true,
+                [Parameter("show_once"), Description("Whether to show this note once and then discard it. Default: false")] bool showOnce = false)
             {
-                await ctx.DeferAsync();
+                await ctx.DeferResponseAsync();
 
                 // Assemble new note
                 long noteId = Program.db.StringIncrement("totalWarnings");
@@ -42,13 +45,14 @@ namespace Cliptok.Commands.InteractionCommands
                 await LogChannelHelper.LogMessageAsync("mod", $"{Program.cfgjson.Emoji.Information} New note for {user.Mention}!", embed);
 
                 // Respond
-                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Successfully added note!").AsEphemeral());
+                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Successfully added note!").AsEphemeral());
             }
 
-            [SlashCommand("delete", "Delete a note.")]
-            public async Task RemoveUserNoteAsync(InteractionContext ctx,
-                [Option("user", "The user whose note to delete.")] DiscordUser user,
-                [Autocomplete(typeof(NotesAutocompleteProvider))][Option("note", "The note to delete.")] string targetNote)
+            [Command("delete")]
+			[Description("Delete a note.")]
+            public async Task RemoveUserNoteAsync(SlashCommandContext ctx,
+                [Parameter("user"), Description("The user whose note to delete.")] DiscordUser user,
+                [SlashAutoCompleteProvider(typeof(NotesAutocompleteProvider))][Parameter("note"), Description("The note to delete.")] string targetNote)
             {
                 // Get note
                 UserNote note;
@@ -58,14 +62,14 @@ namespace Cliptok.Commands.InteractionCommands
                 }
                 catch
                 {
-                    await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I couldn't find that note! Make sure you've got the right ID.").AsEphemeral());
+                    await ctx.RespondAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I couldn't find that note! Make sure you've got the right ID.").AsEphemeral());
                     return;
                 }
 
                 // If user manually provided an ID of a warning, refuse the request and suggest /delwarn instead
                 if (note.Type == WarningType.Warning)
                 {
-                    await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} That's a warning, not a note! Try using `/delwarn` instead, or make sure you've got the right note ID.").AsEphemeral());
+                    await ctx.RespondAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} That's a warning, not a note! Try using `/delwarn` instead, or make sure you've got the right note ID.").AsEphemeral());
                     return;
                 }
 
@@ -77,18 +81,19 @@ namespace Cliptok.Commands.InteractionCommands
                 await LogChannelHelper.LogMessageAsync("mod", $"{Program.cfgjson.Emoji.Deleted} Note deleted: `{note.NoteId}` (belonging to {user.Mention}, deleted by {ctx.User.Mention})", embed);
 
                 // Respond
-                await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Successfully deleted note!").AsEphemeral());
+                await ctx.RespondAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Successfully deleted note!").AsEphemeral());
             }
 
-            [SlashCommand("edit", "Edit a note for a user.")]
-            public async Task EditUserNoteAsync(InteractionContext ctx,
-                [Option("user", "The user to edit a note for.")] DiscordUser user,
-                [Autocomplete(typeof(NotesAutocompleteProvider))][Option("note", "The note to edit.")] string targetNote,
-                [Option("new_text", "The new note text. Leave empty to not change.")] string newNoteText = default,
-                [Option("show_on_modmail", "Whether to show the note when the user opens a modmail thread.")] bool? showOnModmail = null,
-                [Option("show_on_warn", "Whether to show the note when the user is warned.")] bool? showOnWarn = null,
-                [Option("show_all_mods", "Whether to show this note to all mods, versus just yourself.")] bool? showAllMods = null,
-                [Option("show_once", "Whether to show this note once and then discard it.")] bool? showOnce = null)
+            [Command("edit")]
+			[Description("Edit a note for a user.")]
+            public async Task EditUserNoteAsync(SlashCommandContext ctx,
+                [Parameter("user"), Description("The user to edit a note for.")] DiscordUser user,
+                [SlashAutoCompleteProvider(typeof(NotesAutocompleteProvider))][Parameter("note"), Description("The note to edit.")] string targetNote,
+                [Parameter("new_text"), Description("The new note text. Leave empty to not change.")] string newNoteText = default,
+                [Parameter("show_on_modmail"), Description("Whether to show the note when the user opens a modmail thread.")] bool? showOnModmail = null,
+                [Parameter("show_on_warn"), Description("Whether to show the note when the user is warned.")] bool? showOnWarn = null,
+                [Parameter("show_all_mods"), Description("Whether to show this note to all mods, versus just yourself.")] bool? showAllMods = null,
+                [Parameter("show_once"), Description("Whether to show this note once and then discard it.")] bool? showOnce = null)
             {
                 // Get note
                 UserNote note;
@@ -98,7 +103,7 @@ namespace Cliptok.Commands.InteractionCommands
                 }
                 catch
                 {
-                    await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I couldn't find that note! Make sure you've got the right ID.").AsEphemeral());
+                    await ctx.RespondAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I couldn't find that note! Make sure you've got the right ID.").AsEphemeral());
                     return;
                 }
 
@@ -109,14 +114,14 @@ namespace Cliptok.Commands.InteractionCommands
                 // If no changes are made, refuse the request
                 if (note.NoteText == newNoteText && showOnModmail is null && showOnWarn is null && showAllMods is null && showOnce is null)
                 {
-                    await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You didn't change anything about the note!").AsEphemeral());
+                    await ctx.RespondAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You didn't change anything about the note!").AsEphemeral());
                     return;
                 }
 
                 // If user manually provided an ID of a warning, refuse the request and suggest /editwarn instead
                 if (note.Type == WarningType.Warning)
                 {
-                    await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} That's a warning, not a note! Try using `/editwarn` instead, or make sure you've got the right note ID.").AsEphemeral());
+                    await ctx.RespondAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} That's a warning, not a note! Try using `/editwarn` instead, or make sure you've got the right note ID.").AsEphemeral());
                     return;
                 }
 
@@ -146,22 +151,24 @@ namespace Cliptok.Commands.InteractionCommands
                 await LogChannelHelper.LogMessageAsync("mod", $"{Program.cfgjson.Emoji.Information} Note edited: `{note.NoteId}` (belonging to {user.Mention})", embed);
 
                 // Respond
-                await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Successfully edited note!").AsEphemeral());
+                await ctx.RespondAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Successfully edited note!").AsEphemeral());
             }
 
-            [SlashCommand("list", "List all notes for a user.")]
-            public async Task ListUserNotesAsync(InteractionContext ctx,
-                [Option("user", "The user whose notes to list.")] DiscordUser user,
-                [Option("public", "Whether to show the notes in public chat. Default: false")] bool showPublicly = false)
+            [Command("list")]
+			[Description("List all notes for a user.")]
+            public async Task ListUserNotesAsync(SlashCommandContext ctx,
+                [Parameter("user"), Description("The user whose notes to list.")] DiscordUser user,
+                [Parameter("public"), Description("Whether to show the notes in public chat. Default: false")] bool showPublicly = false)
             {
-                await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().AddEmbed(await GenerateUserNotesEmbedAsync(user)).AsEphemeral(!showPublicly));
+                await ctx.RespondAsync(new DiscordInteractionResponseBuilder().AddEmbed(await GenerateUserNotesEmbedAsync(user)).AsEphemeral(!showPublicly));
             }
 
-            [SlashCommand("details", "Show the details of a specific note for a user.")]
-            public async Task ShowUserNoteAsync(InteractionContext ctx,
-                [Option("user", "The user whose note to show details for.")] DiscordUser user,
-                [Autocomplete(typeof(NotesAutocompleteProvider))][Option("note", "The note to show.")] string targetNote,
-                [Option("public", "Whether to show the note in public chat. Default: false")] bool showPublicly = false)
+            [Command("details")]
+			[Description("Show the details of a specific note for a user.")]
+            public async Task ShowUserNoteAsync(SlashCommandContext ctx,
+                [Parameter("user"), Description("The user whose note to show details for.")] DiscordUser user,
+                [SlashAutoCompleteProvider(typeof(NotesAutocompleteProvider))][Parameter("note"), Description("The note to show.")] string targetNote,
+                [Parameter("public"), Description("Whether to show the note in public chat. Default: false")] bool showPublicly = false)
             {
                 // Get note
                 UserNote note;
@@ -171,26 +178,26 @@ namespace Cliptok.Commands.InteractionCommands
                 }
                 catch
                 {
-                    await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I couldn't find that note! Make sure you've got the right ID.").AsEphemeral());
+                    await ctx.RespondAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I couldn't find that note! Make sure you've got the right ID.").AsEphemeral());
                     return;
                 }
 
                 // If user manually provided an ID of a warning, refuse the request and suggest /warndetails instead
                 if (note.Type == WarningType.Warning)
                 {
-                    await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} That's a warning, not a note! Try using `/warndetails` instead, or make sure you've got the right note ID.").AsEphemeral());
+                    await ctx.RespondAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} That's a warning, not a note! Try using `/warndetails` instead, or make sure you've got the right note ID.").AsEphemeral());
                     return;
                 }
 
                 // Respond
-                await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().AddEmbed(await GenerateUserNoteDetailEmbedAsync(note, user)).AsEphemeral(!showPublicly));
+                await ctx.RespondAsync(new DiscordInteractionResponseBuilder().AddEmbed(await GenerateUserNoteDetailEmbedAsync(note, user)).AsEphemeral(!showPublicly));
             }
 
-            private class NotesAutocompleteProvider : IAutocompleteProvider
+            private class NotesAutocompleteProvider : IAutoCompleteProvider
             {
-                public async Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext ctx)
+                public async ValueTask<IReadOnlyDictionary<string, object>> AutoCompleteAsync(AutoCompleteContext ctx)
                 {
-                    var list = new List<DiscordAutoCompleteChoice>();
+                    var list = new Dictionary<string, object>();
 
                     var useroption = ctx.Options.FirstOrDefault(x => x.Name == "user");
                     if (useroption == default)
@@ -213,8 +220,10 @@ namespace Cliptok.Commands.InteractionCommands
 
                         string noteString = $"{StringHelpers.Pad(note.Value.NoteId)} - {StringHelpers.Truncate(note.Value.NoteText, 29, true)} - {TimeHelpers.TimeToPrettyFormat(DateTime.Now - note.Value.Timestamp, true)}";
 
-                        if (ctx.FocusedOption.Value.ToString() == "" || note.Value.NoteText.Contains((string)ctx.FocusedOption.Value) || noteString.ToLower().Contains(ctx.FocusedOption.Value.ToString().ToLower()))
-                            list.Add(new DiscordAutoCompleteChoice(noteString, StringHelpers.Pad(note.Value.NoteId)));
+                        var focusedOption = ctx.Options.FirstOrDefault(option => option.Focused);
+                        if (focusedOption is not null) // TODO(#202): is this right?
+                            if (note.Value.NoteText.Contains((string)focusedOption.Value) || noteString.ToLower().Contains(focusedOption.Value.ToString().ToLower()))
+                                list.Add(noteString, StringHelpers.Pad(note.Value.NoteId));
                     }
 
                     return list;

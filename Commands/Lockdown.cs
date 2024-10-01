@@ -1,15 +1,16 @@
 namespace Cliptok.Commands
 {
-    class Lockdown : BaseCommandModule
+    class Lockdown
     {
         public bool ongoingLockdown = false;
 
         [Command("lockdown")]
-        [Aliases("lock")]
+        [TextAlias("lock")]
         [Description("Locks the current channel, preventing any new messages. See also: unlock")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequireBotPermissions(DiscordPermissions.ManageChannels)]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ManageChannels, DiscordPermissions.None)]
         public async Task LockdownCommand(
-            CommandContext ctx,
+            TextCommandContext ctx,
             [RemainingText, Description("The time and reason for the lockdown. For example '3h' or '3h spam'. Default is permanent with no reason.")] string timeAndReason = ""
         )
         {
@@ -98,8 +99,9 @@ namespace Cliptok.Commands
 
         [Command("unlock")]
         [Description("Unlocks a previously locked channel. See also: lockdown")]
-        [Aliases("unlockdown"), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequireBotPermissions(DiscordPermissions.ManageChannels)]
-        public async Task UnlockCommand(CommandContext ctx, [RemainingText] string reason = "")
+        [AllowedProcessors(typeof(TextCommandProcessor))]
+        [TextAlias("unlockdown"), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ManageChannels, DiscordPermissions.None)]
+        public async Task UnlockCommand(TextCommandContext ctx, [RemainingText] string reason = "")
         {
             var currentChannel = ctx.Channel;
             if (!Program.cfgjson.LockdownEnabledChannels.Contains(currentChannel.Id))

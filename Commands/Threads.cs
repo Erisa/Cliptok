@@ -1,11 +1,12 @@
 ﻿namespace Cliptok.Commands
 {
-    internal class Threads : BaseCommandModule
+    internal class Threads
     {
         [Command("archive")]
         [Description("Archive the current thread or another thread.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public async Task ArchiveCommand(CommandContext ctx, DiscordChannel channel = default)
+        public async Task ArchiveCommand(TextCommandContext ctx, DiscordChannel channel = default)
         {
             if (channel == default)
                 channel = ctx.Channel;
@@ -27,8 +28,9 @@
 
         [Command("lockthread")]
         [Description("Lock the current thread or another thread.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public async Task LockThreadCommand(CommandContext ctx, DiscordChannel channel = default)
+        public async Task LockThreadCommand(TextCommandContext ctx, DiscordChannel channel = default)
         {
             if (channel == default)
                 channel = ctx.Channel;
@@ -50,8 +52,9 @@
 
         [Command("unarchive")]
         [Description("Unarchive a thread")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public async Task UnarchiveCommand(CommandContext ctx, DiscordChannel channel = default)
+        public async Task UnarchiveCommand(TextCommandContext ctx, DiscordChannel channel = default)
         {
             if (channel == default)
                 channel = ctx.Channel;

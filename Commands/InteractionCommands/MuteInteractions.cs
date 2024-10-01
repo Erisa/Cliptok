@@ -1,18 +1,20 @@
 ﻿namespace Cliptok.Commands.InteractionCommands
 {
-    internal class MuteInteractions : ApplicationCommandModule
+    internal class MuteInteractions
     {
-        [SlashCommand("mute", "Mute a user, temporarily or permanently.")]
+        [Command("mute")]
+        [Description("Mute a user, temporarily or permanently.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        [RequirePermissions(DiscordPermissions.ModerateMembers)]
         public async Task MuteSlashCommand(
-            InteractionContext ctx,
-            [Option("user", "The user you wish to mute.")] DiscordUser targetUser,
-            [Option("reason", "The reason for the mute.")] string reason,
-            [Option("time", "The length of time to mute for.")] string time = ""
+            SlashCommandContext ctx,
+            [Parameter("user"), Description("The user you wish to mute.")] DiscordUser targetUser,
+            [Parameter("reason"), Description("The reason for the mute.")] string reason,
+            [Parameter("time"), Description("The length of time to mute for.")] string time = ""
         )
         {
-            await ctx.DeferAsync(ephemeral: true);
+            await ctx.DeferResponseAsync(ephemeral: true);
             DiscordMember targetMember = default;
             try
             {
@@ -35,7 +37,7 @@
             {
                 try
                 {
-                    muteDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(ctx.Interaction.CreationTimestamp.DateTime);
+                    muteDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(DateTime.UtcNow); // TODO(#202): this used InteractionContext#Interaction.CreationTimestamp.DateTime before, please test!!
                 }
                 catch
                 {
@@ -48,16 +50,18 @@
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Command completed successfully."));
         }
 
-        [SlashCommand("unmute", "Unmute a user.")]
+        [Command("unmute")]
+        [Description("Unmute a user.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        [RequirePermissions(DiscordPermissions.ModerateMembers)]
         public async Task UnmuteSlashCommand(
-            InteractionContext ctx,
-            [Option("user", "The user you wish to mute.")] DiscordUser targetUser,
-            [Option("reason", "The reason for the unmute.")] string reason = "No reason specified."
+            SlashCommandContext ctx,
+            [Parameter("user"), Description("The user you wish to mute.")] DiscordUser targetUser,
+            [Parameter("reason"), Description("The reason for the unmute.")] string reason = "No reason specified."
             )
         {
-            await ctx.DeferAsync(ephemeral: false);
+            await ctx.DeferResponseAsync(ephemeral: false);
 
             reason = $"[Manual unmute by {DiscordHelpers.UniqueUsername(ctx.User)}]: {reason}";
 
@@ -77,29 +81,31 @@
             if ((await Program.db.HashExistsAsync("mutes", targetUser.Id)) || (member != default && member.Roles.Contains(mutedRole)))
             {
                 await MuteHelpers.UnmuteUserAsync(targetUser, reason, true, ctx.User);
-                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Successfully unmuted **{DiscordHelpers.UniqueUsername(targetUser)}**."));
+                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Successfully unmuted **{DiscordHelpers.UniqueUsername(targetUser)}**."));
             }
             else
                 try
                 {
                     await MuteHelpers.UnmuteUserAsync(targetUser, reason, true, ctx.User);
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Warning} According to Discord that user is not muted, but I tried to unmute them anyway. Hope it works."));
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Warning} According to Discord that user is not muted, but I tried to unmute them anyway. Hope it works."));
                 }
                 catch (Exception e)
                 {
                     Program.discord.Logger.LogError(e, "An error occurred unmuting {user}", targetUser.Id);
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be muted, *and* an error occurred while attempting to unmute them anyway. Please contact the bot owner, the error has been logged."));
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be muted, *and* an error occurred while attempting to unmute them anyway. Please contact the bot owner, the error has been logged."));
                 }
         }
 
-        [SlashCommand("tqsmute", "Temporarily mute a user in tech support channels.")]
+        [Command("tqsmute")]
+        [Description("Temporarily mute a user in tech support channels.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
         [SlashRequireHomeserverPerm(ServerPermLevel.TechnicalQueriesSlayer)]
         public async Task TqsMuteSlashCommand(
-            InteractionContext ctx,
-            [Option("user", "The user to mute.")] DiscordUser targetUser,
-            [Option("reason", "The reason for the mute.")] string reason)
+            SlashCommandContext ctx,
+            [Parameter("user"), Description("The user to mute.")] DiscordUser targetUser,
+            [Parameter("reason"), Description("The reason for the mute.")] string reason)
         {
-            await ctx.DeferAsync(ephemeral: true);
+            await ctx.DeferResponseAsync(ephemeral: true);
 
             // only work if TQS mute role is configured
             if (Program.cfgjson.TqsMutedRole == 0)

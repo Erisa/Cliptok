@@ -2,6 +2,7 @@ using DSharpPlus.Extensions;
 using DSharpPlus.Net.Gateway;
 using Serilog.Sinks.Grafana.Loki;
 using System.Reflection;
+using DSharpPlus.Commands.EventArgs;
 
 namespace Cliptok
 {
@@ -36,10 +37,9 @@ namespace Cliptok
 
     }
 
-    class Program : BaseCommandModule
+    class Program
     {
         public static DiscordClient discord;
-        static CommandsNextExtension commands;
         public static Random rnd = new();
         public static ConfigJson cfgjson;
         public static ConnectionMultiplexer redis;
@@ -179,6 +179,20 @@ namespace Cliptok
             discordBuilder.ConfigureServices(services =>
             {
                 services.Replace<IGatewayController, GatewayController>();
+                services.AddCommandsExtension(builder =>
+                {
+                    builder.CommandErrored += ErrorEvents.CommandErrored;
+
+                    // Interaction commands
+                    var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands" && !t.IsNested);
+                    foreach (var type in slashCommandClasses)
+                        builder.AddCommands(type, cfgjson.ServerID);
+                    
+                    // Text commands TODO(#202):  [Error] Failed to build command '"editwarn"' System.ArgumentException: An item with the same key has already been added. Key: editwarn
+                    var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands" && !t.IsNested);
+                    foreach (var type in commandClasses)
+                        builder.AddCommands(type);
+                });
             });
 
             discordBuilder.ConfigureExtraFeatures(clientConfig =>
@@ -210,30 +224,6 @@ namespace Cliptok
                                   .HandleChannelDeleted(ChannelEvents.ChannelDeleted)
                                   .HandleAutoModerationRuleExecuted(AutoModEvents.AutoModerationRuleExecuted)
             );
-
-#pragma warning disable CS0618 // Type or member is obsolete
-            discordBuilder.UseSlashCommands(slash =>
-            {
-                slash.SlashCommandErrored += InteractionEvents.SlashCommandErrorEvent;
-                slash.ContextMenuErrored += InteractionEvents.ContextCommandErrorEvent;
-
-                var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands" && !t.IsNested);
-                foreach (var type in slashCommandClasses)
-                    slash.RegisterCommands(type, cfgjson.ServerID); ;
-            });
-#pragma warning restore CS0618 // Type or member is obsolete
-
-            discordBuilder.UseCommandsNext(commands =>
-            {
-                var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands" && !t.IsNested);
-                foreach (var type in commandClasses)
-                    commands.RegisterCommands(type);
-
-                commands.CommandErrored += ErrorEvents.CommandsNextService_CommandErrored;
-            }, new CommandsNextConfiguration
-            {
-                StringPrefixes = cfgjson.Core.Prefixes
-            });
 
             // TODO(erisa): At some point we might be forced to ConnectAsync() the builder directly
             // and then we will need to rework some other pieces that rely on Program.discord

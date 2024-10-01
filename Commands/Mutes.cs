@@ -1,12 +1,13 @@
 namespace Cliptok.Commands
 {
-    internal class Mutes : BaseCommandModule
+    internal class Mutes
     {
         [Command("unmute")]
-        [Aliases("umute")]
+        [TextAlias("umute")]
         [Description("Unmutes a previously muted user, typically ahead of the standard expiration time. See also: mute")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public async Task UnmuteCmd(CommandContext ctx, [Description("The user you're trying to unmute.")] DiscordUser targetUser, string reason = "No reason provided.")
+        public async Task UnmuteCmd(TextCommandContext ctx, [Description("The user you're trying to unmute.")] DiscordUser targetUser, string reason = "No reason provided.")
         {
             reason = $"[Manual unmute by {DiscordHelpers.UniqueUsername(ctx.User)}]: {reason}";
 
@@ -46,9 +47,10 @@ namespace Cliptok.Commands
 
         [Command("mute")]
         [Description("Mutes a user, preventing them from sending messages until they're unmuted. See also: unmute")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task MuteCmd(
-            CommandContext ctx, [Description("The user you're trying to mute")] DiscordUser targetUser,
+            TextCommandContext ctx, [Description("The user you're trying to mute")] DiscordUser targetUser,
             [RemainingText, Description("Combined argument for the time and reason for the mute. For example '1h rule 7' or 'rule 10'")] string timeAndReason = "No reason specified."
         )
         {
@@ -100,9 +102,10 @@ namespace Cliptok.Commands
         [Command("tqsmute")]
         [Description(
             "Temporarily mutes a user, preventing them from sending messages in #tech-support and related channels until they're unmuted.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TechnicalQueriesSlayer)]
         public async Task TqsMuteCmd(
-            CommandContext ctx, [Description("The user to mute")] DiscordUser targetUser,
+            TextCommandContext ctx, [Description("The user to mute")] DiscordUser targetUser,
             [RemainingText, Description("The reason for the mute")] string reason = "No reason specified.")
         {
             if (Program.cfgjson.TqsMutedRole == 0)

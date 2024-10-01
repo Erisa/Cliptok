@@ -2,12 +2,13 @@
 
 namespace Cliptok.Commands.InteractionCommands
 {
-    internal class DebugInteractions : ApplicationCommandModule
+    internal class DebugInteractions
     {
-        [SlashCommand("scamcheck", "Check if a link or message is known to the anti-phishing API.", defaultPermission: false)]
+        [Command("scamcheck")]
         [Description("Check if a link or message is known to the anti-phishing API.")]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
-        public async Task ScamCheck(InteractionContext ctx, [Option("input", "Domain or message content to scan.")] string content)
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
+        public async Task ScamCheck(SlashCommandContext ctx, [Parameter("input"), Description("Domain or message content to scan.")] string content)
         {
             var urlMatches = Constants.RegexConstants.url_rx.Matches(content);
             if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") is not null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
@@ -34,9 +35,11 @@ namespace Cliptok.Commands.InteractionCommands
             }
         }
 
-        [SlashCommand("tellraw", "You know what you're here for.", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
-        public async Task TellRaw(InteractionContext ctx, [Option("input", "???")] string input, [Option("reply_msg_id", "ID of message to use in a reply context.")] string replyID = "0", [Option("pingreply", "Ping pong.")] bool pingreply = true, [Option("channel", "Either mention or ID. Not a name.")] string discordChannel = default)
+        [Command("tellraw")]
+        [Description("You know what you're here for.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ModerateMembers)]
+        public async Task TellRaw(SlashCommandContext ctx, [Parameter("input"), Description("???")] string input, [Parameter("reply_msg_id"), Description("ID of message to use in a reply context.")] string replyID = "0", [Parameter("pingreply"), Description("Ping pong.")] bool pingreply = true, [Parameter("channel"), Description("Either mention or ID. Not a name.")] string discordChannel = default)
         {
             DiscordChannel channelObj = default;
 
@@ -89,30 +92,36 @@ namespace Cliptok.Commands.InteractionCommands
             );
         }
 
-        [SlashCommand("userinfo", "Retrieve information about a given user.")]
-        public async Task UserInfoSlashCommand(InteractionContext ctx, [Option("user", "The user to retrieve information about.")] DiscordUser user, [Option("public", "Whether to show the output publicly.")] bool publicMessage = false)
+        [Command("userinfo")]
+        [Description("Retrieve information about a given user.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
+        public async Task UserInfoSlashCommand(SlashCommandContext ctx, [Parameter("user"), Description("The user to retrieve information about.")] DiscordUser user, [Parameter("public"), Description("Whether to show the output publicly.")] bool publicMessage = false)
         {
             await ctx.RespondAsync(embed: await DiscordHelpers.GenerateUserEmbed(user, ctx.Guild), ephemeral: !publicMessage);
         }
 
-        [SlashCommand("muteinfo", "Show information about the mute for a user.")]
+        [Command("muteinfo")]
+        [Description("Show information about the mute for a user.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        [RequirePermissions(DiscordPermissions.ModerateMembers)]
         public async Task MuteInfoSlashCommand(
-            InteractionContext ctx,
-            [Option("user", "The user whose mute information to show.")] DiscordUser targetUser,
-            [Option("public", "Whether to show the output publicly. Default: false")] bool isPublic = false)
+            SlashCommandContext ctx,
+            [Parameter("user"), Description("The user whose mute information to show.")] DiscordUser targetUser,
+            [Parameter("public"), Description("Whether to show the output publicly. Default: false")] bool isPublic = false)
         {
             await ctx.RespondAsync(embed: await MuteHelpers.MuteStatusEmbed(targetUser, ctx.Guild), ephemeral: !isPublic);
         }
 
-        [SlashCommand("baninfo", "Show information about the ban for a user.")]
+        [Command("baninfo")]
+        [Description("Show information about the ban for a user.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        [RequirePermissions(DiscordPermissions.ModerateMembers)]
         public async Task BanInfoSlashCommand(
-            InteractionContext ctx,
-            [Option("user", "The user whose ban information to show.")] DiscordUser targetUser,
-            [Option("public", "Whether to show the output publicly. Default: false")] bool isPublic = false)
+            SlashCommandContext ctx,
+            [Parameter("user"), Description("The user whose ban information to show.")] DiscordUser targetUser,
+            [Parameter("public"), Description("Whether to show the output publicly. Default: false")] bool isPublic = false)
         {
             await ctx.RespondAsync(embed: await BanHelpers.BanStatusEmbed(targetUser, ctx.Guild), ephemeral: !isPublic);
         }

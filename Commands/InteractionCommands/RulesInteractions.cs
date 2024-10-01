@@ -1,13 +1,16 @@
 ﻿namespace Cliptok.Commands.InteractionCommands
 {
-    public class RulesInteractions : ApplicationCommandModule
+    public class RulesInteractions
     {
         [HomeServer]
-        [SlashCommandGroup("rules", "Misc. commands related to server rules", defaultPermission: true)]
+        [Command("rules")]
+        [Description("Misc. commands related to server rules")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
         internal class RulesSlashCommands
         {
-            [SlashCommand("all", "Shows all of the community rules.", defaultPermission: true)]
-            public async Task RulesAllCommand(InteractionContext ctx)
+            [Command("all")]
+			[Description("Shows all of the community rules.")]
+            public async Task RulesAllCommand(SlashCommandContext ctx)
             {
                 List<string> rules = default;
 
@@ -34,8 +37,9 @@
 
             }
 
-            [SlashCommand("rule", "Shows a specific rule.", defaultPermission: true)]
-            public async Task RuleCommand(InteractionContext ctx, [Option("rule_number", "The rule number to show.")] long ruleNumber)
+            [Command("rule")]
+			[Description("Shows a specific rule.")]
+            public async Task RuleCommand(SlashCommandContext ctx, [Parameter("rule_number"), Description("The rule number to show.")] long ruleNumber)
             {
                 IReadOnlyList<string> rules = default;
 
@@ -62,8 +66,9 @@
                 await ctx.RespondAsync(embed: embed);
             }
 
-            [SlashCommand("search", "Search for a rule by keyword.", defaultPermission: true)]
-            public async Task RuleSearchCommand(InteractionContext ctx, [Option("keyword", "The keyword to search for.")] string keyword)
+            [Command("search")]
+			[Description("Search for a rule by keyword.")]
+            public async Task RuleSearchCommand(SlashCommandContext ctx, [Parameter("keyword"), Description("The keyword to search for.")] string keyword)
             {
                 List<string> rules = default;
 

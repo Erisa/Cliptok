@@ -66,7 +66,7 @@
         }
 
         [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-        public class RequireHomeserverPermAttribute : CheckBaseAttribute
+        public class RequireHomeserverPermAttribute : ContextCheckAttribute // TODO(#202): checks changed!! see the checks section of https://dsharpplus.github.io/DSharpPlus/articles/migration/slashcommands_to_commands.html
         {
             public ServerPermLevel TargetLvl { get; set; }
             public bool WorkOutside { get; set; }
@@ -80,7 +80,7 @@
                 TargetLvl = targetlvl;
             }
 
-            public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
+            public async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
             {
                 // If the command is supposed to stay within the server and its being used outside, fail silently
                 if (!WorkOutside && (ctx.Channel.IsPrivate || ctx.Guild.Id != Program.cfgjson.ServerID))
@@ -112,7 +112,7 @@
                 if (level >= TargetLvl)
                     return true;
 
-                else if (!help && ctx.Command.QualifiedName != "edit")
+                else if (!help && ctx.Command.FullName != "edit")
                 {
                     var levelText = level.ToString();
                     if (level == ServerPermLevel.Nothing && Program.rand.Next(1, 100) == 69)
@@ -126,22 +126,22 @@
             }
         }
 
-        public class HomeServerAttribute : CheckBaseAttribute
+        public class HomeServerAttribute : ContextCheckAttribute
         {
-            public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
+            public async Task<bool> ExecuteCheckAsync(CommandContext ctx)
             {
                 return !ctx.Channel.IsPrivate && ctx.Guild.Id == Program.cfgjson.ServerID;
             }
         }
 
-        public class SlashRequireHomeserverPermAttribute : SlashCheckBaseAttribute
+        public class SlashRequireHomeserverPermAttribute : ContextCheckAttribute
         {
             public ServerPermLevel TargetLvl;
 
             public SlashRequireHomeserverPermAttribute(ServerPermLevel targetlvl)
                 => TargetLvl = targetlvl;
 
-            public override async Task<bool> ExecuteChecksAsync(InteractionContext ctx)
+            public async Task<bool> ExecuteChecksAsync(CommandContext ctx)
             {
                 if (ctx.Guild.Id != Program.cfgjson.ServerID)
                     return false;

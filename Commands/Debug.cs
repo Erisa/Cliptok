@@ -1,17 +1,20 @@
-﻿namespace Cliptok.Commands
+﻿using DSharpPlus.Commands.Trees.Metadata;
+
+namespace Cliptok.Commands
 {
-    internal class Debug : BaseCommandModule
+    internal class Debug
     {
         public static Dictionary<ulong, PendingUserOverride> OverridesPendingAddition = new();
 
-        [Group("debug")]
-        [Aliases("troubleshoot", "unbug", "bugn't", "helpsomethinghasgoneverywrong")]
+        [Command("debug")]
+        [TextAlias("troubleshoot", "unbug", "bugn't", "helpsomethinghasgoneverywrong")]
         [Description("Commands and things for fixing the bot in the unlikely event that it breaks a bit.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        class DebugCmds : BaseCommandModule
+        class DebugCmds
         {
             [Command("mutestatus")]
-            public async Task MuteStatus(CommandContext ctx, DiscordUser targetUser = default)
+            public async Task MuteStatus(TextCommandContext ctx, DiscordUser targetUser = default)
             {
                 if (targetUser == default)
                     targetUser = ctx.User;
@@ -20,9 +23,9 @@
             }
 
             [Command("mutes")]
-            [Aliases("mute")]
+            [TextAlias("mute")]
             [Description("Debug the list of mutes.")]
-            public async Task MuteDebug(CommandContext ctx, DiscordUser targetUser = default)
+            public async Task MuteDebug(TextCommandContext ctx, DiscordUser targetUser = default)
             {
 
                 await DiscordHelpers.SafeTyping(ctx.Channel);
@@ -61,9 +64,9 @@
             }
 
             [Command("bans")]
-            [Aliases("ban")]
+            [TextAlias("ban")]
             [Description("Debug the list of bans.")]
-            public async Task BanDebug(CommandContext ctx, DiscordUser targetUser = default)
+            public async Task BanDebug(TextCommandContext ctx, DiscordUser targetUser = default)
             {
                 await DiscordHelpers.SafeTyping(ctx.Channel);
 
@@ -101,7 +104,7 @@
 
             [Command("restart")]
             [RequireHomeserverPerm(ServerPermLevel.Admin, ownerOverride: true), Description("Restart the bot. If not under Docker (Cliptok is, dw) this WILL exit instead.")]
-            public async Task Restart(CommandContext ctx)
+            public async Task Restart(TextCommandContext ctx)
             {
                 await ctx.RespondAsync("Bot is restarting. Please hold.");
                 Environment.Exit(1);
@@ -109,7 +112,7 @@
 
             [Command("shutdown")]
             [RequireHomeserverPerm(ServerPermLevel.Admin, ownerOverride: true), Description("Panics and shuts the bot down. Check the arguments for usage.")]
-            public async Task Shutdown(CommandContext ctx, [Description("This MUST be set to \"I understand what I am doing\" for the command to work."), RemainingText] string verificationArgument)
+            public async Task Shutdown(TextCommandContext ctx, [Description("This MUST be set to \"I understand what I am doing\" for the command to work."), RemainingText] string verificationArgument)
             {
                 if (verificationArgument == "I understand what I am doing")
                 {
@@ -126,9 +129,10 @@
             [Command("refresh")]
             [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
             [Description("Manually run all the automatic actions.")]
-            public async Task Refresh(CommandContext ctx)
+            public async Task Refresh(TextCommandContext ctx)
             {
-                var msg = await ctx.RespondAsync("Checking for pending scheduled tasks...");
+                await ctx.RespondAsync("Checking for pending scheduled tasks...");
+                var msg = await ctx.GetResponseAsync();
                 bool bans = await Tasks.PunishmentTasks.CheckBansAsync();
                 bool mutes = await Tasks.PunishmentTasks.CheckMutesAsync();
                 bool warns = await Tasks.PunishmentTasks.CheckAutomaticWarningsAsync();
@@ -142,10 +146,10 @@
             }
 
             [Command("sh")]
-            [Aliases("cmd")]
+            [TextAlias("cmd")]
             [IsBotOwner]
             [Description("Run shell commands! Bash for Linux/macOS, batch for Windows!")]
-            public async Task Shell(CommandContext ctx, [RemainingText] string command)
+            public async Task Shell(TextCommandContext ctx, [RemainingText] string command)
             {
                 if (string.IsNullOrWhiteSpace(command))
                 {
@@ -153,7 +157,8 @@
                     return;
                 }
 
-                DiscordMessage msg = await ctx.RespondAsync("executing..");
+                await ctx.RespondAsync("executing..");
+                DiscordMessage msg = await ctx.GetResponseAsync();
 
                 ShellResult finishedShell = RunShellCommand(command);
                 string result = Regex.Replace(finishedShell.result, "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") ?? "DUMMYVALUE", "REDACTED");
@@ -166,7 +171,7 @@
             }
 
             [Command("logs")]
-            public async Task Logs(CommandContext ctx)
+            public async Task Logs(TextCommandContext ctx)
             {
                 if (Program.cfgjson.LogLevel is Level.Verbose)
                 {
@@ -189,7 +194,7 @@
             [Command("dumpwarnings"), Description("Dump all warning data. EXTREMELY computationally expensive, use with caution.")]
             [IsBotOwner]
             [RequireHomeserverPerm(ServerPermLevel.Moderator)]
-            public async Task MostWarningsCmd(CommandContext ctx)
+            public async Task MostWarningsCmd(TextCommandContext ctx)
             {
                 await DiscordHelpers.SafeTyping(ctx.Channel);
 
@@ -221,10 +226,10 @@
             }
 
             [Command("checkpendingchannelevents")]
-            [Aliases("checkpendingevents", "pendingevents")]
+            [TextAlias("checkpendingevents", "pendingevents")]
             [Description("Check pending events to handle in the Channel Update and Channel Delete handlers.")]
             [IsBotOwner]
-            public async Task CheckPendingChannelEvents(CommandContext ctx)
+            public async Task CheckPendingChannelEvents(TextCommandContext ctx)
             {
                 var pendingUpdateEvents = Tasks.EventTasks.PendingChannelUpdateEvents;
                 var pendingDeleteEvents = Tasks.EventTasks.PendingChannelDeleteEvents;
@@ -259,12 +264,12 @@
                 await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(list));
             }
 
-            [Group("overrides")]
+            [Command("overrides")]
             [Description("Commands for managing stored permission overrides.")]
-            public class Overrides : BaseCommandModule
+            public class Overrides
             {
-                [GroupCommand]
-                public async Task ShowOverrides(CommandContext ctx,
+                [DefaultGroupCommand]
+                public async Task ShowOverrides(TextCommandContext ctx,
                     [Description("The user whose overrides to show.")] DiscordUser user)
                 {
                     var userOverrides = await Program.db.HashGetAsync("overrides", user.Id.ToString());
@@ -314,7 +319,7 @@
 
                 [Command("import")]
                 [Description("Import overrides from a channel to the database.")]
-                public async Task Import(CommandContext ctx,
+                public async Task Import(TextCommandContext ctx,
                     [Description("The channel to import overrides from.")] DiscordChannel channel)
                 {
                     // Import overrides
@@ -330,10 +335,11 @@
 
                 [Command("importall")]
                 [Description("Import all overrides from all channels to the database.")]
-                public async Task ImportAll(CommandContext ctx)
+                public async Task ImportAll(TextCommandContext ctx)
                 {
-                    var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working...");
-
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working...");
+                    var msg = await ctx.GetResponseAsync();
+                    
                     // Get all channels
                     var channels = await ctx.Guild.GetChannelsAsync();
 
@@ -356,7 +362,7 @@
                 [Command("add")]
                 [Description("Insert an override into the db. Useful if you want to add an override for a user who has left.")]
                 [IsBotOwner]
-                public async Task Add(CommandContext ctx,
+                public async Task Add(TextCommandContext ctx,
                     [Description("The user to add an override for.")] DiscordUser user,
                     [Description("The channel to add the override to.")] DiscordChannel channel,
                     [Description("Allowed permissions. Use a permission integer. See https://discordlookup.com/permissions-calculator.")] int allowedPermissions,
@@ -369,11 +375,12 @@
                     var confirmButton = new DiscordButtonComponent(DiscordButtonStyle.Success, "debug-overrides-add-confirm-callback", "Yes");
                     var cancelButton = new DiscordButtonComponent(DiscordButtonStyle.Danger, "debug-overrides-add-cancel-callback", "No");
 
-                    var confirmationMessage = await ctx.RespondAsync(new DiscordMessageBuilder().WithContent(
+                    await ctx.RespondAsync(new DiscordMessageBuilder().WithContent(
                             $"{Program.cfgjson.Emoji.ShieldHelp} Just to confirm, you want to add the following override for {user.Mention} to {channel.Mention}?\n" +
                             $"**Allowed:** {parsedAllowedPerms}\n" +
                             $"**Denied:** {parsedDeniedPerms}\n")
                         .AddComponents([confirmButton, cancelButton]));
+                    var confirmationMessage = await ctx.GetResponseAsync();
 
                     OverridesPendingAddition.Add(confirmationMessage.Id, new PendingUserOverride
                     {
@@ -389,7 +396,7 @@
 
                 [Command("remove")]
                 [Description("Remove a user's overrides for a channel from the database.")]
-                public async Task Remove(CommandContext ctx,
+                public async Task Remove(TextCommandContext ctx,
                     [Description("The user whose overrides to remove.")] DiscordUser user,
                     [Description("The channel to remove overrides from.")] DiscordChannel channel)
                 {
@@ -421,11 +428,12 @@
                 [Command("apply")]
                 [Description("Apply a user's overrides from the db.")]
                 [IsBotOwner]
-                public async Task Apply(CommandContext ctx,
+                public async Task Apply(TextCommandContext ctx,
                     [Description("The user whose overrides to apply.")] DiscordUser user)
                 {
-                    var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
-
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
+                    var msg = await ctx.GetResponseAsync();
+                    
                     // Try fetching member to determine whether they are in the server. If they are not, we can't apply overrides for them.
                     DiscordMember member;
                     try
@@ -485,7 +493,7 @@
             [Command("dumpchanneloverrides")]
             [Description("Dump all of a channel's overrides. This pulls from Discord, not the database.")]
             [IsBotOwner]
-            public async Task DumpChannelOverrides(CommandContext ctx,
+            public async Task DumpChannelOverrides(TextCommandContext ctx,
                 [Description("The channel to dump overrides for.")] DiscordChannel channel)
             {
                 var overwrites = channel.PermissionOverwrites;
@@ -502,7 +510,7 @@
             [Command("dmchannel")]
             [Description("Create or find a DM channel ID for a user.")]
             [IsBotOwner]
-            public async Task GetDMChannel(CommandContext ctx, DiscordUser user)
+            public async Task GetDMChannel(TextCommandContext ctx, DiscordUser user)
             {
                 var dmChannel = await user.CreateDmChannelAsync();
                 await ctx.RespondAsync(dmChannel.Id.ToString());
@@ -511,7 +519,7 @@
             [Command("dumpdmchannels")]
             [Description("Dump all DM channels")]
             [IsBotOwner]
-            public async Task DumpDMChannels(CommandContext ctx)
+            public async Task DumpDMChannels(TextCommandContext ctx)
             {
                 var dmChannels = ctx.Client.PrivateChannels;
 
@@ -523,11 +531,12 @@
             [Command("searchmembers")]
             [Description("Search member list with a regex. Restricted to bot owners bc regexes are scary.")]
             [IsBotOwner]
-            public async Task SearchMembersCmd(CommandContext ctx, string regex)
+            public async Task SearchMembersCmd(TextCommandContext ctx, string regex)
             {
                 var rx = new Regex(regex);
 
-                var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it. This will take a while.");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it. This will take a while.");
+                var msg = await ctx.GetResponseAsync();
                 var discordMembers = await ctx.Guild.GetAllMembersAsync().ToListAsync();
 
                 var matchedMembers = discordMembers.Where(discordMember => discordMember.Username is not null && rx.IsMatch(discordMember.Username)).ToList();
@@ -540,9 +549,9 @@
 
             [Command("rawmessage")]
             [Description("Dumps the raw data for a message.")]
-            [Aliases("rawmsg")]
+            [TextAlias("rawmsg")]
             [IsBotOwner]
-            public async Task DumpRawMessage(CommandContext ctx, [Description("The message whose raw data to get.")] string msgLinkOrId)
+            public async Task DumpRawMessage(TextCommandContext ctx, [Description("The message whose raw data to get.")] string msgLinkOrId)
             {
                 DiscordMessage message;
                 if (Constants.RegexConstants.discord_link_rx.IsMatch(msgLinkOrId))

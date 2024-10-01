@@ -1,11 +1,14 @@
-﻿namespace Cliptok.Commands
+﻿using DSharpPlus.Commands.Trees.Metadata;
+
+namespace Cliptok.Commands
 {
-    internal class Dehoist : BaseCommandModule
+    internal class Dehoist
     {
         [Command("dehoist")]
         [Description("Adds an invisible character to someone's nickname that drops them to the bottom of the member list. Accepts multiple members.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public async Task DehoistCmd(CommandContext ctx, [Description("List of server members to dehoist")] params DiscordMember[] discordMembers)
+        public async Task DehoistCmd(TextCommandContext ctx, [Description("List of server members to dehoist")] params DiscordMember[] discordMembers)
         {
             if (discordMembers.Length == 0)
             {
@@ -35,7 +38,8 @@
                 return;
             }
 
-            var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
+            var msg = await ctx.GetResponseAsync();
             int failedCount = 0;
 
             foreach (DiscordMember discordMember in discordMembers)
@@ -67,10 +71,12 @@
 
         [Command("massdehoist")]
         [Description("Dehoist everyone on the server who has a bad name. This may take a while and can exhaust rate limits.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task MassDehoist(CommandContext ctx)
+        public async Task MassDehoist(TextCommandContext ctx)
         {
-            var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it. This will take a while.");
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it. This will take a while.");
+            var msg = await ctx.GetResponseAsync();
             var discordMembers = await ctx.Guild.GetAllMembersAsync().ToListAsync();
             int failedCount = 0;
 
@@ -87,8 +93,9 @@
 
         [Command("massundehoist")]
         [Description("Remove the dehoist for users attached via a txt file.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task MassUndhoist(CommandContext ctx)
+        public async Task MassUndhoist(TextCommandContext ctx)
         {
             int failedCount = 0;
 
@@ -106,7 +113,8 @@
 
                 var list = strList.Split(' ');
 
-                var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it. This will take a while.");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it. This will take a while.");
+                var msg = await ctx.GetResponseAsync();
 
                 foreach (string strID in list)
                 {
@@ -143,14 +151,15 @@
             }
         }
 
-        [Group("permadehoist")]
+        [Command("permadehoist")]
         [Description("Permanently/persistently dehoist members.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public class Permadehoist : BaseCommandModule
+        public class Permadehoist
         {
             // Toggle
-            [GroupCommand]
-            public async Task PermadehoistToggleCmd(CommandContext ctx, [Description("The member(s) to permadehoist.")] params DiscordUser[] discordUsers)
+            [DefaultGroupCommand]
+            public async Task PermadehoistToggleCmd(TextCommandContext ctx, [Description("The member(s) to permadehoist.")] params DiscordUser[] discordUsers)
             {
                 if (discordUsers.Length == 0)
                 {
@@ -200,7 +209,8 @@
 
                 // Toggle permadehoist for multiple members
 
-                var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
+                var msg = await ctx.GetResponseAsync();
                 int failedCount = 0;
 
                 foreach (var discordUser in discordUsers)
@@ -215,7 +225,7 @@
 
             [Command("enable")]
             [Description("Permanently dehoist a member (or members). They will be automatically dehoisted until disabled.")]
-            public async Task PermadehoistEnableCmd(CommandContext ctx, [Description("The member(s) to permadehoist.")] params DiscordUser[] discordUsers)
+            public async Task PermadehoistEnableCmd(TextCommandContext ctx, [Description("The member(s) to permadehoist.")] params DiscordUser[] discordUsers)
             {
                 if (discordUsers.Length == 0)
                 {
@@ -249,7 +259,8 @@
 
                 // Permadehoist multiple members
 
-                var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
+                var msg = await ctx.GetResponseAsync();
                 int failedCount = 0;
 
                 foreach (var discordUser in discordUsers)
@@ -264,7 +275,7 @@
 
             [Command("disable")]
             [Description("Disable permadehoist for a member (or members).")]
-            public async Task PermadehoistDisableCmd(CommandContext ctx, [Description("The member(s) to remove the permadehoist for.")] params DiscordUser[] discordUsers)
+            public async Task PermadehoistDisableCmd(TextCommandContext ctx, [Description("The member(s) to remove the permadehoist for.")] params DiscordUser[] discordUsers)
             {
                 if (discordUsers.Length == 0)
                 {
@@ -298,7 +309,8 @@
 
                 // Un-permadehoist multiple members
 
-                var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
+                var msg = await ctx.GetResponseAsync();
                 int failedCount = 0;
 
                 foreach (var discordUser in discordUsers)
@@ -313,7 +325,7 @@
 
             [Command("status")]
             [Description("Check the status of permadehoist for a member.")]
-            public async Task PermadehoistStatus(CommandContext ctx, [Description("The member whose permadehoist status to check.")] DiscordUser discordUser)
+            public async Task PermadehoistStatus(TextCommandContext ctx, [Description("The member whose permadehoist status to check.")] DiscordUser discordUser)
             {
                 if (await Program.db.SetContainsAsync("permadehoists", discordUser.Id))
                     await ctx.RespondAsync(new DiscordMessageBuilder()

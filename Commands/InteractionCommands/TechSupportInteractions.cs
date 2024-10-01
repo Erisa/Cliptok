@@ -2,19 +2,16 @@
 
 namespace Cliptok.Commands.InteractionCommands
 {
-    public class TechSupportInteractions : ApplicationCommandModule
+    public class TechSupportInteractions
     {
-        [SlashCommand("vcredist", "Outputs download URLs for the specified Visual C++ Redistributables version")]
+        [Command("vcredist")]
+        [Description("Outputs download URLs for the specified Visual C++ Redistributables version")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
         public async Task RedistsCommand(
-            InteractionContext ctx,
+            SlashCommandContext ctx,
 
-            [Choice("Visual Studio 2015+ - v140", 140)]
-            [Choice("Visual Studio 2013 - v120", 120)]
-            [Choice("Visual Studio 2012 - v110", 110)]
-            [Choice("Visual Studio 2010 - v100", 100)]
-            [Choice("Visual Studio 2008 - v90", 90)]
-            [Choice("Visual Studio 2005 - v80", 80)]
-            [Option("version", "Visual Studio version number or year")] long version
+            [SlashChoiceProvider(typeof(VcRedistChoiceProvider))]
+            [Parameter("version"), Description("Visual Studio version number or year")] long version // TODO(#202): test choices!!!
             )
         {
             VcRedist redist = VcRedistConstants.VcRedists
@@ -34,6 +31,22 @@ namespace Cliptok.Commands.InteractionCommands
             }
 
             await ctx.RespondAsync(null, embed.Build(), false);
+        }
+    }
+    
+    internal class VcRedistChoiceProvider : IChoiceProvider
+    {
+        public async ValueTask<IReadOnlyDictionary<string, object>> ProvideAsync(CommandParameter _)
+        {
+            return new Dictionary<string, object>
+            {
+                { "Visual Studio 2015+ - v140", "140" },
+                { "Visual Studio 2013 - v120", "120" },
+                { "Visual Studio 2012 - v110", "110" },
+                { "Visual Studio 2010 - v100", "100" },
+                { "Visual Studio 2008 - v90", "90" },
+                { "Visual Studio 2005 - v80", "80" }
+            };
         }
     }
 }

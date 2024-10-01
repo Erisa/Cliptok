@@ -1,15 +1,18 @@
 namespace Cliptok.Commands.InteractionCommands
 {
-    internal class JoinwatchInteractions : ApplicationCommandModule
+    internal class JoinwatchInteractions
     {
-        [SlashCommandGroup("joinwatch", "Watch for joins and leaves of a given user. Output goes to #investigations.", defaultPermission: false)]
+        [Command("joinwatch")]
+        [Description("Watch for joins and leaves of a given user. Output goes to #investigations.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public class JoinwatchSlashCmds
         {
-            [SlashCommand("add", "Watch for joins and leaves of a given user. Output goes to #investigations.")]
-            public async Task JoinwatchAdd(InteractionContext ctx,
-                [Option("user", "The user to watch for joins and leaves of.")] DiscordUser user,
-                [Option("note", "An optional note for context.")] string note = "")
+            [Command("add")]
+			[Description("Watch for joins and leaves of a given user. Output goes to #investigations.")]
+            public async Task JoinwatchAdd(SlashCommandContext ctx,
+                [Parameter("user"), Description("The user to watch for joins and leaves of.")] DiscordUser user,
+                [Parameter("note"), Description("An optional note for context.")] string note = "")
             {
                 var joinWatchlist = await Program.db.ListRangeAsync("joinWatchedUsers");
 
@@ -50,9 +53,10 @@ namespace Cliptok.Commands.InteractionCommands
                 }
             }
 
-            [SlashCommand("remove", "Stop watching for joins and leaves of a user.")]
-            public async Task JoinwatchRemove(InteractionContext ctx,
-                [Option("user", "The user to stop watching for joins and leaves of.")] DiscordUser user)
+            [Command("remove")]
+			[Description("Stop watching for joins and leaves of a user.")]
+            public async Task JoinwatchRemove(SlashCommandContext ctx,
+                [Parameter("user"), Description("The user to stop watching for joins and leaves of.")] DiscordUser user)
             {
                 var joinWatchlist = await Program.db.ListRangeAsync("joinWatchedUsers");
 
@@ -68,9 +72,10 @@ namespace Cliptok.Commands.InteractionCommands
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully unwatched {user.Mention}!");
             }
 
-            [SlashCommand("status", "Check the joinwatch status for a user.")]
-            public async Task JoinwatchStatus(InteractionContext ctx,
-                [Option("user", "The user whose joinwatch status to check.")] DiscordUser user)
+            [Command("status")]
+			[Description("Check the joinwatch status for a user.")]
+            public async Task JoinwatchStatus(SlashCommandContext ctx,
+                [Parameter("user"), Description("The user whose joinwatch status to check.")] DiscordUser user)
             {
                 var joinWatchlist = await Program.db.ListRangeAsync("joinWatchedUsers");
 

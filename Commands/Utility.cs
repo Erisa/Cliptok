@@ -1,10 +1,11 @@
 ﻿namespace Cliptok.Commands
 {
-    internal class Utility : BaseCommandModule
+    internal class Utility
     {
         [Command("ping")]
         [Description("Pong? This command lets you know whether I'm working well.")]
-        public async Task Ping(CommandContext ctx)
+        [AllowedProcessors(typeof(TextCommandProcessor))]
+        public async Task Ping(TextCommandContext ctx)
         {
             ctx.Client.Logger.LogDebug(ctx.Client.GetConnectionLatency(Program.cfgjson.ServerID).ToString());
             DiscordMessage return_message = await ctx.Message.RespondAsync("Pinging...");
@@ -18,9 +19,10 @@
 
         [Command("edit")]
         [Description("Edit a message.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task Edit(
-            CommandContext ctx,
+            TextCommandContext ctx,
             [Description("The ID of the message to edit.")] ulong messageId,
             [RemainingText, Description("New message content.")] string content
         )
@@ -37,9 +39,10 @@
 
         [Command("editappend")]
         [Description("Append content to an existing bot message with a newline.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task EditAppend(
-            CommandContext ctx,
+            TextCommandContext ctx,
             [Description("The ID of the message to edit")] ulong messageId,
             [RemainingText, Description("Content to append on the end of the message.")] string content
         )
@@ -63,9 +66,10 @@
 
         [Command("userinfo")]
         [Description("Show info about a user.")]
-        [Aliases("user-info", "whois")]
+        [TextAlias("userinfo", "user-info", "whois")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         public async Task UserInfoCommand(
-            CommandContext ctx,
+            TextCommandContext ctx,
             DiscordUser user = null)
         {
             if (user is null)

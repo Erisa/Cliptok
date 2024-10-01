@@ -1,6 +1,6 @@
 ﻿namespace Cliptok.Commands
 {
-    internal class Lists : BaseCommandModule
+    internal class Lists
     {
         public class GitHubDispatchBody
         {
@@ -25,8 +25,9 @@
 
         [Command("listupdate")]
         [Description("Updates the private lists from the GitHub repository, then reloads them into memory.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task ListUpdate(CommandContext ctx)
+        public async Task ListUpdate(TextCommandContext ctx)
         {
             if (Program.cfgjson.GitListDirectory is null || Program.cfgjson.GitListDirectory == "")
             {
@@ -35,7 +36,8 @@
             }
 
             string command = $"cd Lists/{Program.cfgjson.GitListDirectory} && git pull";
-            DiscordMessage msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Updating private lists..");
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Updating private lists..");
+            DiscordMessage msg = await ctx.GetResponseAsync();
 
             ShellResult finishedShell = RunShellCommand(command);
 
@@ -55,9 +57,10 @@
 
         [Command("listadd")]
         [Description("Add a piece of text to a public list.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task ListAdd(
-            CommandContext ctx,
+            TextCommandContext ctx,
             [Description("The filename of the public list to add to. For example scams.txt")] string fileName,
             [RemainingText, Description("The text to add the list. Can be in a codeblock and across multiple line.")] string content
         )
@@ -134,8 +137,9 @@
 
         [Command("scamcheck")]
         [Description("Check if a link or message is known to the anti-phishing API.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public async Task ScamCheck(CommandContext ctx, [RemainingText, Description("Domain or message content to scan.")] string content)
+        public async Task ScamCheck(TextCommandContext ctx, [RemainingText, Description("Domain or message content to scan.")] string content)
         {
             var urlMatches = Constants.RegexConstants.url_rx.Matches(content);
             if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") is not null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
@@ -164,11 +168,12 @@
         }
 
         [Command("joinwatch")]
-        [Aliases("joinnotify", "leavewatch", "leavenotify")]
+        [TextAlias("joinnotify", "leavewatch", "leavenotify")]
         [Description("Watch for joins and leaves of a given user. Output goes to #investigations.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task JoinWatch(
-            CommandContext ctx,
+            TextCommandContext ctx,
             [Description("The user to watch for joins and leaves of.")] DiscordUser user,
             [Description("An optional note for context."), RemainingText] string note = ""
         )
@@ -212,11 +217,12 @@
         }
 
         [Command("appealblock")]
-        [Aliases("superduperban", "ablock")]
+        [TextAlias("superduperban", "ablock")]
         [Description("Prevents a user from submitting ban appeals.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task AppealBlock(
-            CommandContext ctx,
+            TextCommandContext ctx,
             [Description("The user to block from ban appeals.")] DiscordUser user
         )
         {

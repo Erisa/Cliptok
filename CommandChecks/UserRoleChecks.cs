@@ -1,8 +1,8 @@
 ﻿namespace Cliptok.CommandChecks
 {
-    public class UserRolesPresentAttribute : CheckBaseAttribute
+    public class UserRolesPresentAttribute : ContextCheckAttribute
     {
-        public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
+        public async Task<bool> ExecuteCheckAsync(CommandContext ctx)
         {
             return Program.cfgjson.UserRoles is not null;
         }

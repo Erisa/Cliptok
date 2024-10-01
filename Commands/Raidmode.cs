@@ -1,16 +1,19 @@
-﻿namespace Cliptok.Commands
+﻿using DSharpPlus.Commands.Trees.Metadata;
+
+namespace Cliptok.Commands
 {
-    internal class Raidmode : BaseCommandModule
+    internal class Raidmode
     {
-        [Group("clipraidmode")]
+        [Command("clipraidmode")]
         [Description("Manage the server's raidmode, preventing joins while on.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        class RaidmodeCommands : BaseCommandModule
+        class RaidmodeCommands
         {
-            [GroupCommand]
+            [DefaultGroupCommand]
             [Description("Check whether raidmode is enabled or not, and when it ends.")]
-            [Aliases("status")]
-            public async Task RaidmodeStatus(CommandContext ctx)
+            [TextAlias("status")]
+            public async Task RaidmodeStatus(TextCommandContext ctx)
             {
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {
@@ -27,7 +30,7 @@
 
             [Command("on")]
             [Description("Enable raidmode.")]
-            public async Task RaidmodeOn(CommandContext ctx, [Description("The amount of time to keep raidmode enabled for. Default is 3 hours.")] string duration = default)
+            public async Task RaidmodeOn(TextCommandContext ctx, [Description("The amount of time to keep raidmode enabled for. Default is 3 hours.")] string duration = default)
             {
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {
@@ -60,7 +63,7 @@
 
             [Command("off")]
             [Description("Disable raidmode.")]
-            public async Task RaidmdodeOff(CommandContext ctx)
+            public async Task RaidmdodeOff(TextCommandContext ctx)
             {
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {

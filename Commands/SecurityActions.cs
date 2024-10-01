@@ -1,11 +1,12 @@
 namespace Cliptok.Commands
 {
-    public class SecurityActions : BaseCommandModule
+    public class SecurityActions
     {
         [Command("pausedms")]
         [Description("Temporarily pause DMs between server members.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task PauseDMs(CommandContext ctx, [Description("The amount of time to pause DMs for."), RemainingText] string time)
+        public async Task PauseDMs(TextCommandContext ctx, [Description("The amount of time to pause DMs for."), RemainingText] string time)
         {
             if (string.IsNullOrWhiteSpace(time))
             {
@@ -68,8 +69,9 @@ namespace Cliptok.Commands
 
         [Command("unpausedms")]
         [Description("Unpause DMs between server members.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task UnpauseDMs(CommandContext ctx)
+        public async Task UnpauseDMs(TextCommandContext ctx)
         {
             // need to make our own api calls because D#+ can't do this natively?
 

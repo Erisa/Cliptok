@@ -1,6 +1,6 @@
 ﻿namespace Cliptok.Commands
 {
-    public class Reminders : BaseCommandModule
+    public class Reminders
     {
         public class Reminder
         {
@@ -28,10 +28,11 @@
 
         [Command("remindme")]
         [Description("Set a reminder for yourself. Example: !reminder 1h do the thing")]
-        [Aliases("reminder", "rember", "wemember", "remember", "remind")]
+        [TextAlias("reminder", "rember", "wemember", "remember", "remind")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Tier4, WorkOutside = true)]
         public async Task RemindMe(
-            CommandContext ctx,
+            TextCommandContext ctx,
             [Description("The amount of time to wait before reminding you. For example: 2s, 5m, 1h, 1d")] string timetoParse,
             [RemainingText, Description("The text to send when the reminder triggers.")] string reminder
         )

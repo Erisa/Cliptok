@@ -1,37 +1,39 @@
 ﻿namespace Cliptok.Commands.InteractionCommands
 {
-    public class ClearInteractions : ApplicationCommandModule
+    public class ClearInteractions
     {
         public static Dictionary<ulong, List<DiscordMessage>> MessagesToClear = new();
 
-        [SlashCommand("clear", "Delete many messages from the current channel.", defaultPermission: false)]
-        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequireBotPermissions(DiscordPermissions.ManageMessages), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
-        public async Task ClearSlashCommand(InteractionContext ctx,
-            [Option("count", "The number of messages to consider for deletion. Required if you don't use the 'up_to' argument.")] long count = 0,
-            [Option("up_to", "Optionally delete messages up to (not including) this one. Accepts IDs and links.")] string upTo = "",
-            [Option("user", "Optionally filter the deletion to a specific user.")] DiscordUser user = default,
-            [Option("ignore_mods", "Optionally filter the deletion to only messages sent by users who are not Moderators.")] bool ignoreMods = false,
-            [Option("match", "Optionally filter the deletion to only messages containing certain text.")] string match = "",
-            [Option("bots_only", "Optionally filter the deletion to only bots.")] bool botsOnly = false,
-            [Option("humans_only", "Optionally filter the deletion to only humans.")] bool humansOnly = false,
-            [Option("attachments_only", "Optionally filter the deletion to only messages with attachments.")] bool attachmentsOnly = false,
-            [Option("stickers_only", "Optionally filter the deletion to only messages with stickers.")] bool stickersOnly = false,
-            [Option("links_only", "Optionally filter the deletion to only messages containing links.")] bool linksOnly = false,
-            [Option("dry_run", "Don't actually delete the messages, just output what would be deleted.")] bool dryRun = false
+        [Command("clear")]
+        [Description("Delete many messages from the current channel.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
+        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ManageMessages, DiscordPermissions.ModerateMembers)]
+        public async Task ClearSlashCommand(SlashCommandContext ctx,
+            [Parameter("count"), Description("The number of messages to consider for deletion. Required if you don't use the 'up_to' argument.")] long count = 0,
+            [Parameter("up_to"), Description("Optionally delete messages up to (not including) this one. Accepts IDs and links.")] string upTo = "",
+            [Parameter("user"), Description("Optionally filter the deletion to a specific user.")] DiscordUser user = default,
+            [Parameter("ignore_mods"), Description("Optionally filter the deletion to only messages sent by users who are not Moderators.")] bool ignoreMods = false,
+            [Parameter("match"), Description("Optionally filter the deletion to only messages containing certain text.")] string match = "",
+            [Parameter("bots_only"), Description("Optionally filter the deletion to only bots.")] bool botsOnly = false,
+            [Parameter("humans_only"), Description("Optionally filter the deletion to only humans.")] bool humansOnly = false,
+            [Parameter("attachments_only"), Description("Optionally filter the deletion to only messages with attachments.")] bool attachmentsOnly = false,
+            [Parameter("stickers_only"), Description("Optionally filter the deletion to only messages with stickers.")] bool stickersOnly = false,
+            [Parameter("links_only"), Description("Optionally filter the deletion to only messages containing links.")] bool linksOnly = false,
+            [Parameter("dry_run"), Description("Don't actually delete the messages, just output what would be deleted.")] bool dryRun = false
         )
         {
-            await ctx.DeferAsync(ephemeral: !dryRun);
+            await ctx.DeferResponseAsync(ephemeral: !dryRun);
 
             // If all args are unset
             if (count == 0 && upTo == "" && user == default && ignoreMods == false && match == "" && botsOnly == false && humansOnly == false && attachmentsOnly == false && stickersOnly == false && linksOnly == false)
             {
-                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You must provide at least one argument! I need to know which messages to delete.").AsEphemeral(true));
+                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You must provide at least one argument! I need to know which messages to delete.").AsEphemeral(true));
                 return;
             }
 
             if (count == 0 && upTo == "")
             {
-                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I need to know how many messages to delete! Please provide a value for `count` or `up_to`.").AsEphemeral(true));
+                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I need to know how many messages to delete! Please provide a value for `count` or `up_to`.").AsEphemeral(true));
                 return;
             }
 
@@ -39,13 +41,13 @@
 
             if (count < 0)
             {
-                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I can't delete a negative number of messages! Try setting `count` to a positive number.").AsEphemeral(true));
+                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I can't delete a negative number of messages! Try setting `count` to a positive number.").AsEphemeral(true));
                 return;
             }
 
             if (count >= 1000)
             {
-                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Deleting that many messages poses a risk of something disastrous happening, so I'm refusing your request, sorry.").AsEphemeral(true));
+                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Deleting that many messages poses a risk of something disastrous happening, so I'm refusing your request, sorry.").AsEphemeral(true));
                 return;
             }
 
@@ -53,7 +55,7 @@
 
             if (upTo != "" && count != 0)
             {
-                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You can't provide both a count of messages and a message to delete up to! Please only provide one of the two arguments.").AsEphemeral(true));
+                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You can't provide both a count of messages and a message to delete up to! Please only provide one of the two arguments.").AsEphemeral(true));
                 return;
             }
 
@@ -71,7 +73,7 @@
                 {
                     if (!ulong.TryParse(upTo, out messageId))
                     {
-                        await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} That doesn't look like a valid message ID or link! Please try again."));
+                        await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} That doesn't look like a valid message ID or link! Please try again."));
                         return;
                     }
                 }
@@ -82,7 +84,7 @@
                         || !ulong.TryParse(Constants.RegexConstants.discord_link_rx.Match(upTo).Groups[3].Value, out messageId)
                     )
                     {
-                        await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Please provide a valid link to a message in this channel!").AsEphemeral(true));
+                        await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Please provide a valid link to a message in this channel!").AsEphemeral(true));
                         return;
                     }
                 }
@@ -159,7 +161,7 @@
             {
                 if (humansOnly)
                 {
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You can't use `bots_only` and `humans_only` together! Pick one or the other please.").AsEphemeral(true));
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You can't use `bots_only` and `humans_only` together! Pick one or the other please.").AsEphemeral(true));
                     return;
                 }
 
@@ -234,7 +236,7 @@
 
             if (messagesToClear.Count == 0 && skipped)
             {
-                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} All of the messages to delete are older than 2 weeks, so I can't delete them!").AsEphemeral(true));
+                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} All of the messages to delete are older than 2 weeks, so I can't delete them!").AsEphemeral(true));
                 return;
             }
 
@@ -245,7 +247,7 @@
                 var msg = await LogChannelHelper.CreateDumpMessageAsync($"{Program.cfgjson.Emoji.Information} **{messagesToClear.Count}** messages would have been deleted, but are instead logged below.",
                     messagesToClear,
                     ctx.Channel);
-                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent(msg.Content).AddFiles(msg.Files).AddEmbeds(msg.Embeds).AsEphemeral(false));
+                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent(msg.Content).AddFiles(msg.Files).AddEmbeds(msg.Embeds).AsEphemeral(false));
                 return;
             }
 
@@ -253,7 +255,7 @@
             if (messagesToClear.Count >= 50)
             {
                 DiscordButtonComponent confirmButton = new(DiscordButtonStyle.Danger, "clear-confirm-callback", "Delete Messages");
-                DiscordMessage confirmationMessage = await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Muted} You're about to delete {messagesToClear.Count} messages. Are you sure?").AddComponents(confirmButton).AsEphemeral(true));
+                DiscordMessage confirmationMessage = await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Muted} You're about to delete {messagesToClear.Count} messages. Are you sure?").AddComponents(confirmButton).AsEphemeral(true));
 
                 MessagesToClear.Add(confirmationMessage.Id, messagesToClear);
             }
@@ -275,11 +277,11 @@
                             .WithContent($"{Program.cfgjson.Emoji.Deleted} **{messagesToClear.Count}** messages were cleared in {ctx.Channel.Mention} by {ctx.User.Mention}.")
                             .WithAllowedMentions(Mentions.None)
                     );
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Done!").AsEphemeral(true));
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Done!").AsEphemeral(true));
                 }
                 else
                 {
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} There were no messages that matched all of the arguments you provided! Nothing to do."));
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} There were no messages that matched all of the arguments you provided! Nothing to do."));
                 }
 
                 await LogChannelHelper.LogDeletedMessagesAsync(

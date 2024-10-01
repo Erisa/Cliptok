@@ -1,12 +1,13 @@
 ﻿namespace Cliptok.Commands
 {
-    internal class Kick : BaseCommandModule
+    internal class Kick
     {
         [Command("kick")]
-        [Aliases("yeet", "shoo", "goaway", "defenestrate")]
+        [TextAlias("yeet", "shoo", "goaway", "defenestrate")]
         [Description("Kicks a user, removing them from the server until they rejoin. Generally not very useful.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequirePermissions(DiscordPermissions.KickMembers), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task KickCmd(CommandContext ctx, DiscordUser target, [RemainingText] string reason = "No reason specified.")
+        public async Task KickCmd(TextCommandContext ctx, DiscordUser target, [RemainingText] string reason = "No reason specified.")
         {
             if (target.IsBot)
             {
@@ -50,8 +51,9 @@
         }
 
         [Command("masskick")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task MassKickCmd(CommandContext ctx, [RemainingText] string input)
+        public async Task MassKickCmd(TextCommandContext ctx, [RemainingText] string input)
         {
 
             List<string> usersString = input.Replace("\n", " ").Replace("\r", "").Split(' ').ToList();
@@ -65,7 +67,8 @@
             List<Task<bool>> taskList = new();
             int successes = 0;
 
-            var loading = await ctx.RespondAsync("Processing, please wait.");
+            await ctx.RespondAsync("Processing, please wait.");
+            var loading = await ctx.GetResponseAsync();
 
             foreach (ulong user in users)
             {

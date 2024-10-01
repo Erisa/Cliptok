@@ -2,12 +2,13 @@
 
 namespace Cliptok.Commands
 {
-    class Bans : BaseCommandModule
+    class Bans
     {
         [Command("massban")]
-        [Aliases("bigbonk")]
+        [TextAlias("bigbonk")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task MassBanCmd(CommandContext ctx, [RemainingText] string input)
+        public async Task MassBanCmd(TextCommandContext ctx, [RemainingText] string input)
         {
 
             List<string> usersString = input.Replace("\n", " ").Replace("\r", "").Split(' ').ToList();
@@ -21,7 +22,8 @@ namespace Cliptok.Commands
             List<Task<bool>> taskList = new();
             int successes = 0;
 
-            var loading = await ctx.RespondAsync("Processing, please wait.");
+            await ctx.RespondAsync("Processing, please wait.");
+            var loading = await ctx.GetResponseAsync();
 
             foreach (ulong user in users)
             {
@@ -41,10 +43,11 @@ namespace Cliptok.Commands
         }
 
         [Command("ban")]
-        [Aliases("tempban", "bonk", "isekaitruck")]
+        [TextAlias("tempban", "bonk", "isekaitruck")]
         [Description("Bans a user that you have permission to ban, deleting all their messages in the process. See also: bankeep.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.BanMembers)]
-        public async Task BanCmd(CommandContext ctx,
+        public async Task BanCmd(TextCommandContext ctx,
          [Description("The user you wish to ban. Accepts many formats")] DiscordUser targetMember,
          [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling' NOTE: Add 'appeal' to the start of the reason to include an appeal link")] string timeAndReason = "No reason specified.")
         {
@@ -133,9 +136,10 @@ namespace Cliptok.Commands
         /// I CANNOT find a way to do this as alias so I made it a separate copy of the command.
         /// Sue me, I beg you.
         [Command("bankeep")]
-        [Aliases("bansave")]
+        [TextAlias("bansave")]
         [Description("Bans a user but keeps their messages around."), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.BanMembers)]
-        public async Task BankeepCmd(CommandContext ctx,
+        [AllowedProcessors(typeof(TextCommandProcessor))]
+        public async Task BankeepCmd(TextCommandContext ctx,
         [Description("The user you wish to ban. Accepts many formats")] DiscordUser targetMember,
         [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling' NOTE: Add 'appeal' to the start of the reason to include an appeal link")] string timeAndReason = "No reason specified.")
         {
@@ -216,8 +220,9 @@ namespace Cliptok.Commands
 
         [Command("unban")]
         [Description("Unbans a user who has been previously banned.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.BanMembers)]
-        public async Task UnbanCmd(CommandContext ctx, [Description("The user to unban, usually a mention or ID")] DiscordUser targetUser, [Description("Used in audit log only currently")] string reason = "No reason specified.")
+        public async Task UnbanCmd(TextCommandContext ctx, [Description("The user to unban, usually a mention or ID")] DiscordUser targetUser, [Description("Used in audit log only currently")] string reason = "No reason specified.")
         {
             if ((await Program.db.HashExistsAsync("bans", targetUser.Id)))
             {

@@ -6,14 +6,17 @@ using System.Threading.Tasks;
 
 namespace Cliptok.Commands.InteractionCommands
 {
-    public class NicknameLockInteraction : ApplicationCommandModule
+    public class NicknameLockInteraction
     {
-        [SlashCommandGroup("nicknamelock", "Prevent a member from changing their nickname.", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(DiscordPermissions.ManageNicknames)]
+        [Command("nicknamelock")]
+        [Description("Prevent a member from changing their nickname.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ManageNicknames)]
         public class NicknameLockSlashCommands
         {
-            [SlashCommand("enable", "Prevent a member from changing their nickname.")]
-            public async Task NicknameLockEnableSlashCmd(InteractionContext ctx, [Option("member", "The member to nickname lock.")] DiscordUser discordUser)
+            [Command("enable")]
+			[Description("Prevent a member from changing their nickname.")]
+            public async Task NicknameLockEnableSlashCmd(SlashCommandContext ctx, [Parameter("member"), Description("The member to nickname lock.")] DiscordUser discordUser)
             {
                 DiscordMember member = default;
 
@@ -40,8 +43,9 @@ namespace Cliptok.Commands.InteractionCommands
                 }
             }
 
-            [SlashCommand("disable", "Allow a member to change their nickname again.")]
-            public async Task NicknameLockDisableSlashCmd(InteractionContext ctx, [Option("member", "The member to remove the nickname lock for.")] DiscordUser discordUser)
+            [Command("disable")]
+			[Description("Allow a member to change their nickname again.")]
+            public async Task NicknameLockDisableSlashCmd(SlashCommandContext ctx, [Parameter("member"), Description("The member to remove the nickname lock for.")] DiscordUser discordUser)
             {
                 DiscordMember member = default;
 
@@ -70,8 +74,9 @@ namespace Cliptok.Commands.InteractionCommands
                 }
             }
 
-                [SlashCommand("status", "Check the status of nickname lock for a member.")]
-            public async Task NicknameLockStatusSlashCmd(InteractionContext ctx, [Option("member", "The member whose nickname lock status to check.")] DiscordUser discordUser)
+            [Command("status")]
+			[Description("Check the status of nickname lock for a member.")]
+            public async Task NicknameLockStatusSlashCmd(SlashCommandContext ctx, [Parameter("member"), Description("The member whose nickname lock status to check.")] DiscordUser discordUser)
             {
                 if ((await Program.db.HashGetAsync("nicknamelock", discordUser.Id)).HasValue)
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.On} {discordUser.Mention} is nickname locked.", mentions: false);

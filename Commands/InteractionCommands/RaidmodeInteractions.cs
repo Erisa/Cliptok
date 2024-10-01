@@ -1,14 +1,17 @@
 ﻿namespace Cliptok.Commands.InteractionCommands
 {
-    internal class RaidmodeInteractions : ApplicationCommandModule
+    internal class RaidmodeInteractions
     {
-        [SlashCommandGroup("raidmode", "Commands relating to Raidmode", defaultPermission: false)]
+        [Command("raidmode")]
+        [Description("Commands relating to Raidmode")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
         [SlashRequireHomeserverPerm(ServerPermLevel.Moderator)]
-        [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
-        public class RaidmodeSlashCommands : ApplicationCommandModule
+        [RequirePermissions(DiscordPermissions.ModerateMembers)]
+        public class RaidmodeSlashCommands
         {
-            [SlashCommand("status", "Check the current state of raidmode.")]
-            public async Task RaidmodeStatus(InteractionContext ctx)
+            [Command("status")]
+			[Description("Check the current state of raidmode.")]
+            public async Task RaidmodeStatus(SlashCommandContext ctx)
             {
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {
@@ -30,10 +33,11 @@
 
             }
 
-            [SlashCommand("on", "Enable raidmode. Defaults to 3 hour length if not specified.")]
-            public async Task RaidmodeOnSlash(InteractionContext ctx,
-                [Option("duration", "How long to keep raidmode enabled for.")] string duration = default,
-                [Option("allowed_account_age", "How old an account can be to be allowed to bypass raidmode. Relative to right now.")] string allowedAccountAge = ""
+            [Command("on")]
+			[Description("Enable raidmode. Defaults to 3 hour length if not specified.")]
+            public async Task RaidmodeOnSlash(SlashCommandContext ctx,
+                [Parameter("duration"), Description("How long to keep raidmode enabled for.")] string duration = default,
+                [Parameter("allowed_account_age"), Description("How old an account can be to be allowed to bypass raidmode. Relative to right now.")] string allowedAccountAge = ""
             )
             {
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
@@ -96,8 +100,9 @@
                 }
             }
 
-            [SlashCommand("off", "Disable raidmode immediately.")]
-            public async Task RaidmodeOffSlash(InteractionContext ctx)
+            [Command("off")]
+			[Description("Disable raidmode immediately.")]
+            public async Task RaidmodeOffSlash(SlashCommandContext ctx)
             {
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {

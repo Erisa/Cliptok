@@ -1,14 +1,16 @@
 ﻿namespace Cliptok.Commands.InteractionCommands
 {
-    internal class SlowmodeInteractions : ApplicationCommandModule
+    internal class SlowmodeInteractions
     {
-        [SlashCommand("slowmode", "Slow down the channel...", defaultPermission: false)]
+        [Command("slowmode")]
+        [Description("Slow down the channel...")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        [RequirePermissions(DiscordPermissions.ModerateMembers)]
         public async Task SlowmodeSlashCommand(
-            InteractionContext ctx,
-            [Option("slow_time", "Allowed time between each users messages. 0 for off. A number of seconds or a parseable time.")] string timeToParse,
-            [Option("channel", "The channel to slow down, if not the current one.")] DiscordChannel channel = default
+            SlashCommandContext ctx,
+            [Parameter("slow_time"), Description("Allowed time between each users messages. 0 for off. A number of seconds or a parseable time.")] string timeToParse,
+            [Parameter("channel"), Description("The channel to slow down, if not the current one.")] DiscordChannel channel = default
         )
         {
             if (channel == default)

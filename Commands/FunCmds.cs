@@ -1,11 +1,12 @@
 ﻿namespace Cliptok.Commands
 {
-    internal class FunCmds : BaseCommandModule
+    internal class FunCmds
     {
         [Command("tellraw")]
         [Description("Nothing of interest.")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task TellRaw(CommandContext ctx, [Description("???")] DiscordChannel discordChannel, [RemainingText, Description("???")] string output)
+        public async Task TellRaw(TextCommandContext ctx, [Description("???")] DiscordChannel discordChannel, [RemainingText, Description("???")] string output)
         {
             try
             {
@@ -22,9 +23,10 @@
 
         [Command("no")]
         [Description("Makes Cliptok choose something for you. Outputs either Yes or No.")]
-        [Aliases("yes")]
+        [TextAlias("yes")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Tier5)]
-        public async Task No(CommandContext ctx)
+        public async Task No(TextCommandContext ctx)
         {
             List<string> noResponses = new()
             {

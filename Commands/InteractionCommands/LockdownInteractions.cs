@@ -1,27 +1,30 @@
 namespace Cliptok.Commands.InteractionCommands
 {
-    class LockdownInteractions : ApplicationCommandModule
+    class LockdownInteractions
     {
         public static bool ongoingLockdown = false;
 
-        [SlashCommandGroup("lockdown", "Lock the current channel or all channels in the server, preventing new messages. See also: unlock")]
-        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.Moderator), RequireBotPermissions(DiscordPermissions.ManageChannels)]
+        [Command("lockdown")]
+        [Description("Lock the current channel or all channels in the server, preventing new messages. See also: unlock")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
+        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ManageChannels, DiscordPermissions.None)]
         public class LockdownCmds
         {
-            [SlashCommand("channel", "Lock the current channel. See also: unlock channel")]
+            [Command("channel")]
+			[Description("Lock the current channel. See also: unlock channel")]
             public async Task LockdownChannelCommand(
-                InteractionContext ctx,
-                [Option("reason", "The reason for the lockdown.")] string reason = "No reason specified.",
-                [Option("time", "The length of time to lock the channel for.")] string time = null,
-                [Option("lockthreads", "Whether to lock this channel's threads. Disables sending messages, but does not archive them.")] bool lockThreads = false)
+                SlashCommandContext ctx,
+                [Parameter("reason"), Description("The reason for the lockdown.")] string reason = "No reason specified.",
+                [Parameter("time"), Description("The length of time to lock the channel for.")] string time = null,
+                [Parameter("lockthreads"), Description("Whether to lock this channel's threads. Disables sending messages, but does not archive them.")] bool lockThreads = false)
             {
-                await ctx.DeferAsync(ephemeral: true);
+                await ctx.DeferResponseAsync(ephemeral: true);
 
                 if (ctx.Channel.Type is DiscordChannelType.PublicThread or DiscordChannelType.PrivateThread or DiscordChannelType.NewsThread)
                 {
                     if (lockThreads)
                     {
-                        await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Denied} You can't lock this channel!\n`/lockdown` with `lockthreads` cannot be used inside of a thread. If you meant to lock {ctx.Channel.Parent.Mention} and all of its threads, use the command there.\n\nIf you meant to only lock this thread, use `!lock` instead, or use `/lockdown` with `lockthreads` set to False.").AsEphemeral(true));
+                        await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Denied} You can't lock this channel!\n`/lockdown` with `lockthreads` cannot be used inside of a thread. If you meant to lock {ctx.Channel.Parent.Mention} and all of its threads, use the command there.\n\nIf you meant to only lock this thread, use `!lock` instead, or use `/lockdown` with `lockthreads` set to False.").AsEphemeral(true));
                         return;
                     }
 
@@ -33,7 +36,7 @@ namespace Cliptok.Commands.InteractionCommands
                         a.Locked = true;
                     });
 
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Thread locked successfully!").AsEphemeral(true));
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Thread locked successfully!").AsEphemeral(true));
                     return;
                 }
 
@@ -41,46 +44,47 @@ namespace Cliptok.Commands.InteractionCommands
 
                 if (!string.IsNullOrWhiteSpace(time))
                 {
-                    lockDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(ctx.Interaction.CreationTimestamp.LocalDateTime);
+                    lockDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(DateTime.Now); // TODO(#202): this used InteractionContext#Interaction.CreationTimestamp.DateTime before, please test!!
                 }
 
                 var currentChannel = ctx.Channel;
                 if (!Program.cfgjson.LockdownEnabledChannels.Contains(currentChannel.Id))
                 {
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Denied} You can't lock or unlock this channel!\nIf this is in error, add its ID (`{currentChannel.Id}`) to the lockdown whitelist."));
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Denied} You can't lock or unlock this channel!\nIf this is in error, add its ID (`{currentChannel.Id}`) to the lockdown whitelist."));
                     return;
                 }
 
                 if (ongoingLockdown)
                 {
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} A mass lockdown or unlock is already ongoing. Refusing your request to avoid conflicts, sorry."));
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} A mass lockdown or unlock is already ongoing. Refusing your request to avoid conflicts, sorry."));
                     return;
                 }
 
                 bool success = await LockdownHelpers.LockChannelAsync(user: ctx.User, channel: currentChannel, duration: lockDuration, reason: reason, lockThreads: lockThreads);
                 if (success)
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Channel locked successfully.").AsEphemeral(true));
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Channel locked successfully.").AsEphemeral(true));
                 else
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Failed to lock this channel!").AsEphemeral(true));
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Failed to lock this channel!").AsEphemeral(true));
             }
 
-            [SlashCommand("all", "Lock all lockable channels in the server. See also: unlock all")]
+            [Command("all")]
+			[Description("Lock all lockable channels in the server. See also: unlock all")]
             public async Task LockdownAllCommand(
-                InteractionContext ctx,
-                [Option("reason", "The reason for the lockdown.")] string reason = "",
-                [Option("time", "The length of time to lock the channels for.")] string time = null,
-                [Option("lockthreads", "Whether to lock threads. Disables sending messages, but does not archive them.")] bool lockThreads = false)
+                SlashCommandContext ctx,
+                [Parameter("reason"), Description("The reason for the lockdown.")] string reason = "",
+                [Parameter("time"), Description("The length of time to lock the channels for.")] string time = null,
+                [Parameter("lockthreads"), Description("Whether to lock threads. Disables sending messages, but does not archive them.")] bool lockThreads = false)
             {
-                await ctx.DeferAsync();
+                await ctx.DeferResponseAsync();
 
                 ongoingLockdown = true;
-                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Loading} Working on it, please hold..."));
+                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Loading} Working on it, please hold..."));
 
                 TimeSpan? lockDuration = null;
 
                 if (!string.IsNullOrWhiteSpace(time))
                 {
-                    lockDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(ctx.Interaction.CreationTimestamp.LocalDateTime);
+                    lockDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(DateTime.Now); // TODO(#202): this used InteractionContext#Interaction.CreationTimestamp.LocalDateTime before, please test!!
                 }
 
                 foreach (var chanID in Program.cfgjson.LockdownEnabledChannels)
@@ -96,47 +100,51 @@ namespace Cliptok.Commands.InteractionCommands
                     }
 
                 }
-                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Done!"));
+                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Done!"));
                 ongoingLockdown = false;
                 return;
             }
         }
 
-        [SlashCommandGroup("unlock", "Unlock the current channel or all channels in the server, allowing new messages. See also: lockdown")]
-        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.Moderator), RequireBotPermissions(DiscordPermissions.ManageChannels)]
+        [Command("unlock")]
+        [Description("Unlock the current channel or all channels in the server, allowing new messages. See also: lockdown")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
+        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ManageChannels, DiscordPermissions.None)]
         public class UnlockCmds
         {
-            [SlashCommand("channel", "Unlock the current channel. See also: lockdown")]
-            public async Task UnlockChannelCommand(InteractionContext ctx, [Option("reason", "The reason for the unlock.")] string reason = "")
+            [Command("channel")]
+			[Description("Unlock the current channel. See also: lockdown")]
+            public async Task UnlockChannelCommand(SlashCommandContext ctx, [Parameter("reason"), Description("The reason for the unlock.")] string reason = "")
             {
-                await ctx.DeferAsync(ephemeral: true);
+                await ctx.DeferResponseAsync(ephemeral: true);
 
                 var currentChannel = ctx.Channel;
                 if (!Program.cfgjson.LockdownEnabledChannels.Contains(currentChannel.Id))
                 {
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Denied} You can't lock or unlock this channel!\nIf this is in error, add its ID (`{currentChannel.Id}`) to the lockdown whitelist.").AsEphemeral(true));
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Denied} You can't lock or unlock this channel!\nIf this is in error, add its ID (`{currentChannel.Id}`) to the lockdown whitelist.").AsEphemeral(true));
                     return;
                 }
 
                 if (ongoingLockdown)
                 {
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} A mass lockdown or unlock is already ongoing. Refusing your request. sorry.").AsEphemeral(true));
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} A mass lockdown or unlock is already ongoing. Refusing your request. sorry.").AsEphemeral(true));
                     return;
                 }
                 bool success = await LockdownHelpers.UnlockChannel(currentChannel, ctx.Member);
                 if (success)
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Channel unlocked successfully.").AsEphemeral(true));
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Channel unlocked successfully.").AsEphemeral(true));
                 else
-                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Failed to unlock this channel!").AsEphemeral(true));
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Failed to unlock this channel!").AsEphemeral(true));
             }
 
-            [SlashCommand("all", "Unlock all lockable channels in the server. See also: lockdown all")]
-            public async Task UnlockAllCommand(InteractionContext ctx, [Option("reason", "The reason for the unlock.")] string reason = "")
+            [Command("all")]
+			[Description("Unlock all lockable channels in the server. See also: lockdown all")]
+            public async Task UnlockAllCommand(SlashCommandContext ctx, [Parameter("reason"), Description("The reason for the unlock.")] string reason = "")
             {
-                await ctx.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource);
+                await ctx.DeferResponseAsync();
 
                 ongoingLockdown = true;
-                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Loading} Working on it, please hold..."));
+                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Loading} Working on it, please hold..."));
                 foreach (var chanID in Program.cfgjson.LockdownEnabledChannels)
                 {
                     try
@@ -149,7 +157,7 @@ namespace Cliptok.Commands.InteractionCommands
 
                     }
                 }
-                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Done!"));
+                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Done!"));
                 ongoingLockdown = false;
                 return;
             }

@@ -1,47 +1,57 @@
 ﻿namespace Cliptok.Commands.InteractionCommands
 {
-    internal class ContextCommands : ApplicationCommandModule
+    internal class ContextCommands
     {
-        [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "Show Avatar", defaultPermission: true)]
-        public async Task ContextAvatar(ContextMenuContext ctx)
+        [Command("Show Avatar")]
+        [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
+        [AllowedProcessors(typeof(UserCommandProcessor))]
+        public async Task ContextAvatar(CommandContext ctx, DiscordUser targetUser)
         {
-            string avatarUrl = await LykosAvatarMethods.UserOrMemberAvatarURL(ctx.TargetUser, ctx.Guild);
+            string avatarUrl = await LykosAvatarMethods.UserOrMemberAvatarURL(targetUser, ctx.Guild);
 
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
             .WithColor(new DiscordColor(0xC63B68))
             .WithTimestamp(DateTime.UtcNow)
             .WithImageUrl(avatarUrl)
             .WithAuthor(
-                $"Avatar for {ctx.TargetUser.Username} (Click to open in browser)",
+                $"Avatar for {targetUser.Username} (Click to open in browser)",
                 avatarUrl
             );
 
             await ctx.RespondAsync(null, embed, ephemeral: true);
         }
 
-        [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "Show Notes", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
-        public async Task ShowNotes(ContextMenuContext ctx)
+        [Command("Show Notes")]
+        [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
+        [AllowedProcessors(typeof(UserCommandProcessor))]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
+        public async Task ShowNotes(CommandContext ctx, DiscordUser targetUser)
         {
-            await ctx.RespondAsync(embed: await UserNoteHelpers.GenerateUserNotesEmbedAsync(ctx.TargetUser), ephemeral: true);
+            await ctx.RespondAsync(embed: await UserNoteHelpers.GenerateUserNotesEmbedAsync(targetUser), ephemeral: true);
         }
 
-        [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "Show Warnings", defaultPermission: true)]
-        public async Task ContextWarnings(ContextMenuContext ctx)
+        [Command("Show Warnings")]
+        [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
+        [AllowedProcessors(typeof(UserCommandProcessor))]
+        public async Task ContextWarnings(CommandContext ctx, DiscordUser targetUser)
         {
-            await ctx.RespondAsync(embed: await WarningHelpers.GenerateWarningsEmbedAsync(ctx.TargetUser), ephemeral: true);
+            await ctx.RespondAsync(embed: await WarningHelpers.GenerateWarningsEmbedAsync(targetUser), ephemeral: true);
         }
 
-        [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "User Information", defaultPermission: true)]
-        public async Task ContextUserInformation(ContextMenuContext ctx)
+        [Command("User Information")]
+        [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
+        [AllowedProcessors(typeof(UserCommandProcessor))]
+        public async Task ContextUserInformation(CommandContext ctx, DiscordUser targetUser)
         {
-            await ctx.RespondAsync(embed: await DiscordHelpers.GenerateUserEmbed(ctx.TargetUser, ctx.Guild), ephemeral: true);
+            await ctx.RespondAsync(embed: await DiscordHelpers.GenerateUserEmbed(targetUser, ctx.Guild), ephemeral: true);
         }
 
-        [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "Hug", defaultPermission: true),]
-        public async Task Hug(ContextMenuContext ctx)
+        [Command("Hug")]
+        [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
+        [AllowedProcessors(typeof(UserCommandProcessor))]
+        public async Task Hug(CommandContext ctx, DiscordUser targetUser)
         {
-            var user = ctx.TargetUser;
+            var user = targetUser;
 
             if (user is not null)
             {

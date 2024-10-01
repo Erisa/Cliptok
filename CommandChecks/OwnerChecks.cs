@@ -1,8 +1,8 @@
 ﻿namespace Cliptok.CommandChecks
 {
-    public class IsBotOwnerAttribute : CheckBaseAttribute
+    public class IsBotOwnerAttribute : ContextCheckAttribute
     {
-        public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
+        public async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
         {
             if (Program.cfgjson.BotOwners.Contains(ctx.User.Id))
             {

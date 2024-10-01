@@ -3,16 +3,17 @@
 namespace Cliptok.Commands
 {
 
-    public class Warnings : BaseCommandModule
+    public class Warnings
     {
         [
-            Command("warn"),
+            Command("6158e255-e8b3-4467-8d1a-79f89829"),
             Description("Issues a formal warning to a user."),
-            Aliases("wam", "warm"),
+            TextAlias("warn", "wam", "warm"),
+            AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
         public async Task WarnCmd(
-            CommandContext ctx,
+            TextCommandContext ctx,
             [Description("The user you are warning. Accepts many formats.")] DiscordUser targetUser,
             [RemainingText, Description("The reason for giving this warning.")] string reason = null
         )
@@ -54,11 +55,12 @@ namespace Cliptok.Commands
         [
             Command("anonwarn"),
             Description("Issues a formal warning to a user from a private channel."),
-            Aliases("anonwam", "anonwarm"),
+            TextAlias("anonwam", "anonwarm"),
+            AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
         public async Task AnonWarnCmd(
-            CommandContext ctx,
+            TextCommandContext ctx,
             [Description("The channel you wish for the warning message to appear in.")] DiscordChannel targetChannel,
             [Description("The user you are warning. Accepts many formats.")] DiscordUser targetUser,
             [RemainingText, Description("The reason for giving this warning.")] string reason = null
@@ -91,13 +93,14 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("warnings"),
+            Command("6158e255-e8b3-4467-8d1a-79f89810"),
             Description("Shows a list of warnings that a user has been given. For more in-depth information, use the 'warnlookup' command."),
-            Aliases("infractions", "warnfractions", "wammings", "wamfractions"),
+            TextAlias("warnings", "infractions", "warnfractions", "wammings", "wamfractions"),
+            AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
         ]
         public async Task WarningCmd(
-            CommandContext ctx,
+            TextCommandContext ctx,
             [Description("The user you want to look up warnings for. Accepts many formats.")] DiscordUser targetUser = null
         )
         {
@@ -108,13 +111,14 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("delwarn"),
+            Command("6158e255-e8b3-4467-8d1a-79f89811"),
             Description("Delete a warning that was issued by mistake or later became invalid."),
-            Aliases("delwarm", "delwam", "deletewarn", "delwarning", "deletewarning"),
+            TextAlias("delwarn", "delwarm", "delwam", "deletewarn", "delwarning", "deletewarning"),
+            AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
         public async Task DelwarnCmd(
-            CommandContext ctx,
+            TextCommandContext ctx,
             [Description("The user you're removing a warning from. Accepts many formats.")] DiscordUser targetUser,
             [Description("The ID of the warning you want to delete.")] long warnId
         )
@@ -155,11 +159,12 @@ namespace Cliptok.Commands
         [
             Command("warnlookup"),
             Description("Looks up information about a warning. Shows only publicly available information."),
-            Aliases("warning", "warming", "waming", "wamming", "lookup", "lookylooky", "peek", "investigate", "what-did-i-do-wrong-there", "incident"),
+            TextAlias("warning", "warming", "waming", "wamming", "lookup", "lookylooky", "peek", "investigate", "what-did-i-do-wrong-there", "incident"),
+            AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
         ]
         public async Task WarnlookupCmd(
-            CommandContext ctx,
+            TextCommandContext ctx,
             [Description("The user you're looking at a warning for. Accepts many formats.")] DiscordUser targetUser,
             [Description("The ID of the warning you want to see")] long warnId
         )
@@ -172,14 +177,15 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("warndetails"),
-            Aliases("warninfo", "waminfo", "wamdetails", "warndetail", "wamdetail"),
+            Command("6158e255-e8b3-4467-8d1a-79f89822"),
+            TextAlias("warndetails", "warninfo", "waminfo", "wamdetails", "warndetail", "wamdetail"),
             Description("Check the details of a warning in depth. Shows extra information (Such as responsible Mod) that may not be wanted to be public."),
+            AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer,
             RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
         public async Task WarnDetailsCmd(
-            CommandContext ctx,
+            TextCommandContext ctx,
             [Description("The user you're looking up detailed warn information for. Accepts many formats.")] DiscordUser targetUser,
             [Description("The ID of the warning you're looking at in detail.")] long warnId
         )
@@ -198,15 +204,16 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("editwarn"),
-            Aliases("warnedit", "editwarning"),
+            Command("6158e255-e8b3-4467-8d1a-79f89812"),
+            TextAlias("editwarn", "warnedit", "editwarning"),
             Description("Edit the reason of an existing warning.\n" +
                 "The Moderator who is editing the reason will become responsible for the case."),
+            AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer,
             RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
         public async Task EditwarnCmd(
-            CommandContext ctx,
+            TextCommandContext ctx,
             [Description("The user you're editing a warning for. Accepts many formats.")] DiscordUser targetUser,
             [Description("The ID of the warning you want to edit.")] long warnId,
             [RemainingText, Description("The new reason for the warning.")] string newReason)
@@ -217,7 +224,8 @@ namespace Cliptok.Commands
                 return;
             }
 
-            var msg = await ctx.RespondAsync("Processing your request...");
+            await ctx.RespondAsync("Processing your request...");
+            var msg = await ctx.GetResponseAsync();
             var warning = GetWarning(targetUser.Id, warnId);
             if (warning is null)
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.");
@@ -245,8 +253,9 @@ namespace Cliptok.Commands
         }
 
         [Command("mostwarnings"), Description("Who has the most warnings???")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public async Task MostWarningsCmd(CommandContext ctx)
+        public async Task MostWarningsCmd(TextCommandContext ctx)
         {
             await DiscordHelpers.SafeTyping(ctx.Channel);
 
@@ -276,8 +285,9 @@ namespace Cliptok.Commands
         }
 
         [Command("mostwarningsday"), Description("Which day has the most warnings???")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public async Task MostWarningsDayCmd(CommandContext ctx)
+        public async Task MostWarningsDayCmd(TextCommandContext ctx)
         {
             await DiscordHelpers.SafeTyping(ctx.Channel);
 
