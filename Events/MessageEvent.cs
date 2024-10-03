@@ -531,15 +531,16 @@ namespace Cliptok.Events
                             if ((await GetPermLevelAsync(member)) == ServerPermLevel.Nothing && !Program.db.HashExists("emojiPardoned", message.Author.Id.ToString()))
                             {
                                 await Program.db.HashSetAsync("emojiPardoned", member.Id.ToString(), false);
-                                DiscordMessage msgOut;
+                                string pardonOutput;
                                 if (Program.cfgjson.UnrestrictedEmojiChannels.Count > 0)
-                                    msgOut = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, if you want to play around with lots of emoji, please use <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.");
+                                    pardonOutput = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, if you want to play around with lots of emoji, please use <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.";
                                 else
                                     if (wasAutoModBlock)
-                                        msgOut = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention} Your message contained too many emoji.");
-                                    else
-                                        msgOut = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention} Your message was automatically deleted for mass emoji.");
+                                    pardonOutput = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention} Your message contained too many emoji.";
+                                else
+                                    pardonOutput = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention} Your message was automatically deleted for mass emoji.";
 
+                                var msgOut = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, pardonOutput, wasAutoModBlock);
                                 await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, DiscordHelpers.MessageLink(msgOut), wasAutoModBlock: wasAutoModBlock);
                                 return;
                             }
