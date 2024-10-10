@@ -1,5 +1,6 @@
 using DSharpPlus.Extensions;
 using DSharpPlus.Net.Gateway;
+using DSharpPlus.SlashCommands;
 using Serilog.Sinks.Grafana.Loki;
 using System.Reflection;
 
@@ -29,10 +30,8 @@ namespace Cliptok
 
         public async Task ReconnectRequestedAsync(IGatewayClient _) { }
         public async Task ReconnectFailedAsync(IGatewayClient _) { }
-
         public async Task SessionInvalidatedAsync(IGatewayClient _) { }
-
-
+        public async Task ResumeAttemptedAsync(IGatewayClient _) { }
 
     }
 
@@ -179,8 +178,19 @@ namespace Cliptok
             discordBuilder.ConfigureServices(services =>
             {
                 services.Replace<IGatewayController, GatewayController>();
+#pragma warning disable CS0618 // Type or member is obsolete
+                services.AddSlashCommandsExtension(slash =>
+                {
+                slash.SlashCommandErrored += InteractionEvents.SlashCommandErrorEvent;
+                slash.ContextMenuErrored += InteractionEvents.ContextCommandErrorEvent;
+
+                var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands" && !t.IsNested);
+                foreach (var type in slashCommandClasses)
+                    slash.RegisterCommands(type, cfgjson.ServerID);
+                });
             });
 
+#pragma warning restore CS0618 // Type or member is obsolete
             discordBuilder.ConfigureExtraFeatures(clientConfig =>
             {
                 clientConfig.LogUnknownEvents = false;
@@ -210,18 +220,6 @@ namespace Cliptok
                                   .HandleChannelDeleted(ChannelEvents.ChannelDeleted)
                                   .HandleAutoModerationRuleExecuted(AutoModEvents.AutoModerationRuleExecuted)
             );
-
-#pragma warning disable CS0618 // Type or member is obsolete
-            discordBuilder.UseSlashCommands(slash =>
-            {
-                slash.SlashCommandErrored += InteractionEvents.SlashCommandErrorEvent;
-                slash.ContextMenuErrored += InteractionEvents.ContextCommandErrorEvent;
-
-                var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands" && !t.IsNested);
-                foreach (var type in slashCommandClasses)
-                    slash.RegisterCommands(type, cfgjson.ServerID); ;
-            });
-#pragma warning restore CS0618 // Type or member is obsolete
 
             discordBuilder.UseCommandsNext(commands =>
             {
