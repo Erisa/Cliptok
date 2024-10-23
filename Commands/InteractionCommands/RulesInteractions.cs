@@ -106,7 +106,7 @@
             // Returns: true for public response, false for private
             private async Task<bool> DeterminePublicResponse(DiscordMember member, DiscordChannel channel, bool? isPublic)
             {
-                if (Program.cfgjson.RulesAllowedPublicChannels.Contains(channel.Id))
+                if (Program.cfgjson.RulesAllowedPublicChannels.Contains(channel.Id) || Program.cfgjson.RulesAllowedPublicChannels.Contains(channel.Parent.Id))
                 {
                     if (isPublic is null)
                         return true;
