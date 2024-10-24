@@ -301,6 +301,9 @@
         
         [JsonProperty("forumChannelAutoWarnFallbackChannel")]
         public ulong ForumChannelAutoWarnFallbackChannel { get; private set; } = 0;
+        
+        [JsonProperty("rulesAllowedPublicChannels")]
+        public List<ulong> RulesAllowedPublicChannels { get; private set; } = new();
     }
 
     public enum Level { Information, Warning, Error, Debug, Verbose }
