@@ -4,7 +4,7 @@
     {
         [SlashCommandGroup("tracking", "Commands to manage message tracking of users", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
-        public class PermadehoistSlashCommands
+        public class TrackingSlashCommands
         {
             [SlashCommand("add", "Track a users messages.")]
             public async Task TrackingAddSlashCmd(InteractionContext ctx, [Option("member", "The member to track.")] DiscordUser discordUser)
