@@ -149,7 +149,7 @@ namespace Cliptok.Events
                         {
                             // This user's tracking is filtered to channels; check the channel before relaying the msg to the tracking thread
                             var channels = JsonConvert.DeserializeObject<List<ulong>>(trackingChannels);
-                            if (channels.Contains(channel.Id))
+                            if (channels.Contains(channel.Id) || channels.Contains(channel.Parent.Id))
                             {
                                 await RelayTrackedMessageAsync(client, message);
                             }
