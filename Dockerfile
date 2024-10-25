@@ -23,7 +23,7 @@ RUN touch dummy.txt && \
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/runtime:8.0.8-alpine3.20
-LABEL com.centurylinklabs.watchtower.enable true
+LABEL com.centurylinklabs.watchtower.enable=true
 WORKDIR /app
 RUN apk add --no-cache git redis openssh
 RUN git config --global --add safe.directory /app/Lists/Private
