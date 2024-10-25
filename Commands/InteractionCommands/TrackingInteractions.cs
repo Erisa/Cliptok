@@ -17,7 +17,7 @@
                 List<ulong> filterChannels = new();
                 if (!string.IsNullOrEmpty(channels))
                 {
-                    channels = channels.Replace(", ", ","); // "#general-chat, #lounge" ~> "#general-chat,#lounge"
+                    channels = Regex.Replace(channels, ", +", ",").Trim(); // "#general-chat, #lounge" ~> "#general-chat,#lounge" & trim
                     var channelIds = channels.Split(' ', ',');
                     foreach (var channel in channelIds)
                     {
