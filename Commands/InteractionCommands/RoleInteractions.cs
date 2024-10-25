@@ -76,18 +76,18 @@
         
         internal class RoleCommandChoiceProvider : IChoiceProvider
         {
-            public async ValueTask<IReadOnlyDictionary<string, object>> ProvideAsync(CommandParameter _)
+            public async ValueTask<IEnumerable<DiscordApplicationCommandOptionChoice>> ProvideAsync(CommandParameter _)
             {
-                return new Dictionary<string, object>
+                return new List<DiscordApplicationCommandOptionChoice>
                 {
-                    { "Windows 11 Insiders (Canary)", "insiderCanary" },
-                    { "Windows 11 Insiders (Dev)", "insiderDev" },
-                    { "Windows 11 Insiders (Beta)", "insiderBeta" },
-                    { "Windows 11 Insiders (Release Preview)", "insiderRP" },
-                    { "Windows 10 Insiders (Release Preview)", "insider10RP" },
-                    { "Windows 10 Insiders (Beta)", "insider10Beta" },
-                    { "Patch Tuesday", "patchTuesday" },
-                    { "Giveaways", "giveaways" }  
+                    new("Windows 11 Insiders (Canary)", "insiderCanary"),
+                    new("Windows 11 Insiders (Dev)", "insiderDev"),
+                    new("Windows 11 Insiders (Beta)", "insiderBeta"),
+                    new("Windows 11 Insiders (Release Preview)", "insiderRP"),
+                    new("Windows 10 Insiders (Release Preview)", "insider10RP"),
+                    new("Windows 10 Insiders (Beta)", "insider10Beta"),
+                    new("Patch Tuesday", "patchTuesday"),
+                    new("Giveaways", "giveaways")
                 };
             }
         }

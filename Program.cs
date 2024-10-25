@@ -32,6 +32,8 @@ namespace Cliptok
         public async Task ReconnectFailedAsync(IGatewayClient _) { }
 
         public async Task SessionInvalidatedAsync(IGatewayClient _) { }
+        
+        public async Task ResumeAttemptedAsync(IGatewayClient _) { }
 
 
 
@@ -179,20 +181,21 @@ namespace Cliptok
             discordBuilder.ConfigureServices(services =>
             {
                 services.Replace<IGatewayController, GatewayController>();
-                services.AddCommandsExtension(builder =>
-                {
-                    builder.CommandErrored += ErrorEvents.CommandErrored;
+            });
+            
+            discordBuilder.UseCommands((_, builder) =>
+            {
+                builder.CommandErrored += ErrorEvents.CommandErrored;
 
-                    // Interaction commands
-                    var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands" && !t.IsNested);
-                    foreach (var type in slashCommandClasses)
-                        builder.AddCommands(type, cfgjson.ServerID);
+                // Interaction commands
+                var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands" && !t.IsNested);
+                foreach (var type in slashCommandClasses)
+                    builder.AddCommands(type, cfgjson.ServerID);
                     
-                    // Text commands TODO(#202):  [Error] Failed to build command '"editwarn"' System.ArgumentException: An item with the same key has already been added. Key: editwarn
-                    var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands" && !t.IsNested);
-                    foreach (var type in commandClasses)
-                        builder.AddCommands(type);
-                });
+                // Text commands TODO(#202):  [Error] Failed to build command '"editwarn"' System.ArgumentException: An item with the same key has already been added. Key: editwarn
+                var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands" && !t.IsNested);
+                foreach (var type in commandClasses)
+                    builder.AddCommands(type);
             });
 
             discordBuilder.ConfigureExtraFeatures(clientConfig =>

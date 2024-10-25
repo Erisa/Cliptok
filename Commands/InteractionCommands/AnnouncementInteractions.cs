@@ -261,26 +261,26 @@
         
         internal class WindowsVersionChoiceProvider : IChoiceProvider
         {
-            public async ValueTask<IReadOnlyDictionary<string, object>> ProvideAsync(CommandParameter _)
+            public async ValueTask<IEnumerable<DiscordApplicationCommandOptionChoice>> ProvideAsync(CommandParameter _)
             {
-                return new Dictionary<string, object>
+                return new List<DiscordApplicationCommandOptionChoice>
                 {
-                    { "Windows 10", "10" },
-                    { "Windows 11", "11" }
+                    new("Windows 10", "10"),
+                    new("Windows 11", "11")
                 };
             }
         }
         
         internal class WindowsInsiderChannelChoiceProvider : IChoiceProvider
         {
-            public async ValueTask<IReadOnlyDictionary<string, object>> ProvideAsync(CommandParameter _)
+            public async ValueTask<IEnumerable<DiscordApplicationCommandOptionChoice>> ProvideAsync(CommandParameter _)
             {
-                return new Dictionary<string, object>
+                return new List<DiscordApplicationCommandOptionChoice>
                 {
-                    { "Canary Channel", "Canary" },
-                    { "Dev Channel", "Dev" },
-                    { "Beta Channel", "Beta" },
-                    { "Release Preview Channel", "RP" }
+                    new("Canary Channel", "Canary"),
+                    new("Dev Channel", "Dev"),
+                    new("Beta Channel", "Beta"),
+                    new("Release Preview Channel", "RP")
                 };
             }
         }

@@ -36,16 +36,16 @@ namespace Cliptok.Commands.InteractionCommands
     
     internal class VcRedistChoiceProvider : IChoiceProvider
     {
-        public async ValueTask<IReadOnlyDictionary<string, object>> ProvideAsync(CommandParameter _)
+        public async ValueTask<IEnumerable<DiscordApplicationCommandOptionChoice>> ProvideAsync(CommandParameter _)
         {
-            return new Dictionary<string, object>
+            return new List<DiscordApplicationCommandOptionChoice>
             {
-                { "Visual Studio 2015+ - v140", "140" },
-                { "Visual Studio 2013 - v120", "120" },
-                { "Visual Studio 2012 - v110", "110" },
-                { "Visual Studio 2010 - v100", "100" },
-                { "Visual Studio 2008 - v90", "90" },
-                { "Visual Studio 2005 - v80", "80" }
+                new("Visual Studio 2015+ - v140", "140"),
+                new("Visual Studio 2013 - v120", "120"),
+                new("Visual Studio 2012 - v110", "110"),
+                new("Visual Studio 2010 - v100", "100"),
+                new("Visual Studio 2008 - v90", "90"),
+                new("Visual Studio 2005 - v80", "80")
             };
         }
     }

@@ -195,9 +195,9 @@ namespace Cliptok.Commands.InteractionCommands
 
             private class NotesAutocompleteProvider : IAutoCompleteProvider
             {
-                public async ValueTask<IReadOnlyDictionary<string, object>> AutoCompleteAsync(AutoCompleteContext ctx)
+                public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext ctx)
                 {
-                    var list = new Dictionary<string, object>();
+                    var list = new List<DiscordAutoCompleteChoice>();
 
                     var useroption = ctx.Options.FirstOrDefault(x => x.Name == "user");
                     if (useroption == default)
@@ -223,7 +223,7 @@ namespace Cliptok.Commands.InteractionCommands
                         var focusedOption = ctx.Options.FirstOrDefault(option => option.Focused);
                         if (focusedOption is not null) // TODO(#202): is this right?
                             if (note.Value.NoteText.Contains((string)focusedOption.Value) || noteString.ToLower().Contains(focusedOption.Value.ToString().ToLower()))
-                                list.Add(noteString, StringHelpers.Pad(note.Value.NoteId));
+                                list.Add(new DiscordAutoCompleteChoice(noteString, StringHelpers.Pad(note.Value.NoteId)));
                     }
 
                     return list;

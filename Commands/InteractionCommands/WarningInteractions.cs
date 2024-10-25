@@ -141,9 +141,9 @@ namespace Cliptok.Commands.InteractionCommands
 
         internal partial class WarningsAutocompleteProvider : IAutoCompleteProvider
         {
-            public async ValueTask<IReadOnlyDictionary<string, object>> AutoCompleteAsync(AutoCompleteContext ctx)
+            public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext ctx)
             {
-                var list = new Dictionary<string, object>();
+                var list = new List<DiscordAutoCompleteChoice>();
 
                 var useroption = ctx.Options.FirstOrDefault(x => x.Name == "user");
                 if (useroption == default)
@@ -169,7 +169,7 @@ namespace Cliptok.Commands.InteractionCommands
                     var focusedOption = ctx.Options.FirstOrDefault(option => option.Focused);
                     if (focusedOption is not null) // TODO(#202): is this right?
                         if (warning.Value.WarnReason.Contains((string)focusedOption.Value) || warningString.ToLower().Contains(focusedOption.Value.ToString().ToLower()))
-                            list.Add(warningString, StringHelpers.Pad(warning.Value.WarningId));
+                            list.Add(new DiscordAutoCompleteChoice(warningString, StringHelpers.Pad(warning.Value.WarningId)));
                 }
 
                 return list;
