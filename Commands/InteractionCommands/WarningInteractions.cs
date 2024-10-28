@@ -48,7 +48,14 @@ namespace Cliptok.Commands.InteractionCommands
                 .WithContent($"{Program.cfgjson.Emoji.Warning} {user.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
 
             if (replyMsgId != "0")
-                messageBuild.WithReply(Convert.ToUInt64(replyMsgId), true, false);
+            {
+                if (!ulong.TryParse(replyMsgId, out var msgId))
+                {
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Invalid reply message ID! Please try again.").AsEphemeral(true));
+                    return;
+                }
+                messageBuild.WithReply(msgId, true, false);
+            }
 
             var msg = await channel.SendMessageAsync(messageBuild);
 
