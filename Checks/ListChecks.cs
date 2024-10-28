@@ -6,7 +6,7 @@ namespace Cliptok.Checks
     {
         // Map of Cyrillic to Latin characters, to catch attempted bypasses using Cyrillic lookalikes
         // <string, string> is <Cyrillic, Latin>
-        static Dictionary<string, string> alphabetMap = new()
+        public static Dictionary<string, string> alphabetMap = new()
                             {
                                 { "А", "A" },
                                 { "В", "B" },

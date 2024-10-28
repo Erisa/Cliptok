@@ -640,7 +640,10 @@ namespace Cliptok.Events
                     }
 
                     // attempted to ping @everyone/@here
-                    if (Program.cfgjson.EveryoneFilter && !member.Roles.Any(role => Program.cfgjson.EveryoneExcludedRoles.Contains(role.Id)) && !Program.cfgjson.EveryoneExcludedChannels.Contains(channel.Id) && (message.Content.Contains("@everyone") || message.Content.Contains("@here")))
+                    var msgContent = message.Content;
+                    foreach (var letter in Checks.ListChecks.alphabetMap)
+                        msgContent = msgContent.Replace(letter.Key, letter.Value);
+                    if (Program.cfgjson.EveryoneFilter && !member.Roles.Any(role => Program.cfgjson.EveryoneExcludedRoles.Contains(role.Id)) && !Program.cfgjson.EveryoneExcludedChannels.Contains(channel.Id) && (msgContent.Contains("@everyone") || msgContent.Contains("@here")))
                     {
                         if (wasAutoModBlock)
                         {
