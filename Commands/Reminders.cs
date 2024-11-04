@@ -36,7 +36,7 @@
             [RemainingText, Description("The text to send when the reminder triggers.")] string reminder
         )
         {
-            string discordTimestampRegexExp = @"^<t:(\d+):[a-z]>$";
+            string discordTimestampRegexExp = @"^<t:(\d+):?\w*>$";
             Match matchesDiscordTimestamp = Regex.Match(timetoParse, discordTimestampRegexExp);
 
 
