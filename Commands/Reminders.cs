@@ -36,19 +36,37 @@
             [RemainingText, Description("The text to send when the reminder triggers.")] string reminder
         )
         {
-            DateTime t = HumanDateParser.HumanDateParser.Parse(timetoParse);
-            if (t <= DateTime.Now)
+            string discordTimestampRegexExp = @"^<t:(\d+):[a-z]>$";
+            Match matchesDiscordTimestamp = Regex.Match(timetoParse, discordTimestampRegexExp);
+
+
+            DateTime t;
+            if (matchesDiscordTimestamp.Success)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time can't be in the past!");
-                return;
+                // parse as timestamp
+                // Extract the Unix timestamp from the matched pattern
+                long unixTimestamp = long.Parse(matchesDiscordTimestamp.Groups[1].Value);
+                // Convert the Unix timestamp to a DateTime object
+                t = DateTimeOffset.FromUnixTimeSeconds(unixTimestamp).DateTime;
             }
+            else
+            {
+                t = HumanDateParser.HumanDateParser.Parse(timetoParse);
+                if (t <= DateTime.Now)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time can't be in the past!");
+                    return;
+                }
 #if !DEBUG
-            else if (t < (DateTime.Now + TimeSpan.FromSeconds(59)))
-            {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time must be at least a minute in the future!");
-                return;
-            }
+                else if (t < (DateTime.Now + TimeSpan.FromSeconds(59)))
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time must be at least a minute in the future!");
+                    return;
+                }
 #endif
+            }
+            
+            
             string guildId;
 
             if (ctx.Channel.IsPrivate)
