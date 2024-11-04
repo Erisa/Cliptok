@@ -52,20 +52,20 @@
             else
             {
                 t = HumanDateParser.HumanDateParser.Parse(timetoParse);
-                if (t <= DateTime.Now)
-                {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time can't be in the past!");
-                    return;
-                }
-#if !DEBUG
-                else if (t < (DateTime.Now + TimeSpan.FromSeconds(59)))
-                {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time must be at least a minute in the future!");
-                    return;
-                }
-#endif
             }
             
+            if (t <= DateTime.Now)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time can't be in the past!");
+                return;
+            }
+#if !DEBUG
+            else if (t < (DateTime.Now + TimeSpan.FromSeconds(59)))
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time must be at least a minute in the future!");
+                return;
+            }
+#endif
             
             string guildId;
 
