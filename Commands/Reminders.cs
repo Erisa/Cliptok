@@ -36,24 +36,7 @@
             [RemainingText, Description("The text to send when the reminder triggers.")] string reminder
         )
         {
-            string discordTimestampRegexExp = @"(?:<t:)?(\d+)(?::\w*>)?";
-            Match matchesDiscordTimestamp = Regex.Match(timetoParse, discordTimestampRegexExp);
-
-
-            DateTime t;
-            if (matchesDiscordTimestamp.Success)
-            {
-                // parse as timestamp
-                // Extract the Unix timestamp from the matched pattern
-                long unixTimestamp = long.Parse(matchesDiscordTimestamp.Groups[1].Value);
-                // Convert the Unix timestamp to a DateTime object
-                t = DateTimeOffset.FromUnixTimeSeconds(unixTimestamp).DateTime;
-            }
-            else
-            {
-                t = HumanDateParser.HumanDateParser.Parse(timetoParse);
-            }
-            
+            DateTime t = HumanDateParser.HumanDateParser.Parse(timetoParse);
             if (t <= DateTime.Now)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time can't be in the past!");
@@ -66,7 +49,6 @@
                 return;
             }
 #endif
-            
             string guildId;
 
             if (ctx.Channel.IsPrivate)
