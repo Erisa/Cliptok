@@ -110,7 +110,7 @@ namespace Cliptok.Commands
         [
             Command("delwarn"),
             Description("Delete a warning that was issued by mistake or later became invalid."),
-            Aliases("delwarm", "delwam", "deletewarn", "delwarning", "deletewarning"),
+            Aliases("delwarm", "delwam", "deletewarn", "delwarning", "deletewarning", "removewarning", "removewarn"),
             HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
         public async Task DelwarnCmd(
