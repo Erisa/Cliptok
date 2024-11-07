@@ -4,9 +4,6 @@
     {
         public static async void DirectMessageEventHandler(DiscordMessage message)
         {
-            // Ignore message if user is blocked
-            if (await Program.db.SetContainsAsync("dmRelayBlocklist", message.Author.Id)) return;
-
             // Auto-response to contact modmail if DM follows warn/mute and is within configured time limit
 
             bool sentAutoresponse = false;
@@ -35,6 +32,12 @@
                     }
                 }
             }
+
+            // Don't relay message if user is a bot (user apps)
+            if (message.Author.IsBot) return;
+
+            // Don't relay message if user is blocked
+            if (await Program.db.SetContainsAsync("dmRelayBlocklist", message.Author.Id)) return;
 
             // Log DMs to DM log channel, include note about auto-response if applicable
             await LogChannelHelper.LogMessageAsync("dms", await DiscordHelpers.GenerateMessageRelay(message, sentAutoresponse: sentAutoresponse));
