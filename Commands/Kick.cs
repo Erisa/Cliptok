@@ -2,8 +2,8 @@
 {
     internal class Kick
     {
-        [Command("kick")]
-        [TextAlias("yeet", "shoo", "goaway", "defenestrate")]
+        [Command("kicktextcmd")]
+        [TextAlias("kick", "yeet", "shoo", "goaway", "defenestrate")]
         [Description("Kicks a user, removing them from the server until they rejoin. Generally not very useful.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequirePermissions(DiscordPermissions.KickMembers), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
@@ -50,7 +50,8 @@
             }
         }
 
-        [Command("masskick")]
+        [Command("masskicktextcmd")]
+        [TextAlias("masskick")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task MassKickCmd(TextCommandContext ctx, [RemainingText] string input)

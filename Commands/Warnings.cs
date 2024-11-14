@@ -6,7 +6,7 @@ namespace Cliptok.Commands
     public class Warnings
     {
         [
-            Command("6158e255-e8b3-4467-8d1a-79f89829"),
+            Command("warntextcmd"),
             Description("Issues a formal warning to a user."),
             TextAlias("warn", "wam", "warm"),
             AllowedProcessors(typeof(TextCommandProcessor)),
@@ -53,9 +53,9 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("anonwarn"),
+            Command("anonwarntextcmd"),
+            TextAlias("anonwarn", "anonwam", "anonwarm"),
             Description("Issues a formal warning to a user from a private channel."),
-            TextAlias("anonwam", "anonwarm"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
@@ -93,9 +93,9 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("6158e255-e8b3-4467-8d1a-79f89810"),
-            Description("Shows a list of warnings that a user has been given. For more in-depth information, use the 'warnlookup' command."),
+            Command("warningstextcmd"),
             TextAlias("warnings", "infractions", "warnfractions", "wammings", "wamfractions"),
+            Description("Shows a list of warnings that a user has been given. For more in-depth information, use the 'warnlookup' command."),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
         ]
@@ -111,9 +111,9 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("6158e255-e8b3-4467-8d1a-79f89811"),
-            Description("Delete a warning that was issued by mistake or later became invalid."),
+            Command("delwarntextcmd"),
             TextAlias("delwarn", "delwarm", "delwam", "deletewarn", "delwarning", "deletewarning"),
+            Description("Delete a warning that was issued by mistake or later became invalid."),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)
         ]
@@ -157,9 +157,9 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("warnlookup"),
+            Command("warnlookuptextcmd"),
             Description("Looks up information about a warning. Shows only publicly available information."),
-            TextAlias("warning", "warming", "waming", "wamming", "lookup", "lookylooky", "peek", "investigate", "what-did-i-do-wrong-there", "incident"),
+            TextAlias("warnlookup", "warning", "warming", "waming", "wamming", "lookup", "lookylooky", "peek", "investigate", "what-did-i-do-wrong-there", "incident"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
         ]
@@ -177,7 +177,7 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("6158e255-e8b3-4467-8d1a-79f89822"),
+            Command("warndetailstextcmd"),
             TextAlias("warndetails", "warninfo", "waminfo", "wamdetails", "warndetail", "wamdetail"),
             Description("Check the details of a warning in depth. Shows extra information (Such as responsible Mod) that may not be wanted to be public."),
             AllowedProcessors(typeof(TextCommandProcessor)),
@@ -204,7 +204,7 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("6158e255-e8b3-4467-8d1a-79f89812"),
+            Command("editwarntextcmd"),
             TextAlias("editwarn", "warnedit", "editwarning"),
             Description("Edit the reason of an existing warning.\n" +
                 "The Moderator who is editing the reason will become responsible for the case."),
@@ -252,7 +252,9 @@ namespace Cliptok.Commands
             }
         }
 
-        [Command("mostwarnings"), Description("Who has the most warnings???")]
+        [Command("mostwarningstextcmd")]
+        [TextAlias("mostwarnings")]
+        [Description("Who has the most warnings???")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task MostWarningsCmd(TextCommandContext ctx)
@@ -284,7 +286,9 @@ namespace Cliptok.Commands
             await ctx.RespondAsync($":thinking: The user with the most warnings is **{DiscordHelpers.UniqueUsername(user)}** with a total of **{myList.Last().Value} warnings!**\nThis includes users who have left or been banned.");
         }
 
-        [Command("mostwarningsday"), Description("Which day has the most warnings???")]
+        [Command("mostwarningsdaytextcmd")]
+        [TextAlias("mostwarningsday")]
+        [Description("Which day has the most warnings???")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task MostWarningsDayCmd(TextCommandContext ctx)

@@ -2,10 +2,10 @@
 {
     internal class DmRelayBlock
     {
-        [Command("dmrelayblock")]
+        [Command("dmrelayblocktextcmd")]
+        [TextAlias("dmrelayblock", "dmblock")]
         [Description("Stop a member's DMs from being relayed to the configured DM relay channel.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
-        [TextAlias("dmblock")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task DmRelayBlockCommand(TextCommandContext ctx, [Description("The member to stop relaying DMs from.")] DiscordUser user)
         {

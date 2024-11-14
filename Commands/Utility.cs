@@ -2,7 +2,8 @@
 {
     internal class Utility
     {
-        [Command("ping")]
+        [Command("pingtextcmd")]
+        [TextAlias("ping")]
         [Description("Pong? This command lets you know whether I'm working well.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         public async Task Ping(TextCommandContext ctx)
@@ -17,7 +18,8 @@
                 $"• Last Websocket Heartbeat took `{Math.Round(ctx.Client.GetConnectionLatency(0).TotalMilliseconds, 0)}ms`!");
         }
 
-        [Command("edit")]
+        [Command("edittextcmd")]
+        [TextAlias("edit")]
         [Description("Edit a message.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
@@ -37,7 +39,8 @@
             await msg.ModifyAsync(content);
         }
 
-        [Command("editappend")]
+        [Command("editappendtextcmd")]
+        [TextAlias("editappend")]
         [Description("Append content to an existing bot message with a newline.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
@@ -64,9 +67,9 @@
             }
         }
 
-        [Command("userinfo")]
+        [Command("userinfotextcmd")]
+        [TextAlias("userinfo", "userinfo", "user-info", "whois")]
         [Description("Show info about a user.")]
-        [TextAlias("userinfo", "user-info", "whois")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         public async Task UserInfoCommand(
             TextCommandContext ctx,

@@ -2,7 +2,8 @@ namespace Cliptok.Commands
 {
     public class SecurityActions
     {
-        [Command("pausedms")]
+        [Command("pausedmstextcmd")]
+        [TextAlias("pausedms")]
         [Description("Temporarily pause DMs between server members.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
@@ -67,7 +68,8 @@ namespace Cliptok.Commands
             }
         }
 
-        [Command("unpausedms")]
+        [Command("unpausedmstextcmd")]
+        [TextAlias("unpausedms")]
         [Description("Unpause DMs between server members.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]

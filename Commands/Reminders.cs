@@ -26,9 +26,9 @@
             public DateTime OriginalTime { get; set; }
         }
 
-        [Command("remindme")]
+        [Command("remindmetextcmd")]
         [Description("Set a reminder for yourself. Example: !reminder 1h do the thing")]
-        [TextAlias("reminder", "rember", "wemember", "remember", "remind")]
+        [TextAlias("remindme", "reminder", "rember", "wemember", "remember", "remind")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Tier4, WorkOutside = true)]
         public async Task RemindMe(

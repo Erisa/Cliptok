@@ -2,7 +2,7 @@
 {
     internal class Grant
     {
-        [Command("grant")]
+        [Command("granttextcmd")]
         [Description("Grant a user access to the server, by giving them the Tier 1 role.")]
         [TextAlias("grant", "clipgrant", "verify")]
         [AllowedProcessors(typeof(TextCommandProcessor))]

@@ -3,7 +3,8 @@
     internal class Announcements
     {
 
-        [Command("editannounce")]
+        [Command("editannouncetextcmd")]
+        [TextAlias("editannounce")]
         [Description("Edit an announcement, preserving the ping highlight.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
@@ -39,7 +40,8 @@
             }
         }
 
-        [Command("announce")]
+        [Command("announcetextcmd")]
+        [TextAlias("announce")]
         [Description("Announces something in the current channel, pinging an Insider role in the process.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]

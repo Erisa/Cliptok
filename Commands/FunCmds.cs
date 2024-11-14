@@ -2,7 +2,8 @@
 {
     internal class FunCmds
     {
-        [Command("tellraw")]
+        [Command("tellrawtextcmd")]
+        [TextAlias("tellraw")]
         [Description("Nothing of interest.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
@@ -21,9 +22,9 @@
 
         }
 
-        [Command("no")]
+        [Command("notextcmd")]
+        [TextAlias("no", "yes")]
         [Description("Makes Cliptok choose something for you. Outputs either Yes or No.")]
-        [TextAlias("yes")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Tier5)]
         public async Task No(TextCommandContext ctx)

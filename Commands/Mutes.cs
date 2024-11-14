@@ -2,8 +2,8 @@ namespace Cliptok.Commands
 {
     internal class Mutes
     {
-        [Command("unmute")]
-        [TextAlias("umute")]
+        [Command("unmutetextcmd")]
+        [TextAlias("unmute", "umute")]
         [Description("Unmutes a previously muted user, typically ahead of the standard expiration time. See also: mute")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
@@ -45,7 +45,8 @@ namespace Cliptok.Commands
                 }
         }
 
-        [Command("mute")]
+        [Command("mutetextcmd")]
+        [TextAlias("mute")]
         [Description("Mutes a user, preventing them from sending messages until they're unmuted. See also: unmute")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
@@ -99,9 +100,9 @@ namespace Cliptok.Commands
             _ = MuteHelpers.MuteUserAsync(targetUser, reason, ctx.User.Id, ctx.Guild, ctx.Channel, muteDuration, true);
         }
 
-        [Command("tqsmute")]
-        [Description(
-            "Temporarily mutes a user, preventing them from sending messages in #tech-support and related channels until they're unmuted.")]
+        [Command("tqsmutetextcmd")]
+        [TextAlias("tqsmute")]
+        [Description("Temporarily mutes a user, preventing them from sending messages in #tech-support and related channels until they're unmuted.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TechnicalQueriesSlayer)]
         public async Task TqsMuteCmd(

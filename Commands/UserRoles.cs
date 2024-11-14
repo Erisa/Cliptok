@@ -72,8 +72,8 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("swap-insider-rp"),
-            TextAlias("swap-insiders-rp"),
+            Command("swap-insider-rptextcmd"),
+            TextAlias("swap-insider-rp", "swap-insiders-rp"),
             Description("Removes the Windows 11 Insiders (Release Preview) role and replaces it with Windows 10 Insiders (Release Preview) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
@@ -85,8 +85,8 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("swap-insider-dev"),
-            TextAlias("swap-insiders-dev", "swap-insider-canary", "swap-insiders-canary", "swap-insider-can", "swap-insiders-can"),
+            Command("swap-insider-devtextcmd"),
+            TextAlias("swap-insider-dev", "swap-insiders-dev", "swap-insider-canary", "swap-insiders-canary", "swap-insider-can", "swap-insiders-can"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             Description("Removes the Windows 11 Insiders (Canary) role and replaces it with Windows 10 Insiders (Dev) role"),
             HomeServer
@@ -99,8 +99,8 @@ namespace Cliptok.Commands
 
 
         [
-            Command("join-insider-dev"),
-            TextAlias("join-insiders-dev"),
+            Command("join-insider-devtextcmd"),
+            TextAlias("join-insider-dev", "join-insiders-dev"),
             Description("Gives you the Windows 11 Insiders (Dev) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
@@ -111,8 +111,8 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("join-insider-canary"),
-            TextAlias("join-insiders-canary", "join-insider-can", "join-insiders-can"),
+            Command("join-insider-canarytextcmd"),
+            TextAlias("join-insider-canary", "join-insiders-canary", "join-insider-can", "join-insiders-can"),
             Description("Gives you the Windows 11 Insiders (Canary) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
@@ -124,8 +124,8 @@ namespace Cliptok.Commands
 
 
         [
-            Command("join-insider-beta"),
-            TextAlias("join-insiders-beta"),
+            Command("join-insider-betatextcmd"),
+            TextAlias("join-insider-beta", "join-insiders-beta"),
             Description("Gives you the Windows 11 Insiders (Beta) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
@@ -136,8 +136,8 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("join-insider-rp"),
-            TextAlias("join-insiders-rp", "join-insiders-11-rp", "join-insider-11-rp"),
+            Command("join-insider-rptextcmd"),
+            TextAlias("join-insider-rp", "join-insiders-rp", "join-insiders-11-rp", "join-insider-11-rp"),
             Description("Gives you the Windows 11 Insiders (Release Preview) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
@@ -148,8 +148,8 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("join-insider-10"),
-            TextAlias("join-insiders-10"),
+            Command("join-insider-10textcmd"),
+            TextAlias("join-insider-10", "join-insiders-10"),
             Description("Gives you to the Windows 10 Insiders (Release Preview) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
@@ -160,7 +160,8 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("join-patch-tuesday"),
+            Command("join-patch-tuesdaytextcmd"),
+            TextAlias("join-patch-tuesday"),
             Description("Gives you the 💻 Patch Tuesday role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
@@ -171,7 +172,8 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("keep-me-updated"),
+            Command("keep-me-updatedtextcmd"),
+            TextAlias("keep-me-updated"),
             Description("Gives you all opt-in roles"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
@@ -182,8 +184,8 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("leave-insiders"),
-            TextAlias("leave-insider"),
+            Command("leave-insiderstextcmd"),
+            TextAlias("leave-insiders", "leave-insider"),
             Description("Removes you from Insider roles"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
@@ -202,7 +204,8 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("dont-keep-me-updated"),
+            Command("dont-keep-me-updatedtextcmd"),
+            TextAlias("dont-keep-me-updated"),
             Description("Takes away from you all opt-in roles"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
@@ -213,8 +216,8 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("leave-insider-dev"),
-            TextAlias("leave-insiders-dev"),
+            Command("leave-insider-devtextcmd"),
+            TextAlias("leave-insider-dev", "leave-insiders-dev"),
             Description("Removes the Windows 11 Insiders (Dev) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
@@ -225,8 +228,8 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("leave-insider-canary"),
-            TextAlias("leave-insiders-canary", "leave-insider-can", "leave-insiders-can"),
+            Command("leave-insider-canarytextcmd"),
+            TextAlias("leave-insider-canary", "leave-insiders-canary", "leave-insider-can", "leave-insiders-can"),
             Description("Removes the Windows 11 Insiders (Canary) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
@@ -237,8 +240,8 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("leave-insider-beta"),
-            TextAlias("leave-insiders-beta"),
+            Command("leave-insider-betatextcmd"),
+            TextAlias("leave-insider-beta", "leave-insiders-beta"),
             Description("Removes the Windows 11 Insiders (Beta) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
@@ -249,8 +252,8 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("leave-insider-10"),
-            TextAlias("leave-insiders-10"),
+            Command("leave-insider-10textcmd"),
+            TextAlias("leave-insider-10", "leave-insiders-10"),
             Description("Removes the Windows 10 Insiders (Release Preview) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
@@ -261,8 +264,8 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("leave-insider-rp"),
-            TextAlias("leave-insiders-rp", "leave-insiders-11-rp", "leave-insider-11-rp"),
+            Command("leave-insider-rptextcmd"),
+            TextAlias("leave-insider-rp", "leave-insiders-rp", "leave-insiders-11-rp", "leave-insider-11-rp"),
             Description("Removes the Windows 11 Insiders (Release Preview) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer
@@ -273,7 +276,8 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("leave-patch-tuesday"),
+            Command("leave-patch-tuesdaytextcmd"),
+            TextAlias("leave-patch-tuesday"),
             Description("Removes the 💻 Patch Tuesday role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer

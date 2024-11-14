@@ -4,7 +4,8 @@ namespace Cliptok.Commands
 {
     internal class Raidmode
     {
-        [Command("clipraidmode")]
+        [Command("clipraidmodetextcmd")]
+        [TextAlias("clipraidmode")]
         [Description("Manage the server's raidmode, preventing joins while on.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]

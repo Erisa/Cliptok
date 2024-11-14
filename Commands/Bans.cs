@@ -4,8 +4,8 @@ namespace Cliptok.Commands
 {
     class Bans
     {
-        [Command("massban")]
-        [TextAlias("bigbonk")]
+        [Command("massbantextcmd")]
+        [TextAlias("massban", "bigbonk")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task MassBanCmd(TextCommandContext ctx, [RemainingText] string input)
@@ -42,8 +42,8 @@ namespace Cliptok.Commands
             await loading.DeleteAsync();
         }
 
-        [Command("ban")]
-        [TextAlias("tempban", "bonk", "isekaitruck")]
+        [Command("bantextcmd")]
+        [TextAlias("ban", "tempban", "bonk", "isekaitruck")]
         [Description("Bans a user that you have permission to ban, deleting all their messages in the process. See also: bankeep.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.BanMembers)]
@@ -135,8 +135,8 @@ namespace Cliptok.Commands
 
         /// I CANNOT find a way to do this as alias so I made it a separate copy of the command.
         /// Sue me, I beg you.
-        [Command("bankeep")]
-        [TextAlias("bansave")]
+        [Command("bankeeptextcmd")]
+        [TextAlias("bankeep", "bansave")]
         [Description("Bans a user but keeps their messages around."), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.BanMembers)]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         public async Task BankeepCmd(TextCommandContext ctx,
@@ -218,7 +218,8 @@ namespace Cliptok.Commands
                 await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{TimeHelpers.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
         }
 
-        [Command("unban")]
+        [Command("unbantextcmd")]
+        [TextAlias("unban")]
         [Description("Unbans a user who has been previously banned.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.BanMembers)]

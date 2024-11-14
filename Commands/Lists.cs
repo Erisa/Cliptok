@@ -23,7 +23,8 @@
             public string User { get; set; }
         }
 
-        [Command("listupdate")]
+        [Command("listupdatetextcmd")]
+        [TextAlias("listupdate")]
         [Description("Updates the private lists from the GitHub repository, then reloads them into memory.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
@@ -55,7 +56,8 @@
 
         }
 
-        [Command("listadd")]
+        [Command("listaddtextcmd")]
+        [TextAlias("listadd")]
         [Description("Add a piece of text to a public list.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
@@ -135,7 +137,8 @@
                     $"Body: ```json\n{responseText}```");
         }
 
-        [Command("scamcheck")]
+        [Command("scamchecktextcmd")]
+        [TextAlias("scamcheck")]
         [Description("Check if a link or message is known to the anti-phishing API.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
@@ -167,8 +170,8 @@
             }
         }
 
-        [Command("joinwatch")]
-        [TextAlias("joinnotify", "leavewatch", "leavenotify")]
+        [Command("joinwatchtextcmd")]
+        [TextAlias("joinwatch", "joinnotify", "leavewatch", "leavenotify")]
         [Description("Watch for joins and leaves of a given user. Output goes to #investigations.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
@@ -216,8 +219,8 @@
             }
         }
 
-        [Command("appealblock")]
-        [TextAlias("superduperban", "ablock")]
+        [Command("appealblocktextcmd")]
+        [TextAlias("appealblock", "superduperban", "ablock")]
         [Description("Prevents a user from submitting ban appeals.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]

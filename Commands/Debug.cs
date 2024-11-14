@@ -6,8 +6,8 @@ namespace Cliptok.Commands
     {
         public static Dictionary<ulong, PendingUserOverride> OverridesPendingAddition = new();
 
-        [Command("debug")]
-        [TextAlias("troubleshoot", "unbug", "bugn't", "helpsomethinghasgoneverywrong")]
+        [Command("debugtextcmd")]
+        [TextAlias("debug", "troubleshoot", "unbug", "bugn't", "helpsomethinghasgoneverywrong")]
         [Description("Commands and things for fixing the bot in the unlikely event that it breaks a bit.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]

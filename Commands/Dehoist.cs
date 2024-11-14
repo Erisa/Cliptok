@@ -4,7 +4,8 @@ namespace Cliptok.Commands
 {
     internal class Dehoist
     {
-        [Command("dehoist")]
+        [Command("dehoisttextcmd")]
+        [TextAlias("dehoist")]
         [Description("Adds an invisible character to someone's nickname that drops them to the bottom of the member list. Accepts multiple members.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
@@ -69,7 +70,8 @@ namespace Cliptok.Commands
             _ = await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {discordMembers.Length - failedCount} of {discordMembers.Length} member(s)! (Check Audit Log for details)");
         }
 
-        [Command("massdehoist")]
+        [Command("massdehoisttextcmd")]
+        [TextAlias("massdehoist")]
         [Description("Dehoist everyone on the server who has a bad name. This may take a while and can exhaust rate limits.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
@@ -91,7 +93,8 @@ namespace Cliptok.Commands
             await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {discordMembers.Count() - failedCount} of {discordMembers.Count()} member(s)! (Check Audit Log for details)").WithReply(ctx.Message.Id, true, false));
         }
 
-        [Command("massundehoist")]
+        [Command("massundehoisttextcmd")]
+        [TextAlias("massundehoist")]
         [Description("Remove the dehoist for users attached via a txt file.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
@@ -151,7 +154,8 @@ namespace Cliptok.Commands
             }
         }
 
-        [Command("permadehoist")]
+        [Command("permadehoisttextcmd")]
+        [TextAlias("permadehoist")]
         [Description("Permanently/persistently dehoist members.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]

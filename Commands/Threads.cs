@@ -2,7 +2,8 @@
 {
     internal class Threads
     {
-        [Command("archive")]
+        [Command("archivetextcmd")]
+        [TextAlias("archive")]
         [Description("Archive the current thread or another thread.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
@@ -26,7 +27,8 @@
             });
         }
 
-        [Command("lockthread")]
+        [Command("lockthreadtextcmd")]
+        [TextAlias("lockthread")]
         [Description("Lock the current thread or another thread.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
@@ -50,7 +52,8 @@
             });
         }
 
-        [Command("unarchive")]
+        [Command("unarchivetextcmd")]
+        [TextAlias("unarchive")]
         [Description("Unarchive a thread")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]

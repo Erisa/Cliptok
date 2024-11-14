@@ -2,7 +2,8 @@
 {
     internal class TechSupport
     {
-        [Command("ask")]
+        [Command("asktextcmd")]
+        [TextAlias("ask")]
         [Description("Outputs information on how and where to ask tech support questions. Replying to a message while triggering the command will mirror the reply in the response.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer]

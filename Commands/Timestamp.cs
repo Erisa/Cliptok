@@ -4,8 +4,8 @@ namespace Cliptok.Commands
 {
     internal class Timestamp
     {
-        [Command("timestamp")]
-        [TextAlias("ts", "time")]
+        [Command("timestamptextcmd")]
+        [TextAlias("timestamp", "ts", "time")]
         [Description("Returns various timestamps for a given Discord ID/snowflake")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer]

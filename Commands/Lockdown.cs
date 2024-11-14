@@ -4,8 +4,8 @@ namespace Cliptok.Commands
     {
         public bool ongoingLockdown = false;
 
-        [Command("lockdown")]
-        [TextAlias("lock")]
+        [Command("lockdowntextcmd")]
+        [TextAlias("lockdown", "lock")]
         [Description("Locks the current channel, preventing any new messages. See also: unlock")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ManageChannels, DiscordPermissions.None)]
@@ -97,10 +97,11 @@ namespace Cliptok.Commands
             await LockdownHelpers.LockChannelAsync(user: ctx.User, channel: currentChannel, duration: lockDuration, reason: reason);
         }
 
-        [Command("unlock")]
+        [Command("unlocktextcmd")]
+        [TextAlias("unlock", "unlockdown")]
         [Description("Unlocks a previously locked channel. See also: lockdown")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
-        [TextAlias("unlockdown"), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ManageChannels, DiscordPermissions.None)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ManageChannels, DiscordPermissions.None)]
         public async Task UnlockCommand(TextCommandContext ctx, [RemainingText] string reason = "")
         {
             var currentChannel = ctx.Channel;
