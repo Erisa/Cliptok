@@ -2,7 +2,6 @@ using DSharpPlus.Extensions;
 using DSharpPlus.Net.Gateway;
 using Serilog.Sinks.Grafana.Loki;
 using System.Reflection;
-using DSharpPlus.Commands.EventArgs;
 
 namespace Cliptok
 {
@@ -30,12 +29,8 @@ namespace Cliptok
 
         public async Task ReconnectRequestedAsync(IGatewayClient _) { }
         public async Task ReconnectFailedAsync(IGatewayClient _) { }
-
         public async Task SessionInvalidatedAsync(IGatewayClient _) { }
-        
         public async Task ResumeAttemptedAsync(IGatewayClient _) { }
-
-
 
     }
 
@@ -59,9 +54,6 @@ namespace Cliptok
         public static Random rand = new();
         public static HasteBinClient hasteUploader;
 
-        public static StringBuilder outputStringBuilder = new(16, 200000000);
-        public static StringWriter outputCapture;
-
         static public readonly HttpClient httpClient = new();
 
         public static List<ServerApiResponseJson> serverApiList = new();
@@ -80,7 +72,6 @@ namespace Cliptok
         static async Task Main(string[] _)
         {
             Console.OutputEncoding = Encoding.UTF8;
-            outputCapture = new(outputStringBuilder);
 
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var logFormat = "[{Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{Level}] {Message}{NewLine}{Exception}";
@@ -127,9 +118,6 @@ namespace Cliptok
                     loggerConfig.MinimumLevel.Information();
                     break;
             }
-
-            if (cfgjson.LogLevel is not Level.Verbose)
-                loggerConfig.WriteTo.TextWriter(outputCapture, outputTemplate: logFormat);
 
             if (cfgjson.LokiURL is not null && cfgjson.LokiServiceName is not null)
             {
@@ -182,7 +170,7 @@ namespace Cliptok
             {
                 services.Replace<IGatewayController, GatewayController>();
             });
-            
+
             discordBuilder.UseCommands((_, builder) =>
             {
                 builder.CommandErrored += ErrorEvents.CommandErrored;
@@ -191,7 +179,7 @@ namespace Cliptok
                 var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands" && !t.IsNested);
                 foreach (var type in slashCommandClasses)
                     builder.AddCommands(type, cfgjson.ServerID);
-                    
+
                 // Text commands TODO(#202):  [Error] Failed to build command '"editwarn"' System.ArgumentException: An item with the same key has already been added. Key: editwarn
                 var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands" && !t.IsNested);
                 foreach (var type in commandClasses)

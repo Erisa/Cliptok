@@ -324,5 +324,13 @@
   "lokiURL": "http://100.79.19.82:3100",
   "lokiServiceName": "cliptok",
   "voiceChannelPurge":  true,
-  "forumChannelAutoWarnFallbackChannel": 150662382874525696
+  "forumChannelAutoWarnFallbackChannel": 150662382874525696,
+  "rulesAllowedPublicChannels": [
+    150909451270881280,
+    1006577277313744996,
+    153165424358457345,
+    740272437719072808,
+    536572162450915340,
+    355973419961155584
+  ]
 }

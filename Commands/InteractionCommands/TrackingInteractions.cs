@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Cliptok.Commands.InteractionCommands
+﻿namespace Cliptok.Commands.InteractionCommands
 {
     internal class TrackingInteractions
     {
@@ -8,7 +6,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Description("Commands to manage message tracking of users")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
-        public class PermadehoistSlashCommands
+        public class TrackingSlashCommands
         {
             [Command("add")]
 			[Description("Track a users messages.")]

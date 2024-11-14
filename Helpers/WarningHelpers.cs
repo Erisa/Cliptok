@@ -197,6 +197,10 @@
             {
                 // We failed to DM the user.
                 // Lets log this if it isn't a known cause.
+                if (e is DSharpPlus.Exceptions.NotFoundException)
+                {
+                    Program.discord.Logger.LogWarning(e, "Failed to send warning DM to user because they are not in the server: {user}", targetUser.Id);
+                }
                 if (e is not DSharpPlus.Exceptions.UnauthorizedException)
                 {
                     Program.discord.Logger.LogWarning(e, "Failed to send warning DM to user: {user}", targetUser.Id);
@@ -388,6 +392,35 @@
             {
                 return null;
             }
+        }
+        
+        public static async Task<DiscordMessage> SendPublicWarningMessageAndDeleteInfringingMessageAsync(DiscordMessage infringingMessage, string warningMessageContent, bool wasAutoModBlock = false, int minMessages = 0)
+        {
+            return await SendPublicWarningMessageAndDeleteInfringingMessageAsync(new MockDiscordMessage(infringingMessage), warningMessageContent, wasAutoModBlock, minMessages);
+        }
+        
+        public static async Task<DiscordMessage> SendPublicWarningMessageAndDeleteInfringingMessageAsync(MockDiscordMessage infringingMessage, string warningMessageContent, bool wasAutoModBlock = false, int minMessages = 0)
+        {
+            // If this is a `GuildForum` channel, delete the thread if it is empty (empty = 1 message left if `isAutoWarn`, otherwise 0); if not empty, just delete the infringing message.
+            // Then, based on whether the thread was deleted, send the warning message into the thread or into the configured fallback channel.
+            // Return the sent warning message for logging.
+            
+            var targetChannel = infringingMessage.Channel;
+            if (infringingMessage.Channel.Type == DiscordChannelType.GuildForum)
+            {
+                if (Program.cfgjson.ForumChannelAutoWarnFallbackChannel == 0)
+                    Program.discord.Logger.LogWarning("A warning in forum channel {channelId} was attempted, but may fail due to the fallback channel not being set. Please set 'forumChannelAutoWarnFallbackChannel' in config.json to avoid this.", targetChannel.Id);
+                else
+                    targetChannel = Program.ForumChannelAutoWarnFallbackChannel;
+            }
+            
+            if (!wasAutoModBlock)
+            {
+                if (await DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(infringingMessage, minMessages))
+                    targetChannel = await Program.discord.GetChannelAsync(Program.cfgjson.ForumChannelAutoWarnFallbackChannel);
+            }
+            var warningMessage = await targetChannel.SendMessageAsync(warningMessageContent);
+            return warningMessage;
         }
 
     }

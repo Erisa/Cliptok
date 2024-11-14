@@ -13,7 +13,8 @@ namespace Cliptok.Commands.InteractionCommands
             [Parameter("reason"), Description("The reason the user is being banned")] string reason,
             [Parameter("keep_messages"), Description("Whether to keep the users messages when banning")] bool keepMessages = false,
             [Parameter("time"), Description("The length of time the user is banned for")] string time = null,
-            [Parameter("appeal_link"), Description("Whether to show the user an appeal URL in the DM")] bool appealable = false
+            [Parameter("appeal_link"), Description("Whether to show the user an appeal URL in the DM")] bool appealable = false,
+            [Parameter("compromised_account"), Description("Whether to include special instructions for compromised accounts")] bool compromisedAccount = false
         )
         {
             // Initial response to avoid the 3 second timeout, will edit later.

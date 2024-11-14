@@ -12,7 +12,7 @@ namespace Cliptok.Events
                 HttpResponseMessage response;
                 try
                 {
-                    response = await Program.httpClient.GetAsync(Environment.GetEnvironmentVariable("UPTIME_KUMA_PUSH_URL") + client.Ping.TotalMicroseconds);
+                    response = await Program.httpClient.GetAsync(Environment.GetEnvironmentVariable("UPTIME_KUMA_PUSH_URL") + client.Ping.Milliseconds);
                 }
                 catch (Exception ex)
                 {

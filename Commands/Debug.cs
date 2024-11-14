@@ -173,22 +173,7 @@ namespace Cliptok.Commands
             [Command("logs")]
             public async Task Logs(TextCommandContext ctx)
             {
-                if (Program.cfgjson.LogLevel is Level.Verbose)
-                {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Verbose logging is enabled, so the in-memory logger is disabled. Please access the logs through another method.");
-                    return;
-                }
-
-                await DiscordHelpers.SafeTyping(ctx.Channel);
-
-                string result = Regex.Replace(Program.outputCapture.ToString(), "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED");
-
-                if (Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") is not null)
-                {
-                    result = result.Replace(Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT"), "REDACTED");
-                }
-
-                await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(result));
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command has been removed! Please find logs through other means.");
             }
 
             [Command("dumpwarnings"), Description("Dump all warning data. EXTREMELY computationally expensive, use with caution.")]

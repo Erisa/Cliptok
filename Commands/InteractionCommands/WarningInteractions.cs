@@ -1,6 +1,4 @@
-﻿using DSharpPlus.Commands.Processors.SlashCommands;
-using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
-using static Cliptok.Helpers.WarningHelpers;
+﻿using static Cliptok.Helpers.WarningHelpers;
 
 namespace Cliptok.Commands.InteractionCommands
 {
@@ -49,7 +47,14 @@ namespace Cliptok.Commands.InteractionCommands
                 .WithContent($"{Program.cfgjson.Emoji.Warning} {user.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
 
             if (replyMsgId != "0")
-                messageBuild.WithReply(Convert.ToUInt64(replyMsgId), true, false);
+            {
+                if (!ulong.TryParse(replyMsgId, out var msgId))
+                {
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Invalid reply message ID! Please try again.").AsEphemeral(true));
+                    return;
+                }
+                messageBuild.WithReply(msgId, true, false);
+            }
 
             var msg = await channel.SendMessageAsync(messageBuild);
 
@@ -328,6 +333,8 @@ namespace Cliptok.Commands.InteractionCommands
             {
                 await ctx.DeferResponseAsync(ephemeral: !showPublic);
 
+                await EditWarning(user, warnId, ctx.User, reason);
+
                 await LogChannelHelper.LogMessageAsync("mod",
                     new DiscordMessageBuilder()
                         .WithContent($"{Program.cfgjson.Emoji.Information} Warning edited:" +
@@ -335,7 +342,6 @@ namespace Cliptok.Commands.InteractionCommands
                         .AddEmbed(await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), true, userID: user.Id))
                 );
 
-                await EditWarning(user, warnId, ctx.User, reason);
                 await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Successfully edited warning `{StringHelpers.Pad(warnId)}` (belonging to {user.Mention})")
                     .AddEmbed(await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), userID: user.Id)));
             }
