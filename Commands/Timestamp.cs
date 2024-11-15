@@ -12,7 +12,8 @@ namespace Cliptok.Commands
         class TimestampCmds
         {
             [DefaultGroupCommand]
-            [TextAlias("u", "unix", "epoch")]
+            [Command("unix")]
+            [TextAlias("u", "epoch")]
             [Description("Returns the Unix timestamp of a given Discord ID/snowflake")]
             public async Task TimestampUnixCmd(TextCommandContext ctx, [Description("The ID/snowflake to fetch the Unix timestamp for")] ulong snowflake)
             {

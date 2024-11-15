@@ -12,8 +12,8 @@ namespace Cliptok.Commands
         class RaidmodeCommands
         {
             [DefaultGroupCommand]
+            [Command("status")]
             [Description("Check whether raidmode is enabled or not, and when it ends.")]
-            [TextAlias("status")]
             public async Task RaidmodeStatus(TextCommandContext ctx)
             {
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))

@@ -254,6 +254,7 @@ namespace Cliptok.Commands
             public class Overrides
             {
                 [DefaultGroupCommand]
+                [Command("show")]
                 public async Task ShowOverrides(TextCommandContext ctx,
                     [Description("The user whose overrides to show.")] DiscordUser user)
                 {

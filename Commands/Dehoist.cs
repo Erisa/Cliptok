@@ -161,8 +161,9 @@ namespace Cliptok.Commands
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public class Permadehoist
         {
-            // Toggle
             [DefaultGroupCommand]
+            [Command("toggle")]
+            [Description("Toggle permadehoist status for a member (or members).")]
             public async Task PermadehoistToggleCmd(TextCommandContext ctx, [Description("The member(s) to permadehoist.")] params DiscordUser[] discordUsers)
             {
                 if (discordUsers.Length == 0)
