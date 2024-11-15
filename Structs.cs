@@ -489,9 +489,6 @@
 
         [JsonProperty("giveaways")]
         public ulong Giveaways { get; private set; }
-
-        [JsonProperty("insider10beta")]
-        public ulong Insider10Beta { get; private set; }
     }
 
     public class PhishingRequestBody
