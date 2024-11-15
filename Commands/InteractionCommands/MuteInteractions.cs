@@ -5,7 +5,7 @@
         [Command("mute")]
         [Description("Mute a user, temporarily or permanently.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         [RequirePermissions(DiscordPermissions.ModerateMembers)]
         public async Task MuteSlashCommand(
             SlashCommandContext ctx,
@@ -37,7 +37,7 @@
             {
                 try
                 {
-                    muteDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(DateTime.UtcNow); // TODO(#202): this used InteractionContext#Interaction.CreationTimestamp.DateTime before, please test!!
+                    muteDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(ctx.Interaction.CreationTimestamp.LocalDateTime);
                 }
                 catch
                 {
@@ -53,7 +53,7 @@
         [Command("unmute")]
         [Description("Unmute a user.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         [RequirePermissions(DiscordPermissions.ModerateMembers)]
         public async Task UnmuteSlashCommand(
             SlashCommandContext ctx,
@@ -99,7 +99,7 @@
         [Command("tqsmute")]
         [Description("Temporarily mute a user in tech support channels.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TechnicalQueriesSlayer)]
+        [RequireHomeserverPerm(ServerPermLevel.TechnicalQueriesSlayer)]
         public async Task TqsMuteSlashCommand(
             SlashCommandContext ctx,
             [Parameter("user"), Description("The user to mute.")] DiscordUser targetUser,

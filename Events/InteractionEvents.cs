@@ -211,8 +211,8 @@ namespace Cliptok.Events
         {
             if (e.Exception is ChecksFailedException slex)
             {
-                foreach (var check in slex.Errors) // TODO(#202): test this!!!
-                    if (check.ContextCheckAttribute is SlashRequireHomeserverPermAttribute att && e.Context.Command.Name != "edit")
+                foreach (var check in slex.Errors)
+                    if (check.ContextCheckAttribute is RequireHomeserverPermAttribute att && e.Context.Command.Name != "edit")
                     {
                         var level = (await GetPermLevelAsync(e.Context.Member));
                         var levelText = level.ToString();
@@ -234,8 +234,8 @@ namespace Cliptok.Events
         {
             if (e.Exception is ChecksFailedException slex)
             {
-                foreach (var check in slex.Errors) // TODO(#202): test this!!!
-                    if (check.ContextCheckAttribute is SlashRequireHomeserverPermAttribute att && e.Context.Command.Name != "edit")
+                foreach (var check in slex.Errors)
+                    if (check.ContextCheckAttribute is RequireHomeserverPermAttribute att && e.Context.Command.Name != "edit")
                     {
                         var level = (await GetPermLevelAsync(e.Context.Member));
                         var levelText = level.ToString();

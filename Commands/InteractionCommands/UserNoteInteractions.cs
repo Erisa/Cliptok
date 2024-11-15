@@ -7,7 +7,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Command("note")]
         [Description("Manage user notes")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
         public class UserNoteSlashCommands
         {
             [Command("add")]
@@ -221,7 +221,7 @@ namespace Cliptok.Commands.InteractionCommands
                         string noteString = $"{StringHelpers.Pad(note.Value.NoteId)} - {StringHelpers.Truncate(note.Value.NoteText, 29, true)} - {TimeHelpers.TimeToPrettyFormat(DateTime.Now - note.Value.Timestamp, true)}";
 
                         var focusedOption = ctx.Options.FirstOrDefault(option => option.Focused);
-                        if (focusedOption is not null) // TODO(#202): is this right?
+                        if (focusedOption is not null)
                             if (note.Value.NoteText.Contains((string)focusedOption.Value) || noteString.ToLower().Contains(focusedOption.Value.ToString().ToLower()))
                                 list.Add(new DiscordAutoCompleteChoice(noteString, StringHelpers.Pad(note.Value.NoteId)));
                     }

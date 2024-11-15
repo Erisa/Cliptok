@@ -7,7 +7,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Command("lockdown")]
         [Description("Lock the current channel or all channels in the server, preventing new messages. See also: unlock")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ManageChannels, DiscordPermissions.None)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ManageChannels, DiscordPermissions.None)]
         public class LockdownCmds
         {
             [Command("channel")]
@@ -44,7 +44,7 @@ namespace Cliptok.Commands.InteractionCommands
 
                 if (!string.IsNullOrWhiteSpace(time))
                 {
-                    lockDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(DateTime.Now); // TODO(#202): this used InteractionContext#Interaction.CreationTimestamp.DateTime before, please test!!
+                    lockDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(ctx.Interaction.CreationTimestamp.DateTime);
                 }
 
                 var currentChannel = ctx.Channel;
@@ -84,7 +84,7 @@ namespace Cliptok.Commands.InteractionCommands
 
                 if (!string.IsNullOrWhiteSpace(time))
                 {
-                    lockDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(DateTime.Now); // TODO(#202): this used InteractionContext#Interaction.CreationTimestamp.LocalDateTime before, please test!!
+                    lockDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(ctx.Interaction.CreationTimestamp.DateTime);
                 }
 
                 foreach (var chanID in Program.cfgjson.LockdownEnabledChannels)
@@ -109,7 +109,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Command("unlock")]
         [Description("Unlock the current channel or all channels in the server, allowing new messages. See also: lockdown")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ManageChannels, DiscordPermissions.None)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ManageChannels, DiscordPermissions.None)]
         public class UnlockCmds
         {
             [Command("channel")]

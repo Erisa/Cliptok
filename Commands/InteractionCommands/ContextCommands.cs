@@ -24,7 +24,7 @@
         [Command("Show Notes")]
         [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
         [AllowedProcessors(typeof(UserCommandProcessor))]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
         public async Task ShowNotes(CommandContext ctx, DiscordUser targetUser)
         {
             await ctx.RespondAsync(embed: await UserNoteHelpers.GenerateUserNotesEmbedAsync(targetUser), ephemeral: true);

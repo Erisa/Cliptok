@@ -7,7 +7,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Command("warn")]
         [Description("Formally warn a user, usually for breaking the server rules.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         [RequirePermissions(DiscordPermissions.ModerateMembers)]
         public async Task WarnSlashCommand(SlashCommandContext ctx,
          [Parameter("user"), Description("The user to warn.")] DiscordUser user,
@@ -17,8 +17,7 @@ namespace Cliptok.Commands.InteractionCommands
         )
         {
             // Initial response to avoid the 3 second timeout, will edit later.
-            var eout = new DiscordInteractionResponseBuilder().AsEphemeral(true);
-            await ctx.RespondAsync(eout);
+            await ctx.DeferResponseAsync(true);
 
             // Edits need a webhook rather than interaction..?
             DiscordWebhookBuilder webhookOut;
@@ -81,7 +80,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Command("transfer_warnings")]
         [Description("Transfer warnings from one user to another.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [RequireHomeserverPerm(ServerPermLevel.Moderator)]
         [RequirePermissions(DiscordPermissions.ModerateMembers)]
         public async Task TransferWarningsSlashCommand(SlashCommandContext ctx,
             [Parameter("source_user"), Description("The user currently holding the warnings.")] DiscordUser sourceUser,
@@ -90,7 +89,7 @@ namespace Cliptok.Commands.InteractionCommands
             [Parameter("force_override"), Description("DESTRUCTIVE OPERATION: Whether to OVERRIDE and DELETE the target users existing warnings.")] bool forceOverride = false
         )
         {
-            await ctx.DeferResponseAsync(); // TODO(#202): how do you make this ephemeral?
+            await ctx.DeferResponseAsync(false);
 
             if (sourceUser == targetUser)
             {
@@ -172,7 +171,7 @@ namespace Cliptok.Commands.InteractionCommands
                     string warningString = $"{StringHelpers.Pad(warning.Value.WarningId)} - {StringHelpers.Truncate(warning.Value.WarnReason, 29, true)} - {TimeHelpers.TimeToPrettyFormat(DateTime.Now - warning.Value.WarnTimestamp, true)}";
 
                     var focusedOption = ctx.Options.FirstOrDefault(option => option.Focused);
-                    if (focusedOption is not null) // TODO(#202): is this right?
+                    if (focusedOption is not null)
                         if (warning.Value.WarnReason.Contains((string)focusedOption.Value) || warningString.ToLower().Contains(focusedOption.Value.ToString().ToLower()))
                             list.Add(new DiscordAutoCompleteChoice(warningString, StringHelpers.Pad(warning.Value.WarningId)));
                 }
@@ -185,7 +184,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Command("warndetails")]
         [Description("Search for a warning and return its details.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
         public async Task WarndetailsSlashCommand(SlashCommandContext ctx,
             [Parameter("user"), Description("The user to fetch a warning for.")] DiscordUser user,
             [SlashAutoCompleteProvider(typeof(WarningsAutocompleteProvider)), Parameter("warning"), Description("Type to search! Find the warning you want to fetch.")] string warning,
@@ -224,7 +223,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Command("delwarn")]
         [Description("Search for a warning and delete it!")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
         public async Task DelwarnSlashCommand(SlashCommandContext ctx,
             [Parameter("user"), Description("The user to delete a warning for.")] DiscordUser targetUser,
             [SlashAutoCompleteProvider(typeof(WarningsAutocompleteProvider))][Parameter("warning"), Description("Type to search! Find the warning you want to delete.")] string warningId,
@@ -288,7 +287,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Command("editwarn")]
         [Description("Search for a warning and edit it!")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
         public async Task EditWarnSlashCommand(SlashCommandContext ctx,
             [Parameter("user"), Description("The user to fetch a warning for.")] DiscordUser user,
             [SlashAutoCompleteProvider(typeof(WarningsAutocompleteProvider))][Parameter("warning"), Description("Type to search! Find the warning you want to edit.")] string warning,

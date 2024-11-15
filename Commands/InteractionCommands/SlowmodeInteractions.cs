@@ -5,7 +5,7 @@
         [Command("slowmode")]
         [Description("Slow down the channel...")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         [RequirePermissions(DiscordPermissions.ModerateMembers)]
         public async Task SlowmodeSlashCommand(
             SlashCommandContext ctx,

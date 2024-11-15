@@ -5,7 +5,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Command("joinwatch")]
         [Description("Watch for joins and leaves of a given user. Output goes to #investigations.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public class JoinwatchSlashCmds
         {
             [Command("add")]

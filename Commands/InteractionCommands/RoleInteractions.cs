@@ -5,7 +5,7 @@
         [Command("grant")]
         [Description("Grant a user Tier 1, bypassing any verification requirements.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
         public async Task SlashGrant(SlashCommandContext ctx, [Parameter("user"), Description("The user to grant Tier 1 to.")] DiscordUser _)
         {
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command is deprecated and no longer works. Please right click (or tap and hold on mobile) the user and click \"Verify Member\" if available.");
@@ -22,7 +22,7 @@
             public async Task GrantRole(
                 SlashCommandContext ctx,
                 [SlashAutoCompleteProvider(typeof(RolesAutocompleteProvider))]
-                [Parameter("role"), Description("The role to opt into.")] string role) // TODO(#202): test choices!!!
+                [Parameter("role"), Description("The role to opt into.")] string role)
             {
                 DiscordMember member = ctx.Member;
 
@@ -63,7 +63,7 @@
             public async Task RemoveRole(
                 SlashCommandContext ctx,
                 [SlashAutoCompleteProvider(typeof(RolesAutocompleteProvider))]
-                [Parameter("role"), Description("The role to opt out of.")] string role) // TODO(#202): test choices!!!
+                [Parameter("role"), Description("The role to opt out of.")] string role)
             {
                 DiscordMember member = ctx.Member;
 
@@ -94,9 +94,9 @@
             }
         }
 
-        internal class RolesAutocompleteProvider : IAutocompleteProvider
+        internal class RolesAutocompleteProvider : IAutoCompleteProvider
         {
-            public async Task<IEnumerable<DiscordAutoCompleteChoice>> Provider(AutocompleteContext ctx)
+            public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext ctx)
             {
                 Dictionary<string, string> options = new()
                     {
@@ -117,7 +117,8 @@
 
                 foreach (var option in options)
                 {
-                    if (ctx.FocusedOption.Value.ToString() == "" || option.Key.Contains(ctx.FocusedOption.Value.ToString(), StringComparison.OrdinalIgnoreCase))
+                    var focusedOption = ctx.Options.FirstOrDefault(option => option.Focused);
+                    if (focusedOption.Value.ToString() == "" || option.Key.Contains(focusedOption.Value.ToString(), StringComparison.OrdinalIgnoreCase))
                     {
                         if (option.Value == "cts" && !memberHasTqs) continue;
                         list.Add(new DiscordAutoCompleteChoice(option.Key, option.Value));

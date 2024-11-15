@@ -6,7 +6,7 @@ namespace Cliptok.Commands.InteractionCommands
     {
         [Command("status")]
         [Description("Status commands")]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         [RequirePermissions(DiscordPermissions.ModerateMembers)]
 
         public class StatusSlashCommands
@@ -18,7 +18,7 @@ namespace Cliptok.Commands.InteractionCommands
             public async Task StatusSetCommand(
                 SlashCommandContext ctx,
                 [Parameter("text"), Description("The text to use for the status.")] string statusText,
-                [Parameter("type"), Description("Defaults to custom. The type of status to use.")]  DiscordActivityType statusType = DiscordActivityType.Custom // TODO(#202): test this!!!!
+                [Parameter("type"), Description("Defaults to custom. The type of status to use.")]  DiscordActivityType statusType = DiscordActivityType.Custom
             )
             {
                 if (statusText.Length > 128)

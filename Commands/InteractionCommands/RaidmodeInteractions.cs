@@ -5,7 +5,7 @@
         [Command("raidmode")]
         [Description("Commands relating to Raidmode")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [RequireHomeserverPerm(ServerPermLevel.Moderator)]
         [RequirePermissions(DiscordPermissions.ModerateMembers)]
         public class RaidmodeSlashCommands
         {

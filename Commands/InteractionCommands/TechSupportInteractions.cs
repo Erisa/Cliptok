@@ -11,7 +11,7 @@ namespace Cliptok.Commands.InteractionCommands
             SlashCommandContext ctx,
 
             [SlashChoiceProvider(typeof(VcRedistChoiceProvider))]
-            [Parameter("version"), Description("Visual Studio version number or year")] long version // TODO(#202): test choices!!!
+            [Parameter("version"), Description("Visual Studio version number or year")] long version
             )
         {
             VcRedist redist = VcRedistConstants.VcRedists

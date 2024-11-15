@@ -2,6 +2,8 @@ using DSharpPlus.Extensions;
 using DSharpPlus.Net.Gateway;
 using Serilog.Sinks.Grafana.Loki;
 using System.Reflection;
+using Cliptok.Commands.InteractionCommands;
+using DSharpPlus.Commands.Processors.TextCommands.Parsing;
 
 namespace Cliptok
 {
@@ -176,14 +178,31 @@ namespace Cliptok
                 builder.CommandErrored += ErrorEvents.CommandErrored;
 
                 // Interaction commands
-                var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands" && !t.IsNested);
+                var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands");
                 foreach (var type in slashCommandClasses)
                     builder.AddCommands(type, cfgjson.ServerID);
 
-                // Text commands TODO(#202):  [Error] Failed to build command '"editwarn"' System.ArgumentException: An item with the same key has already been added. Key: editwarn
-                var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands" && !t.IsNested);
+                // Text commands
+                var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands");
                 foreach (var type in commandClasses)
                     builder.AddCommands(type);
+
+                // Register command checks
+                builder.AddCheck<HomeServerCheck>();
+                builder.AddCheck<RequireHomeserverPermCheck>();
+                builder.AddCheck<IsBotOwnerCheck>();
+                builder.AddCheck<UserRolesPresentCheck>();
+
+                // Set custom prefixes from config.json
+                TextCommandProcessor textCommandProcessor = new(new TextCommandConfiguration
+                {
+                    PrefixResolver = new DefaultPrefixResolver(true, Program.cfgjson.Core.Prefixes.ToArray()).ResolvePrefixAsync
+                });
+                builder.AddProcessor(textCommandProcessor);
+            }, new CommandsConfiguration
+            {
+                // Disable the default D#+ error handler because we are using our own
+                UseDefaultCommandErrorHandler = false
             });
 
             discordBuilder.ConfigureExtraFeatures(clientConfig =>

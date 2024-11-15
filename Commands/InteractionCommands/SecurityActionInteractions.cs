@@ -5,7 +5,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Command("pausedms")]
         [Description("Temporarily pause DMs between server members.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ModerateMembers)]
         public async Task SlashPauseDMs(SlashCommandContext ctx, [Parameter("time"), Description("The amount of time to pause DMs for. Cannot be greater than 24 hours.")] string time)
         {
             // need to make our own api calls because D#+ can't do this natively?
@@ -55,7 +55,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Command("unpausedms")]
         [Description("Unpause DMs between server members.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ModerateMembers)]
         public async Task SlashUnpauseDMs(SlashCommandContext ctx)
         {
             // need to make our own api calls because D#+ can't do this natively?

@@ -5,7 +5,7 @@
         [Command("announcebuild")]
         [Description("Announce a Windows Insider build in the current channel.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         [RequirePermissions(DiscordPermissions.ModerateMembers)]
         public async Task AnnounceBuildSlashCommand(SlashCommandContext ctx,
             [SlashChoiceProvider(typeof(WindowsVersionChoiceProvider))]
@@ -16,10 +16,10 @@
             [Parameter("blog_link"), Description("The link to the Windows blog entry relating to this build.")] string blogLink,
 
             [SlashChoiceProvider(typeof(WindowsInsiderChannelChoiceProvider))]
-            [Parameter("insider_role1"), Description("The first insider role to ping.")] string insiderChannel1, // TODO(#202): test choices!!!
+            [Parameter("insider_role1"), Description("The first insider role to ping.")] string insiderChannel1,
 
             [SlashChoiceProvider(typeof(WindowsInsiderChannelChoiceProvider))]
-            [Parameter("insider_role2"), Description("The second insider role to ping.")] string insiderChannel2 = "", // TODO(#202): test choices!!!
+            [Parameter("insider_role2"), Description("The second insider role to ping.")] string insiderChannel2 = "",
 
             [Parameter("canary_create_new_thread"), Description("Enable this option if you want to create a new Canary thread for some reason")] bool canaryCreateNewThread = false,
             [Parameter("thread"), Description("The thread to mention in the announcement.")] DiscordChannel threadChannel = default,

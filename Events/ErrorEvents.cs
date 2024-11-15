@@ -8,7 +8,7 @@ namespace Cliptok.Events
         {
             // Because we no longer have DSharpPlus.CommandsNext or DSharpPlus.SlashCommands (only DSharpPlus.Commands), we can't point to different
             // error handlers based on command type in our command handler configuration. Instead, we can start here, and jump to the correct
-            // handler based on the command type. TODO(#202): hopefully.
+            // handler based on the command type.
             
             // This is a lazy approach that just takes error type and points to the error handlers we already had.
             // Maybe it can be improved later?
@@ -21,10 +21,8 @@ namespace Cliptok.Events
             else if (e.Context is SlashCommandContext)
             {
                 // Interaction command error (slash, user ctx, message ctx)
-            }
-            else
-            {
-                // Maybe left as CommandContext... TODO(#202): how to handle?
+                if (e.Context is UserCommandContext) await InteractionEvents.ContextCommandErrored(e); // this works because UserCommandContext inherits from SlashCommandContext
+                else await InteractionEvents.SlashCommandErrored(e);
             }
         }
         

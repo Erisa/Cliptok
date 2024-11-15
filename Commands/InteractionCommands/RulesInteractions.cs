@@ -10,7 +10,7 @@
         {
             [Command("all")]
 			[Description("Shows all of the community rules.")]
-            public async Task RulesAllCommand(SlashCommandContext ctx)
+            public async Task RulesAllCommand(SlashCommandContext ctx, [Parameter("public"), Description("Whether to show the response publicly.")] bool? isPublic = null)
             {
                 var publicResponse = await DeterminePublicResponse(ctx.Member, ctx.Channel, isPublic);
 

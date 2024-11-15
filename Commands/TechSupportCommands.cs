@@ -1,6 +1,6 @@
 ﻿namespace Cliptok.Commands
 {
-    internal class TechSupportCommands : BaseCommandModule
+    internal class TechSupportCommands
     {
         [Command("on-call")]
         [Description("Give yourself the CTS role.")]
