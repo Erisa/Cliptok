@@ -28,14 +28,17 @@ namespace Cliptok.Events
         
         public static async Task TextCommandErrored(CommandErroredEventArgs e)
         {
-            if (e.Exception is CommandNotFoundException && (e.Context.Command is null || e.Context.Command.FullName != "help"))
+            // strip out "textcmd" from text command names
+            var commandName = e.Context.Command.FullName.Replace("textcmd", "");
+            
+            if (e.Exception is CommandNotFoundException && (e.Context.Command is null || commandName != "help"))
                 return;
 
             // avoid conflicts with modmail
-            if (e.Context.Command.FullName == "edit" || e.Context.Command.FullName == "timestamp")
+            if (commandName == "edit" || commandName == "timestamp")
                 return;
 
-            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Exception occurred during {user}s invocation of {command}", e.Context.User.Username, e.Context.Command.FullName);
+            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Exception occurred during {user}s invocation of {command}", e.Context.User.Username, commandName);
 
             var exs = new List<Exception>();
             if (e.Exception is AggregateException ae)
@@ -45,17 +48,33 @@ namespace Cliptok.Events
 
             foreach (var ex in exs)
             {
-                if (ex is CommandNotFoundException && (e.Context.Command is null || e.Context.Command.FullName != "help"))
+                if (ex is CommandNotFoundException && (e.Context.Command is null || commandName != "help"))
                     return;
 
-                if (ex is ChecksFailedException && (e.Context.Command.Name != "help"))
+                if (ex is ChecksFailedException cfex && (commandName != "help"))
+                {
+                    foreach (var check in cfex.Errors)
+                    {
+                        if (check.ContextCheckAttribute is RequireHomeserverPermAttribute att)
+                        {
+                            var level = (await GetPermLevelAsync(e.Context.Member));
+                            var levelText = level.ToString();
+                            if (level == ServerPermLevel.Nothing && Program.rand.Next(1, 100) == 69)
+                                levelText = $"naught but a thing, my dear human. Congratulations, you win {Program.rand.Next(1, 10)} bonus points.";
+
+                            await e.Context.RespondAsync(
+                                $"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{commandName}**!\n" +
+                                $"Required: `{att.TargetLvl}`\nYou have: `{levelText}`");
+                        }
+                    }
                     return;
+                }
 
                 var embed = new DiscordEmbedBuilder
                 {
                     Color = new DiscordColor("#FF0000"),
                     Title = "An exception occurred when executing a command",
-                    Description = $"{cfgjson.Emoji.BSOD} `{e.Exception.GetType()}` occurred when executing `{e.Context.Command.FullName}`.",
+                    Description = $"{cfgjson.Emoji.BSOD} `{e.Exception.GetType()}` occurred when executing `{commandName}`.",
                     Timestamp = DateTime.UtcNow
                 };
                 embed.WithFooter(discord.CurrentUser.Username, discord.CurrentUser.AvatarUrl)
