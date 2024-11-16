@@ -56,9 +56,6 @@ namespace Cliptok
         public static Random rand = new();
         public static HasteBinClient hasteUploader;
 
-        public static StringBuilder outputStringBuilder = new(16, 200000000);
-        public static StringWriter outputCapture;
-
         static public readonly HttpClient httpClient = new();
 
         public static List<ServerApiResponseJson> serverApiList = new();
@@ -77,7 +74,6 @@ namespace Cliptok
         static async Task Main(string[] _)
         {
             Console.OutputEncoding = Encoding.UTF8;
-            outputCapture = new(outputStringBuilder);
 
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var logFormat = "[{Timestamp:yyyy-MM-dd HH:mm:ss zzz}] [{Level}] {Message}{NewLine}{Exception}";
@@ -124,9 +120,6 @@ namespace Cliptok
                     loggerConfig.MinimumLevel.Information();
                     break;
             }
-
-            if (cfgjson.LogLevel is not Level.Verbose)
-                loggerConfig.WriteTo.TextWriter(outputCapture, outputTemplate: logFormat);
 
             if (cfgjson.LokiURL is not null && cfgjson.LokiServiceName is not null)
             {
