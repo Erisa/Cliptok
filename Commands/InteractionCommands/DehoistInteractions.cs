@@ -3,7 +3,7 @@
     internal class DehoistInteractions : ApplicationCommandModule
     {
         [SlashCommand("dehoist", "Dehoist a member, dropping them to the bottom of the list. Lasts until they change nickname.", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(DiscordPermissions.ManageNicknames)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(permissions: DiscordPermission.ManageNicknames)]
         public async Task DehoistSlashCmd(InteractionContext ctx, [Option("member", "The member to dehoist.")] DiscordUser user)
         {
             DiscordMember member;
@@ -39,7 +39,7 @@
         }
 
         [SlashCommandGroup("permadehoist", "Permanently/persistently dehoist members.", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(DiscordPermissions.ManageNicknames)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(permissions: DiscordPermission.ManageNicknames)]
         public class PermadehoistSlashCommands
         {
             [SlashCommand("enable", "Permanently dehoist a member. They will be automatically dehoisted until disabled.")]

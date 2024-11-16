@@ -4,7 +4,7 @@
     {
         [SlashCommand("announcebuild", "Announce a Windows Insider build in the current channel.", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        [SlashCommandPermissions(permissions: DiscordPermission.ModerateMembers)]
         public async Task AnnounceBuildSlashCommand(InteractionContext ctx,
             [Choice("Windows 10", 10)]
             [Choice("Windows 11", 11)]

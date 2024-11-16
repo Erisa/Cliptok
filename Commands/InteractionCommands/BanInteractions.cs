@@ -5,7 +5,7 @@ namespace Cliptok.Commands.InteractionCommands
     internal class BanInteractions : ApplicationCommandModule
     {
         [SlashCommand("ban", "Bans a user from the server, either permanently or temporarily.", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(DiscordPermissions.BanMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(permissions: DiscordPermission.BanMembers)]
         public async Task BanSlashCommand(InteractionContext ctx,
             [Option("user", "The user to ban")] DiscordUser user,
             [Option("reason", "The reason the user is being banned")] string reason,
@@ -114,7 +114,7 @@ namespace Cliptok.Commands.InteractionCommands
         }
 
         [SlashCommand("unban", "Unbans a user who has been previously banned.", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(DiscordPermissions.BanMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(permissions: DiscordPermission.BanMembers)]
         public async Task SlashUnbanCommand(InteractionContext ctx, [Option("user", "The ID or mention of the user to unban. Ignore the suggestions, IDs work.")] SnowflakeObject userId, [Option("reason", "Used in audit log only currently")] string reason = "No reason specified.")
         {
             DiscordUser targetUser = default;
@@ -145,7 +145,7 @@ namespace Cliptok.Commands.InteractionCommands
         }
 
         [SlashCommand("kick", "Kicks a user, removing them from the server until they rejoin.", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(DiscordPermissions.KickMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(permissions: DiscordPermission.KickMembers)]
         public async Task KickCmd(InteractionContext ctx, [Option("user", "The user you want to kick from the server.")] DiscordUser target, [Option("reason", "The reason for kicking this user.")] string reason = "No reason specified.")
         {
             if (target.IsBot)

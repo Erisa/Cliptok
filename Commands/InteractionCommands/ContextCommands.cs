@@ -20,7 +20,7 @@
         }
 
         [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "Show Notes", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(permissions: DiscordPermission.ModerateMembers)]
         public async Task ShowNotes(ContextMenuContext ctx)
         {
             await ctx.RespondAsync(embed: await UserNoteHelpers.GenerateUserNotesEmbedAsync(ctx.TargetUser), ephemeral: true);

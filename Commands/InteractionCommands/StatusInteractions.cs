@@ -4,7 +4,7 @@
     {
         [SlashCommandGroup("status", "Status commands")]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        [SlashCommandPermissions(permissions: DiscordPermission.ModerateMembers)]
 
         public class StatusSlashCommands
         {
