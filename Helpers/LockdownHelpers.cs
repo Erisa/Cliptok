@@ -159,7 +159,7 @@
                     }
 
                     if (role == await discordChannel.Guild.GetRoleAsync(Program.cfgjson.ModRole)
-                        && permission.Allowed == new DiscordPermissions([DiscordPermission.SendMessages, DiscordPermission.ViewChannel])) // TODO: TEST THIS
+                        && permission.Allowed == new DiscordPermissions([DiscordPermission.SendMessages, DiscordPermission.ViewChannel]))
                     {
                         await discordChannel.AddOverwriteAsync(await discordChannel.Guild.GetRoleAsync(Program.cfgjson.ModRole), (DiscordPermissions)(permission.Allowed - DiscordPermission.SendMessages), DiscordPermissions.None);
                     }
