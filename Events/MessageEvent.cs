@@ -144,20 +144,23 @@ namespace Cliptok.Events
                     {
                         // Check current channel against tracking channels
                         var trackingChannels = await Program.db.HashGetAsync("trackingChannels", message.Author.Id);
-                        var trackingChannelsList = JsonConvert.DeserializeObject<List<ulong>>(trackingChannels);
-                        if (trackingChannelsList.Count > 0)
+                        if (trackingChannels.HasValue)
                         {
-                            // This user's tracking is filtered to channels; check the channel before relaying the msg to the tracking thread
-                            var channels = JsonConvert.DeserializeObject<List<ulong>>(trackingChannels);
-                            if (channels.Contains(channel.Id) || channels.Contains(channel.Parent.Id))
+                            var trackingChannelsList = JsonConvert.DeserializeObject<List<ulong>>(trackingChannels);
+                            if (trackingChannelsList.Count > 0)
                             {
+                                // This user's tracking is filtered to channels; check the channel before relaying the msg to the tracking thread
+                                var channels = JsonConvert.DeserializeObject<List<ulong>>(trackingChannels);
+                                if (channels.Contains(channel.Id) || channels.Contains(channel.Parent.Id))
+                                {
+                                    await RelayTrackedMessageAsync(client, message);
+                                }
+                            }
+                            else
+                            {
+                                // This user's tracking is not filtered to channels, so just relay the msg to the tracking thread
                                 await RelayTrackedMessageAsync(client, message);
                             }
-                        }
-                        else
-                        {
-                            // This user's tracking is not filtered to channels, so just relay the msg to the tracking thread
-                            await RelayTrackedMessageAsync(client, message);
                         }
                     }
 
