@@ -4,7 +4,7 @@
     {
         [SlashCommandGroup("raidmode", "Commands relating to Raidmode", defaultPermission: false)]
         [SlashRequireHomeserverPerm(ServerPermLevel.Moderator)]
-        [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        [SlashCommandPermissions(permissions: DiscordPermission.ModerateMembers)]
         public class RaidmodeSlashCommands : ApplicationCommandModule
         {
             [SlashCommand("status", "Check the current state of raidmode.")]

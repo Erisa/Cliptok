@@ -4,7 +4,7 @@
     {
         [SlashCommand("mute", "Mute a user, temporarily or permanently.")]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        [SlashCommandPermissions(permissions: DiscordPermission.ModerateMembers)]
         public async Task MuteSlashCommand(
             InteractionContext ctx,
             [Option("user", "The user you wish to mute.")] DiscordUser targetUser,
@@ -50,7 +50,7 @@
 
         [SlashCommand("unmute", "Unmute a user.")]
         [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        [SlashCommandPermissions(permissions: DiscordPermission.ModerateMembers)]
         public async Task UnmuteSlashCommand(
             InteractionContext ctx,
             [Option("user", "The user you wish to mute.")] DiscordUser targetUser,
