@@ -187,7 +187,7 @@
                             // User has other overrides set, so we should only remove the Send Messages override
                             if (overwrite.Allowed.HasPermission(DiscordPermission.SendMessages))
                             {
-                                await e.Before.Channel.AddOverwriteAsync(member, (DiscordPermissions)(overwrite.Allowed - DiscordPermission.SendMessages), overwrite.Denied, "User left voice channel.");
+                                await e.Before.Channel.AddOverwriteAsync(member, overwrite.Allowed.Remove(DiscordPermission.SendMessages), overwrite.Denied, "User left voice channel.");
                             }
                             else
                             {
