@@ -36,11 +36,11 @@
 
                             if (overwrite.Allowed.HasPermission(DiscordPermission.SendMessages))
                             {
-                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), (DiscordPermissions)(overwrite.Allowed - DiscordPermission.SendMessages), DiscordPermission.SendMessages | overwrite.Denied, "Reinstating existing overrides for lockdown.");
+                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed.Remove(DiscordPermission.SendMessages), overwrite.Denied.Add(DiscordPermission.SendMessages), "Reinstating existing overrides for lockdown.");
                             }
                             else
                             {
-                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed, DiscordPermission.SendMessages | overwrite.Denied, "Reinstating existing overrides for lockdown.");
+                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed, overwrite.Denied.Add(DiscordPermission.SendMessages), "Reinstating existing overrides for lockdown.");
                             }
                         }
                         else
@@ -56,11 +56,11 @@
 
                             if (overwrite.Allowed.HasPermission(DiscordPermission.SendMessages))
                             {
-                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), (DiscordPermissions)(overwrite.Allowed - DiscordPermission.SendMessages), DiscordPermission.SendMessages | overwrite.Denied, "Reinstating existing overrides for lockdown.");
+                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed.Remove(DiscordPermission.SendMessages), overwrite.Denied.Add(DiscordPermission.SendMessages), "Reinstating existing overrides for lockdown.");
                             }
                             else
                             {
-                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed, DiscordPermission.SendMessages | overwrite.Denied, "Reinstating existing overrides for lockdown.");
+                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed, overwrite.Denied.Add(DiscordPermission.SendMessages), "Reinstating existing overrides for lockdown.");
                             }
                         }
 
@@ -133,7 +133,7 @@
                             newOverwrite = new(discordChannel.Guild.EveryoneRole)
                             {
                                 Allowed = permission.Allowed,
-                                Denied = permission.Denied - DiscordPermission.SendMessages - DiscordPermission.SendThreadMessages
+                                Denied = permission.Denied.Remove([DiscordPermission.SendMessages, DiscordPermission.SendThreadMessages])
                             };
                         }
                         else
@@ -141,7 +141,7 @@
                             newOverwrite = new(discordChannel.Guild.EveryoneRole)
                             {
                                 Allowed = permission.Allowed,
-                                Denied = (DiscordPermissions)(permission.Denied - DiscordPermission.SendMessages)
+                                Denied = permission.Denied.Remove(DiscordPermission.SendMessages)
                             };
                         }
 
@@ -161,7 +161,7 @@
                     if (role == await discordChannel.Guild.GetRoleAsync(Program.cfgjson.ModRole)
                         && permission.Allowed == new DiscordPermissions([DiscordPermission.SendMessages, DiscordPermission.ViewChannel]))
                     {
-                        await discordChannel.AddOverwriteAsync(await discordChannel.Guild.GetRoleAsync(Program.cfgjson.ModRole), (DiscordPermissions)(permission.Allowed - DiscordPermission.SendMessages), DiscordPermissions.None);
+                        await discordChannel.AddOverwriteAsync(await discordChannel.Guild.GetRoleAsync(Program.cfgjson.ModRole), permission.Allowed.Remove(DiscordPermission.SendMessages), DiscordPermissions.None);
                     }
 
                 }
