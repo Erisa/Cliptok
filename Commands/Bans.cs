@@ -46,7 +46,7 @@ namespace Cliptok.Commands
         [TextAlias("ban", "tempban", "bonk", "isekaitruck")]
         [Description("Bans a user that you have permission to ban, deleting all their messages in the process. See also: bankeep.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.BanMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.BanMembers)]
         public async Task BanCmd(TextCommandContext ctx,
          [Description("The user you wish to ban. Accepts many formats")] DiscordUser targetMember,
          [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling' NOTE: Add 'appeal' to the start of the reason to include an appeal link")] string timeAndReason = "No reason specified.")
@@ -137,7 +137,7 @@ namespace Cliptok.Commands
         /// Sue me, I beg you.
         [Command("bankeeptextcmd")]
         [TextAlias("bankeep", "bansave")]
-        [Description("Bans a user but keeps their messages around."), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.BanMembers)]
+        [Description("Bans a user but keeps their messages around."), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.BanMembers)]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         public async Task BankeepCmd(TextCommandContext ctx,
         [Description("The user you wish to ban. Accepts many formats")] DiscordUser targetMember,
@@ -222,7 +222,7 @@ namespace Cliptok.Commands
         [TextAlias("unban")]
         [Description("Unbans a user who has been previously banned.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.BanMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.BanMembers)]
         public async Task UnbanCmd(TextCommandContext ctx, [Description("The user to unban, usually a mention or ID")] DiscordUser targetUser, [Description("Used in audit log only currently")] string reason = "No reason specified.")
         {
             if ((await Program.db.HashExistsAsync("bans", targetUser.Id)))

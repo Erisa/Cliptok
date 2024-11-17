@@ -7,7 +7,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Command("scamcheck")]
         [Description("Check if a link or message is known to the anti-phishing API.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task ScamCheck(SlashCommandContext ctx, [Parameter("input"), Description("Domain or message content to scan.")] string content)
         {
             var urlMatches = Constants.RegexConstants.url_rx.Matches(content);
@@ -38,7 +38,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Command("tellraw")]
         [Description("You know what you're here for.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task TellRaw(SlashCommandContext ctx, [Parameter("input"), Description("???")] string input, [Parameter("reply_msg_id"), Description("ID of message to use in a reply context.")] string replyID = "0", [Parameter("pingreply"), Description("Ping pong.")] bool pingreply = true, [Parameter("channel"), Description("Either mention or ID. Not a name.")] string discordChannel = default)
         {
             DiscordChannel channelObj = default;
@@ -104,7 +104,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Description("Show information about the mute for a user.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task MuteInfoSlashCommand(
             SlashCommandContext ctx,
             [Parameter("user"), Description("The user whose mute information to show.")] DiscordUser targetUser,
@@ -117,7 +117,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Description("Show information about the ban for a user.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task BanInfoSlashCommand(
             SlashCommandContext ctx,
             [Parameter("user"), Description("The user whose ban information to show.")] DiscordUser targetUser,

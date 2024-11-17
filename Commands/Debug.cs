@@ -355,8 +355,8 @@ namespace Cliptok.Commands
                     [Description("Denied permissions. Use a permission integer. See https://discordlookup.com/permissions-calculator.")] int deniedPermissions)
                 {
                     // Confirm permission overrides before we do anything.
-                    var parsedAllowedPerms = (DiscordPermissions)allowedPermissions;
-                    var parsedDeniedPerms = (DiscordPermissions)deniedPermissions;
+                    var parsedAllowedPerms = (DiscordPermission)allowedPermissions;
+                    var parsedDeniedPerms = (DiscordPermission)deniedPermissions;
 
                     var confirmButton = new DiscordButtonComponent(DiscordButtonStyle.Success, "debug-overrides-add-confirm-callback", "Yes");
                     var cancelButton = new DiscordButtonComponent(DiscordButtonStyle.Danger, "debug-overrides-add-cancel-callback", "No");

@@ -5,7 +5,7 @@
         [Command("grant")]
         [Description("Grant a user Tier 1, bypassing any verification requirements.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task SlashGrant(SlashCommandContext ctx, [Parameter("user"), Description("The user to grant Tier 1 to.")] DiscordUser _)
         {
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command is deprecated and no longer works. Please right click (or tap and hold on mobile) the user and click \"Verify Member\" if available.");
@@ -33,7 +33,6 @@
                     "insiderBeta" => Program.cfgjson.UserRoles.InsiderBeta,
                     "insiderRP" => Program.cfgjson.UserRoles.InsiderRP,
                     "insider10RP" => Program.cfgjson.UserRoles.Insider10RP,
-                    "insider10Beta" => Program.cfgjson.UserRoles.Insider10Beta,
                     "patchTuesday" => Program.cfgjson.UserRoles.PatchTuesday,
                     "giveaways" => Program.cfgjson.UserRoles.Giveaways,
                     "cts" => Program.cfgjson.CommunityTechSupportRoleID,
@@ -74,7 +73,6 @@
                     "insiderBeta" => Program.cfgjson.UserRoles.InsiderBeta,
                     "insiderRP" => Program.cfgjson.UserRoles.InsiderRP,
                     "insider10RP" => Program.cfgjson.UserRoles.Insider10RP,
-                    "insider10Beta" => Program.cfgjson.UserRoles.Insider10Beta,
                     "patchTuesday" => Program.cfgjson.UserRoles.PatchTuesday,
                     "giveaways" => Program.cfgjson.UserRoles.Giveaways,
                     "cts" => Program.cfgjson.CommunityTechSupportRoleID,
@@ -105,7 +103,6 @@
                         { "Windows 11 Insiders (Beta)", "insiderBeta" },
                         { "Windows 11 Insiders (Release Preview)", "insiderRP" },
                         { "Windows 10 Insiders (Release Preview)", "insider10RP" },
-                        { "Windows 10 Insiders (Beta)", "insider10Beta" },
                         { "Patch Tuesday", "patchTuesday" },
                         { "Giveaways", "giveaways" },
                         { "Community Tech Support (CTS)", "cts" }

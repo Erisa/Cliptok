@@ -6,7 +6,7 @@
         [Description("Slow down the channel...")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task SlowmodeSlashCommand(
             SlashCommandContext ctx,
             [Parameter("slow_time"), Description("Allowed time between each users messages. 0 for off. A number of seconds or a parseable time.")] string timeToParse,

@@ -11,7 +11,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Command("nicknamelock")]
         [Description("Prevent a member from changing their nickname.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ManageNicknames)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ManageNicknames)]
         public class NicknameLockSlashCommands
         {
             [Command("enable")]

@@ -1,13 +1,11 @@
-﻿using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
-
-namespace Cliptok.Commands.InteractionCommands
+﻿namespace Cliptok.Commands.InteractionCommands
 {
     internal class StatusInteractions
     {
         [Command("status")]
         [Description("Status commands")]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequirePermissions(DiscordPermission.ModerateMembers)]
 
         public class StatusSlashCommands
         {

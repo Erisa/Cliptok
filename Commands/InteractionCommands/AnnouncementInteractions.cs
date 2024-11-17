@@ -6,7 +6,7 @@
         [Description("Announce a Windows Insider build in the current channel.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task AnnounceBuildSlashCommand(SlashCommandContext ctx,
             [SlashChoiceProvider(typeof(WindowsVersionChoiceProvider))]
             [Parameter("windows_version"), Description("The Windows version to announce a build of. Must be either 10 or 11.")] long windowsVersion,
@@ -40,11 +40,9 @@
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Both insider channels cannot be the same! Simply set one instead.", ephemeral: true);
             }
 
-            List<string> validWindows10Channels = ["RP", "Beta", ""];
-
-            if (windowsVersion == 10 && (!validWindows10Channels.Contains(insiderChannel1) || !validWindows10Channels.Contains(insiderChannel2)))
+            if (windowsVersion == 10 && insiderChannel1 != "RP")
             {
-                await ctx.RespondAsync(text: $"{Program.cfgjson.Emoji.Error} Windows 10 only has Release Preview and Beta Channels.", ephemeral: true);
+                await ctx.RespondAsync(text: $"{Program.cfgjson.Emoji.Error} Windows 10 only has a Release Preview Channel.", ephemeral: true);
                 return;
             }
 
@@ -258,7 +256,7 @@
                 await LockdownHelpers.LockChannelAsync(user: ctx.User, channel: ctx.Channel, duration: lockDuration);
             }
         }
-        
+
         internal class WindowsVersionChoiceProvider : IChoiceProvider
         {
             public async ValueTask<IEnumerable<DiscordApplicationCommandOptionChoice>> ProvideAsync(CommandParameter _)
@@ -270,7 +268,7 @@
                 };
             }
         }
-        
+
         internal class WindowsInsiderChannelChoiceProvider : IChoiceProvider
         {
             public async ValueTask<IEnumerable<DiscordApplicationCommandOptionChoice>> ProvideAsync(CommandParameter _)

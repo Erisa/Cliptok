@@ -5,7 +5,7 @@
         [Command("dehoist")]
         [Description("Dehoist a member, dropping them to the bottom of the list. Lasts until they change nickname.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ManageNicknames)]
+        [RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermission.ManageNicknames)]
         public async Task DehoistSlashCmd(SlashCommandContext ctx, [Parameter("member"), Description("The member to dehoist.")] DiscordUser user)
         {
             DiscordMember member;
@@ -43,7 +43,7 @@
         [Command("permadehoist")]
         [Description("Permanently/persistently dehoist members.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ManageNicknames)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ManageNicknames)]
         public class PermadehoistSlashCommands
         {
             [Command("enable")]

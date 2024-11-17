@@ -8,7 +8,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Description("Formally warn a user, usually for breaking the server rules.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task WarnSlashCommand(SlashCommandContext ctx,
          [Parameter("user"), Description("The user to warn.")] DiscordUser user,
          [Parameter("reason"), Description("The reason they're being warned.")] string reason,
@@ -81,7 +81,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Description("Transfer warnings from one user to another.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        [RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task TransferWarningsSlashCommand(SlashCommandContext ctx,
             [Parameter("source_user"), Description("The user currently holding the warnings.")] DiscordUser sourceUser,
             [Parameter("target_user"), Description("The user receiving the warnings.")] DiscordUser targetUser,
@@ -184,7 +184,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Command("warndetails")]
         [Description("Search for a warning and return its details.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task WarndetailsSlashCommand(SlashCommandContext ctx,
             [Parameter("user"), Description("The user to fetch a warning for.")] DiscordUser user,
             [SlashAutoCompleteProvider(typeof(WarningsAutocompleteProvider)), Parameter("warning"), Description("Type to search! Find the warning you want to fetch.")] string warning,
@@ -223,7 +223,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Command("delwarn")]
         [Description("Search for a warning and delete it!")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task DelwarnSlashCommand(SlashCommandContext ctx,
             [Parameter("user"), Description("The user to delete a warning for.")] DiscordUser targetUser,
             [SlashAutoCompleteProvider(typeof(WarningsAutocompleteProvider))][Parameter("warning"), Description("Type to search! Find the warning you want to delete.")] string warningId,
@@ -287,7 +287,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Command("editwarn")]
         [Description("Search for a warning and edit it!")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermissions.ModerateMembers)]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task EditWarnSlashCommand(SlashCommandContext ctx,
             [Parameter("user"), Description("The user to fetch a warning for.")] DiscordUser user,
             [SlashAutoCompleteProvider(typeof(WarningsAutocompleteProvider))][Parameter("warning"), Description("Type to search! Find the warning you want to edit.")] string warning,

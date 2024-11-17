@@ -6,7 +6,7 @@
         [TextAlias("kick", "yeet", "shoo", "goaway", "defenestrate")]
         [Description("Kicks a user, removing them from the server until they rejoin. Generally not very useful.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
-        [RequirePermissions(DiscordPermissions.KickMembers), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [RequirePermissions(permissions: DiscordPermission.KickMembers), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task KickCmd(TextCommandContext ctx, DiscordUser target, [RemainingText] string reason = "No reason specified.")
         {
             if (target.IsBot)

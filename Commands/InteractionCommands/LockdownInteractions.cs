@@ -7,7 +7,7 @@ namespace Cliptok.Commands.InteractionCommands
         [Command("lockdown")]
         [Description("Lock the current channel or all channels in the server, preventing new messages. See also: unlock")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermissions.ManageChannels, DiscordPermissions.None)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermission.ManageChannels, DiscordPermissions.None)]
         public class LockdownCmds
         {
             [Command("channel")]
