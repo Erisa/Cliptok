@@ -17,7 +17,7 @@ namespace Cliptok.Commands.InteractionCommands
                 string responseToSend;
                 if (match)
                 {
-                    responseToSend = $"Match found:\n`";
+                    responseToSend = $"Match found:\n";
                 }
                 else
                 {

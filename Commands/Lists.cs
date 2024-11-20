@@ -145,7 +145,7 @@
                 string responseToSend;
                 if (match)
                 {
-                    responseToSend = $"Match found:\n```json\n{responseText}\n";
+                    responseToSend = $"Match found:\n";
 
                 }
                 else
