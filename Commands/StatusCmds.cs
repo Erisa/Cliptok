@@ -1,6 +1,6 @@
 ﻿namespace Cliptok.Commands.InteractionCommands
 {
-    internal class StatusInteractions
+    internal class StatusCmds
     {
         [Command("status")]
         [Description("Status commands")]

@@ -1,6 +1,6 @@
-﻿namespace Cliptok.Commands.InteractionCommands
+﻿namespace Cliptok.Commands
 {
-    public class ClearInteractions
+    public class ClearCmds
     {
         public static Dictionary<ulong, List<DiscordMessage>> MessagesToClear = new();
 

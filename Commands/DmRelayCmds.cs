@@ -1,6 +1,6 @@
-﻿namespace Cliptok.Commands
+namespace Cliptok.Commands
 {
-    internal class DmRelayBlock
+    public class DmRelayCmds
     {
         [Command("dmrelayblocktextcmd")]
         [TextAlias("dmrelayblock", "dmblock")]

@@ -177,15 +177,10 @@ namespace Cliptok
             {
                 builder.CommandErrored += ErrorEvents.CommandErrored;
 
-                // Interaction commands
-                var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands");
-                foreach (var type in slashCommandClasses)
-                    builder.AddCommands(type, cfgjson.ServerID);
-
-                // Text commands
+                // Register commands
                 var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands");
                 foreach (var type in commandClasses)
-                    builder.AddCommands(type);
+                    builder.AddCommands(type, cfgjson.ServerID);
 
                 // Register command checks
                 builder.AddCheck<HomeServerCheck>();

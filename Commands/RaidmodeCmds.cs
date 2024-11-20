@@ -1,18 +1,26 @@
-﻿namespace Cliptok.Commands.InteractionCommands
+namespace Cliptok.Commands
 {
-    internal class RaidmodeInteractions
+    public class RaidmodeCmds
     {
         [Command("raidmode")]
+        [TextAlias("clipraidmode")]
         [Description("Commands relating to Raidmode")]
-        [AllowedProcessors(typeof(SlashCommandProcessor))]
+        [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
         [RequirePermissions(DiscordPermission.ModerateMembers)]
         public class RaidmodeSlashCommands
         {
+            [DefaultGroupCommand]
             [Command("status")]
 			[Description("Check the current state of raidmode.")]
-            public async Task RaidmodeStatus(SlashCommandContext ctx)
+            public async Task RaidmodeStatus(CommandContext ctx)
             {
+                // Avoid conflicts with Modmail's !raidmode
+                if (ctx is TextCommandContext
+                    && !ctx.As<TextCommandContext>().Message.Content.Contains("clipraidmode")
+                    && !ctx.As<TextCommandContext>().Message.Content.Contains("c!raidmode"))
+                    return;
+
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {
                     string output = $"Raidmode is currently **enabled**.";
@@ -35,11 +43,17 @@
 
             [Command("on")]
 			[Description("Enable raidmode. Defaults to 3 hour length if not specified.")]
-            public async Task RaidmodeOnSlash(SlashCommandContext ctx,
+            public async Task RaidmodeOnSlash(CommandContext ctx,
                 [Parameter("duration"), Description("How long to keep raidmode enabled for.")] string duration = default,
                 [Parameter("allowed_account_age"), Description("How old an account can be to be allowed to bypass raidmode. Relative to right now.")] string allowedAccountAge = ""
             )
             {
+                // Avoid conflicts with Modmail's !raidmode
+                if (ctx is TextCommandContext
+                    && !ctx.As<TextCommandContext>().Message.Content.Contains("clipraidmode")
+                    && !ctx.As<TextCommandContext>().Message.Content.Contains("c!raidmode"))
+                    return;
+
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {
                     string output = $"Raidmode is already **enabled**.";
@@ -102,8 +116,14 @@
 
             [Command("off")]
 			[Description("Disable raidmode immediately.")]
-            public async Task RaidmodeOffSlash(SlashCommandContext ctx)
+            public async Task RaidmodeOffSlash(CommandContext ctx)
             {
+                // Avoid conflicts with Modmail's !raidmode
+                if (ctx is TextCommandContext
+                    && !ctx.As<TextCommandContext>().Message.Content.Contains("clipraidmode")
+                    && !ctx.As<TextCommandContext>().Message.Content.Contains("c!raidmode"))
+                    return;
+
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {
                     long expirationTimeUnix = (long)Program.db.HashGet("raidmode", ctx.Guild.Id);
@@ -128,6 +148,5 @@
                 }
             }
         }
-
     }
 }

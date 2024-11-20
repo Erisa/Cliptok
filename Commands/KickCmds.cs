@@ -1,13 +1,13 @@
-﻿namespace Cliptok.Commands
+namespace Cliptok.Commands
 {
-    internal class Kick
+    public class KickCmds
     {
-        [Command("kicktextcmd")]
-        [TextAlias("kick", "yeet", "shoo", "goaway", "defenestrate")]
-        [Description("Kicks a user, removing them from the server until they rejoin. Generally not very useful.")]
-        [AllowedProcessors(typeof(TextCommandProcessor))]
-        [RequirePermissions(permissions: DiscordPermission.KickMembers), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task KickCmd(TextCommandContext ctx, DiscordUser target, [RemainingText] string reason = "No reason specified.")
+        [Command("kick")]
+        [TextAlias("yeet", "shoo", "goaway", "defenestrate")]
+        [Description("Kicks a user, removing them from the server until they rejoin.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
+        [RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermission.KickMembers)]
+        public async Task KickCmd(CommandContext ctx, [Parameter("user"), Description("The user you want to kick from the server.")] DiscordUser target, [Parameter("reason"), Description("The reason for kicking this user.")] string reason = "No reason specified.")
         {
             if (target.IsBot)
             {
@@ -32,20 +32,20 @@
             {
                 if (DiscordHelpers.AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
                 {
-                    await ctx.Message.DeleteAsync();
                     await KickAndLogAsync(member, reason, ctx.Member);
                     await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Ejected} {target.Mention} has been kicked: **{reason}**");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Done!", ephemeral: true);
                     return;
                 }
                 else
                 {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I don't have permission to kick **{DiscordHelpers.UniqueUsername(target)}**!");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I don't have permission to kick **{DiscordHelpers.UniqueUsername(target)}**!", ephemeral: true);
                     return;
                 }
             }
             else
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} You aren't allowed to kick **{DiscordHelpers.UniqueUsername(target)}**!");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} You aren't allowed to kick **{DiscordHelpers.UniqueUsername(target)}**!", ephemeral: true);
                 return;
             }
         }
@@ -128,6 +128,5 @@
                 return false;
             }
         }
-
     }
 }

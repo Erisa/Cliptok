@@ -1,6 +1,6 @@
-﻿namespace Cliptok.Commands.InteractionCommands
+namespace Cliptok.Commands
 {
-    public class RulesInteractions
+    public class RulesCmds
     {
         [HomeServer]
         [Command("rules")]

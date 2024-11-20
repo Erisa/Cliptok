@@ -1,6 +1,6 @@
 ﻿namespace Cliptok.Commands
 {
-    internal class Lists
+    internal class ListCmds
     {
         public class GitHubDispatchBody
         {
@@ -137,12 +137,11 @@
                     $"Body: ```json\n{responseText}```");
         }
 
-        [Command("scamchecktextcmd")]
-        [TextAlias("scamcheck")]
+        [Command("scamcheck")]
         [Description("Check if a link or message is known to the anti-phishing API.")]
-        [AllowedProcessors(typeof(TextCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public async Task ScamCheck(TextCommandContext ctx, [RemainingText, Description("Domain or message content to scan.")] string content)
+        [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        public async Task ScamCheck(CommandContext ctx, [Parameter("input"), Description("Domain or message content to scan.")] string content)
         {
             var urlMatches = Constants.RegexConstants.url_rx.Matches(content);
             if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") is not null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
@@ -152,8 +151,7 @@
                 string responseToSend;
                 if (match)
                 {
-                    responseToSend = $"Match found:\n```json\n{responseText}\n";
-
+                    responseToSend = $"Match found:\n";
                 }
                 else
                 {
@@ -167,55 +165,6 @@
             else
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Anti-phishing API is not configured, nothing for me to do.");
-            }
-        }
-
-        [Command("joinwatchtextcmd")]
-        [TextAlias("joinwatch", "joinnotify", "leavewatch", "leavenotify")]
-        [Description("Watch for joins and leaves of a given user. Output goes to #investigations.")]
-        [AllowedProcessors(typeof(TextCommandProcessor))]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public async Task JoinWatch(
-            TextCommandContext ctx,
-            [Description("The user to watch for joins and leaves of.")] DiscordUser user,
-            [Description("An optional note for context."), RemainingText] string note = ""
-        )
-        {
-            var joinWatchlist = await Program.db.ListRangeAsync("joinWatchedUsers");
-
-            if (joinWatchlist.Contains(user.Id))
-            {
-                if (note != "")
-                {
-                    // User is already joinwatched, just update note
-
-                    // Get current note; if it's the same, do nothing
-                    var currentNote = await Program.db.HashGetAsync("joinWatchedUsersNotes", user.Id);
-                    if (currentNote == note || (string.IsNullOrWhiteSpace(currentNote) && string.IsNullOrWhiteSpace(note)))
-                    {
-                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {user.Mention} is already being watched with the same note! Nothing to do.");
-                        return;
-                    }
-
-                    // If note is different, update it
-                    await Program.db.HashSetAsync("joinWatchedUsersNotes", user.Id, note);
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully updated the note for {user.Mention} (run again with no note to unwatch):\n> {note}");
-                    return;
-                }
-
-                // User is already joinwatched, unwatch
-                Program.db.ListRemove("joinWatchedUsers", joinWatchlist.First(x => x == user.Id));
-                await Program.db.HashDeleteAsync("joinWatchedUsersNotes", user.Id);
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully unwatched {user.Mention}, since they were already in the list.");
-            }
-            else
-            {
-                // User is not joinwatched, watch
-                await Program.db.ListRightPushAsync("joinWatchedUsers", user.Id);
-                if (note != "")
-                    await Program.db.HashSetAsync("joinWatchedUsersNotes", user.Id, note);
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Now watching for joins/leaves of {user.Mention} to send to the investigations channel"
-                    + (note == "" ? "!" : $" with the following note:\n>>> {note}"));
             }
         }
 

@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Cliptok.Commands.InteractionCommands
+namespace Cliptok.Commands
 {
-    public class NicknameLockInteraction
+    public class NicknameLockCmds
     {
         [Command("nicknamelock")]
         [Description("Prevent a member from changing their nickname.")]
@@ -85,5 +79,4 @@ namespace Cliptok.Commands.InteractionCommands
             }
         }
     }
-
 }

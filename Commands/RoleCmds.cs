@@ -1,8 +1,131 @@
 namespace Cliptok.Commands
 {
-    [UserRolesPresent]
-    public class UserRoleCmds
+    public class RoleCmds
     {
+        [Command("grant")]
+        [Description("Grant a user Tier 1, bypassing any verification requirements.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        public async Task Grant(CommandContext ctx, [Parameter("user"), Description("The user to grant Tier 1 to.")] DiscordUser _)
+        {
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command is deprecated and no longer works. Please right click (or tap and hold on mobile) the user and click \"Verify Member\" if available.");
+        }
+
+        [HomeServer]
+        [Command("roles")]
+        [Description("Opt in/out of roles.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
+        internal class RoleSlashCommands
+        {
+            [Command("grant")]
+			[Description("Opt into a role.")]
+            public async Task GrantRole(
+                SlashCommandContext ctx,
+                [SlashAutoCompleteProvider(typeof(RolesAutocompleteProvider))]
+                [Parameter("role"), Description("The role to opt into.")] string role)
+            {
+                DiscordMember member = ctx.Member;
+
+                ulong roleId = role switch
+                {
+                    "insiderCanary" => Program.cfgjson.UserRoles.InsiderCanary,
+                    "insiderDev" => Program.cfgjson.UserRoles.InsiderDev,
+                    "insiderBeta" => Program.cfgjson.UserRoles.InsiderBeta,
+                    "insiderRP" => Program.cfgjson.UserRoles.InsiderRP,
+                    "insider10RP" => Program.cfgjson.UserRoles.Insider10RP,
+                    "patchTuesday" => Program.cfgjson.UserRoles.PatchTuesday,
+                    "giveaways" => Program.cfgjson.UserRoles.Giveaways,
+                    "cts" => Program.cfgjson.CommunityTechSupportRoleID,
+                    _ => 0
+                };
+
+                if (roleId == 0)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Invalid role! Please choose from the list.", ephemeral: true);
+                    return;
+                }
+
+                if (roleId == Program.cfgjson.CommunityTechSupportRoleID && await GetPermLevelAsync(ctx.Member) < ServerPermLevel.TechnicalQueriesSlayer)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.NoPermissions} You must be a TQS member to get the CTS role!", ephemeral: true);
+                    return;
+                }
+
+                var roleData = await ctx.Guild.GetRoleAsync(roleId);
+
+                await member.GrantRoleAsync(roleData, $"/roles grant used by {DiscordHelpers.UniqueUsername(ctx.User)}");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} The role {roleData.Mention} has been successfully granted!", ephemeral: true, mentions: false);
+            }
+
+            [Command("remove")]
+			[Description("Opt out of a role.")]
+            public async Task RemoveRole(
+                SlashCommandContext ctx,
+                [SlashAutoCompleteProvider(typeof(RolesAutocompleteProvider))]
+                [Parameter("role"), Description("The role to opt out of.")] string role)
+            {
+                DiscordMember member = ctx.Member;
+
+                ulong roleId = role switch
+                {
+                    "insiderCanary" => Program.cfgjson.UserRoles.InsiderCanary,
+                    "insiderDev" => Program.cfgjson.UserRoles.InsiderDev,
+                    "insiderBeta" => Program.cfgjson.UserRoles.InsiderBeta,
+                    "insiderRP" => Program.cfgjson.UserRoles.InsiderRP,
+                    "insider10RP" => Program.cfgjson.UserRoles.Insider10RP,
+                    "patchTuesday" => Program.cfgjson.UserRoles.PatchTuesday,
+                    "giveaways" => Program.cfgjson.UserRoles.Giveaways,
+                    "cts" => Program.cfgjson.CommunityTechSupportRoleID,
+                    _ => 0
+                };
+
+                if (roleId == 0)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Invalid role! Please choose from the list.", ephemeral: true);
+                    return;
+                }
+
+                var roleData = await ctx.Guild.GetRoleAsync(roleId);
+
+                await member.RevokeRoleAsync(roleData, $"/roles remove used by {DiscordHelpers.UniqueUsername(ctx.User)}");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} The role {roleData.Mention} has been successfully removed!", ephemeral: true, mentions: false);
+            }
+        }
+
+        internal class RolesAutocompleteProvider : IAutoCompleteProvider
+        {
+            public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext ctx)
+            {
+                Dictionary<string, string> options = new()
+                    {
+                        { "Windows 11 Insiders (Canary)", "insiderCanary" },
+                        { "Windows 11 Insiders (Dev)", "insiderDev" },
+                        { "Windows 11 Insiders (Beta)", "insiderBeta" },
+                        { "Windows 11 Insiders (Release Preview)", "insiderRP" },
+                        { "Windows 10 Insiders (Release Preview)", "insider10RP" },
+                        { "Patch Tuesday", "patchTuesday" },
+                        { "Giveaways", "giveaways" },
+                        { "Community Tech Support (CTS)", "cts" }
+                    };
+
+                var memberHasTqs = await GetPermLevelAsync(ctx.Member) >= ServerPermLevel.TechnicalQueriesSlayer;
+
+                List<DiscordAutoCompleteChoice> list = new();
+
+                foreach (var option in options)
+                {
+                    var focusedOption = ctx.Options.FirstOrDefault(option => option.Focused);
+                    if (focusedOption.Value.ToString() == "" || option.Key.Contains(focusedOption.Value.ToString(), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (option.Value == "cts" && !memberHasTqs) continue;
+                        list.Add(new DiscordAutoCompleteChoice(option.Key, option.Value));
+                    }
+                }
+
+                return list;
+            }
+        }
+
         public static async Task GiveUserRoleAsync(TextCommandContext ctx, ulong role)
         {
             await GiveUserRolesAsync(ctx, x => (ulong)x.GetValue(Program.cfgjson.UserRoles, null) == role);
@@ -76,7 +199,8 @@ namespace Cliptok.Commands
             TextAlias("swap-insider-rp", "swap-insiders-rp"),
             Description("Removes the Windows 11 Insiders (Release Preview) role and replaces it with Windows 10 Insiders (Release Preview) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task SwapInsiderRpCmd(TextCommandContext ctx)
         {
@@ -89,7 +213,8 @@ namespace Cliptok.Commands
             TextAlias("swap-insider-dev", "swap-insiders-dev", "swap-insider-canary", "swap-insiders-canary", "swap-insider-can", "swap-insiders-can"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             Description("Removes the Windows 11 Insiders (Canary) role and replaces it with Windows 10 Insiders (Dev) role"),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task SwapInsiderDevCmd(TextCommandContext ctx)
         {
@@ -103,7 +228,8 @@ namespace Cliptok.Commands
             TextAlias("join-insider-dev", "join-insiders-dev"),
             Description("Gives you the Windows 11 Insiders (Dev) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task JoinInsiderDevCmd(TextCommandContext ctx)
         {
@@ -115,7 +241,8 @@ namespace Cliptok.Commands
             TextAlias("join-insider-canary", "join-insiders-canary", "join-insider-can", "join-insiders-can"),
             Description("Gives you the Windows 11 Insiders (Canary) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task JoinInsiderCanaryCmd(TextCommandContext ctx)
         {
@@ -128,7 +255,8 @@ namespace Cliptok.Commands
             TextAlias("join-insider-beta", "join-insiders-beta"),
             Description("Gives you the Windows 11 Insiders (Beta) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task JoinInsiderBetaCmd(TextCommandContext ctx)
         {
@@ -140,7 +268,8 @@ namespace Cliptok.Commands
             TextAlias("join-insider-rp", "join-insiders-rp", "join-insiders-11-rp", "join-insider-11-rp"),
             Description("Gives you the Windows 11 Insiders (Release Preview) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task JoinInsiderRPCmd(TextCommandContext ctx)
         {
@@ -152,7 +281,8 @@ namespace Cliptok.Commands
             TextAlias("join-insider-10", "join-insiders-10"),
             Description("Gives you to the Windows 10 Insiders (Release Preview) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task JoinInsiders10Cmd(TextCommandContext ctx)
         {
@@ -164,7 +294,8 @@ namespace Cliptok.Commands
             TextAlias("join-patch-tuesday"),
             Description("Gives you the 💻 Patch Tuesday role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task JoinPatchTuesday(TextCommandContext ctx)
         {
@@ -176,7 +307,8 @@ namespace Cliptok.Commands
             TextAlias("keep-me-updated"),
             Description("Gives you all opt-in roles"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task KeepMeUpdated(TextCommandContext ctx)
         {
@@ -188,7 +320,8 @@ namespace Cliptok.Commands
             TextAlias("leave-insiders", "leave-insider"),
             Description("Removes you from Insider roles"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task LeaveInsiders(TextCommandContext ctx)
         {
@@ -208,7 +341,8 @@ namespace Cliptok.Commands
             TextAlias("dont-keep-me-updated"),
             Description("Takes away from you all opt-in roles"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task DontKeepMeUpdated(TextCommandContext ctx)
         {
@@ -220,7 +354,8 @@ namespace Cliptok.Commands
             TextAlias("leave-insider-dev", "leave-insiders-dev"),
             Description("Removes the Windows 11 Insiders (Dev) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task LeaveInsiderDevCmd(TextCommandContext ctx)
         {
@@ -232,7 +367,8 @@ namespace Cliptok.Commands
             TextAlias("leave-insider-canary", "leave-insiders-canary", "leave-insider-can", "leave-insiders-can"),
             Description("Removes the Windows 11 Insiders (Canary) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task LeaveInsiderCanaryCmd(TextCommandContext ctx)
         {
@@ -244,7 +380,8 @@ namespace Cliptok.Commands
             TextAlias("leave-insider-beta", "leave-insiders-beta"),
             Description("Removes the Windows 11 Insiders (Beta) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task LeaveInsiderBetaCmd(TextCommandContext ctx)
         {
@@ -256,7 +393,8 @@ namespace Cliptok.Commands
             TextAlias("leave-insider-10", "leave-insiders-10"),
             Description("Removes the Windows 10 Insiders (Release Preview) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task LeaveInsiderRPCmd(TextCommandContext ctx)
         {
@@ -268,7 +406,8 @@ namespace Cliptok.Commands
             TextAlias("leave-insider-rp", "leave-insiders-rp", "leave-insiders-11-rp", "leave-insider-11-rp"),
             Description("Removes the Windows 11 Insiders (Release Preview) role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task LeaveInsider10RPCmd(TextCommandContext ctx)
         {
@@ -280,12 +419,12 @@ namespace Cliptok.Commands
             TextAlias("leave-patch-tuesday"),
             Description("Removes the 💻 Patch Tuesday role"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer
+            HomeServer,
+            UserRolesPresent
         ]
         public async Task LeavePatchTuesday(TextCommandContext ctx)
         {
             await RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.PatchTuesday);
         }
-
     }
 }

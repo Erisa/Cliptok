@@ -1,8 +1,6 @@
-﻿using DSharpPlus.Commands.Trees.Metadata;
-
 namespace Cliptok.Commands
 {
-    internal class Debug
+    public class DebugCmds
     {
         public static Dictionary<ulong, PendingUserOverride> OverridesPendingAddition = new();
 
@@ -11,7 +9,7 @@ namespace Cliptok.Commands
         [Description("Commands and things for fixing the bot in the unlikely event that it breaks a bit.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        class DebugCmds
+        class DebugCmd
         {
             [Command("mutestatus")]
             public async Task MuteStatus(TextCommandContext ctx, DiscordUser targetUser = default)
@@ -325,7 +323,7 @@ namespace Cliptok.Commands
                 {
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working...");
                     var msg = await ctx.GetResponseAsync();
-                    
+
                     // Get all channels
                     var channels = await ctx.Guild.GetChannelsAsync();
 
@@ -419,7 +417,7 @@ namespace Cliptok.Commands
                 {
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
                     var msg = await ctx.GetResponseAsync();
-                    
+
                     // Try fetching member to determine whether they are in the server. If they are not, we can't apply overrides for them.
                     DiscordMember member;
                     try
@@ -657,6 +655,5 @@ namespace Cliptok.Commands
             }
 
         }
-
     }
 }

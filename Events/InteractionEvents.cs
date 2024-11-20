@@ -32,7 +32,7 @@ namespace Cliptok.Events
             }
             else if (e.Id == "clear-confirm-callback")
             {
-                Dictionary<ulong, List<DiscordMessage>> messagesToClear = Commands.InteractionCommands.ClearInteractions.MessagesToClear;
+                Dictionary<ulong, List<DiscordMessage>> messagesToClear = Commands.ClearCmds.MessagesToClear;
 
                 if (!messagesToClear.ContainsKey(e.Message.Id))
                 {
@@ -70,7 +70,7 @@ namespace Cliptok.Events
             {
                 await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredMessageUpdate);
 
-                var overridesPendingAddition = Commands.Debug.OverridesPendingAddition;
+                var overridesPendingAddition = Commands.DebugCmds.OverridesPendingAddition;
                 if (!overridesPendingAddition.ContainsKey(e.Message.Id))
                 {
                     await e.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{cfgjson.Emoji.Error} {e.User.Mention}, this action has already been completed!").WithReply(e.Message.Id));
@@ -134,7 +134,7 @@ namespace Cliptok.Events
             {
                 await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredMessageUpdate);
 
-                var overridesPendingAddition = Commands.Debug.OverridesPendingAddition;
+                var overridesPendingAddition = Commands.DebugCmds.OverridesPendingAddition;
                 if (!overridesPendingAddition.ContainsKey(e.Message.Id))
                 {
                     await e.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{cfgjson.Emoji.Error} {e.User.Mention}, this action has already been completed!").WithReply(e.Message.Id));
@@ -157,7 +157,7 @@ namespace Cliptok.Events
 
                 await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredMessageUpdate);
 
-                var overridesPendingAddition = Commands.Debug.OverridesPendingAddition;
+                var overridesPendingAddition = Commands.DebugCmds.OverridesPendingAddition;
                 if (!overridesPendingAddition.ContainsKey(e.Message.Id))
                 {
                     await e.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{cfgjson.Emoji.Error} {e.User.Mention}, this action has already been completed!").WithReply(e.Message.Id));

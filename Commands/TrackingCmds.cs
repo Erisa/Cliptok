@@ -1,6 +1,6 @@
 ﻿namespace Cliptok.Commands.InteractionCommands
 {
-    internal class TrackingInteractions
+    internal class TrackingCmds
     {
         [Command("tracking")]
         [Description("Commands to manage message tracking of users")]
