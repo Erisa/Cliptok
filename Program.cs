@@ -2,7 +2,6 @@ using DSharpPlus.Extensions;
 using DSharpPlus.Net.Gateway;
 using Serilog.Sinks.Grafana.Loki;
 using System.Reflection;
-using Cliptok.Commands.InteractionCommands;
 using DSharpPlus.Commands.Processors.TextCommands.Parsing;
 
 namespace Cliptok
