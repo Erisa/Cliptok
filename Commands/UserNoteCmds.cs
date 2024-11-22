@@ -1,6 +1,6 @@
 using static Cliptok.Helpers.UserNoteHelpers;
 
-namespace Cliptok.Commands.InteractionCommands
+namespace Cliptok.Commands
 {
     internal class UserNoteCmds
     {

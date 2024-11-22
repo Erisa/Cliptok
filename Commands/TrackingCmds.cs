@@ -1,4 +1,4 @@
-﻿namespace Cliptok.Commands.InteractionCommands
+﻿namespace Cliptok.Commands
 {
     internal class TrackingCmds
     {
