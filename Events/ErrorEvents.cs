@@ -21,8 +21,7 @@ namespace Cliptok.Events
             else if (e.Context is SlashCommandContext)
             {
                 // Interaction command error (slash, user ctx, message ctx)
-                if (e.Context is UserCommandContext) await InteractionEvents.ContextCommandErrored(e); // this works because UserCommandContext inherits from SlashCommandContext
-                else await InteractionEvents.SlashCommandErrored(e);
+                await InteractionEvents.SlashCommandErrored(e);
             }
         }
         
