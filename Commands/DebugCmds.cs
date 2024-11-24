@@ -249,6 +249,7 @@ namespace Cliptok.Commands
 
             [Command("overrides")]
             [Description("Commands for managing stored permission overrides.")]
+            [AllowedProcessors(typeof(TextCommandProcessor))]
             public class Overrides
             {
                 [DefaultGroupCommand]
