@@ -66,7 +66,7 @@ namespace Cliptok.Commands
                     };
                     embed.WithFooter(Program.discord.CurrentUser.Username, Program.discord.CurrentUser.AvatarUrl)
                         .AddField("Message", ex.Message);
-                    if (ex is ArgumentException)
+                    if (ex is ArgumentException or DSharpPlus.Commands.Exceptions.ArgumentParseException)
                         embed.AddField("Note", "This usually means that you used the command incorrectly.\n" +
                             "Please double-check how to use this command.");
                     await ctx.RespondAsync(embed: embed.Build(), ephemeral: true).ConfigureAwait(false);
