@@ -5,7 +5,7 @@ namespace Cliptok.Commands
         [Command("Show Avatar")]
         [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
         [AllowedProcessors(typeof(UserCommandProcessor))]
-        public async Task ContextAvatar(SlashCommandContext ctx, DiscordUser targetUser)
+        public async Task ContextAvatar(UserCommandContext ctx, DiscordUser targetUser)
         {
             string avatarUrl = await LykosAvatarMethods.UserOrMemberAvatarURL(targetUser, ctx.Guild);
 
@@ -24,7 +24,7 @@ namespace Cliptok.Commands
         [Command("User Information")]
         [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
         [AllowedProcessors(typeof(UserCommandProcessor))]
-        public async Task ContextUserInformation(SlashCommandContext ctx, DiscordUser targetUser)
+        public async Task ContextUserInformation(UserCommandContext ctx, DiscordUser targetUser)
         {
             await ctx.RespondAsync(embed: await DiscordHelpers.GenerateUserEmbed(targetUser, ctx.Guild), ephemeral: true);
         }

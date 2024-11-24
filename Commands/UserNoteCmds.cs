@@ -8,7 +8,7 @@ namespace Cliptok.Commands
         [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
         [AllowedProcessors(typeof(UserCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
-        public async Task ShowNotes(SlashCommandContext ctx, DiscordUser targetUser)
+        public async Task ShowNotes(UserCommandContext ctx, DiscordUser targetUser)
         {
             await ctx.RespondAsync(embed: await UserNoteHelpers.GenerateUserNotesEmbedAsync(targetUser), ephemeral: true);
         }

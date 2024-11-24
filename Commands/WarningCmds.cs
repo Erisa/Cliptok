@@ -7,7 +7,7 @@ namespace Cliptok.Commands
         [Command("Show Warnings")]
         [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
         [AllowedProcessors(typeof(UserCommandProcessor))]
-        public async Task ContextWarnings(SlashCommandContext ctx, DiscordUser targetUser)
+        public async Task ContextWarnings(UserCommandContext ctx, DiscordUser targetUser)
         {
             await ctx.RespondAsync(embed: await WarningHelpers.GenerateWarningsEmbedAsync(targetUser), ephemeral: true);
         }

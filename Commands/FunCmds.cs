@@ -7,7 +7,7 @@ namespace Cliptok.Commands
         [Command("Hug")]
         [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
         [AllowedProcessors(typeof(UserCommandProcessor))]
-        public async Task Hug(SlashCommandContext ctx, DiscordUser targetUser)
+        public async Task Hug(UserCommandContext ctx, DiscordUser targetUser)
         {
             var user = targetUser;
 
