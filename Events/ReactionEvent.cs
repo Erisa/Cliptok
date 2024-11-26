@@ -1,4 +1,5 @@
 ﻿using static Cliptok.Program;
+using static Cliptok.Constants.RegexConstants;
 
 namespace Cliptok.Events
 {
@@ -15,9 +16,12 @@ namespace Cliptok.Events
             // Remove reactions from warning/mute/ban messages
 
             if (targetMessage.Author.Id == discord.CurrentUser.Id &&
-                targetMessage.Content.Contains("was warned") ||
-                targetMessage.Content.Contains("has been muted") ||
-                targetMessage.Content.Contains("has been banned"))
+                warn_msg_rx.IsMatch(targetMessage.Content) ||
+                auto_warn_msg_rx.IsMatch(targetMessage.Content) ||
+                mute_msg_rx.IsMatch(targetMessage.Content) ||
+                unmute_msg_rx.IsMatch(targetMessage.Content) ||
+                ban_msg_rx.IsMatch(targetMessage.Content) ||
+                unban_msg_rx.IsMatch(targetMessage.Content))
             {
                 await targetMessage.DeleteReactionAsync(e.Emoji, e.User);
                 return;
