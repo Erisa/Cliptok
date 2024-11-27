@@ -105,33 +105,43 @@ namespace Cliptok.Events
             if (e.Guild.Id != cfgjson.ServerID)
                 return;
 
-            var muteRole = await e.Guild.GetRoleAsync(cfgjson.MutedRole);
+            // Attempt to check if member is cached
+            bool isMemberCached = client.Guilds[e.Guild.Id].Members.ContainsKey(e.Member.Id);
 
-            DiscordRole tqsMuteRole = default;
-            if (cfgjson.TqsMutedRole != 0)
-                tqsMuteRole = await e.Guild.GetRoleAsync(cfgjson.TqsMutedRole);
-
-            var userMute = await db.HashGetAsync("mutes", e.Member.Id);
-
-            if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole) & !e.Member.Roles.Contains(tqsMuteRole))
-                db.HashDeleteAsync("mutes", e.Member.Id);
-
-            if ((e.Member.Roles.Contains(muteRole) || e.Member.Roles.Contains(tqsMuteRole)) && userMute.IsNull)
+            if (isMemberCached)
             {
-                MemberPunishment newMute = new()
+                // Only check mute role against db entry if we know the member's roles are accurate.
+                // If the member is not cached, we will think they have no roles when they might actually be muted!
+                // Then we would be falsely removing their mute entry.
+
+                var muteRole = await e.Guild.GetRoleAsync(cfgjson.MutedRole);
+
+                DiscordRole tqsMuteRole = default;
+                if (cfgjson.TqsMutedRole != 0)
+                    tqsMuteRole = await e.Guild.GetRoleAsync(cfgjson.TqsMutedRole);
+
+                var userMute = await db.HashGetAsync("mutes", e.Member.Id);
+
+                if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole) & !e.Member.Roles.Contains(tqsMuteRole))
+                    db.HashDeleteAsync("mutes", e.Member.Id);
+
+                if ((e.Member.Roles.Contains(muteRole) || e.Member.Roles.Contains(tqsMuteRole)) && userMute.IsNull)
                 {
-                    MemberId = e.Member.Id,
-                    ModId = discord.CurrentUser.Id,
-                    ServerId = e.Guild.Id,
-                    ExpireTime = null,
-                    ActionTime = DateTime.Now
-                };
+                    MemberPunishment newMute = new()
+                    {
+                        MemberId = e.Member.Id,
+                        ModId = discord.CurrentUser.Id,
+                        ServerId = e.Guild.Id,
+                        ExpireTime = null,
+                        ActionTime = DateTime.Now
+                    };
 
-                db.HashSetAsync("mutes", e.Member.Id, JsonConvert.SerializeObject(newMute));
+                    db.HashSetAsync("mutes", e.Member.Id, JsonConvert.SerializeObject(newMute));
+                }
+
+                if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole) && !e.Member.Roles.Contains(tqsMuteRole))
+                    db.HashDeleteAsync("mutes", e.Member.Id);
             }
-
-            if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole) && !e.Member.Roles.Contains(tqsMuteRole))
-                db.HashDeleteAsync("mutes", e.Member.Id);
 
             string rolesStr = "None";
 
