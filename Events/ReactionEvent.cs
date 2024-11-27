@@ -24,6 +24,8 @@ namespace Cliptok.Events
                 unban_msg_rx.IsMatch(targetMessage.Content))
             {
                 await targetMessage.DeleteReactionAsync(e.Emoji, e.User);
+                var emoji = e.Emoji.Id != 0 ? $"[{e.Emoji.Name}](<{e.Emoji.Url}>)" : e.Emoji.ToString();
+                await LogChannelHelper.LogMessageAsync("reactions", $"{cfgjson.Emoji.Deleted} Removed reaction {emoji} from [this message]({e.Message.JumpLink}) by {e.User.Mention}");
                 return;
             }
 
