@@ -1,6 +1,6 @@
-﻿namespace Cliptok.Commands
+namespace Cliptok.Commands
 {
-    public class Reminders : BaseCommandModule
+    public class ReminderCmds
     {
         public class Reminder
         {
@@ -26,12 +26,13 @@
             public DateTime OriginalTime { get; set; }
         }
 
-        [Command("remindme")]
+        [Command("remindmetextcmd")]
         [Description("Set a reminder for yourself. Example: !reminder 1h do the thing")]
-        [Aliases("reminder", "rember", "wemember", "remember", "remind")]
+        [TextAlias("remindme", "reminder", "rember", "wemember", "remember", "remind")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Tier4, WorkOutside = true)]
         public async Task RemindMe(
-            CommandContext ctx,
+            TextCommandContext ctx,
             [Description("The amount of time to wait before reminding you. For example: 2s, 5m, 1h, 1d")] string timetoParse,
             [RemainingText, Description("The text to send when the reminder triggers.")] string reminder
         )
@@ -70,6 +71,5 @@
             await Program.db.ListRightPushAsync("reminders", JsonConvert.SerializeObject(reminderObject));
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} I'll try my best to remind you about that on <t:{TimeHelpers.ToUnixTimestamp(t)}:f> (<t:{TimeHelpers.ToUnixTimestamp(t)}:R>)"); // (In roughly **{TimeHelpers.TimeToPrettyFormat(t.Subtract(ctx.Message.Timestamp.DateTime), false)}**)");
         }
-
     }
 }
