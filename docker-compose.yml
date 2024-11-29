@@ -25,6 +25,8 @@ services:
       # Overrides your configs Redis options for use with Docker Compose
       #  I don't advise changing this unless you have a strange setup
       - REDIS_DOCKER_OVERRIDE=true
+    # uncomment this for bespoke setups
+    network_mode: service:tailscale
   redis:
     image: 'redis:7.2-alpine'
     restart: always
@@ -65,4 +67,3 @@ services:
       - net_admin
       - sys_module
     restart: always
-    network_mode: service:bot
