@@ -281,8 +281,11 @@
                     var response = $"**Overrides for {user.Mention}:**\n\n";
                     foreach (var overwrite in overwrites)
                     {
+                        var allowedPermissions = string.IsNullOrWhiteSpace(overwrite.Value.Allowed.ToString("name")) ? "none" : overwrite.Value.Allowed.ToString("name");
+                        var deniedPermissions = string.IsNullOrWhiteSpace(overwrite.Value.Denied.ToString("name")) ? "none" : overwrite.Value.Denied.ToString("name");
+                        
                         response +=
-                            $"<#{overwrite.Key}>:\n**Allowed**: {overwrite.Value.Allowed}\n**Denied**: {overwrite.Value.Denied}\n\n";
+                            $"<#{overwrite.Key}>:\n**Allowed**: {allowedPermissions}\n**Denied**: {deniedPermissions}\n\n";
                     }
 
                     if (response.Length > 2000)
