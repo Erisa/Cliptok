@@ -54,8 +54,8 @@ namespace Cliptok.Tasks
 
                                 // Try to fetch member. If it fails, they are not in the guild. If this is a voice channel, remove the override.
                                 // (if they are not in the guild & this is not a voice channel, skip; otherwise, code below handles removal)
-                                if (!e.Guild.Members.ContainsKey((ulong)userOverwrites.Name) &&
-                                    e.ChannelAfter.Type != DiscordChannelType.Voice)
+                                bool isMemberInServer = await IsMemberInServer((ulong)userOverwrites.Name, e.Guild);
+                                if (!isMemberInServer && e.ChannelAfter.Type != DiscordChannelType.Voice)
                                     continue;
 
                                 // User could be fetched, so they are in the server and their override was removed. Remove from db.
@@ -240,6 +240,29 @@ namespace Cliptok.Tasks
             // Compares two overwrites. ONLY CHECKS PERMISSIONS, ID, TYPE AND CREATION TIME. Ignores other properties!
 
             return a.Allowed == b.Allowed && a.Denied == b.Denied && a.Id == b.Id && a.Type == b.Type && a.CreationTimestamp == b.CreationTimestamp;
+        }
+        
+        private static async Task<bool> IsMemberInServer(ulong userId, DiscordGuild guild)
+        {
+            bool isMemberInServer = false;
+            
+            // Check cache first
+            if (guild.Members.ContainsKey(userId))
+                return true;
+            
+            // If the user isn't cached, try fetching them to confirm
+            try
+            {
+                await guild.GetMemberAsync(userId);
+                isMemberInServer = true;
+            }
+            catch (DSharpPlus.Exceptions.NotFoundException)
+            {
+                // Member is not in the server
+                // isMemberInServer is already false
+            }
+            
+            return isMemberInServer;
         }
     }
 }
