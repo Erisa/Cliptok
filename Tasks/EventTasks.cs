@@ -111,18 +111,7 @@ namespace Cliptok.Tasks
 
                                     if (dict is not null)
                                     {
-                                        try
-                                        {
-                                            dict.Add(e.ChannelAfter.Id, overwrite);
-                                        }
-                                        catch (ArgumentException ex)
-                                        {
-                                            Program.discord.Logger.LogWarning(ex, "Failed to process pending channel update event for channel {channel}: failed to add overwrite with ID {id} to db", e.ChannelAfter.Id, overwrite.Id);
-                                            
-                                            // Skip this overwrite
-                                            PendingChannelUpdateEvents.Remove(timestamp);
-                                            continue;
-                                        }
+                                        dict.Add(e.ChannelAfter.Id, overwrite);
 
                                         if (dict.Count > 0)
                                             await Program.db.HashSetAsync("overrides", overwrite.Id,
