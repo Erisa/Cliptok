@@ -169,11 +169,11 @@
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         public async Task JoinWatch(
             CommandContext ctx,
-            [Description("The user to watch for joins and leaves of.")] DiscordUser _,
-            [Description("An optional note for context."), RemainingText] string __ = ""
+            [Description("The user to watch for joins and leaves of.")] DiscordUser user,
+            [Description("An optional note for context."), RemainingText] string note = ""
         )
         {
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command is deprecated and no longer works; all joinwatches have been converted to notes. Please use `/note add` instead, with the `show_on_join_and_leave` option.");
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command is deprecated and no longer works; all joinwatches have been converted to notes. To add a note for this user, please use `/note add user:{user.Id} note:{(string.IsNullOrEmpty(note) ? "<context>" : note)} show_on_join_and_leave:True`; to remove one, use `/note delete user:{user.Id} note:<note>`.");
         }
 
         [Command("appealblock")]
