@@ -233,6 +233,47 @@ namespace Cliptok
 
             await ReadyEvent.OnStartup(discord);
             
+            // Migration from joinwatch to user notes
+            var joinWatchedUsersList = await Program.db.ListRangeAsync("joinWatchedUsers");
+            var joinWatchNotesList = await Program.db.HashGetAllAsync("joinWatchedUsersNotes");
+            int successfulMigrations = 0;
+            int numJoinWatches = joinWatchedUsersList.Length;
+            foreach (var user in joinWatchedUsersList)
+            {
+                // Get text for note; use joinwatch context if available, or "N/A; created from joinwatch without context" otherwise
+                string noteText;
+                if (joinWatchNotesList.FirstOrDefault(x => x.Name == user) == default)
+                    noteText = "N/A; created from joinwatch without context";
+                else
+                    noteText = joinWatchNotesList.First(x => x.Name == user).Value;
+                
+                // Construct note
+                var note = new UserNote
+                {
+                    TargetUserId = Convert.ToUInt64(user),
+                    ModUserId = discord.CurrentUser.Id,
+                    NoteText = noteText,
+                    ShowOnModmail = false,
+                    ShowOnWarn = false,
+                    ShowAllMods = false,
+                    ShowOnce = false,
+                    ShowOnJoinAndLeave = true,
+                    NoteId = db.StringIncrement("totalWarnings"),
+                    Timestamp = DateTime.Now,
+                    Type = WarningType.Note
+                };
+                
+                // Save note & remove joinwatch
+                await db.HashSetAsync(note.TargetUserId.ToString(), note.NoteId, JsonConvert.SerializeObject(note));
+                await db.ListRemoveAsync("joinWatchedUsers", note.TargetUserId);
+                await db.HashDeleteAsync("joinWatchedUsersNotes", note.TargetUserId);
+                successfulMigrations++;
+            }
+            if (successfulMigrations > 0)
+            {
+                discord.Logger.LogInformation(CliptokEventID, "Successfully migrated {count}/{total} joinwatches to notes.", successfulMigrations, numJoinWatches);
+            }
+            
             if (cfgjson.ForumChannelAutoWarnFallbackChannel != 0)
                 ForumChannelAutoWarnFallbackChannel = await discord.GetChannelAsync(cfgjson.ForumChannelAutoWarnFallbackChannel);
 
