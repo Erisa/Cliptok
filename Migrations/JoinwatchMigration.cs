@@ -45,9 +45,15 @@ namespace Cliptok.Migrations
                 await db.HashDeleteAsync("joinWatchedUsersNotes", note.TargetUserId);
                 successfulMigrations++;
             }
+            
             if (successfulMigrations > 0)
             {
                 discord.Logger.LogInformation(CliptokEventID, "Successfully migrated {count}/{total} joinwatches to notes.", successfulMigrations, numJoinWatches);
+            }
+            
+            if (numJoinWatches != 0 && successfulMigrations != numJoinWatches)
+            {
+                discord.Logger.LogError(CliptokEventID, "Failed to migrate {count} joinwatches to notes!", numJoinWatches - successfulMigrations);
             }
         }
     }
