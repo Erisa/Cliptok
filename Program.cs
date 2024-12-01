@@ -240,10 +240,10 @@ namespace Cliptok
             int numJoinWatches = joinWatchedUsersList.Length;
             foreach (var user in joinWatchedUsersList)
             {
-                // Get text for note; use joinwatch context if available, or "N/A; created from joinwatch without context" otherwise
+                // Get text for note; use joinwatch context if available, or "N/A; imported from joinwatch without context" otherwise
                 string noteText;
                 if (joinWatchNotesList.FirstOrDefault(x => x.Name == user) == default)
-                    noteText = "N/A; created from joinwatch without context";
+                    noteText = "N/A; imported from joinwatch without context";
                 else
                     noteText = joinWatchNotesList.First(x => x.Name == user).Value;
                 
