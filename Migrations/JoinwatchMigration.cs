@@ -7,6 +7,9 @@ namespace Cliptok.Migrations
         public static async Task MigrateJoinwatchesToNotesAsync()
         {
             // Migration from joinwatch to user notes
+            if (!await db.KeyExistsAsync("joinWatchedUsers"))
+                return;
+            
             var joinWatchedUsersList = await Program.db.ListRangeAsync("joinWatchedUsers");
             var joinWatchNotesList = await Program.db.HashGetAllAsync("joinWatchedUsersNotes");
             int successfulMigrations = 0;
