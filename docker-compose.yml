@@ -58,6 +58,8 @@ services:
     image: tailscale/tailscale:latest
     volumes:
       - ./data/ts-state:/var/lib/tailscale
+    devices:
+      - /dev/net/tun:/dev/net/tun
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_STATE_DIR=/var/lib/tailscale
