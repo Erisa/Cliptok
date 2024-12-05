@@ -142,19 +142,26 @@ namespace Cliptok.Events
                 {
                     if (Program.db.SetContains("trackedUsers", message.Author.Id))
                     {
-                        DiscordThreadChannel relayThread;
-
-                        if (trackingThreadCache.ContainsKey(message.Author.Id))
+                        // Check current channel against tracking channels
+                        var trackingChannels = await Program.db.HashGetAsync("trackingChannels", message.Author.Id);
+                        if (trackingChannels.HasValue)
                         {
-                            relayThread = trackingThreadCache[message.Author.Id];
+                            var trackingChannelsList = JsonConvert.DeserializeObject<List<ulong>>(trackingChannels);
+                            if (trackingChannelsList.Count > 0)
+                            {
+                                // This user's tracking is filtered to channels; check the channel before relaying the msg to the tracking thread
+                                var channels = JsonConvert.DeserializeObject<List<ulong>>(trackingChannels);
+                                if (channels.Contains(channel.Id) || channels.Contains(channel.Parent.Id))
+                                {
+                                    await RelayTrackedMessageAsync(client, message);
+                                }
+                            }
+                            else
+                            {
+                                // This user's tracking is not filtered to channels, so just relay the msg to the tracking thread
+                                await RelayTrackedMessageAsync(client, message);
+                            }
                         }
-                        else
-                        {
-                            relayThread = (DiscordThreadChannel)await client.GetChannelAsync((ulong)await Program.db.HashGetAsync("trackingThreads", message.Author.Id));
-                            trackingThreadCache.Add(message.Author.Id, relayThread);
-                        }
-                        var _ = await relayThread.SendMessageAsync(await DiscordHelpers.GenerateMessageRelay(message.BaseMessage, true, true));
-
                     }
 
                     if (!isAnEdit && channel.IsPrivate && Program.cfgjson.LogChannels.ContainsKey("dms"))
@@ -937,6 +944,29 @@ namespace Cliptok.Events
             {
                 return false;
             }
+        }
+        
+        private static async Task RelayTrackedMessageAsync(DiscordClient client, DiscordMessage message)
+        {
+            await RelayTrackedMessageAsync(client, new MockDiscordMessage(message));
+        }
+        private static async Task RelayTrackedMessageAsync(DiscordClient client, MockDiscordMessage message)
+        {
+            DiscordThreadChannel relayThread;
+
+            if (trackingThreadCache.ContainsKey(message.Author.Id))
+            {
+                relayThread = trackingThreadCache[message.Author.Id];
+            }
+            else
+            {
+                relayThread = (DiscordThreadChannel)await client.GetChannelAsync(
+                    (ulong)await Program.db.HashGetAsync("trackingThreads", message.Author.Id));
+                trackingThreadCache.Add(message.Author.Id, relayThread);
+            }
+
+            var _ = await relayThread.SendMessageAsync(
+                await DiscordHelpers.GenerateMessageRelay(message.BaseMessage, true, true));
         }
 
     }
