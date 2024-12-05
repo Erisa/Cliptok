@@ -168,6 +168,15 @@ namespace Cliptok.Events
                     discord.Logger.LogError("Heartbeat ping sent: {status} {content}", (int)response.StatusCode, await response.Content.ReadAsStringAsync());
                 }
             }
+            
+            try
+            {
+                await Migrations.JoinwatchMigration.MigrateJoinwatchesToNotesAsync();
+            }
+            catch (Exception ex)
+            {
+                client.Logger.LogError(ex, "Failed to migrate joinwatches to notes!");
+            }
 
             client.Logger.LogInformation(CliptokEventID, "Startup event complete, logged in as {user}", $"{DiscordHelpers.UniqueUsername(client.CurrentUser)}");
         }

@@ -587,6 +587,9 @@
         [JsonProperty("showOnce")]
         public bool ShowOnce { get; set; }
 
+        [JsonProperty("showOnJoinAndLeave")]
+        public bool ShowOnJoinAndLeave { get; set; }
+
         [JsonProperty("noteId")]
         public long NoteId { get; set; }
 

@@ -15,7 +15,8 @@ namespace Cliptok.Commands.InteractionCommands
                 [Option("show_on_modmail", "Whether to show the note when the user opens a modmail thread. Default: true")] bool showOnModmail = true,
                 [Option("show_on_warn", "Whether to show the note when the user is warned. Default: true")] bool showOnWarn = true,
                 [Option("show_all_mods", "Whether to show this note to all mods, versus just yourself. Default: true")] bool showAllMods = true,
-                [Option("show_once", "Whether to show this note once and then discard it. Default: false")] bool showOnce = false)
+                [Option("show_once", "Whether to show this note once and then discard it. Default: false")] bool showOnce = false,
+                [Option("show_on_join_and_leave", "Whether to show this note when the user joins & leaves. Works like joinwatch. Default: false")] bool showOnJoinAndLeave = false)
             {
                 await ctx.DeferAsync();
 
@@ -30,6 +31,7 @@ namespace Cliptok.Commands.InteractionCommands
                     ShowOnWarn = showOnWarn,
                     ShowAllMods = showAllMods,
                     ShowOnce = showOnce,
+                    ShowOnJoinAndLeave = showOnJoinAndLeave,
                     NoteId = noteId,
                     Timestamp = DateTime.Now,
                     Type = WarningType.Note
@@ -88,7 +90,8 @@ namespace Cliptok.Commands.InteractionCommands
                 [Option("show_on_modmail", "Whether to show the note when the user opens a modmail thread.")] bool? showOnModmail = null,
                 [Option("show_on_warn", "Whether to show the note when the user is warned.")] bool? showOnWarn = null,
                 [Option("show_all_mods", "Whether to show this note to all mods, versus just yourself.")] bool? showAllMods = null,
-                [Option("show_once", "Whether to show this note once and then discard it.")] bool? showOnce = null)
+                [Option("show_once", "Whether to show this note once and then discard it.")] bool? showOnce = null,
+                [Option("show_on_join_and_leave", "Whether to show this note when the user joins & leaves. Works like joinwatch. Default: false")] bool? showOnJoinAndLeave = false)
             {
                 // Get note
                 UserNote note;
@@ -107,7 +110,7 @@ namespace Cliptok.Commands.InteractionCommands
                     newNoteText = note.NoteText;
 
                 // If no changes are made, refuse the request
-                if (note.NoteText == newNoteText && showOnModmail is null && showOnWarn is null && showAllMods is null && showOnce is null)
+                if (note.NoteText == newNoteText && showOnModmail is null && showOnWarn is null && showAllMods is null && showOnce is null && showOnJoinAndLeave is null)
                 {
                     await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You didn't change anything about the note!").AsEphemeral());
                     return;
@@ -129,6 +132,8 @@ namespace Cliptok.Commands.InteractionCommands
                     showAllMods = note.ShowAllMods;
                 if (showOnce is null)
                     showOnce = note.ShowOnce;
+                if (showOnJoinAndLeave is null)
+                    showOnJoinAndLeave = note.ShowOnJoinAndLeave;
 
                 // Assemble new note
                 note.ModUserId = ctx.User.Id;
@@ -137,6 +142,7 @@ namespace Cliptok.Commands.InteractionCommands
                 note.ShowOnWarn = (bool)showOnWarn;
                 note.ShowAllMods = (bool)showAllMods;
                 note.ShowOnce = (bool)showOnce;
+                note.ShowOnJoinAndLeave = (bool)showOnJoinAndLeave;
                 note.Type = WarningType.Note;
 
                 await Program.db.HashSetAsync(user.Id.ToString(), note.NoteId, JsonConvert.SerializeObject(note));
