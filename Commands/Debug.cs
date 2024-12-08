@@ -468,23 +468,71 @@
 
                     await msg.ModifyAsync(x => x.Content = $"{Program.cfgjson.Emoji.Success} Successfully applied {numAppliedOverrides}/{dictionary.Count} overrides for {user.Mention}!");
                 }
-            }
-
-            [Command("dumpchanneloverrides")]
-            [Description("Dump all of a channel's overrides. This pulls from Discord, not the database.")]
-            [IsBotOwner]
-            public async Task DumpChannelOverrides(CommandContext ctx,
-                [Description("The channel to dump overrides for.")] DiscordChannel channel)
-            {
-                var overwrites = channel.PermissionOverwrites;
-
-                string output = "";
-                foreach (var overwrite in overwrites)
+                
+                [Group("dump")]
+                [Description("Dump all of a channel's overrides from Discord or the database.")]
+                [IsBotOwner]
+                public class DumpChannelOverrides : BaseCommandModule
                 {
-                    output += $"{JsonConvert.SerializeObject(overwrite)}\n";
-                }
+                    [GroupCommand]
+                    [Command("discord")]
+                    [Description("Dump all of a channel's overrides as they exist on the Discord channel. Does not read from db.")]
+                    public async Task DumpFromDiscord(CommandContext ctx,
+                        [Description("The channel to dump overrides for.")] DiscordChannel channel)
+                    {
+                        var overwrites = channel.PermissionOverwrites;
 
-                await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(output, "json"));
+                        string output = "";
+                        foreach (var overwrite in overwrites)
+                        {
+                            output += $"{JsonConvert.SerializeObject(overwrite)}\n";
+                        }
+
+                        await ctx.RespondAsync($"Dump from Discord:\n{await StringHelpers.CodeOrHasteBinAsync(output, "json")}");
+                    }
+                    
+                    [Command("db")]
+                    [Aliases("database")]
+                    [Description("Dump all of a channel's overrides as they are stored in the db.")]
+                    public async Task DumpFromDb(CommandContext ctx,
+                        [Description("The channel to dump overrides for.")] DiscordChannel channel)
+                    {
+                        List<DiscordOverwrite> overwrites = new();
+                        try
+                        {
+                            var allOverwrites = await Program.db.HashGetAllAsync("overrides");
+                            foreach (var overwrite in allOverwrites) {
+                                var overwriteDict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(overwrite.Value);
+                                if (overwriteDict is null) continue;
+                                if (overwriteDict.TryGetValue(channel.Id, out var value))
+                                    overwrites.Add(value);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Something went wrong while trying to fetch the overrides for {channel.Mention}!" +
+                                                  " There are overrides in the database but I could not parse them. Check the database manually for details.");
+                            
+                            Program.discord.Logger.LogError(ex, "Failed to read overrides from db for 'debug overrides dump'!");
+                            
+                            return;
+                        }
+                        
+                        if (overwrites.Count == 0)
+                        {
+                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} No overrides found for {channel.Mention} in the database!");
+                            return;
+                        }
+                        
+                        string output = "";
+                        foreach (var overwrite in overwrites)
+                        {
+                            output += $"{JsonConvert.SerializeObject(overwrite)}\n";
+                        }
+
+                        await ctx.RespondAsync($"Dump from db:\n{await StringHelpers.CodeOrHasteBinAsync(output, "json")}");
+                    }
+                }
             }
 
             [Command("dmchannel")]
