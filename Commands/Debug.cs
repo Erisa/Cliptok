@@ -533,6 +533,56 @@
                         await ctx.RespondAsync($"Dump from db:\n{await StringHelpers.CodeOrHasteBinAsync(output, "json")}");
                     }
                 }
+                
+                [Command("cleanup")]
+                [Aliases("clean", "prune")]
+                [Description("Removes overrides from the db for channels that no longer exist.")]
+                [IsBotOwner]
+                public async Task CleanUpOverrides(CommandContext ctx)
+                {
+                    var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
+                    var removedOverridesCount = 0;
+                    
+                    var dbOverwrites = await Program.db.HashGetAllAsync("overrides");
+                    foreach (var userOverwrites in dbOverwrites)
+                    {
+                        var overwriteDict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(userOverwrites.Value);
+                        foreach (var overwrite in overwriteDict)
+                        {
+                            bool channelExists = false;
+                            try
+                            {
+                                await Program.discord.GetChannelAsync(overwrite.Key);
+                                channelExists = true;
+                            }
+                            catch (DSharpPlus.Exceptions.NotFoundException)
+                            {
+                                // Channel doesn't exist, leave bool false
+                            }
+                            
+                            if (!channelExists)
+                            {
+                                // Channel no longer exists, remove the override
+                                overwriteDict.Remove(overwrite.Key);
+                                removedOverridesCount++;
+                            }
+                        }
+                        
+                        // Write back to db
+                        // If the user now has no overrides, remove them from the db entirely
+                        if (overwriteDict.Count == 0)
+                        {
+                            await Program.db.HashDeleteAsync("overrides", userOverwrites.Name);
+                        }
+                        else
+                        {
+                            // Otherwise, update the user's overrides in the db
+                            await Program.db.HashSetAsync("overrides", userOverwrites.Name, JsonConvert.SerializeObject(overwriteDict));
+                        }
+                    }
+                    
+                    await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Done! Cleaned up {removedOverridesCount} overrides.");
+                }
             }
 
             [Command("dmchannel")]
