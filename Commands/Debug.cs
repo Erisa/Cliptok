@@ -549,17 +549,8 @@
                         var overwriteDict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(userOverwrites.Value);
                         foreach (var overwrite in overwriteDict)
                         {
-                            bool channelExists = false;
-                            try
-                            {
-                                await Program.discord.GetChannelAsync(overwrite.Key);
-                                channelExists = true;
-                            }
-                            catch (DSharpPlus.Exceptions.NotFoundException)
-                            {
-                                // Channel doesn't exist, leave bool false
-                            }
-                            
+                            bool channelExists = Program.discord.Guilds.Any(g => g.Value.Channels.Any(c => c.Key == overwrite.Key));
+
                             if (!channelExists)
                             {
                                 // Channel no longer exists, remove the override
