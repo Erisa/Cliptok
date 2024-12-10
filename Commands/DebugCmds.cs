@@ -543,12 +543,13 @@ namespace Cliptok.Commands
                 }
                 
                 [Command("cleanup")]
-                [Aliases("clean", "prune")]
+                [TextAlias("clean", "prune")]
                 [Description("Removes overrides from the db for channels that no longer exist.")]
                 [IsBotOwner]
                 public async Task CleanUpOverrides(CommandContext ctx)
                 {
-                    var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
+                    var msg = await ctx.GetResponseAsync();
                     var removedOverridesCount = 0;
                     
                     var dbOverwrites = await Program.db.HashGetAllAsync("overrides");
