@@ -2,6 +2,14 @@
 {
     public class ChannelEvents
     {
+        public static async Task ChannelCreated(DiscordClient _, ChannelCreatedEventArgs e)
+        {
+            // see comment on ChannelUpdated
+            
+            var timestamp = DateTime.Now;
+            Tasks.EventTasks.PendingChannelCreateEvents.Add(timestamp, e);
+        }
+        
         public static async Task ChannelUpdated(DiscordClient _, ChannelUpdatedEventArgs e)
         {
             // Add this event to the pending events list. These are handled in a task later, see Tasks/EventTasks/HandlePendingChannelUpdateEventsAsync
@@ -12,7 +20,7 @@
 
         public static async Task ChannelDeleted(DiscordClient client, ChannelDeletedEventArgs e)
         {
-            // see above
+            // see comment on ChannelUpdated
 
             var timestamp = DateTime.Now;
             Tasks.EventTasks.PendingChannelDeleteEvents.Add(timestamp, e);

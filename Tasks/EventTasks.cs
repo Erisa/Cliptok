@@ -2,9 +2,164 @@ namespace Cliptok.Tasks
 {
     public class EventTasks
     {
+        public static Dictionary<DateTime, ChannelCreatedEventArgs> PendingChannelCreateEvents = new();
         public static Dictionary<DateTime, ChannelUpdatedEventArgs> PendingChannelUpdateEvents = new();
         public static Dictionary<DateTime, ChannelDeletedEventArgs> PendingChannelDeleteEvents = new();
 
+        // todo(milkshake): combine create & update handlers to reduce duplicate code
+        public static async Task<bool> HandlePendingChannelCreateEventsAsync()
+        {
+            bool success = false;
+
+            try
+            {
+                foreach (var pendingEvent in PendingChannelCreateEvents)
+                {
+                    // This is the timestamp on this event, used to identify it / keep events in order in the list
+                    var timestamp = pendingEvent.Key;
+
+                    // This is a set of ChannelCreatedEventArgs for the event we are processing
+                    var e = pendingEvent.Value;
+
+                    try
+                    {
+                        // Sync channel overwrites with db so that they can be restored when a user leaves & rejoins.
+
+                        // Get the current channel overwrites
+                        var currentChannelOverwrites = e.Channel.PermissionOverwrites;
+
+                        // Get the db overwrites
+                        var dbOverwrites = await Program.db.HashGetAllAsync("overrides");
+
+                        // Compare the two and sync them, prioritizing overwrites on channel over stored overwrites
+
+                        foreach (var userOverwrites in dbOverwrites)
+                        {
+                            var overwriteDict =
+                                JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(userOverwrites
+                                    .Value);
+
+                            // If the db overwrites are not in the current channel overwrites, remove them from the db.
+
+                            foreach (var overwrite in overwriteDict)
+                            {
+                                // (if overwrite is for a different channel, skip)
+                                if (overwrite.Key != e.Channel.Id) continue;
+
+                                // (if current overwrite is in the channel, skip)
+                                // checking individual properties here because sometimes they are the same but the one from Discord has
+                                // other properties like Discord (DiscordClient) that I don't care about and will wrongly mark the overwrite as different
+                                if (currentChannelOverwrites.Any(a => CompareOverwrites(a, overwrite.Value)))
+                                    continue;
+
+                                // If it looks like the member left, do NOT remove their overrides.
+
+                                // Try to fetch member. If it fails, they are not in the guild. If this is a voice channel, remove the override.
+                                // (if they are not in the guild & this is not a voice channel, skip; otherwise, code below handles removal)
+                                bool isMemberInServer = await IsMemberInServer((ulong)userOverwrites.Name, e.Guild);
+                                if (!isMemberInServer && e.Channel.Type != DiscordChannelType.Voice)
+                                    continue;
+
+                                // User could be fetched, so they are in the server and their override was removed. Remove from db.
+                                // (or user could not be fetched & this is a voice channel; remove)
+
+                                var overrides = await Program.db.HashGetAsync("overrides", userOverwrites.Name);
+                                var dict = JsonConvert
+                                    .DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(overrides);
+                                dict.Remove(e.Channel.Id);
+                                if (dict.Count > 0)
+                                    await Program.db.HashSetAsync("overrides", userOverwrites.Name,
+                                        JsonConvert.SerializeObject(dict));
+                                else
+                                {
+                                    await Program.db.HashDeleteAsync("overrides", userOverwrites.Name);
+                                }
+                            }
+                        }
+
+                        foreach (var overwrite in currentChannelOverwrites)
+                        {
+                            // Ignore role overrides because we aren't storing those
+                            if (overwrite.Type == DiscordOverwriteType.Role) continue;
+
+                            // If the current channel overwrites are not in the db, add them to the db.
+
+                            // Pull out db overwrites into list
+
+                            var dbOverwriteRaw = await Program.db.HashGetAllAsync("overrides");
+                            var dbOverwriteList = new List<Dictionary<ulong, DiscordOverwrite>>();
+
+                            foreach (var dbOverwrite in dbOverwriteRaw)
+                            {
+                                var dict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(dbOverwrite.Value);
+                                dbOverwriteList.Add(dict);
+                            }
+
+                            // If the overwrite is already in the db for this channel, skip
+                            if (dbOverwriteList.Any(dbOverwriteSet => dbOverwriteSet.ContainsKey(e.Channel.Id) && CompareOverwrites(dbOverwriteSet[e.Channel.Id], overwrite)))
+                                continue;
+
+                            if ((await Program.db.HashKeysAsync("overrides")).Any(a => a == overwrite.Id.ToString()))
+                            {
+                                // User has an overwrite in the db; add this one to their list of overrides without
+                                // touching existing ones
+
+                                var overwrites = await Program.db.HashGetAsync("overrides", overwrite.Id);
+
+                                if (!string.IsNullOrWhiteSpace(overwrites))
+                                {
+                                    var dict =
+                                        JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(overwrites);
+
+                                    if (dict is not null)
+                                    {
+                                        dict.Add(e.Channel.Id, overwrite);
+
+                                        if (dict.Count > 0)
+                                            await Program.db.HashSetAsync("overrides", overwrite.Id,
+                                                JsonConvert.SerializeObject(dict));
+                                        else
+                                            await Program.db.HashDeleteAsync("overrides", overwrite.Id);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // User doesn't have any overrides in db, so store new dictionary
+
+                                await Program.db.HashSetAsync("overrides",
+                                    overwrite.Id, JsonConvert.SerializeObject(new Dictionary<ulong, DiscordOverwrite>
+                                        { { e.Channel.Id, overwrite } }));
+                            }
+                        }
+
+                        PendingChannelCreateEvents.Remove(timestamp);
+                        success = true;
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        Program.discord.Logger.LogDebug(ex, "Failed to enumerate channel overwrites for channel {channel}; this usually means the permissions were changed while processing a channel event. Will try again on next task run.", e.Channel.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log the exception
+                        Program.discord.Logger.LogWarning(ex,
+                            "Failed to process pending channel create event for channel {channel}", e.Channel.Id);
+
+                        // Always remove the event from the pending list, even if we failed to process it
+                        PendingChannelCreateEvents.Remove(timestamp);
+                    }
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                Program.discord.Logger.LogDebug(ex, "Failed to enumerate pending channel create events; this usually means a Channel Create event was just added to the list, or one was processed and removed from the list. Will try again on next task run.");
+            }
+
+            Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked pending channel create events at {time} with result: {success}", DateTime.Now, success);
+            return success;
+        }
+        
         public static async Task<bool> HandlePendingChannelUpdateEventsAsync()
         {
             bool success = false;
@@ -54,8 +209,8 @@ namespace Cliptok.Tasks
 
                                 // Try to fetch member. If it fails, they are not in the guild. If this is a voice channel, remove the override.
                                 // (if they are not in the guild & this is not a voice channel, skip; otherwise, code below handles removal)
-                                if (!e.Guild.Members.ContainsKey((ulong)userOverwrites.Name) &&
-                                    e.ChannelAfter.Type != DiscordChannelType.Voice)
+                                bool isMemberInServer = await IsMemberInServer((ulong)userOverwrites.Name, e.Guild);
+                                if (!isMemberInServer && e.ChannelAfter.Type != DiscordChannelType.Voice)
                                     continue;
 
                                 // User could be fetched, so they are in the server and their override was removed. Remove from db.
@@ -240,6 +395,29 @@ namespace Cliptok.Tasks
             // Compares two overwrites. ONLY CHECKS PERMISSIONS, ID, TYPE AND CREATION TIME. Ignores other properties!
 
             return a.Allowed == b.Allowed && a.Denied == b.Denied && a.Id == b.Id && a.Type == b.Type && a.CreationTimestamp == b.CreationTimestamp;
+        }
+        
+        private static async Task<bool> IsMemberInServer(ulong userId, DiscordGuild guild)
+        {
+            bool isMemberInServer = false;
+            
+            // Check cache first
+            if (guild.Members.ContainsKey(userId))
+                return true;
+            
+            // If the user isn't cached, try fetching them to confirm
+            try
+            {
+                await guild.GetMemberAsync(userId);
+                isMemberInServer = true;
+            }
+            catch (DSharpPlus.Exceptions.NotFoundException)
+            {
+                // Member is not in the server
+                // isMemberInServer is already false
+            }
+            
+            return isMemberInServer;
         }
     }
 }

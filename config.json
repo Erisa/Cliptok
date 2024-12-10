@@ -287,6 +287,10 @@
     },
     "nicknames": {
       "channelId": 1280688061528674314
+    },
+    "reactions": {
+      "webhookEnvVar": "REACTION_LOG_WEBHOOK",
+      "channelId": 1311084236702482542
     }
   },
   "botOwners": [

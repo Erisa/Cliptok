@@ -224,6 +224,7 @@ namespace Cliptok
                                   .HandleThreadMembersUpdated(ThreadEvents.Discord_ThreadMembersUpdated)
                                   .HandleGuildBanRemoved(UnbanEvent.OnUnban)
                                   .HandleVoiceStateUpdated(VoiceEvents.VoiceStateUpdate)
+                                  .HandleChannelCreated(ChannelEvents.ChannelCreated)
                                   .HandleChannelUpdated(ChannelEvents.ChannelUpdated)
                                   .HandleChannelDeleted(ChannelEvents.ChannelDeleted)
                                   .HandleAutoModerationRuleExecuted(AutoModEvents.AutoModerationRuleExecuted)
@@ -254,6 +255,7 @@ namespace Cliptok
                         Tasks.ReminderTasks.CheckRemindersAsync(),
                         Tasks.RaidmodeTasks.CheckRaidmodeAsync(cfgjson.ServerID),
                         Tasks.LockdownTasks.CheckUnlocksAsync(),
+                        Tasks.EventTasks.HandlePendingChannelCreateEventsAsync(),
                         Tasks.EventTasks.HandlePendingChannelUpdateEventsAsync(),
                         Tasks.EventTasks.HandlePendingChannelDeleteEventsAsync(),
                     ];

@@ -286,8 +286,11 @@ namespace Cliptok.Commands
                     var response = $"**Overrides for {user.Mention}:**\n\n";
                     foreach (var overwrite in overwrites)
                     {
+                        var allowedPermissions = string.IsNullOrWhiteSpace(overwrite.Value.Allowed.ToString("name")) ? "none" : overwrite.Value.Allowed.ToString("name");
+                        var deniedPermissions = string.IsNullOrWhiteSpace(overwrite.Value.Denied.ToString("name")) ? "none" : overwrite.Value.Denied.ToString("name");
+                        
                         response +=
-                            $"<#{overwrite.Key}>:\n**Allowed**: {overwrite.Value.Allowed}\n**Denied**: {overwrite.Value.Denied}\n\n";
+                            $"<#{overwrite.Key}>:\n**Allowed**: {allowedPermissions}\n**Denied**: {deniedPermissions}\n\n";
                     }
 
                     if (response.Length > 2000)
@@ -473,23 +476,112 @@ namespace Cliptok.Commands
 
                     await msg.ModifyAsync(x => x.Content = $"{Program.cfgjson.Emoji.Success} Successfully applied {numAppliedOverrides}/{dictionary.Count} overrides for {user.Mention}!");
                 }
-            }
-
-            [Command("dumpchanneloverrides")]
-            [Description("Dump all of a channel's overrides. This pulls from Discord, not the database.")]
-            [IsBotOwner]
-            public async Task DumpChannelOverrides(TextCommandContext ctx,
-                [Description("The channel to dump overrides for.")] DiscordChannel channel)
-            {
-                var overwrites = channel.PermissionOverwrites;
-
-                string output = "";
-                foreach (var overwrite in overwrites)
+                
+                [Command("dump")]
+                [Description("Dump all of a channel's overrides from Discord or the database.")]
+                [IsBotOwner]
+                public class DumpChannelOverrides
                 {
-                    output += $"{JsonConvert.SerializeObject(overwrite)}\n";
-                }
+                    [DefaultGroupCommand]
+                    [Command("discord")]
+                    [Description("Dump all of a channel's overrides as they exist on the Discord channel. Does not read from db.")]
+                    public async Task DumpFromDiscord(CommandContext ctx,
+                        [Description("The channel to dump overrides for.")] DiscordChannel channel)
+                    {
+                        var overwrites = channel.PermissionOverwrites;
 
-                await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(output, "json"));
+                        string output = "";
+                        foreach (var overwrite in overwrites)
+                        {
+                            output += $"{JsonConvert.SerializeObject(overwrite)}\n";
+                        }
+
+                        await ctx.RespondAsync($"Dump from Discord:\n{await StringHelpers.CodeOrHasteBinAsync(output, "json")}");
+                    }
+                    
+                    [Command("db")]
+                    [TextAlias("database")]
+                    [Description("Dump all of a channel's overrides as they are stored in the db.")]
+                    public async Task DumpFromDb(CommandContext ctx,
+                        [Description("The channel to dump overrides for.")] DiscordChannel channel)
+                    {
+                        List<DiscordOverwrite> overwrites = new();
+                        try
+                        {
+                            var allOverwrites = await Program.db.HashGetAllAsync("overrides");
+                            foreach (var overwrite in allOverwrites) {
+                                var overwriteDict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(overwrite.Value);
+                                if (overwriteDict is null) continue;
+                                if (overwriteDict.TryGetValue(channel.Id, out var value))
+                                    overwrites.Add(value);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Something went wrong while trying to fetch the overrides for {channel.Mention}!" +
+                                                  " There are overrides in the database but I could not parse them. Check the database manually for details.");
+                            
+                            Program.discord.Logger.LogError(ex, "Failed to read overrides from db for 'debug overrides dump'!");
+                            
+                            return;
+                        }
+                        
+                        if (overwrites.Count == 0)
+                        {
+                            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} No overrides found for {channel.Mention} in the database!");
+                            return;
+                        }
+                        
+                        string output = "";
+                        foreach (var overwrite in overwrites)
+                        {
+                            output += $"{JsonConvert.SerializeObject(overwrite)}\n";
+                        }
+
+                        await ctx.RespondAsync($"Dump from db:\n{await StringHelpers.CodeOrHasteBinAsync(output, "json")}");
+                    }
+                }
+                
+                [Command("cleanup")]
+                [Aliases("clean", "prune")]
+                [Description("Removes overrides from the db for channels that no longer exist.")]
+                [IsBotOwner]
+                public async Task CleanUpOverrides(CommandContext ctx)
+                {
+                    var msg = await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
+                    var removedOverridesCount = 0;
+                    
+                    var dbOverwrites = await Program.db.HashGetAllAsync("overrides");
+                    foreach (var userOverwrites in dbOverwrites)
+                    {
+                        var overwriteDict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(userOverwrites.Value);
+                        foreach (var overwrite in overwriteDict)
+                        {
+                            bool channelExists = Program.discord.Guilds.Any(g => g.Value.Channels.Any(c => c.Key == overwrite.Key));
+
+                            if (!channelExists)
+                            {
+                                // Channel no longer exists, remove the override
+                                overwriteDict.Remove(overwrite.Key);
+                                removedOverridesCount++;
+                            }
+                        }
+                        
+                        // Write back to db
+                        // If the user now has no overrides, remove them from the db entirely
+                        if (overwriteDict.Count == 0)
+                        {
+                            await Program.db.HashDeleteAsync("overrides", userOverwrites.Name);
+                        }
+                        else
+                        {
+                            // Otherwise, update the user's overrides in the db
+                            await Program.db.HashSetAsync("overrides", userOverwrites.Name, JsonConvert.SerializeObject(overwriteDict));
+                        }
+                    }
+                    
+                    await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Done! Cleaned up {removedOverridesCount} overrides.");
+                }
             }
 
             [Command("dmchannel")]
