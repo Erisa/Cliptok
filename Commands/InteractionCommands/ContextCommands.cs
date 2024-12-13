@@ -2,6 +2,13 @@
 {
     internal class ContextCommands : ApplicationCommandModule
     {
+        [ContextMenu(DiscordApplicationCommandType.MessageContextMenu, "Dump message data")]
+        public async Task DumpMessage(ContextMenuContext ctx)
+        {
+            var rawMsgData = JsonConvert.SerializeObject(ctx.TargetMessage, Formatting.Indented);
+            await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(rawMsgData, "json"), ephemeral: true);
+        }
+        
         [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "Show Avatar", defaultPermission: true)]
         public async Task ContextAvatar(ContextMenuContext ctx)
         {
