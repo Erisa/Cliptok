@@ -9,93 +9,70 @@
                 return false;
             }
 
+            // Get the permissions that are already on the channel, so that we can make sure they are kept when we adjust overwrites for lockdown
             DiscordOverwrite[] existingOverwrites = channel.PermissionOverwrites.ToArray();
+            
+            // Get Cliptok's permission set from before the lockdown
+            var cliptokOverwritesBeforeLockdown = existingOverwrites.Where(x => x.Id == Program.discord.CurrentUser.Id).FirstOrDefault();
 
-            await channel.AddOverwriteAsync(channel.Guild.CurrentMember, DiscordPermission.SendMessages, DiscordPermissions.None, "Failsafe 1 for Lockdown");
-            await channel.AddOverwriteAsync(await channel.Guild.GetRoleAsync(Program.cfgjson.ModRole), DiscordPermission.SendMessages, DiscordPermissions.None, "Failsafe 2 for Lockdown");
-
-            bool everyoneRoleChanged = false;
-            foreach (DiscordOverwrite overwrite in existingOverwrites)
-            {
-                if (overwrite.Type == DiscordOverwriteType.Role)
-                {
-                    DiscordRole role = await overwrite.GetRoleAsync();
-
-                    if (role == channel.Guild.EveryoneRole)
-                    {
-                        if (lockThreads)
-                        {
-                            if (overwrite.Denied.HasPermission(DiscordPermission.ViewChannel))
-                            {
-                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, DiscordPermissions.None, new([DiscordPermission.SendMessages, DiscordPermission.ViewChannel, DiscordPermission.SendThreadMessages]), $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
-                            }
-                            else
-                            {
-                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, DiscordPermissions.None, new([DiscordPermission.SendMessages, DiscordPermission.SendThreadMessages]), $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
-                            }
-
-                            if (overwrite.Allowed.HasPermission(DiscordPermission.SendMessages))
-                            {
-                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed.Remove(DiscordPermission.SendMessages), overwrite.Denied.Add(DiscordPermission.SendMessages), "Reinstating existing overrides for lockdown.");
-                            }
-                            else
-                            {
-                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed, overwrite.Denied.Add(DiscordPermission.SendMessages), "Reinstating existing overrides for lockdown.");
-                            }
-                        }
-                        else
-                        {
-                            if (overwrite.Denied.HasPermission(DiscordPermission.ViewChannel))
-                            {
-                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, DiscordPermissions.None, new([DiscordPermission.SendMessages, DiscordPermission.ViewChannel]), $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
-                            }
-                            else
-                            {
-                                await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, DiscordPermissions.None, DiscordPermission.SendMessages, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
-                            }
-
-                            if (overwrite.Allowed.HasPermission(DiscordPermission.SendMessages))
-                            {
-                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed.Remove(DiscordPermission.SendMessages), overwrite.Denied.Add(DiscordPermission.SendMessages), "Reinstating existing overrides for lockdown.");
-                            }
-                            else
-                            {
-                                await channel.AddOverwriteAsync(await overwrite.GetRoleAsync(), overwrite.Allowed, overwrite.Denied.Add(DiscordPermission.SendMessages), "Reinstating existing overrides for lockdown.");
-                            }
-                        }
-
-                        everyoneRoleChanged = true;
-                    }
-                    else
-                    {
-                        if (role == await channel.Guild.GetRoleAsync(Program.cfgjson.ModRole))
-                        {
-                            await channel.AddOverwriteAsync(await channel.Guild.GetRoleAsync(Program.cfgjson.ModRole), overwrite.Allowed.Add(DiscordPermission.SendMessages), DiscordPermissions.None, "Reinstating existing overrides for lockdown.");
-                        }
-                        else
-                        {
-                            continue;
-                        }
-                    }
-                }
-                else
-                {
-                    await channel.AddOverwriteAsync(await overwrite.GetMemberAsync(), overwrite.Allowed, overwrite.Denied);
-                }
-            }
-
-            if (!everyoneRoleChanged)
-            {
-                if (lockThreads)
-                {
-                    await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, DiscordPermissions.None, new([DiscordPermission.SendMessages, DiscordPermission.SendThreadMessages]), $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
-                }
-                else
-                {
-                    await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, DiscordPermissions.None, DiscordPermission.SendMessages, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
-                }
-            }
-
+            // Get Cliptok's allowed permission set
+            var cliptokAllowedPermissionsBeforeLockdown = DiscordPermissions.None;
+            if (cliptokOverwritesBeforeLockdown is not null)
+                cliptokAllowedPermissionsBeforeLockdown = cliptokOverwritesBeforeLockdown.Allowed;
+            
+            // Get Cliptok's denied permission set
+            var cliptokDeniedPermissionsBeforeLockdown = DiscordPermissions.None;
+            if (cliptokOverwritesBeforeLockdown is not null)
+                cliptokDeniedPermissionsBeforeLockdown = cliptokOverwritesBeforeLockdown.Denied;
+            
+            // Get the Moderator role's permission set from before the lockdown
+            var moderatorOverwritesBeforeLockdown = existingOverwrites.Where(x => x.Id == Program.cfgjson.ModRole).FirstOrDefault();
+            
+            // Get the Moderator role's allowed permission set
+            var moderatorAllowedPermissionsBeforeLockdown = DiscordPermissions.None;
+            if (moderatorOverwritesBeforeLockdown is not null)
+                moderatorAllowedPermissionsBeforeLockdown = moderatorOverwritesBeforeLockdown.Allowed;
+            
+            // Get the Moderator role's denied permission set
+            var moderatorDeniedPermissionsBeforeLockdown = DiscordPermissions.None;
+            if (moderatorOverwritesBeforeLockdown is not null)
+                moderatorDeniedPermissionsBeforeLockdown = moderatorOverwritesBeforeLockdown.Denied;
+            
+            // Construct failsafe permission sets
+            // Grant Send Messages to Cliptok and Moderator in addition to any permissions they might already have,
+            // and Send Messages in Threads if 'lockThreads' is set
+            var cliptokAllowedPermissions = cliptokAllowedPermissionsBeforeLockdown.Add(DiscordPermission.SendMessages);
+            if (lockThreads)
+                cliptokAllowedPermissions = cliptokAllowedPermissions.Add(DiscordPermission.SendThreadMessages);
+            var moderatorAllowedPermissions = moderatorAllowedPermissionsBeforeLockdown.Add(DiscordPermission.SendMessages);
+            if (lockThreads)
+                moderatorAllowedPermissions = moderatorAllowedPermissions.Add(DiscordPermission.SendThreadMessages);
+            
+            // Apply failsafes for lockdown
+            await channel.AddOverwriteAsync(channel.Guild.CurrentMember, cliptokAllowedPermissions, cliptokDeniedPermissionsBeforeLockdown, "Failsafe 1 for Lockdown");
+            await channel.AddOverwriteAsync(await channel.Guild.GetRoleAsync(Program.cfgjson.ModRole), moderatorAllowedPermissions, moderatorDeniedPermissionsBeforeLockdown, "Failsafe 2 for Lockdown");
+            
+            // Get the @everyone role's permission set from before the lockdown
+            var everyoneOverwritesBeforeLockdown = existingOverwrites.Where(x => x.Id == channel.Guild.EveryoneRole.Id).FirstOrDefault();
+            
+            // Get the @everyone role's allowed permission set
+            var everyoneAllowedPermissionsBeforeLockdown = DiscordPermissions.None;
+            if (everyoneOverwritesBeforeLockdown is not null)
+                everyoneAllowedPermissionsBeforeLockdown = everyoneOverwritesBeforeLockdown.Allowed;
+            
+            // Get the @everyone role's denied permission set
+            var everyoneDeniedPermissionsBeforeLockdown = DiscordPermissions.None;
+            if (everyoneOverwritesBeforeLockdown is not null)
+                everyoneDeniedPermissionsBeforeLockdown = everyoneOverwritesBeforeLockdown.Denied;
+            
+            // Construct new @everyone permission set
+            var everyoneDeniedPermissions = everyoneDeniedPermissionsBeforeLockdown.Add(DiscordPermission.SendMessages);
+            if (lockThreads)
+                everyoneDeniedPermissions = everyoneDeniedPermissions.Add(DiscordPermission.SendThreadMessages);
+            
+            // Lock the channel
+            await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, everyoneAllowedPermissionsBeforeLockdown, everyoneDeniedPermissions, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
+            
             string msg;
             if (reason == "" || reason == "No reason specified.")
                 msg = $"{Program.cfgjson.Emoji.Locked} This channel has been locked by a Moderator.";
@@ -114,83 +91,77 @@
 
         public static async Task<bool> UnlockChannel(DiscordChannel discordChannel, DiscordMember discordMember, string reason = "No reason specified.", bool isMassUnlock = false)
         {
-            bool success = false;
+            // Get the permissions that are already on the channel, so that we can make sure they are kept when we adjust overwrites for the unlock
             var permissions = discordChannel.PermissionOverwrites.ToArray();
-            foreach (var permission in permissions)
-            {
-                if (permission.Type == DiscordOverwriteType.Role)
-                {
-                    DiscordRole role = await permission.GetRoleAsync();
-
-                    DiscordOverwriteBuilder newOverwrite;
-                    if (
-                        (role == discordChannel.Guild.EveryoneRole
-                        && permission.Denied.HasPermission(DiscordPermission.SendMessages))
-                        )
-                    {
-                        if (permission.Denied.HasPermission(DiscordPermission.SendThreadMessages))
-                        {
-                            newOverwrite = new(discordChannel.Guild.EveryoneRole)
-                            {
-                                Allowed = permission.Allowed,
-                                Denied = permission.Denied.Remove([DiscordPermission.SendMessages, DiscordPermission.SendThreadMessages])
-                            };
-                        }
-                        else
-                        {
-                            newOverwrite = new(discordChannel.Guild.EveryoneRole)
-                            {
-                                Allowed = permission.Allowed,
-                                Denied = permission.Denied.Remove(DiscordPermission.SendMessages)
-                            };
-                        }
-
-                        success = true;
-                        if (discordMember.Id == Program.discord.CurrentUser.Id)
-                            await discordChannel.AddOverwriteAsync(discordChannel.Guild.EveryoneRole, newOverwrite.Allowed, newOverwrite.Denied, "Lockdown has naturally expired.");
-                        else
-                            await discordChannel.AddOverwriteAsync(discordChannel.Guild.EveryoneRole, newOverwrite.Allowed, newOverwrite.Denied, $"[Unlock by {DiscordHelpers.UniqueUsername(discordMember)}]: {reason}");
-                    }
-
-                    if (role == await discordChannel.Guild.GetRoleAsync(Program.cfgjson.ModRole)
-                        && permission.Allowed == DiscordPermission.SendMessages)
-                    {
-                        await permission.DeleteAsync();
-                    }
-
-                    if (role == await discordChannel.Guild.GetRoleAsync(Program.cfgjson.ModRole)
-                        && permission.Allowed == new DiscordPermissions([DiscordPermission.SendMessages, DiscordPermission.ViewChannel]))
-                    {
-                        await discordChannel.AddOverwriteAsync(await discordChannel.Guild.GetRoleAsync(Program.cfgjson.ModRole), permission.Allowed.Remove(DiscordPermission.SendMessages), DiscordPermissions.None);
-                    }
-
-                }
-                else
-                {
-                    var member = await permission.GetMemberAsync();
-                    if ((member == discordMember || member == discordChannel.Guild.CurrentMember) && permission.Allowed == DiscordPermission.SendMessages)
-                    {
-                        success = true;
-                        await permission.DeleteAsync();
-                    }
-
-                }
-            }
-            if (success)
-            {
-                await Program.db.HashDeleteAsync("unlocks", discordChannel.Id);
-                await discordChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Unlock} This channel has been unlocked!");
-            }
+            
+            // Get Cliptok's permission set from before the unlock
+            var cliptokOverwritesBeforeUnlock = permissions.Where(x => x.Id == Program.discord.CurrentUser.Id).FirstOrDefault();
+            
+            // Get Cliptok's allowed permission set
+            var cliptokAllowedPermissionsBeforeUnlock = DiscordPermissions.None;
+            if (cliptokOverwritesBeforeUnlock is not null)
+                cliptokAllowedPermissionsBeforeUnlock = cliptokOverwritesBeforeUnlock.Allowed;
+            
+            // Get Cliptok's denied permission set
+            var cliptokDeniedPermissionsBeforeUnlock = DiscordPermissions.None;
+            if (cliptokOverwritesBeforeUnlock is not null)
+                cliptokDeniedPermissionsBeforeUnlock = cliptokOverwritesBeforeUnlock.Denied;
+            
+            // Get the Moderator role's permission set from before the unlock
+            var moderatorOverwritesBeforeUnlock = permissions.Where(x => x.Id == Program.cfgjson.ModRole).FirstOrDefault();
+            
+            // Get the Moderator role's allowed permission set
+            var moderatorAllowedPermissionsBeforeUnlock = DiscordPermissions.None;
+            if (moderatorOverwritesBeforeUnlock is not null)
+                moderatorAllowedPermissionsBeforeUnlock = moderatorOverwritesBeforeUnlock.Allowed;
+            
+            // Get the Moderator role's denied permission set
+            var moderatorDeniedPermissionsBeforeUnlock = DiscordPermissions.None;
+            if (moderatorOverwritesBeforeUnlock is not null)
+                moderatorDeniedPermissionsBeforeUnlock = moderatorOverwritesBeforeUnlock.Denied;
+            
+            // Construct new permission sets for Cliptok and Moderator
+            // Resets Send Messages and Send Messages in Threads for Cliptok and Moderator, while preserving other permissions
+            var cliptokAllowedPermissions = cliptokAllowedPermissionsBeforeUnlock.Remove(DiscordPermission.SendMessages).Remove(DiscordPermission.SendThreadMessages);
+            var moderatorAllowedPermissions = moderatorAllowedPermissionsBeforeUnlock.Remove(DiscordPermission.SendMessages).Remove(DiscordPermission.SendThreadMessages);
+            
+            // Get the @everyone role's permission set from before the unlock
+            var everyoneOverwritesBeforeUnlock = permissions.Where(x => x.Id == discordChannel.Guild.EveryoneRole.Id).FirstOrDefault();
+            
+            // Get the @everyone role's allowed permission set
+            var everyoneAllowedPermissionsBeforeUnlock = DiscordPermissions.None;
+            if (everyoneOverwritesBeforeUnlock is not null)
+                everyoneAllowedPermissionsBeforeUnlock = everyoneOverwritesBeforeUnlock.Allowed;
+            
+            // Get the @everyone role's denied permission set
+            var everyoneDeniedPermissionsBeforeUnlock = DiscordPermissions.None;
+            if (everyoneOverwritesBeforeUnlock is not null)
+                everyoneDeniedPermissionsBeforeUnlock = everyoneOverwritesBeforeUnlock.Denied;
+            
+            // Construct new permission set for @everyone
+            // Resets Send Messages and Send Messages in Threads while preserving other permissions
+            var everyoneDeniedPermissions = everyoneDeniedPermissionsBeforeUnlock.Remove(DiscordPermission.SendMessages).Remove(DiscordPermission.SendThreadMessages);
+            
+            // Unlock the channel
+            await discordChannel.AddOverwriteAsync(discordChannel.Guild.EveryoneRole, everyoneAllowedPermissionsBeforeUnlock, everyoneDeniedPermissions, $"[Unlock by {DiscordHelpers.UniqueUsername(discordMember)}]: {reason}");
+            
+            // Remove failsafes
+            // For any failsafes where the after-unlock permission set is completely empty, delete the override entirely
+            
+            if (cliptokAllowedPermissions == DiscordPermissions.None && cliptokDeniedPermissionsBeforeUnlock == DiscordPermissions.None)
+                await discordChannel.DeleteOverwriteAsync(discordChannel.Guild.CurrentMember, "Resetting Lockdown failsafe 1 for unlock");
             else
-            {
-                if (!isMassUnlock)
-                {
-                    // this is just going to loop forever if we don't remove the entry 
-                    await Program.db.HashDeleteAsync("unlocks", discordChannel.Id);
-                    await discordChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} This channel is not locked, or unlock failed.");
-                }
-            }
-            return success;
+                await discordChannel.AddOverwriteAsync(discordChannel.Guild.CurrentMember, cliptokAllowedPermissions, cliptokDeniedPermissionsBeforeUnlock, "Resetting Lockdown failsafe 1 for unlock");
+            
+            if (moderatorAllowedPermissions == DiscordPermissions.None && moderatorDeniedPermissionsBeforeUnlock == DiscordPermissions.None)
+                await discordChannel.DeleteOverwriteAsync(await discordChannel.Guild.GetRoleAsync(Program.cfgjson.ModRole), "Resetting Lockdown failsafe 2 for unlock");
+            else
+                await discordChannel.AddOverwriteAsync(await discordChannel.Guild.GetRoleAsync(Program.cfgjson.ModRole), moderatorAllowedPermissions, moderatorDeniedPermissionsBeforeUnlock, "Resetting Lockdown failsafe 2 for unlock");
+            
+            await Program.db.HashDeleteAsync("unlocks", discordChannel.Id);
+            await discordChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Unlock} This channel has been unlocked!");
+            
+            return true;
         }
 
     }
