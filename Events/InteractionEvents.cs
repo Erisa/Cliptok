@@ -185,8 +185,8 @@ namespace Cliptok.Events
                 var newMockOverwrite = new MockUserOverwrite
                 {
                     Id = mockOverwrite.Id,
-                    Allowed = newOverwrite.Allowed | existingOverwrite.Allowed,
-                    Denied = newOverwrite.Denied | existingOverwrite.Denied
+                    Allowed = newOverwrite.Allowed.Add(existingOverwrite.Allowed.EnumeratePermissions().ToArray()),
+                    Denied = newOverwrite.Denied.Add(existingOverwrite.Denied.EnumeratePermissions().ToArray())
                 };
 
                 // Cursed conversion again

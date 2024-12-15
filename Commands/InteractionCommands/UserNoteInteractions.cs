@@ -5,7 +5,7 @@ namespace Cliptok.Commands.InteractionCommands
     internal class UserNoteInteractions : ApplicationCommandModule
     {
         [SlashCommandGroup("note", "Manage user notes", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(permissions: DiscordPermission.ModerateMembers)]
         public class UserNoteSlashCommands
         {
             [SlashCommand("add", "Add a note to a user. Only visible to mods.")]

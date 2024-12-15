@@ -3,7 +3,7 @@
     internal class TrackingInteractions : ApplicationCommandModule
     {
         [SlashCommandGroup("tracking", "Commands to manage message tracking of users", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(permissions: DiscordPermission.ModerateMembers)]
         public class TrackingSlashCommands
         {
             [SlashCommand("add", "Track a users messages.")]

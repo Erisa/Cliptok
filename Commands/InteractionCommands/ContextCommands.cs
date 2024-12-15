@@ -2,6 +2,13 @@
 {
     internal class ContextCommands : ApplicationCommandModule
     {
+        [ContextMenu(DiscordApplicationCommandType.MessageContextMenu, "Dump message data")]
+        public async Task DumpMessage(ContextMenuContext ctx)
+        {
+            var rawMsgData = JsonConvert.SerializeObject(ctx.TargetMessage, Formatting.Indented);
+            await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(rawMsgData, "json"), ephemeral: true);
+        }
+        
         [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "Show Avatar", defaultPermission: true)]
         public async Task ContextAvatar(ContextMenuContext ctx)
         {
@@ -20,7 +27,7 @@
         }
 
         [ContextMenu(DiscordApplicationCommandType.UserContextMenu, "Show Notes", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(permissions: DiscordPermission.ModerateMembers)]
         public async Task ShowNotes(ContextMenuContext ctx)
         {
             await ctx.RespondAsync(embed: await UserNoteHelpers.GenerateUserNotesEmbedAsync(ctx.TargetUser), ephemeral: true);

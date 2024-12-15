@@ -5,7 +5,7 @@
         public static Dictionary<ulong, List<DiscordMessage>> MessagesToClear = new();
 
         [SlashCommand("clear", "Delete many messages from the current channel.", defaultPermission: false)]
-        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequireBotPermissions(DiscordPermissions.ManageMessages), SlashCommandPermissions(DiscordPermissions.ModerateMembers)]
+        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), RequireBotPermissions(permissions: DiscordPermission.ManageMessages), SlashCommandPermissions(permissions: DiscordPermission.ModerateMembers)]
         public async Task ClearSlashCommand(InteractionContext ctx,
             [Option("count", "The number of messages to consider for deletion. Required if you don't use the 'up_to' argument.")] long count = 0,
             [Option("up_to", "Optionally delete messages up to (not including) this one. Accepts IDs and links.")] string upTo = "",

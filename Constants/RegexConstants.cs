@@ -9,5 +9,11 @@
         readonly public static Regex bold_rx = new("\\*\\*(.*?)\\*\\*");
         readonly public static Regex discord_link_rx = new(@".*discord(?:app)?.com\/channels\/((?:@)?[a-z0-9]*)\/([0-9]*)(?:\/)?([0-9]*)");
         readonly public static Regex channel_rx = new("<#([0-9]+)>");
+        readonly public static Regex warn_msg_rx = new($"{Program.cfgjson.Emoji.Warning} <@!?[0-9]+> was warned");
+        readonly public static Regex auto_warn_msg_rx = new($"{Program.cfgjson.Emoji.Denied} <@!?[0-9]+> was automatically warned");
+        readonly public static Regex mute_msg_rx = new($"{Program.cfgjson.Emoji.Muted} <@!?[0-9]+> has been muted");
+        readonly public static Regex unmute_msg_rx = new($"{Program.cfgjson.Emoji.Information} Successfully unmuted");
+        readonly public static Regex ban_msg_rx = new($"{Program.cfgjson.Emoji.Banned} <@!?[0-9]+> has been banned");
+        readonly public static Regex unban_msg_rx = new($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned");
     }
 }
