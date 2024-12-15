@@ -8,6 +8,7 @@ global using DSharpPlus.Commands.ArgumentModifiers;
 global using DSharpPlus.Commands.ContextChecks;
 global using DSharpPlus.Commands.EventArgs;
 global using DSharpPlus.Commands.Exceptions;
+global using DSharpPlus.Commands.Processors.MessageCommands;
 global using DSharpPlus.Commands.Processors.SlashCommands;
 global using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 global using DSharpPlus.Commands.Processors.TextCommands;

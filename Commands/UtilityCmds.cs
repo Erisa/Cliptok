@@ -2,6 +2,15 @@ namespace Cliptok.Commands
 {
     public class UtilityCmds
     {
+        [Command("Dump message data")]
+        [SlashCommandTypes(DiscordApplicationCommandType.MessageContextMenu)]
+        [AllowedProcessors(typeof(MessageCommandProcessor))]
+        public async Task DumpMessage(MessageCommandContext ctx, DiscordMessage targetMessage)
+        {
+            var rawMsgData = JsonConvert.SerializeObject(targetMessage, Formatting.Indented);
+            await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(rawMsgData, "json"), ephemeral: true);
+        }
+        
         [Command("Show Avatar")]
         [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
         [AllowedProcessors(typeof(UserCommandProcessor))]
