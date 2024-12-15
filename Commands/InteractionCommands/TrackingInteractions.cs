@@ -21,6 +21,10 @@
                     var channelIds = channels.Split(' ', ',');
                     foreach (var channel in channelIds)
                     {
+                        // skip some common obviously-invalid entries
+                        if (channel == "" || channel == " ")
+                            continue;
+   
                         // If this is a channel mention, get the ID first
                         var channelId = channel.Replace("<#", "").Replace(">", "");
                         
