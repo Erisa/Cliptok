@@ -2,11 +2,11 @@
 {
     public class LockdownHelpers
     {
-        public static async Task<bool> LockChannelAsync(DiscordUser user, DiscordChannel channel, TimeSpan? duration = null, string reason = "No reason specified.", bool lockThreads = false)
+        public static async Task LockChannelAsync(DiscordUser user, DiscordChannel channel, TimeSpan? duration = null, string reason = "No reason specified.", bool lockThreads = false)
         {
             if (!Program.cfgjson.LockdownEnabledChannels.Contains(channel.Id))
             {
-                return false;
+                throw new ArgumentException($"Channel {channel.Id} is not in the lockdown whitelist.");
             }
 
             // Get the permissions that are already on the channel, so that we can make sure they are kept when we adjust overwrites for lockdown
@@ -86,11 +86,15 @@
             }
 
             await channel.SendMessageAsync(msg);
-            return true;
         }
 
-        public static async Task<bool> UnlockChannel(DiscordChannel discordChannel, DiscordMember discordMember, string reason = "No reason specified.", bool isMassUnlock = false)
+        public static async Task UnlockChannel(DiscordChannel discordChannel, DiscordMember discordMember, string reason = "No reason specified.", bool isMassUnlock = false)
         {
+            if (!Program.cfgjson.LockdownEnabledChannels.Contains(discordChannel.Id))
+            {
+                throw new ArgumentException($"Channel {discordChannel.Id} is not in the lockdown whitelist.");
+            }
+            
             // Get the permissions that are already on the channel, so that we can make sure they are kept when we adjust overwrites for the unlock
             var permissions = discordChannel.PermissionOverwrites.ToArray();
             
@@ -160,8 +164,6 @@
             
             await Program.db.HashDeleteAsync("unlocks", discordChannel.Id);
             await discordChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Unlock} This channel has been unlocked!");
-            
-            return true;
         }
 
     }
