@@ -57,11 +57,15 @@ namespace Cliptok.Commands.InteractionCommands
                     return;
                 }
 
-                bool success = await LockdownHelpers.LockChannelAsync(user: ctx.User, channel: currentChannel, duration: lockDuration, reason: reason, lockThreads: lockThreads);
-                if (success)
+                try
+                {
+                    await LockdownHelpers.LockChannelAsync(user: ctx.User, channel: currentChannel, duration: lockDuration, reason: reason, lockThreads: lockThreads);
                     await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Channel locked successfully.").AsEphemeral(true));
-                else
+                }
+                catch (ArgumentException)
+                {
                     await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Failed to lock this channel!").AsEphemeral(true));
+                }
             }
 
             [SlashCommand("all", "Lock all lockable channels in the server. See also: unlock all")]
@@ -123,11 +127,15 @@ namespace Cliptok.Commands.InteractionCommands
                     await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} A mass lockdown or unlock is already ongoing. Refusing your request. sorry.").AsEphemeral(true));
                     return;
                 }
-                bool success = await LockdownHelpers.UnlockChannel(currentChannel, ctx.Member);
-                if (success)
+                try
+                {
+                    await LockdownHelpers.UnlockChannel(currentChannel, ctx.Member);
                     await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Channel unlocked successfully.").AsEphemeral(true));
-                else
+                }
+                catch (ArgumentException)
+                {
                     await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Failed to unlock this channel!").AsEphemeral(true));
+                }
             }
 
             [SlashCommand("all", "Unlock all lockable channels in the server. See also: lockdown all")]
