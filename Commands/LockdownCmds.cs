@@ -79,13 +79,14 @@ namespace Cliptok.Commands
                 if (ctx is TextCommandContext)
                     await ctx.As<TextCommandContext>().Message.DeleteAsync();
 
-                bool success = await LockdownHelpers.LockChannelAsync(user: ctx.User, channel: currentChannel, duration: lockDuration, reason: reason, lockThreads: lockThreads);
-                if (ctx is SlashCommandContext)
+                try
                 {
-                    if (success)
-                        await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Channel locked successfully.").AsEphemeral(true));
-                    else
-                        await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Failed to lock this channel!").AsEphemeral(true));
+                    await LockdownHelpers.LockChannelAsync(user: ctx.User, channel: currentChannel, duration: lockDuration, reason: reason, lockThreads: lockThreads);
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Channel locked successfully.").AsEphemeral(true));
+                }
+                catch (ArgumentException)
+                {
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Failed to lock this channel!").AsEphemeral(true));
                 }
             }
 
@@ -171,13 +172,14 @@ namespace Cliptok.Commands
                         await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} A mass lockdown or unlock is already ongoing. Refusing your request. sorry.");
                     return;
                 }
-                bool success = await LockdownHelpers.UnlockChannel(currentChannel, ctx.Member);
-                if (ctx is SlashCommandContext)
+                try
                 {
-                    if (success)
-                        await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Channel unlocked successfully.").AsEphemeral(true));
-                    else
-                        await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Failed to unlock this channel!").AsEphemeral(true));
+                    await LockdownHelpers.UnlockChannel(currentChannel, ctx.Member);
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Channel locked successfully.").AsEphemeral(true));
+                }
+                catch (ArgumentException)
+                {
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Failed to lock this channel!").AsEphemeral(true));
                 }
             }
 

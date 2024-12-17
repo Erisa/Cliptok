@@ -11,7 +11,7 @@ namespace Cliptok.Events
             if (e.Guild.Id != cfgjson.ServerID)
                 return;
 
-            var embed = new DiscordEmbedBuilder()
+            var userLogEmbed = new DiscordEmbedBuilder()
                .WithColor(new DiscordColor(0x3E9D28))
                .WithTimestamp(DateTimeOffset.Now)
                .WithThumbnail(e.Member.AvatarUrl)
@@ -24,18 +24,20 @@ namespace Cliptok.Events
                .AddField("Action", "Joined the server", false)
                .WithFooter($"{client.CurrentUser.Username}JoinEvent");
 
-            LogChannelHelper.LogMessageAsync("users", $"{cfgjson.Emoji.UserJoin} **Member joined the server!** - {e.Member.Id}", embed);
+            LogChannelHelper.LogMessageAsync("users", $"{cfgjson.Emoji.UserJoin} **Member joined the server!** - {e.Member.Id}", userLogEmbed);
 
-            var joinWatchlist = await db.ListRangeAsync("joinWatchedUsers");
+            // Get this user's notes that are set to show on join/leave
+            var userNotes = db.HashGetAll(e.Member.Id.ToString())
+                .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note
+                        && JsonConvert.DeserializeObject<UserNote>(x.Value).ShowOnJoinAndLeave).ToDictionary(
+                    x => x.Name.ToString(),
+                    x => JsonConvert.DeserializeObject<UserNote>(x.Value)
+                );
 
-            if (joinWatchlist.Contains(e.Member.Id))
+            if (userNotes.Count > 0)
             {
-                if (await db.HashExistsAsync("joinWatchedUsersNotes", e.Member.Id))
-                {
-                    embed.AddField($"Joinwatch Note", await db.HashGetAsync("joinWatchedUsersNotes", e.Member.Id));
-                }
-
-                LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Warning} Watched user {e.Member.Mention} just joined the server!", embed);
+                var notesEmbed = await UserNoteHelpers.GenerateUserNotesEmbedAsync(e.Member, false, userNotes);
+                LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Warning} {e.Member.Mention} just joined the server with notes set to show on join!", notesEmbed);
             }
 
             if (db.HashExists("raidmode", e.Guild.Id))
@@ -155,7 +157,7 @@ namespace Cliptok.Events
                 }
             }
 
-            var embed = new DiscordEmbedBuilder()
+            var userLogEmbed = new DiscordEmbedBuilder()
                 .WithColor(new DiscordColor(0xBA4119))
                 .WithTimestamp(DateTimeOffset.Now)
                 .WithThumbnail(e.Member.AvatarUrl)
@@ -169,18 +171,21 @@ namespace Cliptok.Events
                 .AddField("Roles", rolesStr)
                 .WithFooter($"{client.CurrentUser.Username}LeaveEvent");
 
-            LogChannelHelper.LogMessageAsync("users", $"{cfgjson.Emoji.UserLeave} **Member left the server!** - {e.Member.Id}", embed);
+            LogChannelHelper.LogMessageAsync("users", $"{cfgjson.Emoji.UserLeave} **Member left the server!** - {e.Member.Id}", userLogEmbed);
 
-            var joinWatchlist = await db.ListRangeAsync("joinWatchedUsers");
-
-            if (joinWatchlist.Contains(e.Member.Id))
+            // Get this user's notes that are set to show on join/leave
+            var userNotes = db.HashGetAll(e.Member.Id.ToString())
+                .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note
+                            && JsonConvert.DeserializeObject<UserNote>(x.Value).ShowOnJoinAndLeave).ToDictionary(
+                    x => x.Name.ToString(),
+                    x => JsonConvert.DeserializeObject<UserNote>(x.Value)
+                );
+            
+            DiscordEmbed notesEmbed;
+            if (userNotes.Count > 0)
             {
-                if (await db.HashExistsAsync("joinWatchedUsersNotes", e.Member.Id))
-                {
-                    embed.AddField($"Joinwatch Note", await db.HashGetAsync("joinWatchedUsersNotes", e.Member.Id));
-                }
-
-                LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Warning} Watched user {e.Member.Mention} just left the server!", embed);
+                notesEmbed = await UserNoteHelpers.GenerateUserNotesEmbedAsync(e.Member, false, userNotes);
+                LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Warning} {e.Member.Mention} just left the server with notes set to show on leave!", notesEmbed);
             }
         }
 
