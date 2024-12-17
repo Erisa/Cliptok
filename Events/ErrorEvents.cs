@@ -77,7 +77,7 @@ namespace Cliptok.Events
                     Timestamp = DateTime.UtcNow
                 };
                 embed.WithFooter(discord.CurrentUser.Username, discord.CurrentUser.AvatarUrl)
-                    .AddField("Message", ex.Message);
+                    .AddField("Message", ex.Message.Replace("textcmd", ""));
                 if (e.Exception is System.ArgumentException or DSharpPlus.Commands.Exceptions.ArgumentParseException)
                     embed.AddField("Note", "This usually means that you used the command incorrectly.\n" +
                         "Please double-check how to use this command.");
