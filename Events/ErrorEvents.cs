@@ -49,6 +49,25 @@ namespace Cliptok.Events
             {
                 if (ex is CommandNotFoundException && (e.Context.Command is null || commandName != "help"))
                     return;
+                
+                // If the only exception thrown was an ArgumentParseException, run permission checks.
+                // If the user fails the permission checks, show a permission error instead of the ArgumentParseException.
+                if (ex is ArgumentParseException && exs.Count == 1)
+                {
+                    var att = e.Context.Command.Attributes.FirstOrDefault(x => x is RequireHomeserverPermAttribute) as RequireHomeserverPermAttribute;
+                    var level = (await GetPermLevelAsync(e.Context.Member));
+                    var levelText = level.ToString();
+                    if (level == ServerPermLevel.Nothing && Program.rand.Next(1, 100) == 69)
+                        levelText = $"naught but a thing, my dear human. Congratulations, you win {Program.rand.Next(1, 10)} bonus points.";
+
+                    if (att is not null && level < att.TargetLvl)
+                    {
+                        await e.Context.RespondAsync(
+                            $"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{commandName}**!\n" +
+                            $"Required: `{att.TargetLvl}`\nYou have: `{levelText}`");
+                        return;
+                    }
+                }
 
                 if (ex is ChecksFailedException cfex && (commandName != "help"))
                 {
