@@ -48,7 +48,7 @@ namespace Cliptok.Commands
                         break;
                     }
 
-                    IEnumerable<ContextCheckAttribute> failedChecks = await CheckPermissionsAsync(ctx, cmd);
+                    IEnumerable<ContextCheckAttribute> failedChecks = (await CheckPermissionsAsync(ctx, cmd)).ToList();
                     if (failedChecks.Any())
                     {
                         return;
@@ -91,7 +91,7 @@ namespace Cliptok.Commands
                     var argumentsStr = $"`{cmd.Name.Replace("textcmd", "")}";
                     foreach (var arg in arguments)
                     {
-                        if (arg.ParameterType is CommandContext || arg.ParameterType.IsSubclassOf(typeof(CommandContext)))
+                        if (arg.ParameterType == typeof(CommandContext) || arg.ParameterType.IsSubclassOf(typeof(CommandContext)))
                             continue;
                         
                         bool isCatchAll = arg.GetCustomAttribute<RemainingTextAttribute>() != null;
