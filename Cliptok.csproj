@@ -14,8 +14,7 @@
 	<ItemGroup>
 		<PackageReference Include="Abyssal.HumanDateParser" Version="2.0.0-20191113.1" />
 		<PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02430" />
-		<PackageReference Include="DSharpPlus.CommandsNext" Version="5.0.0-nightly-02430" />
-		<PackageReference Include="DSharpPlus.SlashCommands" Version="5.0.0-nightly-02430" />
+		<PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02430" />
 		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.0" />

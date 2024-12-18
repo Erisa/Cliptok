@@ -1,16 +1,19 @@
-﻿namespace Cliptok.Commands.InteractionCommands
+namespace Cliptok.Commands
 {
-    public class RulesInteractions : ApplicationCommandModule
+    public class RulesCmds
     {
         [HomeServer]
-        [SlashCommandGroup("rules", "Misc. commands related to server rules", defaultPermission: true)]
+        [Command("rules")]
+        [Description("Misc. commands related to server rules")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
         internal class RulesSlashCommands
         {
-            [SlashCommand("all", "Shows all of the community rules.", defaultPermission: true)]
-            public async Task RulesAllCommand(InteractionContext ctx, [Option("public", "Whether to show the response publicly.")] bool? isPublic = null)
+            [Command("all")]
+			[Description("Shows all of the community rules.")]
+            public async Task RulesAllCommand(SlashCommandContext ctx, [Parameter("public"), Description("Whether to show the response publicly.")] bool? isPublic = null)
             {
                 var publicResponse = await DeterminePublicResponse(ctx.Member, ctx.Channel, isPublic);
-                
+
                 List<string> rules = default;
 
                 try
@@ -36,11 +39,14 @@
 
             }
 
-            [SlashCommand("rule", "Shows a specific rule.", defaultPermission: true)]
-            public async Task RuleCommand(InteractionContext ctx, [Option("rule_number", "The rule number to show.")] long ruleNumber, [Option("public", "Whether to show the response publicly.")] bool? isPublic = null)
+            [Command("rule")]
+			[Description("Shows a specific rule.")]
+            public async Task RuleCommand(SlashCommandContext ctx,
+                [Parameter("rule_number"), Description("The rule number to show.")] long ruleNumber,
+                [Parameter("public"), Description("Whether to show the response publicly.")] bool? isPublic = null)
             {
-                var publicResponse = await DeterminePublicResponse(ctx.Member, ctx.Channel, isPublic);   
-                
+                var publicResponse = await DeterminePublicResponse(ctx.Member, ctx.Channel, isPublic);
+
                 IReadOnlyList<string> rules = default;
 
                 try
@@ -66,11 +72,14 @@
                 await ctx.RespondAsync(embed: embed, ephemeral: !publicResponse);
             }
 
-            [SlashCommand("search", "Search for a rule by keyword.", defaultPermission: true)]
-            public async Task RuleSearchCommand(InteractionContext ctx, [Option("keyword", "The keyword to search for.")] string keyword, [Option("public", "Whether to show the response publicly.")] bool? isPublic = null)
+            [Command("search")]
+			[Description("Search for a rule by keyword.")]
+            public async Task RuleSearchCommand(SlashCommandContext ctx,
+                [Parameter("keyword"), Description("The keyword to search for.")] string keyword,
+                [Parameter("public"), Description("Whether to show the response publicly.")] bool? isPublic = null)
             {
                 var publicResponse = await DeterminePublicResponse(ctx.Member, ctx.Channel, isPublic);
-                
+
                 List<string> rules = default;
 
                 try
@@ -102,7 +111,7 @@
 
                 await ctx.RespondAsync(embed: embed, ephemeral: !publicResponse);
             }
-            
+
             // Returns: true for public response, false for private
             private async Task<bool> DeterminePublicResponse(DiscordMember member, DiscordChannel channel, bool? isPublic)
             {
@@ -110,18 +119,18 @@
                 {
                     if (isPublic is null)
                         return true;
-                    
+
                     return isPublic.Value;
                 }
-                
+
                 if (await GetPermLevelAsync(member) >= ServerPermLevel.TrialModerator)
                 {
                     if (isPublic is null)
                         return false;
-                    
+
                     return isPublic.Value;
                 }
-                
+
                 return false;
             }
         }

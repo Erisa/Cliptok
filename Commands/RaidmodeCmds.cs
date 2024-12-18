@@ -1,15 +1,26 @@
-﻿namespace Cliptok.Commands.InteractionCommands
+namespace Cliptok.Commands
 {
-    internal class RaidmodeInteractions : ApplicationCommandModule
+    public class RaidmodeCmds
     {
-        [SlashCommandGroup("raidmode", "Commands relating to Raidmode", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.Moderator)]
-        [SlashCommandPermissions(permissions: DiscordPermission.ModerateMembers)]
-        public class RaidmodeSlashCommands : ApplicationCommandModule
+        [Command("raidmode")]
+        [TextAlias("clipraidmode")]
+        [Description("Commands relating to Raidmode")]
+        [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
+        [RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [RequirePermissions(DiscordPermission.ModerateMembers)]
+        public class RaidmodeSlashCommands
         {
-            [SlashCommand("status", "Check the current state of raidmode.")]
-            public async Task RaidmodeStatus(InteractionContext ctx)
+            [DefaultGroupCommand]
+            [Command("status")]
+			[Description("Check the current state of raidmode.")]
+            public async Task RaidmodeStatus(CommandContext ctx)
             {
+                // Avoid conflicts with Modmail's !raidmode
+                if (ctx is TextCommandContext
+                    && !ctx.As<TextCommandContext>().Message.Content.Contains("clipraidmode")
+                    && !ctx.As<TextCommandContext>().Message.Content.Contains("c!raidmode"))
+                    return;
+
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {
                     string output = $"Raidmode is currently **enabled**.";
@@ -30,12 +41,19 @@
 
             }
 
-            [SlashCommand("on", "Enable raidmode. Defaults to 3 hour length if not specified.")]
-            public async Task RaidmodeOnSlash(InteractionContext ctx,
-                [Option("duration", "How long to keep raidmode enabled for.")] string duration = default,
-                [Option("allowed_account_age", "How old an account can be to be allowed to bypass raidmode. Relative to right now.")] string allowedAccountAge = ""
+            [Command("on")]
+			[Description("Enable raidmode. Defaults to 3 hour length if not specified.")]
+            public async Task RaidmodeOnSlash(CommandContext ctx,
+                [Parameter("duration"), Description("How long to keep raidmode enabled for.")] string duration = default,
+                [Parameter("allowed_account_age"), Description("How old an account can be to be allowed to bypass raidmode. Relative to right now.")] string allowedAccountAge = ""
             )
             {
+                // Avoid conflicts with Modmail's !raidmode
+                if (ctx is TextCommandContext
+                    && !ctx.As<TextCommandContext>().Message.Content.Contains("clipraidmode")
+                    && !ctx.As<TextCommandContext>().Message.Content.Contains("c!raidmode"))
+                    return;
+
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {
                     string output = $"Raidmode is already **enabled**.";
@@ -96,9 +114,16 @@
                 }
             }
 
-            [SlashCommand("off", "Disable raidmode immediately.")]
-            public async Task RaidmodeOffSlash(InteractionContext ctx)
+            [Command("off")]
+			[Description("Disable raidmode immediately.")]
+            public async Task RaidmodeOffSlash(CommandContext ctx)
             {
+                // Avoid conflicts with Modmail's !raidmode
+                if (ctx is TextCommandContext
+                    && !ctx.As<TextCommandContext>().Message.Content.Contains("clipraidmode")
+                    && !ctx.As<TextCommandContext>().Message.Content.Contains("c!raidmode"))
+                    return;
+
                 if (Program.db.HashExists("raidmode", ctx.Guild.Id))
                 {
                     long expirationTimeUnix = (long)Program.db.HashGet("raidmode", ctx.Guild.Id);
@@ -123,6 +148,5 @@
                 }
             }
         }
-
     }
 }
