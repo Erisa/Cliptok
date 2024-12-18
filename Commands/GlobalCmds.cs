@@ -64,6 +64,8 @@ namespace Cliptok.Commands
                                 await ctx.RespondAsync(
                                     $"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{cmd.Name.Replace("textcmd", "")}**!\n" +
                                     $"Required: `{att.TargetLvl}`\nYou have: `{levelText}`");
+                                
+                                return;
                             }
                         }
                         

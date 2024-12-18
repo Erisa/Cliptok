@@ -64,6 +64,8 @@ namespace Cliptok.Events
                             await e.Context.RespondAsync(
                                 $"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{commandName}**!\n" +
                                 $"Required: `{att.TargetLvl}`\nYou have: `{levelText}`");
+                            
+                            return;
                         }
                     }
                     return;
