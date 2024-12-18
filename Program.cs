@@ -177,7 +177,7 @@ namespace Cliptok
                 builder.CommandErrored += ErrorEvents.CommandErrored;
 
                 // Register commands
-                var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands" && !t.IsNested);
+                var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands");
                 foreach (var type in commandClasses)
                     if (type.Name == "GlobalCmds")
                         builder.AddCommands(type);
