@@ -71,10 +71,16 @@ namespace Cliptok.Events
 
                 if (ex is ChecksFailedException cfex && (commandName != "help"))
                 {
-                    foreach (var check in cfex.Errors)
+                    // Iterate over RequireHomeserverPermAttribute failures.
+                    // Only evaluate the last one, so that if we are looking at a command in a group (say, debug shutdown),
+                    // we only evaluate against permissions for the command (shutdown) instead of the group (debug) in case they differ.
+                    var permErrIndex = 1;
+                    foreach(var permErr in cfex.Errors.Where(x => x.ContextCheckAttribute is RequireHomeserverPermAttribute))
                     {
-                        if (check.ContextCheckAttribute is RequireHomeserverPermAttribute att)
+                        // Only evaluate the last failed RequireHomeserverPermAttribute
+                        if (permErrIndex == cfex.Errors.Count(x => x.ContextCheckAttribute is RequireHomeserverPermAttribute))
                         {
+                            var att = permErr.ContextCheckAttribute as RequireHomeserverPermAttribute;
                             var level = (await GetPermLevelAsync(e.Context.Member));
                             var levelText = level.ToString();
                             if (level == ServerPermLevel.Nothing && Program.rand.Next(1, 100) == 69)
@@ -86,6 +92,7 @@ namespace Cliptok.Events
                             
                             return;
                         }
+                        permErrIndex++;
                     }
                     return;
                 }

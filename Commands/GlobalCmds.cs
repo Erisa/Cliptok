@@ -31,7 +31,7 @@ namespace Cliptok.Commands
                 
                 Command? cmd = null;
                 IEnumerable<Command>? searchIn = cmds;
-                foreach (string c in commandSplit)
+                for (int i = 0; i < commandSplit.Length; i++)
                 {
                     if (searchIn is null)
                     {
@@ -41,35 +41,41 @@ namespace Cliptok.Commands
 
                     StringComparison comparison = StringComparison.InvariantCultureIgnoreCase;
                     StringComparer comparer = StringComparer.InvariantCultureIgnoreCase;
-                    cmd = searchIn.FirstOrDefault(xc => xc.Name.Equals(c, comparison) || ((xc.Attributes.FirstOrDefault(x => x is TextAliasAttribute) as TextAliasAttribute)?.Aliases.Contains(c.Replace("textcmd", ""), comparer) ?? false));
+                    cmd = searchIn.FirstOrDefault(xc => xc.Name.Equals(commandSplit[i], comparison) || ((xc.Attributes.FirstOrDefault(x => x is TextAliasAttribute) as TextAliasAttribute)?.Aliases.Contains(commandSplit[i].Replace("textcmd", ""), comparer) ?? false));
 
                     if (cmd is null)
                     {
                         break;
                     }
 
-                    IEnumerable<ContextCheckAttribute> failedChecks = (await CheckPermissionsAsync(ctx, cmd)).ToList();
-                    if (failedChecks.Any())
+                    // Only run checks on the last command in the chain.
+                    // So if we are looking at a command group here, only run checks against the actual command,
+                    // not the group(s) it's under.
+                    if (i == commandSplit.Length - 1)
                     {
-                        if (failedChecks.All(x => x is RequireHomeserverPermAttribute))
+                        IEnumerable<ContextCheckAttribute> failedChecks = (await CheckPermissionsAsync(ctx, cmd)).ToList();
+                        if (failedChecks.Any())
                         {
-                            var att = failedChecks.FirstOrDefault(x => x is RequireHomeserverPermAttribute) as RequireHomeserverPermAttribute;
-                            if (att is not null)
+                            if (failedChecks.All(x => x is RequireHomeserverPermAttribute))
                             {
-                                var level = (await GetPermLevelAsync(ctx.Member));
-                                var levelText = level.ToString();
-                                if (level == ServerPermLevel.Nothing && Program.rand.Next(1, 100) == 69)
-                                    levelText = $"naught but a thing, my dear human. Congratulations, you win {Program.rand.Next(1, 10)} bonus points.";
+                                var att = failedChecks.FirstOrDefault(x => x is RequireHomeserverPermAttribute) as RequireHomeserverPermAttribute;
+                                if (att is not null)
+                                {
+                                    var level = (await GetPermLevelAsync(ctx.Member));
+                                    var levelText = level.ToString();
+                                    if (level == ServerPermLevel.Nothing && Program.rand.Next(1, 100) == 69)
+                                        levelText = $"naught but a thing, my dear human. Congratulations, you win {Program.rand.Next(1, 10)} bonus points.";
 
-                                await ctx.RespondAsync(
-                                    $"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{cmd.Name.Replace("textcmd", "")}**!\n" +
-                                    $"Required: `{att.TargetLvl}`\nYou have: `{levelText}`");
+                                    await ctx.RespondAsync(
+                                        $"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{command.Replace("textcmd", "")}**!\n" +
+                                        $"Required: `{att.TargetLvl}`\nYou have: `{levelText}`");
                                 
-                                return;
+                                    return;
+                                }
                             }
-                        }
                         
-                        return;
+                            return;
+                        }
                     }
 
                     searchIn = cmd.Subcommands.Any() ? cmd.Subcommands : null;
@@ -322,22 +328,23 @@ namespace Cliptok.Commands
                 
                 if (check is RequireHomeserverPermAttribute requireHomeserverPermAttribute)
                 {
+                    // Fail if guild member is null but this cmd does not work outside of the home server
                     if (ctx.Member is null && !requireHomeserverPermAttribute.WorkOutside)
                     {
                         failedChecks.Add(requireHomeserverPermAttribute);
                     }
                     else
                     {
-                        if (!requireHomeserverPermAttribute.WorkOutside)
+                        var level = await GetPermLevelAsync(ctx.Member);
+                        if (level < requireHomeserverPermAttribute.TargetLvl)
                         {
-                            var level = await GetPermLevelAsync(ctx.Member);
-                            if (level < requireHomeserverPermAttribute.TargetLvl)
+                            if (requireHomeserverPermAttribute.OwnerOverride && !Program.cfgjson.BotOwners.Contains(ctx.User.Id)
+                                || !requireHomeserverPermAttribute.OwnerOverride)
                             {
                                 failedChecks.Add(requireHomeserverPermAttribute);
                             }
                         }
                     }
-                    
                 }
 
                 if (check is RequirePermissionsAttribute requirePermissionsAttribute)
