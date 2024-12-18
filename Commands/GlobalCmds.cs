@@ -51,6 +51,22 @@ namespace Cliptok.Commands
                     IEnumerable<ContextCheckAttribute> failedChecks = (await CheckPermissionsAsync(ctx, cmd)).ToList();
                     if (failedChecks.Any())
                     {
+                        if (failedChecks.All(x => x is RequireHomeserverPermAttribute))
+                        {
+                            var att = failedChecks.FirstOrDefault(x => x is RequireHomeserverPermAttribute) as RequireHomeserverPermAttribute;
+                            if (att is not null)
+                            {
+                                var level = (await GetPermLevelAsync(ctx.Member));
+                                var levelText = level.ToString();
+                                if (level == ServerPermLevel.Nothing && Program.rand.Next(1, 100) == 69)
+                                    levelText = $"naught but a thing, my dear human. Congratulations, you win {Program.rand.Next(1, 10)} bonus points.";
+
+                                await ctx.RespondAsync(
+                                    $"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{cmd.Name.Replace("textcmd", "")}**!\n" +
+                                    $"Required: `{att.TargetLvl}`\nYou have: `{levelText}`");
+                            }
+                        }
+                        
                         return;
                     }
 
@@ -102,7 +118,7 @@ namespace Cliptok.Commands
                     
                     foreach (var arg in arguments)
                     {
-                        if (arg.ParameterType is CommandContext || arg.ParameterType.IsSubclassOf(typeof(CommandContext)))
+                        if (arg.ParameterType == typeof(CommandContext) || arg.ParameterType.IsSubclassOf(typeof(CommandContext)))
                             continue;
                         
                         argumentsStr += $"`{arg.Name} ({arg.ParameterType.Name})`: {arg.GetCustomAttribute<DescriptionAttribute>()?.Description ?? "No description provided."}\n";
