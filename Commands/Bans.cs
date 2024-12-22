@@ -207,11 +207,6 @@ namespace Cliptok.Commands
                     return;
                 }
             }
-            reason = reason.Replace("`", "\\`").Replace("*", "\\*");
-            if (banDuration == default)
-                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned: **{reason}**");
-            else
-                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{TimeHelpers.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
         }
 
         [Command("unban")]

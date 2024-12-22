@@ -18,17 +18,16 @@
                 expireTime = null;
             }
 
-            MemberPunishment newBan = new()
+            (DiscordMessage? dmMessage, DiscordMessage? chatMessage) output = new();
+            
+            reason = reason.Replace("`", "\\`").Replace("*", "\\*");
+            if (channel is not null)
             {
-                MemberId = targetUserId,
-                ModId = moderatorId,
-                ServerId = guild.Id,
-                ExpireTime = expireTime,
-                ActionTime = actionTime,
-                Reason = reason
-            };
-
-            await Program.db.HashSetAsync("bans", targetUserId, JsonConvert.SerializeObject(newBan));
+                if (banDuration == default)
+                    output.chatMessage = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> has been banned: **{reason}**");
+                else
+                    output.chatMessage = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> has been banned for **{TimeHelpers.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
+            }
 
             try
             {
@@ -38,24 +37,54 @@
                     if (appealable)
                     {
                         if (compromisedAccount)
-                            await targetMember.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}**!\nReason: **{reason}**\nYou can appeal the ban here: <{Program.cfgjson.AppealLink}>\nBefore appealing, please follow these steps to protect your account:\n1. Reset your Discord account password. Even if you use MFA, this will reset all session tokens.\n2. Review active sessions and authorised app connections.\n3. Ensure your PC is free of malware.\n4. [Enable MFA](https://support.discord.com/hc/en-us/articles/219576828-Setting-up-Multi-Factor-Authentication) if not already.");
+                            output.dmMessage = await targetMember.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}**!\nReason: **{reason}**\nYou can appeal the ban here: <{Program.cfgjson.AppealLink}>\nBefore appealing, please follow these steps to protect your account:\n1. Reset your Discord account password. Even if you use MFA, this will reset all session tokens.\n2. Review active sessions and authorised app connections.\n3. Ensure your PC is free of malware.\n4. [Enable MFA](https://support.discord.com/hc/en-us/articles/219576828-Setting-up-Multi-Factor-Authentication) if not already.");
                         else
-                            await targetMember.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}**!\nReason: **{reason}**\nYou can appeal the ban here: <{Program.cfgjson.AppealLink}>");
+                            output.dmMessage = await targetMember.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}**!\nReason: **{reason}**\nYou can appeal the ban here: <{Program.cfgjson.AppealLink}>");
                     }
                     else
                     {
-                        await targetMember.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} You have been permanently banned from **{guild.Name}**!\nReason: **{reason}**");
+                        output.dmMessage = await targetMember.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} You have been permanently banned from **{guild.Name}**!\nReason: **{reason}**");
                     }
                 }
                 else
                 {
-                    await targetMember.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}** for {TimeHelpers.TimeToPrettyFormat(banDuration, false)}!\nReason: **{reason}**\nBan expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>");
+                    output.dmMessage = await targetMember.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}** for {TimeHelpers.TimeToPrettyFormat(banDuration, false)}!\nReason: **{reason}**\nBan expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>");
                 }
             }
             catch
             {
                 // A DM failing to send isn't important.
             }
+            
+            MemberPunishment newBan = new()
+            {
+                MemberId = targetUserId,
+                ModId = moderatorId,
+                ServerId = guild.Id,
+                ExpireTime = expireTime,
+                ActionTime = actionTime,
+                Reason = reason
+            };
+            
+            if (output.chatMessage is not null)
+                newBan.ContextMessageReference = new()
+                {
+                    MessageId = output.chatMessage.Id,
+                    ChannelId = output.chatMessage.ChannelId
+                };
+
+            if (output.dmMessage is not null)
+                newBan!.DmMessageReference = new()
+                {
+                    MessageId = output.dmMessage.Id,
+                    ChannelId = output.dmMessage.ChannelId
+                };
+
+            await Program.db.HashSetAsync("bans", targetUserId, JsonConvert.SerializeObject(newBan));
+            
+            // If ban is for a compromised account, add to list so the context message can be more-easily deleted later
+            if (compromisedAccount)
+                Program.db.HashSet("compromisedAccountBans", targetUserId, JsonConvert.SerializeObject(newBan));
 
             try
             {

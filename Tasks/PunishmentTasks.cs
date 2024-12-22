@@ -98,6 +98,48 @@
                 return success;
             }
         }
+        
+        public static async Task<bool> CheckCompromisedAccountBansAsync()
+        {
+            if (Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays == 0)
+                return false;
+
+            Dictionary<string, MemberPunishment> banList = Program.db.HashGetAll("compromisedAccountBans").ToDictionary(
+                x => x.Name.ToString(),
+                x => JsonConvert.DeserializeObject<MemberPunishment>(x.Value)
+            );
+
+            if (banList.Keys.Count == 0)
+                return false;
+            else
+            {
+                // The success value will be changed later if any of the message deletes are successful.
+                bool success = false;
+                foreach (KeyValuePair<string, MemberPunishment> entry in banList)
+                {
+                    MemberPunishment ban = entry.Value;
+                    
+                    if (DateTime.Now > ban.ActionTime.Value.AddDays(Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays))
+                    {
+                        try
+                        {
+                            var contextMessage = await DiscordHelpers.GetMessageFromReferenceAsync(ban.ContextMessageReference);
+                            await contextMessage.DeleteAsync();
+                            Program.db.HashDelete("compromisedAccountBans", ban.MemberId);
+                            success = true;
+                        }
+                        catch (NullReferenceException)
+                        {
+                            // it's fine. trust me. we'll live.
+                            Program.db.HashDelete("compromisedAccountBans", ban.MemberId);
+                            continue;
+                        }
+                    }
+                }
+                Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked compromised account bans at {time} with result: {result}", DateTime.Now, success);
+                return success;
+            }
+        }
     }
 
 }
