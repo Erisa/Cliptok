@@ -58,26 +58,26 @@
             }
         }
 
-        public static async Task<bool> CheckAutomaticWarningsAsync()
+        // Cleans up public messages for automatic warnings & bans for compromised accounts
+        public static async Task<bool> CleanUpPunishmentMessagesAsync()
         {
-            if (Program.cfgjson.AutoWarnMsgAutoDeleteDays == 0)
+            if (Program.cfgjson.AutoWarnMsgAutoDeleteDays == 0 && Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays == 0)
                 return false;
-
-            Dictionary<string, UserWarning> warnList = Program.db.HashGetAll("automaticWarnings").ToDictionary(
-                x => x.Name.ToString(),
-                x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
-            );
-
-            if (warnList is null | warnList.Keys.Count == 0)
-                return false;
-            else
+            
+            // The success value will be changed later if any of the message deletes are successful.
+            bool success = false;
+            
+            if (Program.cfgjson.AutoWarnMsgAutoDeleteDays > 0)
             {
-                // The success value will be changed later if any of the message deletes are successful.
-                bool success = false;
+                Dictionary<string, UserWarning> warnList = Program.db.HashGetAll("automaticWarnings").ToDictionary(
+                    x => x.Name.ToString(),
+                    x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
+                );
+                
                 foreach (KeyValuePair<string, UserWarning> entry in warnList)
                 {
                     UserWarning warn = entry.Value;
-                    if (DateTime.Now > warn.WarnTimestamp.AddDays(Program.cfgjson.AutoWarnMsgAutoDeleteDays))
+                    if (DateTime.Now > warn.WarnTimestamp.AddSeconds(Program.cfgjson.AutoWarnMsgAutoDeleteDays))
                     {
                         try
                         {
@@ -94,32 +94,20 @@
                         }
                     }
                 }
-                Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked automatic warnings at {time} with result: {result}", DateTime.Now, success);
-                return success;
             }
-        }
-        
-        public static async Task<bool> CheckCompromisedAccountBansAsync()
-        {
-            if (Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays == 0)
-                return false;
-
-            Dictionary<string, MemberPunishment> banList = Program.db.HashGetAll("compromisedAccountBans").ToDictionary(
-                x => x.Name.ToString(),
-                x => JsonConvert.DeserializeObject<MemberPunishment>(x.Value)
-            );
-
-            if (banList.Keys.Count == 0)
-                return false;
-            else
+            
+            if (Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays > 0)
             {
-                // The success value will be changed later if any of the message deletes are successful.
-                bool success = false;
+                Dictionary<string, MemberPunishment> banList = Program.db.HashGetAll("compromisedAccountBans").ToDictionary(
+                    x => x.Name.ToString(),
+                    x => JsonConvert.DeserializeObject<MemberPunishment>(x.Value)
+                );
+
                 foreach (KeyValuePair<string, MemberPunishment> entry in banList)
                 {
                     MemberPunishment ban = entry.Value;
-                    
-                    if (DateTime.Now > ban.ActionTime.Value.AddDays(Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays))
+                
+                    if (DateTime.Now > ban.ActionTime.Value.AddSeconds(Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays))
                     {
                         try
                         {
@@ -136,9 +124,10 @@
                         }
                     }
                 }
-                Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked compromised account bans at {time} with result: {result}", DateTime.Now, success);
-                return success;
             }
+            
+            Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked for auto-warn and compromised account ban messages at {time} with result: {result}", DateTime.Now, success);
+            return success;
         }
     }
 

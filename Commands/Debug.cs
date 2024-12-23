@@ -131,14 +131,14 @@
                 var msg = await ctx.RespondAsync("Checking for pending scheduled tasks...");
                 bool bans = await Tasks.PunishmentTasks.CheckBansAsync();
                 bool mutes = await Tasks.PunishmentTasks.CheckMutesAsync();
-                bool warns = await Tasks.PunishmentTasks.CheckAutomaticWarningsAsync();
+                bool punishmentMessages = await Tasks.PunishmentTasks.CleanUpPunishmentMessagesAsync();
                 bool reminders = await Tasks.ReminderTasks.CheckRemindersAsync();
                 bool raidmode = await Tasks.RaidmodeTasks.CheckRaidmodeAsync(ctx.Guild.Id);
                 bool unlocks = await Tasks.LockdownTasks.CheckUnlocksAsync();
                 bool channelUpdateEvents = await Tasks.EventTasks.HandlePendingChannelUpdateEventsAsync();
                 bool channelDeleteEvents = await Tasks.EventTasks.HandlePendingChannelDeleteEventsAsync();
 
-                await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nAutomatic warning message check result: `{warns}`\nReminders check result: `{reminders}`\nRaidmode check result: `{raidmode}`\nUnlocks check result: `{unlocks}`\nPending Channel Update events check result: `{channelUpdateEvents}`\nPending Channel Delete events check result: `{channelDeleteEvents}`");
+                await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nPunishment message cleanup check result: `{punishmentMessages}`\nReminders check result: `{reminders}`\nRaidmode check result: `{raidmode}`\nUnlocks check result: `{unlocks}`\nPending Channel Update events check result: `{channelUpdateEvents}`\nPending Channel Delete events check result: `{channelDeleteEvents}`");
             }
 
             [Command("sh")]
