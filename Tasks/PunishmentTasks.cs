@@ -77,7 +77,11 @@
                 foreach (KeyValuePair<string, UserWarning> entry in warnList)
                 {
                     UserWarning warn = entry.Value;
+#if DEBUG
                     if (DateTime.Now > warn.WarnTimestamp.AddSeconds(Program.cfgjson.AutoWarnMsgAutoDeleteDays))
+#else
+                    if (DateTime.Now > warn.WarnTimestamp.AddDays(Program.cfgjson.AutoWarnMsgAutoDeleteDays))
+#endif
                     {
                         try
                         {
@@ -106,8 +110,11 @@
                 foreach (KeyValuePair<string, MemberPunishment> entry in banList)
                 {
                     MemberPunishment ban = entry.Value;
-                
+#if DEBUG
                     if (DateTime.Now > ban.ActionTime.Value.AddSeconds(Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays))
+#else
+                    if (DateTime.Now > ban.ActionTime.Value.AddDays(Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays))
+#endif
                     {
                         try
                         {
