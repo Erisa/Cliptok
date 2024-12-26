@@ -286,6 +286,9 @@
 
         [JsonProperty("autoWarnMsgAutoDeleteDays")]
         public int AutoWarnMsgAutoDeleteDays { get; private set; }
+        
+        [JsonProperty("compromisedAccountBanMsgAutoDeleteDays")]
+        public int CompromisedAccountBanMsgAutoDeleteDays { get; private set; }
 
         [JsonProperty("logLevel")]
         public Level LogLevel { get; private set; } = Level.Information;

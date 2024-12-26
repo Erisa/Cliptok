@@ -123,11 +123,6 @@ namespace Cliptok.Commands
                     return;
                 }
             }
-            reason = reason.Replace("`", "\\`").Replace("*", "\\*");
-            if (banDuration == default)
-                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned: **{reason}**");
-            else
-                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{TimeHelpers.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
         }
 
         /// I CANNOT find a way to do this as alias so I made it a separate copy of the command.
@@ -207,11 +202,6 @@ namespace Cliptok.Commands
                     return;
                 }
             }
-            reason = reason.Replace("`", "\\`").Replace("*", "\\*");
-            if (banDuration == default)
-                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned: **{reason}**");
-            else
-                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{TimeHelpers.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
         }
 
         [Command("unban")]
