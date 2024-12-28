@@ -157,8 +157,18 @@ namespace Cliptok.Commands
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task MassBanCmd(TextCommandContext ctx, [RemainingText] string input)
         {
-            List<string> usersString = input.Replace("\n", " ").Replace("\r", "").Split(' ').ToList();
-            List<ulong> users = usersString.Select(x => Convert.ToUInt64(x)).ToList();
+            List<string> inputString = input.Replace("\n", " ").Replace("\r", "").Split(' ').ToList();
+            List<ulong> users = new();
+            string reason = "";
+            foreach (var word in inputString)
+            {
+                if (ulong.TryParse(word, out var id))
+                    users.Add(id);
+                else
+                    reason += $"{word} ";
+            }
+            reason = reason.Trim();
+            
             if (users.Count == 1 || users.Count == 0)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Not accepting a massban with a single user. Please use `!ban`.");
@@ -173,7 +183,10 @@ namespace Cliptok.Commands
 
             foreach (ulong user in users)
             {
-                taskList.Add(BanSilently(ctx.Guild, user));
+                if (string.IsNullOrWhiteSpace(reason))
+                    taskList.Add(BanSilently(ctx.Guild, user));
+                else
+                    taskList.Add(BanSilently(ctx.Guild, user, $"Mass ban: {reason}"));
             }
 
             var tasks = await Task.WhenAll(taskList);
@@ -272,11 +285,6 @@ namespace Cliptok.Commands
                     return;
                 }
             }
-            reason = reason.Replace("`", "\\`").Replace("*", "\\*");
-            if (banDuration == default)
-                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned: **{reason}**");
-            else
-                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{TimeHelpers.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
         }
 
         /// I CANNOT find a way to do this as alias so I made it a separate copy of the command.
@@ -357,11 +365,6 @@ namespace Cliptok.Commands
                     return;
                 }
             }
-            reason = reason.Replace("`", "\\`").Replace("*", "\\*");
-            if (banDuration == default)
-                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned: **{reason}**");
-            else
-                await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} {targetMember.Mention} has been banned for **{TimeHelpers.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
         }
     }
 }

@@ -254,7 +254,7 @@ namespace Cliptok
                     [
                         Tasks.PunishmentTasks.CheckMutesAsync(),
                         Tasks.PunishmentTasks.CheckBansAsync(),
-                        Tasks.PunishmentTasks.CheckAutomaticWarningsAsync(),
+                        Tasks.PunishmentTasks.CleanUpPunishmentMessagesAsync(),
                         Tasks.ReminderTasks.CheckRemindersAsync(),
                         Tasks.RaidmodeTasks.CheckRaidmodeAsync(cfgjson.ServerID),
                         Tasks.LockdownTasks.CheckUnlocksAsync(),

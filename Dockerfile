@@ -8,7 +8,7 @@ RUN dotnet restore
 
 # Copy source code and build
 COPY . ./
-RUN dotnet build -c Release -o out
+RUN dotnet publish Cliptok.csproj -c Release --property:PublishDir=$PWD/out
 
 # We already have this image pulled, its actually quicker to reuse it
 FROM mcr.microsoft.com/dotnet/sdk:9.0.100 AS git-collector

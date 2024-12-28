@@ -57,8 +57,18 @@ namespace Cliptok.Commands
         public async Task MassKickCmd(TextCommandContext ctx, [RemainingText] string input)
         {
 
-            List<string> usersString = input.Replace("\n", " ").Replace("\r", "").Split(' ').ToList();
-            List<ulong> users = usersString.Select(x => Convert.ToUInt64(x)).ToList();
+            List<string> inputString = input.Replace("\n", " ").Replace("\r", "").Split(' ').ToList();
+            List<ulong> users = new();
+            string reason = "";
+            foreach (var word in inputString)
+            {
+                if (ulong.TryParse(word, out var id))
+                    users.Add(id);
+                else
+                    reason += $"{word} ";
+            }
+            reason = reason.Trim();
+            
             if (users.Count == 1 || users.Count == 0)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Not accepting a masskick with a single user. Please use `!ban`.");
@@ -79,7 +89,7 @@ namespace Cliptok.Commands
                     if (member is not null)
                     {
 
-                        taskList.Add(SafeKickAndLogAsync(member, "Mass kick", ctx.Member));
+                        taskList.Add(SafeKickAndLogAsync(member, $"Mass kick{(string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}")}", ctx.Member));
                     }
                 }
                 catch

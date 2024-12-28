@@ -406,7 +406,7 @@
             // Return the sent warning message for logging.
             
             var targetChannel = infringingMessage.Channel;
-            if (infringingMessage.Channel.Type == DiscordChannelType.GuildForum)
+            if (infringingMessage.Channel.Type == DiscordChannelType.GuildForum || infringingMessage.Channel.Parent.Type == DiscordChannelType.GuildForum)
             {
                 if (Program.cfgjson.ForumChannelAutoWarnFallbackChannel == 0)
                     Program.discord.Logger.LogWarning("A warning in forum channel {channelId} was attempted, but may fail due to the fallback channel not being set. Please set 'forumChannelAutoWarnFallbackChannel' in config.json to avoid this.", targetChannel.Id);
