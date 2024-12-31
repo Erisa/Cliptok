@@ -262,9 +262,15 @@
 
         [JsonProperty("forumIntroPosts")]
         public List<ulong> ForumIntroPosts { get; private set; } = new();
+        
+        [JsonProperty("insiderInfoChannel")]
+        public ulong InsiderInfoChannel { get; private set; }
 
         [JsonProperty("insiderAnnouncementChannel")]
         public ulong InsiderAnnouncementChannel { get; private set; } = 0;
+        
+        [JsonProperty("insidersChannel")]
+        public ulong InsidersChannel { get; private set; }
 
         [JsonProperty("insiderCommandLockedToChannel")]
         public ulong InsiderCommandLockedToChannel { get; private set; } = 0;
@@ -486,6 +492,9 @@
 
         [JsonProperty("insider10RP")]
         public ulong Insider10RP { get; private set; }
+        
+        [JsonProperty("insiderChat")]
+        public ulong InsiderChat { get; private set; }
 
         [JsonProperty("patchTuesday")]
         public ulong PatchTuesday { get; private set; }
