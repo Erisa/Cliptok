@@ -10,7 +10,7 @@ namespace Cliptok.Commands
         {
             [Command("enable")]
 			[Description("Prevent a member from changing their nickname.")]
-            public async Task NicknameLockEnableSlashCmd(SlashCommandContext ctx, [Parameter("member"), Description("The member to nickname lock.")] DiscordUser discordUser)
+            public async Task NicknameLockEnableSlashCmd(SlashCommandContext ctx, [Parameter("member"), Description("The member to nickname lock.")] DiscordUser discordUser, [Parameter("nickname"), Description("The nickname to use. Will use current nickname if not set.")] string nickname = "")
             {
                 DiscordMember member = default;
 
@@ -25,13 +25,17 @@ namespace Cliptok.Commands
 
                 var currentValue = await Program.db.HashGetAsync($"nicknamelock", discordUser.Id);
 
-                if (currentValue.HasValue)
+                if (currentValue.HasValue && (nickname == "" || nickname == member.Nickname))
                 {
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {discordUser.Mention} is already nickname locked!", mentions: false);
                 } else
                 {
-                    await Program.db.HashSetAsync("nicknamelock", discordUser.Id, member.DisplayName);
-                    var msg = $"{Program.cfgjson.Emoji.On} Nickname locked {discordUser.Mention} as `{member.DisplayName}`!";
+                    if (nickname == "")
+                        nickname = member.DisplayName;
+                    
+                    await Program.db.HashSetAsync("nicknamelock", discordUser.Id, nickname);
+                    await member.ModifyAsync(m => m.Nickname = nickname);
+                    var msg = $"{Program.cfgjson.Emoji.On} Nickname locked {discordUser.Mention} as `{nickname}`!";
                     await ctx.RespondAsync(msg, mentions: false);
                     await LogChannelHelper.LogMessageAsync("nicknames", msg);
                 }
