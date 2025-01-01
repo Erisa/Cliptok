@@ -3,7 +3,7 @@ namespace Cliptok.Commands.InteractionCommands
     public class InsidersInteractions : ApplicationCommandModule
     {
         [SlashCommand("send-insiders-info-buttons", "Sends a message with buttons to get Insider roles for #insiders-info.", false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator), SlashCommandPermissions(permissions: DiscordPermission.ModerateMembers)]
+        [SlashRequireHomeserverPerm(ServerPermLevel.Admin, ownerOverride: true), SlashCommandPermissions(permissions: DiscordPermission.ModerateMembers)]
         public static async Task SendInsidersInfoButtonMessage(InteractionContext ctx)
         {
             if (Program.cfgjson.InsiderInfoChannel != 0 && ctx.Channel.Id != Program.cfgjson.InsiderInfoChannel)
