@@ -307,6 +307,9 @@
         
         [JsonProperty("rulesAllowedPublicChannels")]
         public List<ulong> RulesAllowedPublicChannels { get; private set; } = new();
+
+        [JsonProperty("mentionTrackExcludedChannels")]
+        public List<ulong> MentionTrackExcludedChannels { get; private set; } = new();
     }
 
     public enum Level { Information, Warning, Error, Debug, Verbose }

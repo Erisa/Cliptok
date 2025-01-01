@@ -250,7 +250,7 @@ namespace Cliptok.Events
                 if (channel.IsPrivate || channel.Guild.Id != Program.cfgjson.ServerID || message.Author.IsBot)
                     return;
 
-                if (!limitFilters)
+                if (!limitFilters && !Program.cfgjson.MentionTrackExcludedChannels.Contains(channel.Id) && (channel.ParentId is null || !Program.cfgjson.MentionTrackExcludedChannels.Contains((ulong)channel.ParentId)))
                 {
                     // track mentions
                     if (message.MentionedUsers.Any(x => x.Id == Program.discord.CurrentUser.Id))
