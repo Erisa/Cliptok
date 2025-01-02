@@ -269,11 +269,16 @@
         [JsonProperty("insiderAnnouncementChannel")]
         public ulong InsiderAnnouncementChannel { get; private set; } = 0;
         
+        private ulong insidersChannel;
         [JsonProperty("insidersChannel")]
-        public ulong InsidersChannel { get; private set; }
+        public ulong InsidersChannel
+        {
+            get => insidersChannel == 0 ? InsiderCommandLockedToChannel : insidersChannel;
+            private set => insidersChannel = value;
+        }
 
         [JsonProperty("insiderCommandLockedToChannel")]
-        public ulong InsiderCommandLockedToChannel { get; private set; } = 0;
+        private ulong InsiderCommandLockedToChannel { get; set; } = 0;
 
         [JsonProperty("dmAutoresponseTimeLimit")]
         public int DmAutoresponseTimeLimit { get; private set; } = 0;

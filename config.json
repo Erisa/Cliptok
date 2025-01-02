@@ -318,7 +318,6 @@
   "insiderAnnouncementChannel": 1043898319883219004,
   "insiderInfoChannel": 1279201622651572317,
   "insidersChannel": 187649467611086849,
-  "insiderCommandLockedToChannel": 187649467611086849,
   "dmAutoresponseTimeLimit": 6,
   "autoDeleteEmptyThreads": true,
   "insiderCanaryThread": 1082394217168523315,
