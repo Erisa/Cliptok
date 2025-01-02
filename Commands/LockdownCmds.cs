@@ -82,11 +82,13 @@ namespace Cliptok.Commands
                 try
                 {
                     await LockdownHelpers.LockChannelAsync(user: ctx.User, channel: currentChannel, duration: lockDuration, reason: reason, lockThreads: lockThreads);
-                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Channel locked successfully.").AsEphemeral(true));
+                    if (ctx is SlashCommandContext)
+                        await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Channel locked successfully.").AsEphemeral(true));
                 }
                 catch (ArgumentException)
                 {
-                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Failed to lock this channel!").AsEphemeral(true));
+                    if (ctx is SlashCommandContext)
+                        await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Failed to lock this channel!").AsEphemeral(true));
                 }
             }
 
@@ -175,11 +177,13 @@ namespace Cliptok.Commands
                 try
                 {
                     await LockdownHelpers.UnlockChannel(currentChannel, ctx.Member);
-                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Channel locked successfully.").AsEphemeral(true));
+                    if (ctx is SlashCommandContext)
+                        await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Channel locked successfully.").AsEphemeral(true));
                 }
                 catch (ArgumentException)
                 {
-                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Failed to lock this channel!").AsEphemeral(true));
+                    if (ctx is SlashCommandContext)
+                        await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent("Failed to lock this channel!").AsEphemeral(true));
                 }
             }
 
