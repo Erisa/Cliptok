@@ -1,10 +1,12 @@
-namespace Cliptok.Commands.InteractionCommands
+namespace Cliptok.Commands
 {
-    public class SecurityActionInteractions : ApplicationCommandModule
+    public class SecurityActionsCmds
     {
-        [SlashCommand("pausedms", "Temporarily pause DMs between server members.", defaultPermission: false)]
-        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(permissions: DiscordPermission.ModerateMembers)]
-        public async Task SlashPauseDMs(InteractionContext ctx, [Option("time", "The amount of time to pause DMs for. Cannot be greater than 24 hours.")] string time)
+        [Command("pausedms")]
+        [Description("Temporarily pause DMs between server members.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        public async Task SlashPauseDMs(CommandContext ctx, [Parameter("time"), Description("The amount of time to pause DMs for. Cannot be greater than 24 hours.")] string time)
         {
             // need to make our own api calls because D#+ can't do this natively?
 
@@ -50,9 +52,11 @@ namespace Cliptok.Commands.InteractionCommands
             }
         }
 
-        [SlashCommand("unpausedms", "Unpause DMs between server members.", defaultPermission: false)]
-        [HomeServer, SlashRequireHomeserverPerm(ServerPermLevel.Moderator), SlashCommandPermissions(permissions: DiscordPermission.ModerateMembers)]
-        public async Task SlashUnpauseDMs(InteractionContext ctx)
+        [Command("unpausedms")]
+        [Description("Unpause DMs between server members.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        public async Task SlashUnpauseDMs(CommandContext ctx)
         {
             // need to make our own api calls because D#+ can't do this natively?
 

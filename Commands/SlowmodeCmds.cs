@@ -1,14 +1,16 @@
-﻿namespace Cliptok.Commands.InteractionCommands
+namespace Cliptok.Commands
 {
-    internal class SlowmodeInteractions : ApplicationCommandModule
+    public class SlowmodeCmds
     {
-        [SlashCommand("slowmode", "Slow down the channel...", defaultPermission: false)]
-        [SlashRequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [SlashCommandPermissions(permissions: DiscordPermission.ModerateMembers)]
+        [Command("slowmode")]
+        [Description("Slow down the channel...")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        [RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task SlowmodeSlashCommand(
-            InteractionContext ctx,
-            [Option("slow_time", "Allowed time between each users messages. 0 for off. A number of seconds or a parseable time.")] string timeToParse,
-            [Option("channel", "The channel to slow down, if not the current one.")] DiscordChannel channel = default
+            SlashCommandContext ctx,
+            [Parameter("slow_time"), Description("Allowed time between each users messages. 0 for off. A number of seconds or a parseable time.")] string timeToParse,
+            [Parameter("channel"), Description("The channel to slow down, if not the current one.")] DiscordChannel channel = default
         )
         {
             if (channel == default)
@@ -64,13 +66,12 @@
                     };
                     embed.WithFooter(Program.discord.CurrentUser.Username, Program.discord.CurrentUser.AvatarUrl)
                         .AddField("Message", ex.Message);
-                    if (ex is ArgumentException)
+                    if (ex is ArgumentException or DSharpPlus.Commands.Exceptions.ArgumentParseException)
                         embed.AddField("Note", "This usually means that you used the command incorrectly.\n" +
                             "Please double-check how to use this command.");
                     await ctx.RespondAsync(embed: embed.Build(), ephemeral: true).ConfigureAwait(false);
                 }
             }
         }
-
     }
 }
