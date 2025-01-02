@@ -297,7 +297,37 @@ namespace Cliptok.Events
                 // Get member
                 var member = await e.Guild.GetMemberAsync(e.User.Id);
                 
+                // Get insider chat role
                 var insiderChatRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderChat);
+                
+                // Check whether member already has any insider roles
+                var insiderRoles = new List<ulong>()
+                {
+                    cfgjson.UserRoles.InsiderCanary,
+                    cfgjson.UserRoles.InsiderDev,
+                    cfgjson.UserRoles.InsiderBeta,
+                    cfgjson.UserRoles.InsiderRP,
+                    cfgjson.UserRoles.Insider10RP,
+                    cfgjson.UserRoles.PatchTuesday
+                };
+                if (member.Roles.Any(x => insiderRoles.Contains(x.Id)))
+                {
+                    // Member already has an insider role, thus already has access to #insiders
+                    // No need for the chat role too
+                    
+                    string insidersMention;
+                    if (cfgjson.InsidersChannel == 0)
+                        insidersMention = "#insiders";
+                    else
+                        insidersMention = $"<#{cfgjson.InsidersChannel}>";
+
+                    await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                        .WithContent($"You already have Insider roles, so you already have access to chat in {insidersMention}!")
+                        .AsEphemeral(true));
+                    
+                    return;
+                }
+                
                 if (member.Roles.Contains(insiderChatRole))
                 {
                     // Member already has the role
