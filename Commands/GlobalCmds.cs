@@ -41,7 +41,7 @@ namespace Cliptok.Commands
 
                     StringComparison comparison = StringComparison.InvariantCultureIgnoreCase;
                     StringComparer comparer = StringComparer.InvariantCultureIgnoreCase;
-                    cmd = searchIn.FirstOrDefault(xc => xc.Name.Equals(commandSplit[i], comparison) || ((xc.Attributes.FirstOrDefault(x => x is TextAliasAttribute) as TextAliasAttribute)?.Aliases.Contains(commandSplit[i].Replace("textcmd", ""), comparer) ?? false));
+                    cmd = searchIn.FirstOrDefault(xc => xc.Name.Equals(commandSplit[i], comparison) || xc.Name.Equals(commandSplit[i].Replace("textcmd", ""), comparison) || ((xc.Attributes.FirstOrDefault(x => x is TextAliasAttribute) as TextAliasAttribute)?.Aliases.Contains(commandSplit[i].Replace("textcmd", ""), comparer) ?? false));
 
                     if (cmd is null)
                     {
@@ -95,7 +95,7 @@ namespace Cliptok.Commands
                 }
                 
                 var aliases = cmd.Method?.GetCustomAttributes<TextAliasAttribute>().FirstOrDefault()?.Aliases ?? (cmd.Attributes.FirstOrDefault(x => x is TextAliasAttribute) as TextAliasAttribute)?.Aliases ?? null; 
-                if (aliases is not null && aliases.Length > 1)
+                if (aliases is not null && (aliases.Length > 1 || (aliases.Length == 1 && aliases[0] != cmd.Name.Replace("textcmd", ""))))
                 {
                     var aliasStr = "";
                     foreach (var alias in aliases)
