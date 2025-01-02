@@ -18,8 +18,19 @@ namespace Cliptok.Commands.InteractionCommands
                 new DiscordButtonComponent(DiscordButtonStyle.Secondary, "insiders-info-chat-btn-callback", "I just want to chat for now")
             ];
             
+            string insidersChannelMention;
+            if (Program.cfgjson.InsidersChannel == 0)
+            {
+                insidersChannelMention = "#insiders";
+                Program.discord.Logger.LogWarning("#insiders-info message sent with hardcoded #insiders mention! Is insidersChannel set in config.json?");
+            }
+            else
+            {
+                insidersChannelMention = $"<#{Program.cfgjson.InsidersChannel}>";
+            }
+            
             var builder = new DiscordInteractionResponseBuilder()
-                .WithContent($"{Program.cfgjson.Emoji.Insider} Choose your Insider roles here! Or, you can choose to chat in <#{Program.cfgjson.InsidersChannel}> without being notified about new builds.")
+                .WithContent($"{Program.cfgjson.Emoji.Insider} Choose your Insider roles here! Or, you can choose to chat in {insidersChannelMention} without being notified about new builds.")
                 .AddComponents(buttons);
             
             await ctx.CreateResponseAsync(builder);
