@@ -283,7 +283,8 @@ namespace Cliptok.Events
                     }
                 }
                 
-                await member.ReplaceRolesAsync(memberRoles, "Applying Insider roles chosen in #insiders-info");
+                // Apply roles
+                await member.ModifyAsync(x => x.Roles = memberRoles);
                 
                 await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent($"{cfgjson.Emoji.Success} Your Insider roles have been updated!").AsEphemeral(true));
             }
