@@ -228,6 +228,7 @@
     "insiderBeta": 643712828217360394,
     "insiderRP": 288729239921098752,
     "insider10RP": 910319453491839069,
+    "insiderChat": 1323636793668800547,
     "patchTuesday": 445773142233710594,
     "giveaways": 1169336992455200820
   },
@@ -315,7 +316,8 @@
     1065659890036646019
   ],
   "insiderAnnouncementChannel": 1043898319883219004,
-  "insiderCommandLockedToChannel": 187649467611086849,
+  "insiderInfoChannel": 1279201622651572317,
+  "insidersChannel": 187649467611086849,
   "dmAutoresponseTimeLimit": 6,
   "autoDeleteEmptyThreads": true,
   "insiderCanaryThread": 1082394217168523315,

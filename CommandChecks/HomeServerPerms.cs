@@ -137,14 +137,22 @@
         public class SlashRequireHomeserverPermAttribute : SlashCheckBaseAttribute
         {
             public ServerPermLevel TargetLvl;
+            public bool OwnerOverride;
 
-            public SlashRequireHomeserverPermAttribute(ServerPermLevel targetlvl)
-                => TargetLvl = targetlvl;
+            public SlashRequireHomeserverPermAttribute(ServerPermLevel targetlvl, bool ownerOverride = false)
+            {
+                TargetLvl = targetlvl;
+                OwnerOverride = ownerOverride;
+            }
 
             public override async Task<bool> ExecuteChecksAsync(InteractionContext ctx)
             {
                 if (ctx.Guild.Id != Program.cfgjson.ServerID)
                     return false;
+                
+                // bot owners can bypass perm checks ONLY if the command allows it.
+                if (OwnerOverride && Program.cfgjson.BotOwners.Contains(ctx.User.Id))
+                    return true;
 
                 var level = await GetPermLevelAsync(ctx.Member);
                 if (level >= TargetLvl)
