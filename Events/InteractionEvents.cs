@@ -260,7 +260,7 @@ namespace Cliptok.Events
                 };
                 
                 // Get a list of the member's current roles that we can add to or remove from
-                // Then we can apply this in a single request with member.ReplaceRolesAsync to avoid making repeated member update requests
+                // Then we can apply this in a single request with member.ModifyAsync to avoid making repeated member update requests
                 List<DiscordRole> memberRoles = member.Roles.ToList();
                 
                 var selection = e.Values.Select(x => insiderRoles[x]).ToList();
