@@ -4,7 +4,7 @@
     {
         public static async Task<DiscordEmbed> GenerateWarningsEmbedAsync(DiscordUser targetUser)
         {
-            var warningsOutput = Program.db.HashGetAll(targetUser.Id.ToString())
+            var warningsOutput = (await Program.db.HashGetAllAsync(targetUser.Id.ToString()))
                 .Where(x => JsonConvert.DeserializeObject<UserWarning>(x.Value).Type == WarningType.Warning).ToDictionary(
                 x => x.Name.ToString(),
                 x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
@@ -244,7 +244,7 @@
             );
 
             // automute handling
-            var warningsOutput = Program.db.HashGetAll(targetUser.Id.ToString()).ToDictionary(
+            var warningsOutput = (await Program.db.HashGetAllAsync(targetUser.Id.ToString())).ToDictionary(
                 x => x.Name.ToString(),
                 x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
             );
@@ -282,7 +282,7 @@
             if (!modUser.IsBot)
             {
                 // Get notes
-                var notes = Program.db.HashGetAll(targetUser.Id.ToString())
+                var notes = (await Program.db.HashGetAllAsync(targetUser.Id.ToString()))
                     .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note).ToDictionary(
                         x => x.Name.ToString(),
                         x => JsonConvert.DeserializeObject<UserNote>(x.Value)

@@ -32,7 +32,7 @@ namespace Cliptok.Commands
                 string strOut = "";
                 if (targetUser == default)
                 {
-                    var muteList = Program.db.HashGetAll("mutes").ToDictionary();
+                    var muteList = (await Program.db.HashGetAllAsync("mutes")).ToDictionary();
                     if (muteList is null | muteList.Keys.Count == 0)
                     {
                         await ctx.RespondAsync("No mutes found in database!");
@@ -71,7 +71,7 @@ namespace Cliptok.Commands
                 string strOut = "";
                 if (targetUser == default)
                 {
-                    var banList = Program.db.HashGetAll("bans").ToDictionary();
+                    var banList = (await Program.db.HashGetAllAsync("bans")).ToDictionary();
                     if (banList is null | banList.Keys.Count == 0)
                     {
                         await ctx.RespondAsync("No bans found in database!");
@@ -189,7 +189,7 @@ namespace Cliptok.Commands
                 {
                     if (ulong.TryParse(key.ToString(), out ulong number))
                     {
-                        var warnings = Program.db.HashGetAll(key);
+                        var warnings = await Program.db.HashGetAllAsync(key);
                         Dictionary<long, MemberPunishment> warningdict = new();
                         foreach (var warning in warnings)
                         {
@@ -623,6 +623,29 @@ namespace Cliptok.Commands
 
                 _ = msg.DeleteAsync();
                 await ctx.Channel.SendMessageAsync(await StringHelpers.CodeOrHasteBinAsync(JsonConvert.SerializeObject(memberIdsTonames, Formatting.Indented), "json"));
+            }
+
+            [Command("testnre")]
+            [Description("throw a System.NullReferenceException error. dont spam this please.")]
+            [IsBotOwner]
+            public async Task ThrowNRE(TextCommandContext ctx, bool catchAsWarning = false)
+            {
+                if (catchAsWarning)
+                {
+                    try
+                    {
+                        throw new NullReferenceException();
+                    }
+                    catch (NullReferenceException e)
+                    {
+                        ctx.Client.Logger.LogWarning(e, "logging test NRE as warning");
+                        await ctx.RespondAsync("thrown NRE and logged as warning, check logs");
+                    }
+                }
+                else
+                {
+                    throw new NullReferenceException();
+                }
             }
 
             private static async Task<(bool success, ulong failedOverwrite)> ImportOverridesFromChannelAsync(DiscordChannel channel)

@@ -39,19 +39,40 @@ namespace Cliptok
                         return;
                     }
 
-                    if (dummyWriter.ToString().Length > 1984 && dummyWriter.ToString().Length < 4096)
+                    string extraText = "";
+
+                    if (
+                        Program.cfgjson.PingBotOwnersOnBadErrors &&
+                        logEvent.Level >= LogEventLevel.Error &&
+                        logEvent.Exception is not null &&
+                            (
+                                logEvent.Exception.GetType() == typeof(NullReferenceException) ||
+                                logEvent.Exception.GetType() == typeof(RedisTimeoutException)
+                            )
+                        )
                     {
-                        LogChannelHelper.LogMessageAsync("errors", new DiscordEmbedBuilder().WithDescription($"```cs\n{dummyWriter}\n```"));
+                        var pingList = Program.cfgjson.BotOwners.Select(x => $"<@{x}>").ToList();
+                        extraText = string.Join(", ", pingList);
+                    }
+
+                    if (dummyWriter.ToString().Length > (1984 - extraText.Length) && dummyWriter.ToString().Length < (4096 - extraText.Length))
+                    {
+                        LogChannelHelper.LogMessageAsync("errors", new DiscordMessageBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"{extraText}\n```cs\n{dummyWriter}\n```")).WithAllowedMentions(Mentions.All));
 
                     }
-                    else if (dummyWriter.ToString().Length < 1984)
+                    else if (dummyWriter.ToString().Length < (1984 - extraText.Length))
                     {
-                        LogChannelHelper.LogMessageAsync("errors", $"```cs\n{dummyWriter}\n```");
+                        LogChannelHelper.LogMessageAsync("errors", new DiscordMessageBuilder().WithContent($"{extraText}\n```cs\n{dummyWriter}\n```").WithAllowedMentions(Mentions.All));
                     }
                     else
                     {
                         var stream = new MemoryStream(Encoding.UTF8.GetBytes(dummyWriter.ToString()));
-                        LogChannelHelper.LogMessageAsync("errors", new DiscordMessageBuilder().AddFile("error.txt", stream));
+                        var resp = new DiscordMessageBuilder().AddFile("error.txt", stream).WithAllowedMentions(Mentions.All);
+                        if (extraText.Length > 0)
+                        {
+                            resp.WithContent(extraText);
+                        }
+                        LogChannelHelper.LogMessageAsync("errors", resp);
                     }
                 }
                 catch

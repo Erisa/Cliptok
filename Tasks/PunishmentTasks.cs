@@ -5,7 +5,7 @@
         public static async Task<bool> CheckBansAsync()
         {
             DiscordGuild targetGuild = Program.homeGuild;
-            Dictionary<string, MemberPunishment> banList = Program.db.HashGetAll("bans").ToDictionary(
+            Dictionary<string, MemberPunishment> banList = (await Program.db.HashGetAllAsync("bans")).ToDictionary(
                 x => x.Name.ToString(),
                 x => JsonConvert.DeserializeObject<MemberPunishment>(x.Value)
             );
@@ -34,7 +34,7 @@
         }
         public static async Task<bool> CheckMutesAsync()
         {
-            Dictionary<string, MemberPunishment> muteList = Program.db.HashGetAll("mutes").ToDictionary(
+            Dictionary<string, MemberPunishment> muteList = (await Program.db.HashGetAllAsync("mutes")).ToDictionary(
                 x => x.Name.ToString(),
                 x => JsonConvert.DeserializeObject<MemberPunishment>(x.Value)
             );
@@ -69,7 +69,7 @@
             
             if (Program.cfgjson.AutoWarnMsgAutoDeleteDays > 0)
             {
-                Dictionary<string, UserWarning> warnList = Program.db.HashGetAll("automaticWarnings").ToDictionary(
+                Dictionary<string, UserWarning> warnList = (await Program.db.HashGetAllAsync("automaticWarnings")).ToDictionary(
                     x => x.Name.ToString(),
                     x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
                 );
@@ -102,7 +102,7 @@
             
             if (Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays > 0)
             {
-                Dictionary<string, MemberPunishment> banList = Program.db.HashGetAll("compromisedAccountBans").ToDictionary(
+                Dictionary<string, MemberPunishment> banList = (await Program.db.HashGetAllAsync("compromisedAccountBans")).ToDictionary(
                     x => x.Name.ToString(),
                     x => JsonConvert.DeserializeObject<MemberPunishment>(x.Value)
                 );

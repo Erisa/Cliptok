@@ -29,9 +29,9 @@ namespace Cliptok.Commands
             [Parameter("lockdown"), Description("Set 0 to not lock. Lock the channel for a certain period of time after announcing the build.")] string lockdownTime = "auto"
         )
         {
-            if (Program.cfgjson.InsiderCommandLockedToChannel != 0 && ctx.Channel.Id != Program.cfgjson.InsiderCommandLockedToChannel)
+            if (Program.cfgjson.InsidersChannel != 0 && ctx.Channel.Id != Program.cfgjson.InsidersChannel)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command only works in <#{Program.cfgjson.InsiderCommandLockedToChannel}>!", ephemeral: true);
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command only works in <#{Program.cfgjson.InsidersChannel}>!", ephemeral: true);
                 return;
             }
 

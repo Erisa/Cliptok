@@ -222,7 +222,7 @@ namespace Cliptok.Commands
 
                     var user = await ctx.Client.GetUserAsync((ulong)useroption.Value);
 
-                    var notes = Program.db.HashGetAll(user.Id.ToString())
+                    var notes = (await Program.db.HashGetAllAsync(user.Id.ToString()))
                         .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note).ToDictionary(
                             x => x.Name.ToString(),
                             x => JsonConvert.DeserializeObject<UserNote>(x.Value)
