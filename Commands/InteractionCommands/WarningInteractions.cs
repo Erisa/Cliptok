@@ -155,7 +155,7 @@ namespace Cliptok.Commands.InteractionCommands
 
                 var user = await ctx.Client.GetUserAsync((ulong)useroption.Value);
 
-                var warnings = Program.db.HashGetAll(user.Id.ToString())
+                var warnings = (await Program.db.HashGetAllAsync(user.Id.ToString()))
                     .Where(x => JsonConvert.DeserializeObject<UserWarning>(x.Value).Type == WarningType.Warning).ToDictionary(
                    x => x.Name.ToString(),
                   x => JsonConvert.DeserializeObject<UserWarning>(x.Value)

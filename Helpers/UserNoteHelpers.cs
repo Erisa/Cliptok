@@ -9,7 +9,7 @@ namespace Cliptok.Helpers
             // If provided with a set of notes, use them instead
             if (notesToUse == default)
             {
-                notes = Program.db.HashGetAll(user.Id.ToString())
+                notes = (await Program.db.HashGetAllAsync(user.Id.ToString()))
                     .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note).ToDictionary(
                         x => x.Name.ToString(),
                         x => JsonConvert.DeserializeObject<UserNote>(x.Value)

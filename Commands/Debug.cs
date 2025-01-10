@@ -31,7 +31,7 @@
                 string strOut = "";
                 if (targetUser == default)
                 {
-                    var muteList = Program.db.HashGetAll("mutes").ToDictionary();
+                    var muteList = (await Program.db.HashGetAllAsync("mutes")).ToDictionary();
                     if (muteList is null | muteList.Keys.Count == 0)
                     {
                         await ctx.RespondAsync("No mutes found in database!");
@@ -70,7 +70,7 @@
                 string strOut = "";
                 if (targetUser == default)
                 {
-                    var banList = Program.db.HashGetAll("bans").ToDictionary();
+                    var banList = (await Program.db.HashGetAllAsync("bans")).ToDictionary();
                     if (banList is null | banList.Keys.Count == 0)
                     {
                         await ctx.RespondAsync("No bans found in database!");
@@ -186,7 +186,7 @@
                 {
                     if (ulong.TryParse(key.ToString(), out ulong number))
                     {
-                        var warnings = Program.db.HashGetAll(key);
+                        var warnings = await Program.db.HashGetAllAsync(key);
                         Dictionary<long, MemberPunishment> warningdict = new();
                         foreach (var warning in warnings)
                         {

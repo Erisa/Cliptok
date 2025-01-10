@@ -193,7 +193,7 @@ namespace Cliptok.Events
                         // Add notes to message if any exist & are set to show on modmail
 
                         // Get user notes
-                        var notes = Program.db.HashGetAll(modmailMember.Id.ToString())
+                        var notes = (await Program.db.HashGetAllAsync(modmailMember.Id.ToString()))
                             .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note).ToDictionary(
                                 x => x.Name.ToString(),
                                 x => JsonConvert.DeserializeObject<UserNote>(x.Value)

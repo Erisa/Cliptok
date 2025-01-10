@@ -27,7 +27,7 @@ namespace Cliptok.Events
             LogChannelHelper.LogMessageAsync("users", $"{cfgjson.Emoji.UserJoin} **Member joined the server!** - {e.Member.Id}", userLogEmbed);
 
             // Get this user's notes that are set to show on join/leave
-            var userNotes = db.HashGetAll(e.Member.Id.ToString())
+            var userNotes = (await db.HashGetAllAsync(e.Member.Id.ToString()))
                 .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note
                         && JsonConvert.DeserializeObject<UserNote>(x.Value).ShowOnJoinAndLeave).ToDictionary(
                     x => x.Name.ToString(),
@@ -174,7 +174,7 @@ namespace Cliptok.Events
             LogChannelHelper.LogMessageAsync("users", $"{cfgjson.Emoji.UserLeave} **Member left the server!** - {e.Member.Id}", userLogEmbed);
 
             // Get this user's notes that are set to show on join/leave
-            var userNotes = db.HashGetAll(e.Member.Id.ToString())
+            var userNotes = (await db.HashGetAllAsync(e.Member.Id.ToString()))
                 .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note
                             && JsonConvert.DeserializeObject<UserNote>(x.Value).ShowOnJoinAndLeave).ToDictionary(
                     x => x.Name.ToString(),

@@ -258,7 +258,7 @@ namespace Cliptok.Commands
             {
                 if (ulong.TryParse(key.ToString(), out ulong number))
                 {
-                    counts[key.ToString()] = Program.db.HashGetAll(key).Count(x => JsonConvert.DeserializeObject<UserWarning>(x.Value.ToString()).Type == WarningType.Warning);
+                    counts[key.ToString()] = (await Program.db.HashGetAllAsync(key)).Count(x => JsonConvert.DeserializeObject<UserWarning>(x.Value.ToString()).Type == WarningType.Warning);
                 }
             }
 
@@ -291,7 +291,7 @@ namespace Cliptok.Commands
             {
                 if (ulong.TryParse(key.ToString(), out ulong number))
                 {
-                    var warningsOutput = Program.db.HashGetAll(key.ToString()).ToDictionary(
+                    var warningsOutput = (await Program.db.HashGetAllAsync(key.ToString())).ToDictionary(
                         x => x.Name.ToString(),
                         x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
                     );
