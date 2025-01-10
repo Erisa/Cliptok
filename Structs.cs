@@ -321,6 +321,9 @@
 
         [JsonProperty("mentionTrackExcludedChannels")]
         public List<ulong> MentionTrackExcludedChannels { get; private set; } = new();
+
+        [JsonProperty("pingBotOwnersOnBadErrors")]
+        public bool PingBotOwnersOnBadErrors { get; private set; } = false;
     }
 
     public enum Level { Information, Warning, Error, Debug, Verbose }

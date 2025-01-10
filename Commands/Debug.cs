@@ -615,6 +615,29 @@
                 await ctx.Channel.SendMessageAsync(await StringHelpers.CodeOrHasteBinAsync(JsonConvert.SerializeObject(memberIdsTonames, Formatting.Indented), "json"));
             }
 
+            [Command("testnre")]
+            [Description("throw a System.NullReferenceException error. dont spam this please.")]
+            [IsBotOwner]
+            public async Task ThrowNRE(CommandContext ctx, bool catchAsWarning = false)
+            {
+                if (catchAsWarning)
+                {
+                    try
+                    {
+                        throw new NullReferenceException();
+                    }
+                    catch (NullReferenceException e)
+                    {
+                        ctx.Client.Logger.LogWarning(e, "logging test NRE as warning");
+                        await ctx.RespondAsync("thrown NRE and logged as warning, check logs");
+                    }
+                }
+                else
+                {
+                    throw new NullReferenceException();
+                }
+            }
+
             private static async Task<(bool success, ulong failedOverwrite)> ImportOverridesFromChannelAsync(DiscordChannel channel)
             {
                 // Imports overrides from the specified channel to the database. See 'debug overrides import' and 'debug overrides importall'
