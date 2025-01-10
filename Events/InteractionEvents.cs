@@ -109,8 +109,16 @@ namespace Cliptok.Events
                     if (overwrites.ContainsKey(channelId.ToString()))
                     {
                         // Require extra confirmation for merging permissions!
+                        var currentAllowedPerms = (overwrites[channelId.ToString()].Allowed).ToString("name");
+                        if (string.IsNullOrWhiteSpace(currentAllowedPerms))
+                            currentAllowedPerms = "None";
+                        
+                        var currentDeniedPerms = (overwrites[channelId.ToString()].Denied).ToString("name");
+                        if (string.IsNullOrWhiteSpace(currentDeniedPerms))
+                            currentDeniedPerms = "None";
+                        
                         var mergeConfirmResponse = new DiscordMessageBuilder()
-                            .WithContent($"{cfgjson.Emoji.Warning} **Caution:** This user already has an override for <#{channelId}>! Do you want to merge the permissions? Here are their **current** permissions:\n**Allowed:** {overwrites[channelId.ToString()].Allowed}\n**Denied:** {overwrites[channelId.ToString()].Denied}")
+                            .WithContent($"{cfgjson.Emoji.Warning} **Caution:** This user already has an override for <#{channelId}>! Do you want to merge the permissions? Here are their **current** permissions:\n**Allowed:** {currentAllowedPerms}\n**Denied:** {currentDeniedPerms}")
                             .AddComponents(new DiscordButtonComponent(DiscordButtonStyle.Danger, "debug-overrides-add-merge-confirm-callback", "Merge"), new DiscordButtonComponent(DiscordButtonStyle.Primary, "debug-overrides-add-cancel-callback", "Cancel"));
 
                         await e.Message.ModifyAsync(mergeConfirmResponse);
@@ -128,7 +136,15 @@ namespace Cliptok.Events
                 overridesPendingAddition.Remove(e.Message.Id);
 
                 // Respond
-                await e.Message.ModifyAsync(new DiscordMessageBuilder().WithContent($"{cfgjson.Emoji.Success} Successfully added the following override for <@{newOverwrite.Id}> to <#{pendingOverride.ChannelId}>!\n**Allowed:** {newOverwrite.Allowed}\n**Denied:** {newOverwrite.Denied}"));
+                var allowedPermsStr = newOverwrite.Allowed.ToString("name");
+                if (string.IsNullOrWhiteSpace(allowedPermsStr))
+                    allowedPermsStr = "None";
+                
+                var deniedPermsStr = newOverwrite.Denied.ToString("name");
+                if (string.IsNullOrWhiteSpace(deniedPermsStr))
+                    deniedPermsStr = "None";
+                
+                await e.Message.ModifyAsync(new DiscordMessageBuilder().WithContent($"{cfgjson.Emoji.Success} Successfully added the following override for <@{newOverwrite.Id}> to <#{pendingOverride.ChannelId}>!\n**Allowed:** {allowedPermsStr}\n**Denied:** {deniedPermsStr}"));
             }
             else if (e.Id == "debug-overrides-add-cancel-callback")
             {
@@ -198,7 +214,15 @@ namespace Cliptok.Events
                 await db.HashSetAsync("overrides", mockOverwrite.Id, JsonConvert.SerializeObject(overwrites));
 
                 // Respond
-                await e.Message.ModifyAsync(new DiscordMessageBuilder().WithContent($"{cfgjson.Emoji.Success} Override successfully added. <@{newOverwrite.Id}> already had an override in <#{pendingOverride.ChannelId}>, so here are their new permissions:\n**Allowed:** {newOverwrite.Allowed}\n**Denied:** {newOverwrite.Denied}"));
+                var allowedPermsStr = newOverwrite.Allowed.ToString("name");
+                if (string.IsNullOrWhiteSpace(allowedPermsStr))
+                    allowedPermsStr = "None";
+                
+                var deniedPermsStr = newOverwrite.Denied.ToString("name");
+                if (string.IsNullOrWhiteSpace(deniedPermsStr))
+                    deniedPermsStr = "None";
+                
+                await e.Message.ModifyAsync(new DiscordMessageBuilder().WithContent($"{cfgjson.Emoji.Success} Override successfully added. <@{newOverwrite.Id}> already had an override in <#{pendingOverride.ChannelId}>, so here are their new permissions:\n**Allowed:** {allowedPermsStr}\n**Denied:** {deniedPermsStr}"));
             }
             else if (e.Id == "insiders-info-roles-menu-callback")
             {
