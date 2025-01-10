@@ -357,16 +357,24 @@ namespace Cliptok.Commands
                     [Description("Denied permissions. Use a permission integer. See https://discordlookup.com/permissions-calculator.")] int deniedPermissions)
                 {
                     // Confirm permission overrides before we do anything.
-                    var parsedAllowedPerms = (DiscordPermission)allowedPermissions;
-                    var parsedDeniedPerms = (DiscordPermission)deniedPermissions;
+                    var parsedAllowedPerms = new DiscordPermissions(allowedPermissions);
+                    var parsedDeniedPerms = new DiscordPermissions(deniedPermissions);
+                    
+                    var allowedPermsStr = parsedAllowedPerms.ToString("name");
+                    if (string.IsNullOrWhiteSpace(allowedPermsStr))
+                        allowedPermsStr = "None";
+                    
+                    var deniedPermsStr = parsedDeniedPerms.ToString("name");
+                    if (string.IsNullOrWhiteSpace(deniedPermsStr))
+                        deniedPermsStr = "None";
 
                     var confirmButton = new DiscordButtonComponent(DiscordButtonStyle.Success, "debug-overrides-add-confirm-callback", "Yes");
                     var cancelButton = new DiscordButtonComponent(DiscordButtonStyle.Danger, "debug-overrides-add-cancel-callback", "No");
 
                     await ctx.RespondAsync(new DiscordMessageBuilder().WithContent(
                             $"{Program.cfgjson.Emoji.ShieldHelp} Just to confirm, you want to add the following override for {user.Mention} to {channel.Mention}?\n" +
-                            $"**Allowed:** {parsedAllowedPerms}\n" +
-                            $"**Denied:** {parsedDeniedPerms}\n")
+                            $"**Allowed:** {allowedPermsStr}\n" +
+                            $"**Denied:** {deniedPermsStr}\n")
                         .AddComponents([confirmButton, cancelButton]));
                     var confirmationMessage = await ctx.GetResponseAsync();
 
