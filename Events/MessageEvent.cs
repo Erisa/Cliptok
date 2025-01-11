@@ -646,7 +646,9 @@ namespace Cliptok.Events
 
                     // attempted to ping @everyone/@here
                     var msgContent = message.Content;
-                    foreach (var letter in Checks.ListChecks.alphabetMap)
+                    foreach (var letter in Checks.ListChecks.cyrillicAlphabetMap)
+                        msgContent = msgContent.Replace(letter.Key, letter.Value);
+                    foreach (var letter in Checks.ListChecks.greekAlphabetMap)
                         msgContent = msgContent.Replace(letter.Key, letter.Value);
                     if (Program.cfgjson.EveryoneFilter && !member.Roles.Any(role => Program.cfgjson.EveryoneExcludedRoles.Contains(role.Id)) && !Program.cfgjson.EveryoneExcludedChannels.Contains(channel.Id) && (msgContent.Contains("@everyone") || msgContent.Contains("@here")))
                     {
