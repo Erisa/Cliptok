@@ -4,10 +4,10 @@ namespace Cliptok.Checks
 {
     public class ListChecks
     {
-        // Map of Cyrillic to Latin characters, to catch attempted bypasses using Cyrillic lookalikes
-        // <string, string> is <Cyrillic, Latin>
-        public static Dictionary<string, string> cyrillicAlphabetMap = new()
+        // Map of lookalike to Latin characters, to catch attempted bypasses using different language lookalikes
+        public static Dictionary<string, string> lookalikeAlphabetMap = new()
                             {
+                                // <string, string> is <Cyrillic, Latin>
                                 { "А", "A" },
                                 { "В", "B" },
                                 { "С", "C" },
@@ -47,13 +47,9 @@ namespace Cliptok.Checks
                                 { "ѡ", "w" },
                                 { "х", "x" },
                                 { "у", "y" },
-                                { "У", "y" }
-                            };
-        
-        // Map of Greek to Latin characters, to catch attempted bypasses using Greek lookalikes
-        // <string, string> is <Greek, Latin>
-        public static Dictionary<string, string> greekAlphabetMap = new()
-                            {
+                                { "У", "y" },
+
+                                // <string, string> is <Greek, Latin>
                                 { "Α", "A" },
                                 { "Β", "B" },
                                 { "Ε", "E" },
@@ -83,17 +79,13 @@ namespace Cliptok.Checks
                                 { "υ", "y" },
                                 { "ζ", "z" },
                             };
-
+        
         public static (bool success, string? flaggedWord) CheckForNaughtyWords(string input, WordListJson naughtyWordList)
         {
-            // Replace any Cyrillic letters found in message with Latin characters, if in the dictionary
-            foreach (var letter in cyrillicAlphabetMap)
+            // Replace any lookalike letters found in message with Latin characters, if in the dictionary
+            foreach (var letter in lookalikeAlphabetMap)
                 input = input.Replace(letter.Key, letter.Value);
             
-            // and Greek letters
-            foreach (var letter in greekAlphabetMap)
-                input = input.Replace(letter.Key, letter.Value);
-
             string[] naughtyWords = naughtyWordList.Words;
             input = input.Replace("\0", "");
             if (naughtyWordList.WholeWord)
