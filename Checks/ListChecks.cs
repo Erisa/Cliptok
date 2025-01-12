@@ -4,10 +4,10 @@ namespace Cliptok.Checks
 {
     public class ListChecks
     {
-        // Map of Cyrillic to Latin characters, to catch attempted bypasses using Cyrillic lookalikes
-        // <string, string> is <Cyrillic, Latin>
-        public static Dictionary<string, string> alphabetMap = new()
+        // Map of lookalike to Latin characters, to catch attempted bypasses using different language lookalikes
+        public static Dictionary<string, string> lookalikeAlphabetMap = new()
                             {
+                                // <string, string> is <Cyrillic, Latin>
                                 { "А", "A" },
                                 { "В", "B" },
                                 { "С", "C" },
@@ -47,15 +47,45 @@ namespace Cliptok.Checks
                                 { "ѡ", "w" },
                                 { "х", "x" },
                                 { "у", "y" },
-                                { "У", "y" }
-                            };
+                                { "У", "y" },
 
+                                // <string, string> is <Greek, Latin>
+                                { "Α", "A" },
+                                { "Β", "B" },
+                                { "Ε", "E" },
+                                { "Η", "H" },
+                                { "Ι", "I" },
+                                { "Κ", "K" },
+                                { "Μ", "M" },
+                                { "Ν", "N" },
+                                { "Ο", "O" },
+                                { "Ρ", "P" },
+                                { "Τ", "T" },
+                                { "Χ", "X" },
+                                { "Υ", "Y" },
+                                { "Ζ", "Z" },
+                                { "α", "a" },
+                                { "β", "b" },
+                                { "ε", "e" },
+                                { "η", "h" },
+                                { "ι", "i" },
+                                { "κ", "k" },
+                                { "μ", "m" },
+                                { "ν", "n" },
+                                { "ο", "o" },
+                                { "ρ", "p" },
+                                { "τ", "t" },
+                                { "χ", "x" },
+                                { "υ", "y" },
+                                { "ζ", "z" },
+                            };
+        
         public static (bool success, string? flaggedWord) CheckForNaughtyWords(string input, WordListJson naughtyWordList)
         {
-            // Replace any Cyrillic letters found in message with Latin characters, if in the dictionary
-            foreach (var letter in alphabetMap)
+            // Replace any lookalike letters found in message with Latin characters, if in the dictionary
+            foreach (var letter in lookalikeAlphabetMap)
                 input = input.Replace(letter.Key, letter.Value);
-
+            
             string[] naughtyWords = naughtyWordList.Words;
             input = input.Replace("\0", "");
             if (naughtyWordList.WholeWord)
