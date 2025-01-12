@@ -316,6 +316,25 @@ namespace Cliptok.Commands
             var contextChecks = cmd.Attributes.Where(x => x is ContextCheckAttribute);
             var failedChecks = new List<ContextCheckAttribute>();
 
+            // similar to home server perm check logic
+            DiscordMember member = null;
+            if (ctx.Channel.IsPrivate || ctx.Guild.Id != Program.cfgjson.ServerID)
+            {
+                var guild = await ctx.Client.GetGuildAsync(Program.cfgjson.ServerID);
+                try
+                {
+                    member = await guild.GetMemberAsync(ctx.User.Id);
+                }
+                catch (DSharpPlus.Exceptions.NotFoundException)
+                {
+                    // member is null, remember this for later
+                }
+            }
+            else
+            {
+                member = ctx.Member;
+            }
+
             foreach (var check in contextChecks)
             {
                 if (check is HomeServerAttribute homeServerAttribute)
@@ -329,13 +348,13 @@ namespace Cliptok.Commands
                 if (check is RequireHomeserverPermAttribute requireHomeserverPermAttribute)
                 {
                     // Fail if guild member is null but this cmd does not work outside of the home server
-                    if (ctx.Member is null && !requireHomeserverPermAttribute.WorkOutside)
+                    if (member is null && !requireHomeserverPermAttribute.WorkOutside)
                     {
                         failedChecks.Add(requireHomeserverPermAttribute);
                     }
                     else
                     {
-                        var level = await GetPermLevelAsync(ctx.Member);
+                        var level = await GetPermLevelAsync(member);
                         if (level < requireHomeserverPermAttribute.TargetLvl)
                         {
                             if (requireHomeserverPermAttribute.OwnerOverride && !Program.cfgjson.BotOwners.Contains(ctx.User.Id)
@@ -349,7 +368,7 @@ namespace Cliptok.Commands
 
                 if (check is RequirePermissionsAttribute requirePermissionsAttribute)
                 {
-                    if (ctx.Member is null || ctx.Guild is null
+                    if (member is null || ctx.Guild is null
                         || !ctx.Channel.PermissionsFor(ctx.Member).HasAllPermissions(requirePermissionsAttribute.UserPermissions)
                         || !ctx.Channel.PermissionsFor(ctx.Guild.CurrentMember).HasAllPermissions(requirePermissionsAttribute.BotPermissions))
                     {

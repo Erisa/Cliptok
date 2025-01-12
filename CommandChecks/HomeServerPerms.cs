@@ -25,7 +25,7 @@
 
         public static async Task<ServerPermLevel> GetPermLevelAsync(DiscordMember target)
         {
-            if (target.Guild.Id != Program.cfgjson.ServerID)
+            if (target is null || target.Guild is null || target.Guild.Id != Program.cfgjson.ServerID)
                 return ServerPermLevel.Nothing;
 
             // Torch approved of this.
