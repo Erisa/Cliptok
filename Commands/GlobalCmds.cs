@@ -142,7 +142,7 @@ namespace Cliptok.Commands
                     List<Command> eligibleCommands = [];
                     foreach (Command? candidateCommand in commandsToSearch)
                     {
-                        var executionChecks = candidateCommand.Attributes.Where(x => x is ContextCheckAttribute) as List<ContextCheckAttribute>;
+                        var executionChecks = candidateCommand.Attributes.Where(x => x is ContextCheckAttribute);
                         
                         if (executionChecks == null || !executionChecks.Any())
                         {
