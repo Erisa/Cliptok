@@ -419,11 +419,11 @@ namespace Cliptok.Events
 
                             if ((await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && disallowedInviteCodes.Contains(code))
                             {
-                                //match = await InviteCheck(invite, message, client);
                                 if (!match)
                                 {
                                     string reason = "Sent an unapproved invite";
                                     await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock);
+                                    match = true;
                                 }
                                 break;
                             }
@@ -493,7 +493,6 @@ namespace Cliptok.Events
                         }
 
                     }
-
 
                     if (match)
                         return;
