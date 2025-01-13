@@ -337,18 +337,20 @@ namespace Cliptok.Commands
 
             foreach (var check in contextChecks)
             {
-                if (check is HomeServerAttribute homeServerAttribute)
+                // if command requiring homes erver is used outside, fail the check
+                if (check is HomeServerAttribute homeServerAttribute
+                    && (ctx.Channel.IsPrivate || ctx.Guild is null || ctx.Guild.Id != Program.cfgjson.ServerID)
+                   )
                 {
-                    if (ctx.Channel.IsPrivate || ctx.Guild is null || ctx.Guild.Id != Program.cfgjson.ServerID)
-                    {
-                        failedChecks.Add(homeServerAttribute);
-                    }
+                    failedChecks.Add(homeServerAttribute);
                 }
                 
                 if (check is RequireHomeserverPermAttribute requireHomeserverPermAttribute)
                 {
-                    // Fail if guild member is null but this cmd does not work outside of the home server
-                    if (member is null && !requireHomeserverPermAttribute.WorkOutside)
+                    // Fail if guild is wrong but this command does not work outside of the home server
+                    if (
+                        (ctx.Channel.IsPrivate || ctx.Guild is null || ctx.Guild.Id != Program.cfgjson.ServerID)
+                        && !requireHomeserverPermAttribute.WorkOutside)
                     {
                         failedChecks.Add(requireHomeserverPermAttribute);
                     }
