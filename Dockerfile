@@ -26,7 +26,7 @@ FROM mcr.microsoft.com/dotnet/runtime:9.0.0-alpine3.20
 LABEL com.centurylinklabs.watchtower.enable=true
 WORKDIR /app
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
-RUN apk add --no-cache git redis openssh
+RUN apk add --no-cache git redis openssh icu-libs
 RUN git config --global --add safe.directory /app/Lists/Private
 COPY --from=build-env /app/out .
 ADD Lists ./Lists
