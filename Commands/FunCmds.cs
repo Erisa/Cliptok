@@ -1,30 +1,96 @@
-﻿namespace Cliptok.Commands
+using Cliptok.Constants;
+
+namespace Cliptok.Commands
 {
-    internal class FunCmds : BaseCommandModule
+    public class FunCmds
     {
-        [Command("tellraw")]
-        [Description("Nothing of interest.")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task TellRaw(CommandContext ctx, [Description("???")] DiscordChannel discordChannel, [RemainingText, Description("???")] string output)
+        [Command("Hug")]
+        [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
+        [AllowedProcessors(typeof(UserCommandProcessor))]
+        public async Task Hug(UserCommandContext ctx, DiscordUser targetUser)
         {
+            var user = targetUser;
+
+            if (user is not null)
+            {
+                switch (new Random().Next(4))
+                {
+                    case 0:
+                        await ctx.RespondAsync($"*{ctx.User.Mention} snuggles {user.Mention}*");
+                        break;
+
+                    case 1:
+                        await ctx.RespondAsync($"*{ctx.User.Mention} huggles {user.Mention}*");
+                        break;
+
+                    case 2:
+                        await ctx.RespondAsync($"*{ctx.User.Mention} cuddles {user.Mention}*");
+                        break;
+
+                    case 3:
+                        await ctx.RespondAsync($"*{ctx.User.Mention} hugs {user.Mention}*");
+                        break;
+                }
+            }
+        }
+
+        [Command("tellraw")]
+        [Description("You know what you're here for.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
+        [RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        public async Task TellRaw(CommandContext ctx, [Parameter("channel"), Description("Either mention or ID. Not a name.")] string discordChannel, [Parameter("input"), Description("???")] string input, [Parameter("reply_msg_id"), Description("ID of message to use in a reply context.")] string replyID = "0", [Parameter("pingreply"), Description("Ping pong.")] bool pingreply = true)
+        {
+            DiscordChannel channelObj = default;
+            ulong channelId;
+            if (!ulong.TryParse(discordChannel, out channelId))
+            {
+                var captures = RegexConstants.channel_rx.Match(discordChannel).Groups[1].Captures;
+                if (captures.Count > 0)
+                    channelId = Convert.ToUInt64(captures[0].Value);
+                else
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} The channel you gave can't be parsed. Please give either an ID or a mention of a channel.", ephemeral: true);
+                    return;
+                }
+            }
             try
             {
-                await discordChannel.SendMessageAsync(output);
+                channelObj = await ctx.Client.GetChannelAsync(channelId);
             }
             catch
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Your dumb message didn't want to send. Congrats, I'm proud of you.");
+                // caught immediately after
+            }
+            if (channelObj == default)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I can't find a channel with the provided ID!", ephemeral: true);
                 return;
             }
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} I sent your stupid message to {discordChannel.Mention}.");
 
+            try
+            {
+                await channelObj.SendMessageAsync(new DiscordMessageBuilder().WithContent(input).WithReply(Convert.ToUInt64(replyID), pingreply, false));
+            }
+            catch
+            {
+                await ctx.RespondAsync($"Your dumb message didn't want to send. Congrats, I'm proud of you.", ephemeral: true);
+                return;
+            }
+            await ctx.RespondAsync($"I sent your stupid message to {channelObj.Mention}.", ephemeral: true);
+            await LogChannelHelper.LogMessageAsync("secret",
+                new DiscordMessageBuilder()
+                .WithContent($"{ctx.User.Mention} used tellraw in {channelObj.Mention}:")
+                .WithAllowedMentions(Mentions.None)
+                .AddEmbed(new DiscordEmbedBuilder().WithDescription(input))
+            );
         }
 
-        [Command("no")]
+        [Command("notextcmd")]
+        [TextAlias("no", "yes")]
         [Description("Makes Cliptok choose something for you. Outputs either Yes or No.")]
-        [Aliases("yes")]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Tier5)]
-        public async Task No(CommandContext ctx)
+        public async Task No(TextCommandContext ctx)
         {
             List<string> noResponses = new()
             {

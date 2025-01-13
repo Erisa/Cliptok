@@ -1,8 +1,8 @@
 using DSharpPlus.Extensions;
 using DSharpPlus.Net.Gateway;
-using DSharpPlus.SlashCommands;
 using Serilog.Sinks.Grafana.Loki;
 using System.Reflection;
+using DSharpPlus.Commands.Processors.TextCommands.Parsing;
 
 namespace Cliptok
 {
@@ -35,10 +35,9 @@ namespace Cliptok
 
     }
 
-    class Program : BaseCommandModule
+    class Program
     {
         public static DiscordClient discord;
-        static CommandsNextExtension commands;
         public static Random rnd = new();
         public static ConfigJson cfgjson;
         public static ConnectionMultiplexer redis;
@@ -171,19 +170,38 @@ namespace Cliptok
             discordBuilder.ConfigureServices(services =>
             {
                 services.Replace<IGatewayController, GatewayController>();
-#pragma warning disable CS0618 // Type or member is obsolete
-                services.AddSlashCommandsExtension(slash =>
-                {
-                slash.SlashCommandErrored += InteractionEvents.SlashCommandErrorEvent;
-                slash.ContextMenuErrored += InteractionEvents.ContextCommandErrorEvent;
-
-                var slashCommandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands.InteractionCommands" && !t.IsNested);
-                foreach (var type in slashCommandClasses)
-                    slash.RegisterCommands(type, cfgjson.ServerID);
-                });
             });
 
-#pragma warning restore CS0618 // Type or member is obsolete
+            discordBuilder.UseCommands((_, builder) =>
+            {
+                builder.CommandErrored += ErrorEvents.CommandErrored;
+
+                // Register commands
+                var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands");
+                foreach (var type in commandClasses)
+                    if (type.Name == "GlobalCmds")
+                        builder.AddCommands(type);
+                    else
+                        builder.AddCommands(type, cfgjson.ServerID);
+
+                // Register command checks
+                builder.AddCheck<HomeServerCheck>();
+                builder.AddCheck<RequireHomeserverPermCheck>();
+                builder.AddCheck<IsBotOwnerCheck>();
+                builder.AddCheck<UserRolesPresentCheck>();
+
+                // Set custom prefixes from config.json
+                TextCommandProcessor textCommandProcessor = new(new TextCommandConfiguration
+                {
+                    PrefixResolver = new DefaultPrefixResolver(true, Program.cfgjson.Core.Prefixes.ToArray()).ResolvePrefixAsync
+                });
+                builder.AddProcessor(textCommandProcessor);
+            }, new CommandsConfiguration
+            {
+                // Disable the default D#+ error handler because we are using our own
+                UseDefaultCommandErrorHandler = false
+            });
+
             discordBuilder.ConfigureExtraFeatures(clientConfig =>
             {
                 clientConfig.LogUnknownEvents = false;
@@ -214,18 +232,6 @@ namespace Cliptok
                                   .HandleChannelDeleted(ChannelEvents.ChannelDeleted)
                                   .HandleAutoModerationRuleExecuted(AutoModEvents.AutoModerationRuleExecuted)
             );
-
-            discordBuilder.UseCommandsNext(commands =>
-            {
-                var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands" && !t.IsNested);
-                foreach (var type in commandClasses)
-                    commands.RegisterCommands(type);
-
-                commands.CommandErrored += ErrorEvents.CommandsNextService_CommandErrored;
-            }, new CommandsNextConfiguration
-            {
-                StringPrefixes = cfgjson.Core.Prefixes
-            });
 
             // TODO(erisa): At some point we might be forced to ConnectAsync() the builder directly
             // and then we will need to rework some other pieces that rely on Program.discord

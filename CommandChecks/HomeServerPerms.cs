@@ -25,7 +25,7 @@
 
         public static async Task<ServerPermLevel> GetPermLevelAsync(DiscordMember target)
         {
-            if (target.Guild.Id != Program.cfgjson.ServerID)
+            if (target is null || target.Guild is null || target.Guild.Id != Program.cfgjson.ServerID)
                 return ServerPermLevel.Nothing;
 
             // Torch approved of this.
@@ -66,7 +66,7 @@
         }
 
         [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-        public class RequireHomeserverPermAttribute : CheckBaseAttribute
+        public class RequireHomeserverPermAttribute : ContextCheckAttribute
         {
             public ServerPermLevel TargetLvl { get; set; }
             public bool WorkOutside { get; set; }
@@ -79,16 +79,19 @@
                 OwnerOverride = ownerOverride;
                 TargetLvl = targetlvl;
             }
+        }
 
-            public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
+        public class RequireHomeserverPermCheck : IContextCheck<RequireHomeserverPermAttribute>
+        {
+            public async ValueTask<string?> ExecuteCheckAsync(RequireHomeserverPermAttribute attribute, CommandContext ctx)
             {
                 // If the command is supposed to stay within the server and its being used outside, fail silently
-                if (!WorkOutside && (ctx.Channel.IsPrivate || ctx.Guild.Id != Program.cfgjson.ServerID))
-                    return false;
+                if (!attribute.WorkOutside && (ctx.Channel.IsPrivate || ctx.Guild.Id != Program.cfgjson.ServerID))
+                    return "This command must be used in the home server, but was executed outside of it.";
 
                 // bot owners can bypass perm checks ONLY if the command allows it.
-                if (OwnerOverride && Program.cfgjson.BotOwners.Contains(ctx.User.Id))
-                    return true;
+                if (attribute.OwnerOverride && Program.cfgjson.BotOwners.Contains(ctx.User.Id))
+                    return null;
 
                 DiscordMember member;
                 if (ctx.Channel.IsPrivate || ctx.Guild.Id != Program.cfgjson.ServerID)
@@ -100,7 +103,7 @@
                     }
                     catch (DSharpPlus.Exceptions.NotFoundException)
                     {
-                        return false;
+                        return "The invoking user must be a member of the home server; they are not.";
                     }
                 }
                 else
@@ -109,58 +112,21 @@
                 }
 
                 var level = await GetPermLevelAsync(member);
-                if (level >= TargetLvl)
-                    return true;
+                if (level >= attribute.TargetLvl)
+                    return null;
 
-                else if (!help && ctx.Command.QualifiedName != "edit")
-                {
-                    var levelText = level.ToString();
-                    if (level == ServerPermLevel.Nothing && Program.rand.Next(1, 100) == 69)
-                        levelText = $"naught but a thing, my dear human. Congratulations, you win {Program.rand.Next(1, 10)} bonus points.";
-
-                    await ctx.RespondAsync(
-                        $"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{ctx.Command.Name}**!\n" +
-                        $"Required: `{TargetLvl}`\nYou have: `{levelText}`");
-                }
-                return false;
+                return "The invoking user does not have permission to use this command.";
             }
         }
 
-        public class HomeServerAttribute : CheckBaseAttribute
+        public class HomeServerAttribute : ContextCheckAttribute;
+
+        public class HomeServerCheck : IContextCheck<HomeServerAttribute>
         {
-            public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
+            public async ValueTask<string?> ExecuteCheckAsync(HomeServerAttribute attribute, CommandContext ctx)
             {
-                return !ctx.Channel.IsPrivate && ctx.Guild.Id == Program.cfgjson.ServerID;
+                return !ctx.Channel.IsPrivate && ctx.Guild.Id == Program.cfgjson.ServerID ? null : "This command must be used in the home server, but was executed outside of it.";
             }
         }
-
-        public class SlashRequireHomeserverPermAttribute : SlashCheckBaseAttribute
-        {
-            public ServerPermLevel TargetLvl;
-            public bool OwnerOverride;
-
-            public SlashRequireHomeserverPermAttribute(ServerPermLevel targetlvl, bool ownerOverride = false)
-            {
-                TargetLvl = targetlvl;
-                OwnerOverride = ownerOverride;
-            }
-
-            public override async Task<bool> ExecuteChecksAsync(InteractionContext ctx)
-            {
-                if (ctx.Guild.Id != Program.cfgjson.ServerID)
-                    return false;
-                
-                // bot owners can bypass perm checks ONLY if the command allows it.
-                if (OwnerOverride && Program.cfgjson.BotOwners.Contains(ctx.User.Id))
-                    return true;
-
-                var level = await GetPermLevelAsync(ctx.Member);
-                if (level >= TargetLvl)
-                    return true;
-                else
-                    return false;
-            }
-        }
-
     }
 }

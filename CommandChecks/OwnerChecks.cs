@@ -1,20 +1,18 @@
 ﻿namespace Cliptok.CommandChecks
 {
-    public class IsBotOwnerAttribute : CheckBaseAttribute
+    public class IsBotOwnerAttribute : ContextCheckAttribute;
+
+    public class IsBotOwnerCheck : IContextCheck<IsBotOwnerAttribute>
     {
-        public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
+        public async ValueTask<string?> ExecuteCheckAsync(IsBotOwnerAttribute attribute, CommandContext ctx)
         {
             if (Program.cfgjson.BotOwners.Contains(ctx.User.Id))
             {
-                return true;
+                return null;
             }
             else
             {
-                if (!help)
-                {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.NoPermissions} This command is only accessible to bot owners.");
-                }
-                return false;
+                return "Bot owner-only command was executed by a non-owner.";
             }
         }
     }

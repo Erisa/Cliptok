@@ -32,7 +32,7 @@ namespace Cliptok.Events
             }
             else if (e.Id == "clear-confirm-callback")
             {
-                Dictionary<ulong, List<DiscordMessage>> messagesToClear = Commands.InteractionCommands.ClearInteractions.MessagesToClear;
+                Dictionary<ulong, List<DiscordMessage>> messagesToClear = Commands.ClearCmds.MessagesToClear;
 
                 if (!messagesToClear.ContainsKey(e.Message.Id))
                 {
@@ -70,7 +70,7 @@ namespace Cliptok.Events
             {
                 await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredMessageUpdate);
 
-                var overridesPendingAddition = Commands.Debug.OverridesPendingAddition;
+                var overridesPendingAddition = Commands.DebugCmds.OverridesPendingAddition;
                 if (!overridesPendingAddition.ContainsKey(e.Message.Id))
                 {
                     await e.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{cfgjson.Emoji.Error} {e.User.Mention}, this action has already been completed!").WithReply(e.Message.Id));
@@ -150,7 +150,7 @@ namespace Cliptok.Events
             {
                 await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredMessageUpdate);
 
-                var overridesPendingAddition = Commands.Debug.OverridesPendingAddition;
+                var overridesPendingAddition = Commands.DebugCmds.OverridesPendingAddition;
                 if (!overridesPendingAddition.ContainsKey(e.Message.Id))
                 {
                     await e.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{cfgjson.Emoji.Error} {e.User.Mention}, this action has already been completed!").WithReply(e.Message.Id));
@@ -173,7 +173,7 @@ namespace Cliptok.Events
 
                 await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredMessageUpdate);
 
-                var overridesPendingAddition = Commands.Debug.OverridesPendingAddition;
+                var overridesPendingAddition = Commands.DebugCmds.OverridesPendingAddition;
                 if (!overridesPendingAddition.ContainsKey(e.Message.Id))
                 {
                     await e.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{cfgjson.Emoji.Error} {e.User.Mention}, this action has already been completed!").WithReply(e.Message.Id));
@@ -408,54 +408,27 @@ namespace Cliptok.Events
 
         }
 
-        public static async Task SlashCommandErrorEvent(SlashCommandsExtension _, DSharpPlus.SlashCommands.EventArgs.SlashCommandErrorEventArgs e)
+        public static async Task SlashCommandErrored(CommandErroredEventArgs e)
         {
-            if (e.Exception is SlashExecutionChecksFailedException slex)
+            if (e.Exception is ChecksFailedException slex)
             {
-                foreach (var check in slex.FailedChecks)
-                    if (check is SlashRequireHomeserverPermAttribute att && e.Context.CommandName != "edit")
+                foreach (var check in slex.Errors)
+                    if (check.ContextCheckAttribute is RequireHomeserverPermAttribute att && e.Context.Command.Name != "edit")
                     {
                         var level = (await GetPermLevelAsync(e.Context.Member));
                         var levelText = level.ToString();
                         if (level == ServerPermLevel.Nothing && rand.Next(1, 100) == 69)
                             levelText = $"naught but a thing, my dear human. Congratulations, you win {rand.Next(1, 10)} bonus points.";
 
-                        await e.Context.CreateResponseAsync(
-                            DiscordInteractionResponseType.ChannelMessageWithSource,
-                            new DiscordInteractionResponseBuilder().WithContent(
-                                $"{cfgjson.Emoji.NoPermissions} Invalid permission level to use command **{e.Context.CommandName}**!\n" +
+                        await e.Context.RespondAsync(new DiscordInteractionResponseBuilder().WithContent(
+                                $"{cfgjson.Emoji.NoPermissions} Invalid permission level to use command **{e.Context.Command.Name}**!\n" +
                                 $"Required: `{att.TargetLvl}`\n" +
                                 $"You have: `{levelText}`")
                                 .AsEphemeral(true)
                             );
                     }
             }
-            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of interaction command {command} by {user}", e.Context.CommandName, $"{DiscordHelpers.UniqueUsername(e.Context.User)}");
-        }
-
-        public static async Task ContextCommandErrorEvent(SlashCommandsExtension _, DSharpPlus.SlashCommands.EventArgs.ContextMenuErrorEventArgs e)
-        {
-            if (e.Exception is SlashExecutionChecksFailedException slex)
-            {
-                foreach (var check in slex.FailedChecks)
-                    if (check is SlashRequireHomeserverPermAttribute att && e.Context.CommandName != "edit")
-                    {
-                        var level = (await GetPermLevelAsync(e.Context.Member));
-                        var levelText = level.ToString();
-                        if (level == ServerPermLevel.Nothing && rand.Next(1, 100) == 69)
-                            levelText = $"naught but a thing, my dear human. Congratulations, you win {rand.Next(1, 10)} bonus points.";
-
-                        await e.Context.CreateResponseAsync(
-                            DiscordInteractionResponseType.ChannelMessageWithSource,
-                            new DiscordInteractionResponseBuilder().WithContent(
-                                $"{cfgjson.Emoji.NoPermissions} Invalid permission level to use command **{e.Context.CommandName}**!\n" +
-                                $"Required: `{att.TargetLvl}`\n" +
-                                $"You have: `{levelText}`")
-                                .AsEphemeral(true)
-                            );
-                    }
-            }
-            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of context command {command} by {user}", e.Context.CommandName, $"{DiscordHelpers.UniqueUsername(e.Context.User)}");
+            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of interaction command {command} by {user}", e.Context.Command.Name, $"{DiscordHelpers.UniqueUsername(e.Context.User)}");
         }
 
     }

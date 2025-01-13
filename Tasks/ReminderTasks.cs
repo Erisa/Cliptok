@@ -8,7 +8,7 @@
             foreach (var reminder in Program.db.ListRange("reminders", 0, -1))
             {
                 bool DmFallback = false;
-                var reminderObject = JsonConvert.DeserializeObject<Commands.Reminders.Reminder>(reminder);
+                var reminderObject = JsonConvert.DeserializeObject<Commands.GlobalCmds.Reminder>(reminder);
                 if (reminderObject.ReminderTime <= DateTime.Now)
                 {
                     var user = await Program.discord.GetUserAsync(reminderObject.UserID);
