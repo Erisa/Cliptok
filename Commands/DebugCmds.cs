@@ -247,9 +247,79 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(list));
             }
 
-            [Command("overrides")]
+            [Command("dmchannel")]
+            [Description("Create or find a DM channel ID for a user.")]
+            [IsBotOwner]
+            public async Task GetDMChannel(TextCommandContext ctx, DiscordUser user)
+            {
+                var dmChannel = await user.CreateDmChannelAsync();
+                await ctx.RespondAsync(dmChannel.Id.ToString());
+            }
+
+            [Command("dumpdmchannels")]
+            [Description("Dump all DM channels")]
+            [IsBotOwner]
+            public async Task DumpDMChannels(TextCommandContext ctx)
+            {
+                var dmChannels = ctx.Client.PrivateChannels;
+
+                var json = JsonConvert.SerializeObject(dmChannels, Formatting.Indented);
+
+                await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(json, "json"));
+            }
+
+            [Command("searchmembers")]
+            [Description("Search member list with a regex. Restricted to bot owners bc regexes are scary.")]
+            [IsBotOwner]
+            public async Task SearchMembersCmd(TextCommandContext ctx, string regex)
+            {
+                var rx = new Regex(regex);
+
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it. This will take a while.");
+                var msg = await ctx.GetResponseAsync();
+                var discordMembers = await ctx.Guild.GetAllMembersAsync().ToListAsync();
+
+                var matchedMembers = discordMembers.Where(discordMember => discordMember.Username is not null && rx.IsMatch(discordMember.Username)).ToList();
+
+                Dictionary<ulong, string> memberIdsTonames = matchedMembers.Select(member => new KeyValuePair<ulong, string>(member.Id, member.Username)).ToDictionary(x => x.Key, x => x.Value);
+
+                _ = msg.DeleteAsync();
+                await ctx.Channel.SendMessageAsync(await StringHelpers.CodeOrHasteBinAsync(JsonConvert.SerializeObject(memberIdsTonames, Formatting.Indented), "json"));
+            }
+
+            [Command("testnre")]
+            [Description("throw a System.NullReferenceException error. dont spam this please.")]
+            [IsBotOwner]
+            public async Task ThrowNRE(TextCommandContext ctx, bool catchAsWarning = false)
+            {
+                if (catchAsWarning)
+                {
+                    try
+                    {
+                        throw new NullReferenceException();
+                    }
+                    catch (NullReferenceException e)
+                    {
+                        ctx.Client.Logger.LogWarning(e, "logging test NRE as warning");
+                        await ctx.RespondAsync("thrown NRE and logged as warning, check logs");
+                    }
+                }
+                else
+                {
+                    throw new NullReferenceException();
+                }
+            }
+
+        }
+        
+        class OverridesCmd
+        {
+            // This is outside of the debug class/group to avoid issues caused by DSP.Commands that are out of our control
+            [Command("debugoverrides")]
+            [TextAlias("overrides")]
             [Description("Commands for managing stored permission overrides.")]
             [AllowedProcessors(typeof(TextCommandProcessor))]
+            [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
             public class Overrides
             {
                 [DefaultGroupCommand]
@@ -488,12 +558,13 @@ namespace Cliptok.Commands
                 [Command("dump")]
                 [Description("Dump all of a channel's overrides from Discord or the database.")]
                 [IsBotOwner]
+                [AllowedProcessors(typeof(TextCommandProcessor))]
                 public class DumpChannelOverrides
                 {
                     [DefaultGroupCommand]
                     [Command("discord")]
                     [Description("Dump all of a channel's overrides as they exist on the Discord channel. Does not read from db.")]
-                    public async Task DumpFromDiscord(CommandContext ctx,
+                    public async Task DumpFromDiscord(TextCommandContext ctx,
                         [Description("The channel to dump overrides for.")] DiscordChannel channel)
                     {
                         var overwrites = channel.PermissionOverwrites;
@@ -510,7 +581,7 @@ namespace Cliptok.Commands
                     [Command("db")]
                     [TextAlias("database")]
                     [Description("Dump all of a channel's overrides as they are stored in the db.")]
-                    public async Task DumpFromDb(CommandContext ctx,
+                    public async Task DumpFromDb(TextCommandContext ctx,
                         [Description("The channel to dump overrides for.")] DiscordChannel channel)
                     {
                         List<DiscordOverwrite> overwrites = new();
@@ -592,70 +663,7 @@ namespace Cliptok.Commands
                     await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Done! Cleaned up {removedOverridesCount} overrides.");
                 }
             }
-
-            [Command("dmchannel")]
-            [Description("Create or find a DM channel ID for a user.")]
-            [IsBotOwner]
-            public async Task GetDMChannel(TextCommandContext ctx, DiscordUser user)
-            {
-                var dmChannel = await user.CreateDmChannelAsync();
-                await ctx.RespondAsync(dmChannel.Id.ToString());
-            }
-
-            [Command("dumpdmchannels")]
-            [Description("Dump all DM channels")]
-            [IsBotOwner]
-            public async Task DumpDMChannels(TextCommandContext ctx)
-            {
-                var dmChannels = ctx.Client.PrivateChannels;
-
-                var json = JsonConvert.SerializeObject(dmChannels, Formatting.Indented);
-
-                await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(json, "json"));
-            }
-
-            [Command("searchmembers")]
-            [Description("Search member list with a regex. Restricted to bot owners bc regexes are scary.")]
-            [IsBotOwner]
-            public async Task SearchMembersCmd(TextCommandContext ctx, string regex)
-            {
-                var rx = new Regex(regex);
-
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it. This will take a while.");
-                var msg = await ctx.GetResponseAsync();
-                var discordMembers = await ctx.Guild.GetAllMembersAsync().ToListAsync();
-
-                var matchedMembers = discordMembers.Where(discordMember => discordMember.Username is not null && rx.IsMatch(discordMember.Username)).ToList();
-
-                Dictionary<ulong, string> memberIdsTonames = matchedMembers.Select(member => new KeyValuePair<ulong, string>(member.Id, member.Username)).ToDictionary(x => x.Key, x => x.Value);
-
-                _ = msg.DeleteAsync();
-                await ctx.Channel.SendMessageAsync(await StringHelpers.CodeOrHasteBinAsync(JsonConvert.SerializeObject(memberIdsTonames, Formatting.Indented), "json"));
-            }
-
-            [Command("testnre")]
-            [Description("throw a System.NullReferenceException error. dont spam this please.")]
-            [IsBotOwner]
-            public async Task ThrowNRE(TextCommandContext ctx, bool catchAsWarning = false)
-            {
-                if (catchAsWarning)
-                {
-                    try
-                    {
-                        throw new NullReferenceException();
-                    }
-                    catch (NullReferenceException e)
-                    {
-                        ctx.Client.Logger.LogWarning(e, "logging test NRE as warning");
-                        await ctx.RespondAsync("thrown NRE and logged as warning, check logs");
-                    }
-                }
-                else
-                {
-                    throw new NullReferenceException();
-                }
-            }
-
+            
             private static async Task<(bool success, ulong failedOverwrite)> ImportOverridesFromChannelAsync(DiscordChannel channel)
             {
                 // Imports overrides from the specified channel to the database. See 'debug overrides import' and 'debug overrides importall'
@@ -701,7 +709,6 @@ namespace Cliptok.Commands
 
                 return (true, 0);
             }
-
         }
     }
 }
