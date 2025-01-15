@@ -6,6 +6,8 @@
 		<LangVersion>13.0</LangVersion>
 		<UserSecretsId>d9345310-5908-4697-8613-28a24d06d183</UserSecretsId>
 
+		<InvariantGlobalization>false</InvariantGlobalization>
+		
 		<!-- <RestoreAdditionalProjectSources>
 			https://www.myget.org/F/erisa/api/v3/index.json
 		</RestoreAdditionalProjectSources> -->
@@ -13,8 +15,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="Abyssal.HumanDateParser" Version="2.0.0-20191113.1" />
-		<PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02448" />
-		<PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02448" />
+		<PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02449" />
+		<PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02449" />
 		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.1" />
