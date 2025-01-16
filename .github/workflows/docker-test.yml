@@ -25,9 +25,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-iteration3-${{ github.sha }}
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-buildx-iteration3-
+            ${{ runner.os }}-buildx-
       -
         name: Build and push
         uses: docker/build-push-action@v5
