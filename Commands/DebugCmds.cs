@@ -310,6 +310,17 @@ namespace Cliptok.Commands
                 }
             }
 
+            [Command("warningcache")]
+            [Description("Dump the most recent manual warning")]
+            public async Task WarningCacheCmd(TextCommandContext ctx)
+            {
+                if (WarningHelpers.mostRecentWarning is null)
+                {
+                    await ctx.RespondAsync("No cached warning found.");
+                    return;
+                }
+                await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(JsonConvert.SerializeObject(WarningHelpers.mostRecentWarning, Formatting.Indented), "json"));
+            }
         }
         
         class OverridesCmd

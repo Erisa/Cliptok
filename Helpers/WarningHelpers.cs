@@ -2,6 +2,8 @@
 {
     public class WarningHelpers
     {
+        public static UserWarning mostRecentWarning;
+
         public static async Task<DiscordEmbed> GenerateWarningsEmbedAsync(DiscordUser targetUser)
         {
             var warningsOutput = (await Program.db.HashGetAllAsync(targetUser.Id.ToString()))
@@ -233,9 +235,16 @@
 
             Program.db.HashSet(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
 
+            // Now that the warning is in DM, prevent future collisions by caching it.
+            if (!modUser.IsBot)
+            {
+                mostRecentWarning = warning;
             // If warning is automatic (if responsible moderator is a bot), add to list so the context message can be more-easily deleted later
-            if (modUser.IsBot)
+            }
+            else
+            {
                 Program.db.HashSet("automaticWarnings", warningId, JsonConvert.SerializeObject(warning));
+            }
 
             LogChannelHelper.LogMessageAsync("mod",
                 new DiscordMessageBuilder()

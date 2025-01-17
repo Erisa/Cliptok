@@ -28,6 +28,9 @@
 
         [JsonProperty("type")]
         public WarningType Type { get; set; }
+
+        [JsonProperty("stub")]
+        public bool Stub { get; set; } = false;
     }
 
     public class MessageReference
