@@ -34,11 +34,12 @@
                     .WithColor(color: DiscordColor.DarkGreen);
             else
             {
+                TimeSpan timeToCheck = TimeSpan.FromDays(Program.cfgjson.WarningDaysThreshold);
                 foreach (string key in keys)
                 {
                     UserWarning warning = warningsOutput[key];
                     TimeSpan span = DateTime.Now - warning.WarnTimestamp;
-                    if (span.Days < 31)
+                    if (span <= timeToCheck)
                     {
                         recentCount += 1;
                     }
@@ -77,7 +78,7 @@
 
                     embed.AddField($"Last {Program.cfgjson.RecentWarningsPeriodHours} hours", hourRecentMatches.Count().ToString(), true);
 
-                    embed.AddField("Last 30 days", recentCount.ToString(), true)
+                    embed.AddField($"Last {Program.cfgjson.WarningDaysThreshold} days", recentCount.ToString(), true)
                         .AddField("Total", keys.Count().ToString(), true);
                 }
 
