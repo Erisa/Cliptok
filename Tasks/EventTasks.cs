@@ -415,6 +415,8 @@ namespace Cliptok.Tasks
             {
                 // Member is not in the server
                 // isMemberInServer is already false
+                
+                Program.discord.Logger.LogInformation(Program.CliptokEventID, "Failed to fetch member {userId} during override persistence checks. This and the accompanying 404 are expected if the user is not in the server.", userId);
             }
             
             return isMemberInServer;
