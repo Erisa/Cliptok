@@ -363,7 +363,7 @@ namespace Cliptok.Commands
         ]
         public async Task WarnCmd(
             TextCommandContext ctx,
-            [Description("The user you are warning. Accepts many formats.")] DiscordUser targetUser,
+            [Description("The user you are warning. Should be a mention or ID..")] DiscordUser targetUser,
             [RemainingText, Description("The reason for giving this warning.")] string reason = null
         )
         {
@@ -411,7 +411,7 @@ namespace Cliptok.Commands
         public async Task AnonWarnCmd(
             TextCommandContext ctx,
             [Description("The channel you wish for the warning message to appear in.")] DiscordChannel targetChannel,
-            [Description("The user you are warning. Accepts many formats.")] DiscordUser targetUser,
+            [Description("The user you are warning. Should be a mention or ID..")] DiscordUser targetUser,
             [RemainingText, Description("The reason for giving this warning.")] string reason = null
         )
         {
@@ -450,7 +450,7 @@ namespace Cliptok.Commands
         ]
         public async Task WarningCmd(
             TextCommandContext ctx,
-            [Description("The user you want to look up warnings for. Accepts many formats.")] DiscordUser targetUser = null
+            [Description("The user you want to look up warnings for. Should be a mention or ID..")] DiscordUser targetUser = null
         )
         {
             if (targetUser is null)
@@ -468,7 +468,7 @@ namespace Cliptok.Commands
         ]
         public async Task DelwarnCmd(
             TextCommandContext ctx,
-            [Description("The user you're removing a warning from. Accepts many formats.")] DiscordUser targetUser,
+            [Description("The user you're removing a warning from. Should be a mention or ID..")] DiscordUser targetUser,
             [Description("The ID of the warning you want to delete.")] long warnId
         )
         {
@@ -514,7 +514,7 @@ namespace Cliptok.Commands
         ]
         public async Task WarnlookupCmd(
             TextCommandContext ctx,
-            [Description("The user you're looking at a warning for. Accepts many formats.")] DiscordUser targetUser,
+            [Description("The user you're looking at a warning for. Should be a mention or ID..")] DiscordUser targetUser,
             [Description("The ID of the warning you want to see")] long warnId
         )
         {
@@ -535,7 +535,7 @@ namespace Cliptok.Commands
         ]
         public async Task WarnDetailsCmd(
             TextCommandContext ctx,
-            [Description("The user you're looking up detailed warn information for. Accepts many formats.")] DiscordUser targetUser,
+            [Description("The user you're looking up detailed warn information for. Should be a mention or ID..")] DiscordUser targetUser,
             [Description("The ID of the warning you're looking at in detail.")] long warnId
         )
         {
@@ -563,7 +563,7 @@ namespace Cliptok.Commands
         ]
         public async Task EditwarnCmd(
             TextCommandContext ctx,
-            [Description("The user you're editing a warning for. Accepts many formats.")] DiscordUser targetUser,
+            [Description("The user you're editing a warning for. Should be a mention or ID..")] DiscordUser targetUser,
             [Description("The ID of the warning you want to edit.")] long warnId,
             [RemainingText, Description("The new reason for the warning.")] string newReason)
         {

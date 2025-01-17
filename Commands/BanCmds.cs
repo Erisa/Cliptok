@@ -207,7 +207,7 @@ namespace Cliptok.Commands
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.BanMembers)]
         public async Task BanCmd(TextCommandContext ctx,
-         [Description("The user you wish to ban. Accepts many formats")] DiscordUser targetMember,
+         [Description("The user you wish to ban. Should be a mention or ID.")] DiscordUser targetMember,
          [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling' NOTE: Add 'appeal' to the start of the reason to include an appeal link")] string timeAndReason = "No reason specified.")
         {
 
@@ -294,7 +294,7 @@ namespace Cliptok.Commands
         [Description("Bans a user but keeps their messages around."), HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.BanMembers)]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         public async Task BankeepCmd(TextCommandContext ctx,
-        [Description("The user you wish to ban. Accepts many formats")] DiscordUser targetMember,
+        [Description("The user you wish to ban. Should be a mention or ID.")] DiscordUser targetMember,
         [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling' NOTE: Add 'appeal' to the start of the reason to include an appeal link")] string timeAndReason = "No reason specified.")
         {
             bool appealable = false;
