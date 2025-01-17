@@ -263,6 +263,9 @@ namespace Cliptok
                         Tasks.EventTasks.HandlePendingChannelDeleteEventsAsync(),
                     ];
 
+                    // This one has its own time management, run it asynchronously and throw caution to the wind.
+                    Tasks.MassDehoistTasks.CheckAndMassDehoistTask();
+
                     // To prevent a future issue if checks take longer than 10 seconds,
                     // we only start the 10 second counter after all tasks have concluded.
                     await Task.WhenAll(taskList);

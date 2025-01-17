@@ -139,8 +139,9 @@ namespace Cliptok.Commands
                 bool unlocks = await Tasks.LockdownTasks.CheckUnlocksAsync();
                 bool channelUpdateEvents = await Tasks.EventTasks.HandlePendingChannelUpdateEventsAsync();
                 bool channelDeleteEvents = await Tasks.EventTasks.HandlePendingChannelDeleteEventsAsync();
+                bool checkAndMassDehoist = await Tasks.MassDehoistTasks.CheckAndMassDehoistTask();
 
-                await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nPunishment message cleanup check result: `{punishmentMessages}`\nReminders check result: `{reminders}`\nRaidmode check result: `{raidmode}`\nUnlocks check result: `{unlocks}`\nPending Channel Update events check result: `{channelUpdateEvents}`\nPending Channel Delete events check result: `{channelDeleteEvents}`");
+                await msg.ModifyAsync($"Unban check result: `{bans}`\nUnmute check result: `{mutes}`\nPunishment message cleanup check result: `{punishmentMessages}`\nReminders check result: `{reminders}`\nRaidmode check result: `{raidmode}`\nUnlocks check result: `{unlocks}`\nPending Channel Update events check result: `{channelUpdateEvents}`\nPending Channel Delete events check result: `{channelDeleteEvents}`\nMass dehoist check result: `{checkAndMassDehoist}`");
             }
 
             [Command("sh")]

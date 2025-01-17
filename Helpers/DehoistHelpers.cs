@@ -165,5 +165,19 @@
                 return (success, isPermissionError, true);
             }
         }
+
+        public static async Task<(int totalMembers, int failedMembers)> MassDehoistAsync(DiscordGuild guild)
+        {
+            var discordMembers = await guild.GetAllMembersAsync().ToListAsync();
+            int failedCount = 0;
+
+            foreach (DiscordMember discordMember in discordMembers)
+            {
+                bool success = await CheckAndDehoistMemberAsync(discordMember, Program.discord.CurrentUser, true);
+                if (!success)
+                    failedCount++;
+            }
+            return (discordMembers.Count, failedCount);
+        }
     }
 }
