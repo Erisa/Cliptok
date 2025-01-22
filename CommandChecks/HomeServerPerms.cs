@@ -31,7 +31,7 @@
             // Torch approved of this.
             if (target.IsOwner)
                 return ServerPermLevel.Owner;
-            else if (target.Roles.Contains(await target.Guild.GetRoleAsync(Program.cfgjson.AdminRole)))
+            else if (target.Roles.Contains(await target.Guild.GetRoleAsync(Program.cfgjson.AdminRole)) || target.Id == Program.discord.CurrentUser.Id)
                 return ServerPermLevel.Admin;
             else if (target.Roles.Contains(await target.Guild.GetRoleAsync(Program.cfgjson.ModRole)))
                 return ServerPermLevel.Moderator;
