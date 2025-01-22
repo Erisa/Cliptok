@@ -193,7 +193,7 @@
 
                     if (reason.ToLower().Contains("modmail"))
                     {
-                        dmContent += $"\n{Program.cfgjson.Emoji.Information} When contacting modmail, make sure to **enable DMs** from the server to allow your message to go through.";
+                        dmContent += $"\n{Program.cfgjson.Emoji.Information} When contacting <@{Program.cfgjson.ModmailUserId}>, make sure to **enable DMs** from the server to allow your message to go through.";
                     }
                     output.dmMessage = await naughtyMember.SendMessageAsync(dmContent);
                 }

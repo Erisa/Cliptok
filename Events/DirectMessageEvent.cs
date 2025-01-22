@@ -10,7 +10,7 @@
 
             // Make sure there is a message before the current one, otherwise an exception could be thrown
             var msgsBefore = await message.Channel.GetMessagesBeforeAsync(message.Id, 1).ToListAsync();
-            if (msgsBefore.Count() > 0)
+            if (msgsBefore.Count > 0)
             {
                 // Get single message before the current one
                 var msgBefore = msgsBefore[0];
@@ -27,7 +27,8 @@
                     {
                         await message.RespondAsync(
                             $"{Program.cfgjson.Emoji.Information} If you wish to discuss moderator actions, **please contact**" +
-                            $" <@{Program.cfgjson.ModmailUserId}>");
+                            $" <@{Program.cfgjson.ModmailUserId}>." +
+                            $"\nWhen contacting <@{Program.cfgjson.ModmailUserId}>, make sure to **enable DMs** from the server to allow your message to go through.");
                         sentAutoresponse = true;
                     }
                 }
