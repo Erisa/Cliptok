@@ -169,26 +169,33 @@
             {
                 try
                 {
+                    string dmContent = "";
+
                     if (permaMute)
                     {
-                        output.dmMessage = await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}**!\nReason: **{reason}**");
+                        dmContent = $"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}**!\nReason: **{reason}**";
                     }
-
                     else
                     {
                         if (isTqsMute)
                         {
-                            output.dmMessage = await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been temporarily muted, in **tech support channels only**, in **{guild.Name}** for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** pending action from a Moderator." +
+                           dmContent = $"{Program.cfgjson.Emoji.Muted} You have been temporarily muted, in **tech support channels only**, in **{guild.Name}** for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}** pending action from a Moderator." +
                                 $"\nReason: **{reason}**" +
-                                $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>");
+                                $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>";
                         }
                         else
                         {
-                            output.dmMessage = await naughtyMember.SendMessageAsync($"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}** for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}**!" +
+                            dmContent = $"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}** for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}**!" +
                                 $"\nReason: **{reason}**" +
-                                $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>");
+                                $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>";
                         }
                     }
+
+                    if (reason.ToLower().Contains("modmail"))
+                    {
+                        dmContent += $"\n{Program.cfgjson.Emoji.Information} When contacting modmail, make sure to **enable DMs** from the server to allow your message to go through.";
+                    }
+                    output.dmMessage = await naughtyMember.SendMessageAsync(dmContent);
                 }
                 catch (Exception e)
                 {
