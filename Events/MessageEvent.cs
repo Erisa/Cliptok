@@ -150,7 +150,7 @@ namespace Cliptok.Events
                             
                             // Relay if this user's tracking is not filtered to any channels, or if this msg is in a channel the tracking is filtered to
                             var channels = JsonConvert.DeserializeObject<List<ulong>>(trackingChannels);
-                            if (trackingChannelsList.Count == 0 || channels.Contains(channel.Id) || channels.Contains(channel.Parent.Id))
+                            if (trackingChannelsList.Count == 0 || channels.Contains(channel.Id) || (channel.Parent is not null && channels.Contains(channel.Parent.Id)))
                             {
                                 await RelayTrackedMessageAsync(client, message);
                             }
