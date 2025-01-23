@@ -16,7 +16,17 @@ namespace Cliptok.Events
                 var channel = await client.GetChannelAsync(e.Rule.ChannelId!.Value);
                 
                 // Create a "mock" message object to pass to the message handler, since we don't have the actual message object
-                var message = new MockDiscordMessage(author: author, channel: channel, channelId: channel.Id, content: e.Rule.Content);
+                var mentionedUsers = new List<ulong>();
+                if (e.Rule.Content is not null)
+                {
+                    foreach (var match in Constants.RegexConstants.user_rx.Matches(e.Rule.Content))
+                    {
+                        var id = Convert.ToUInt64(((Match)match).Groups[1].ToString());
+                        if (!mentionedUsers.Contains(id))
+                            mentionedUsers.Add(id);
+                    }
+                }
+                var message = new MockDiscordMessage(author: author, channel: channel, channelId: channel.Id, content: e.Rule.Content, mentionedUsersCount: mentionedUsers.Count);
                 
                 // Pass to the message handler
                 await MessageEvent.MessageHandlerAsync(client, message, channel, false, true, true);

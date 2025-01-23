@@ -285,7 +285,7 @@ namespace Cliptok.Events
                         }
                     }
 
-                    if (message.MentionedUsers is not null && message.MentionedUsers.Count > Program.cfgjson.MassMentionBanThreshold)
+                    if ((message.MentionedUsers is not null && message.MentionedUsers.Count > Program.cfgjson.MassMentionBanThreshold) || (message.MentionedUsersCount > Program.cfgjson.MassMentionBanThreshold))
                     {
                         if (wasAutoModBlock)
                         {
@@ -298,7 +298,8 @@ namespace Cliptok.Events
                         }
 
                         _ = channel.Guild.BanMemberAsync(message.Author, TimeSpan.FromDays(7), $"Mentioned more than {Program.cfgjson.MassMentionBanThreshold} users in one message.");
-                        string content = $"{Program.cfgjson.Emoji.Banned} {message.Author.Mention} was automatically banned for mentioning **{message.MentionedUsers.Count}** users.";
+                        var mentionCount = message.MentionedUsers is not null && message.MentionedUsers.Count > 0 ? message.MentionedUsers.Count : message.MentionedUsersCount;
+                        string content = $"{Program.cfgjson.Emoji.Banned} {message.Author.Mention} was automatically banned for mentioning **{mentionCount}** users.";
                         var chatMsg = await channel.SendMessageAsync(content);
                         _ = InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, "Mass mentions (Ban threshold)", DiscordHelpers.MessageLink(chatMsg), content: content, wasAutoModBlock: wasAutoModBlock);
                         _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, "Mass mentions (Ban threshold)", DiscordHelpers.MessageLink(chatMsg), content: content, wasAutoModBlock: wasAutoModBlock);
@@ -666,7 +667,7 @@ namespace Cliptok.Events
                     }
 
                     // Mass mentions
-                    if (message.MentionedUsers is not null && message.MentionedUsers.Count >= Program.cfgjson.MassMentionThreshold && (await GetPermLevelAsync(member)) < ServerPermLevel.Tier3)
+                    if (((message.MentionedUsers is not null && message.MentionedUsers.Count >= Program.cfgjson.MassMentionThreshold) || (message.MentionedUsersCount >= Program.cfgjson.MassMentionThreshold)) && (await GetPermLevelAsync(member)) < ServerPermLevel.Tier3)
                     {
                         if (wasAutoModBlock)
                         {
