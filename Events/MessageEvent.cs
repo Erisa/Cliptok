@@ -116,6 +116,52 @@ namespace Cliptok.Events
         }
         public static async Task MessageHandlerAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
+            // Get forwarded msg & embeds, if any, and combine with content to evaluate
+            // Combined as a single long string
+            
+            string msgContentWithEmbedData = message.Content;
+            var embeds = new List<DiscordEmbed>();
+            embeds.AddRange(message.Embeds);
+            
+            if (message.MessageSnapshots is not null)
+                foreach (var snapshot in message.MessageSnapshots)
+                {
+                    msgContentWithEmbedData += $" {snapshot.Message.Content}";
+                    embeds.AddRange(snapshot.Message.Embeds);
+                }
+            
+            foreach (var embed in embeds)
+            {
+                // Add any text from the embed into the content to be checked
+                
+                if (embed.Author is not null)
+                {
+                    if (embed.Author.Name is not null)
+                        msgContentWithEmbedData += $" {embed.Author.Name}";
+                
+                    if (embed.Author.Url is not null)
+                        msgContentWithEmbedData += $" {embed.Author.Url}";
+                }
+                
+                if (embed.Title is not null)
+                    msgContentWithEmbedData += $" {embed.Title}";
+                
+                if (embed.Url is not null)
+                    msgContentWithEmbedData += $" {embed.Url}";
+                
+                if (embed.Description is not null)
+                    msgContentWithEmbedData += $" {embed.Description}";
+                
+                if (embed.Footer is not null && embed.Footer.Text is not null)
+                    msgContentWithEmbedData += $" {embed.Footer.Text}";
+                
+                if (embed.Fields is not null)
+                    foreach (var field in embed.Fields)
+                    {
+                        msgContentWithEmbedData += $" {field.Name} {field.Value}";
+                    }
+            }
+            
             try
             {
                 if (message.Timestamp is not null && message.Timestamp.Value.Year < (DateTime.Now.Year - 2))
@@ -317,7 +363,7 @@ namespace Cliptok.Events
                         }
                         else
                         {
-                            (bool success, string flaggedWord) = Checks.ListChecks.CheckForNaughtyWords(message.Content.ToLower(), listItem);
+                            (bool success, string flaggedWord) = Checks.ListChecks.CheckForNaughtyWords(msgContentWithEmbedData.ToLower(), listItem);
                             if (success)
                             {
                                 if (wasAutoModBlock)
@@ -359,7 +405,7 @@ namespace Cliptok.Events
                         return;
 
                     // Unapproved invites
-                    string checkedMessage = message.Content.Replace('\\', '/');
+                    string checkedMessage = msgContentWithEmbedData.Replace('\\', '/');
 
                     if ((await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && checkedMessage.Contains("dsc.gg/") ||
                         checkedMessage.Contains("invite.gg/")
@@ -499,9 +545,9 @@ namespace Cliptok.Events
                         return;
 
                     // Mass emoji
-                    if (!Program.cfgjson.UnrestrictedEmojiChannels.Contains(channel.Id) && message.Content.Length >= Program.cfgjson.MassEmojiThreshold)
+                    if (!Program.cfgjson.UnrestrictedEmojiChannels.Contains(channel.Id) && msgContentWithEmbedData.Length >= Program.cfgjson.MassEmojiThreshold)
                     {
-                        char[] tempArray = message.Content.Replace("🏻", "").Replace("🏼", "").Replace("🏽", "").Replace("🏾", "").Replace("🏿", "").ToCharArray();
+                        char[] tempArray = msgContentWithEmbedData.Replace("🏻", "").Replace("🏼", "").Replace("🏽", "").Replace("🏾", "").Replace("🏿", "").ToCharArray();
                         int pos = 0;
                         foreach (char c in tempArray)
                         {
@@ -613,10 +659,10 @@ namespace Cliptok.Events
                     }
 
                     // phishing API
-                    var urlMatches = url_rx.Matches(message.Content);
+                    var urlMatches = url_rx.Matches(msgContentWithEmbedData);
                     if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") is not null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
                     {
-                        var (phishingMatch, httpStatus, responseText, phishingResponse) = await APIs.PhishingAPI.PhishingAPICheckAsync(message.Content);
+                        var (phishingMatch, httpStatus, responseText, phishingResponse) = await APIs.PhishingAPI.PhishingAPICheckAsync(msgContentWithEmbedData);
 
                         if (httpStatus == HttpStatusCode.OK)
                         {
@@ -645,7 +691,7 @@ namespace Cliptok.Events
                     }
 
                     // attempted to ping @everyone/@here
-                    var msgContent = message.Content;
+                    var msgContent = msgContentWithEmbedData;
                     foreach (var letter in Checks.ListChecks.lookalikeAlphabetMap)
                         msgContent = msgContent.Replace(letter.Key, letter.Value);
                     if (Program.cfgjson.EveryoneFilter && !member.Roles.Any(role => Program.cfgjson.EveryoneExcludedRoles.Contains(role.Id)) && !Program.cfgjson.EveryoneExcludedChannels.Contains(channel.Id) && (msgContent.Contains("@everyone") || msgContent.Contains("@here")))
@@ -824,7 +870,7 @@ namespace Cliptok.Events
                         }
                         else
                         {
-                            (bool success, string flaggedWord) = Checks.ListChecks.CheckForNaughtyWords(message.Content.ToLower(), listItem);
+                            (bool success, string flaggedWord) = Checks.ListChecks.CheckForNaughtyWords(msgContentWithEmbedData.ToLower(), listItem);
                             if (success)
                             {
                                 DiscordChannel logChannel = default;
