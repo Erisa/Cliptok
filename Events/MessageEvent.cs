@@ -741,7 +741,7 @@ namespace Cliptok.Events
                     }
 
                     // line limit
-                    var lineCount = CountNewlines(message.Content);
+                    var lineCount = CountNewlines(msgContentWithEmbedData);
 
                     if (!Program.cfgjson.LineLimitExcludedChannels.Contains(channel.Id)
                         && (channel.ParentId is null || !Program.cfgjson.LineLimitExcludedChannels.Contains((ulong)channel.ParentId))
