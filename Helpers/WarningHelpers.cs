@@ -411,12 +411,17 @@
         
         public static async Task<DiscordMessage> SendPublicWarningMessageAndDeleteInfringingMessageAsync(MockDiscordMessage infringingMessage, string warningMessageContent, bool wasAutoModBlock = false, int minMessages = 0)
         {
-            // If this is a `GuildForum` channel, delete the thread if it is empty (empty = 1 message left if `isAutoWarn`, otherwise 0); if not empty, just delete the infringing message.
+            // If this is a `GuildForum` channel, delete the thread if it is empty; if not empty, just delete the infringing message.
             // Then, based on whether the thread was deleted, send the warning message into the thread or into the configured fallback channel.
+            // If this was an AutoMod block, don't delete anything.
             // Return the sent warning message for logging.
             
-            var targetChannel = infringingMessage.Channel;
-            if (infringingMessage.Channel.Type == DiscordChannelType.GuildForum || infringingMessage.Channel.Parent.Type == DiscordChannelType.GuildForum)
+            bool wasThreadDeleted = false;
+            if (!wasAutoModBlock)
+                wasThreadDeleted = await DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(infringingMessage, minMessages);
+            
+            DiscordChannel targetChannel = infringingMessage.Channel;
+            if (wasThreadDeleted || targetChannel.Id == Program.cfgjson.SupportForumId)
             {
                 if (Program.cfgjson.ForumChannelAutoWarnFallbackChannel == 0)
                     Program.discord.Logger.LogWarning("A warning in forum channel {channelId} was attempted, but may fail due to the fallback channel not being set. Please set 'forumChannelAutoWarnFallbackChannel' in config.json to avoid this.", targetChannel.Id);
@@ -424,14 +429,8 @@
                     targetChannel = Program.ForumChannelAutoWarnFallbackChannel;
             }
             
-            if (!wasAutoModBlock)
-            {
-                if (await DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(infringingMessage, minMessages))
-                    targetChannel = await Program.discord.GetChannelAsync(Program.cfgjson.ForumChannelAutoWarnFallbackChannel);
-            }
             var warningMessage = await targetChannel.SendMessageAsync(warningMessageContent);
             return warningMessage;
         }
-
     }
 }
