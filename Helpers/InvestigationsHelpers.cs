@@ -6,13 +6,13 @@
         {
             await SendInfringingMessaageAsync(logChannelKey, new MockDiscordMessage(infringingMessage), reason, messageURL, extraField, content, colour, channelOverride);
         }
-        public static async Task SendInfringingMessaageAsync(string logChannelKey, MockDiscordMessage infringingMessage, string reason, string messageURL, (string name, string value, bool inline) extraField = default, string content = default, DiscordColor? colour = null, DiscordChannel channelOverride = default, bool wasAutoModBlock = false)
+        public static async Task SendInfringingMessaageAsync(string logChannelKey, MockDiscordMessage infringingMessage, string reason, string messageURL, (string name, string value, bool inline) extraField = default, string content = default, DiscordColor? colour = null, DiscordChannel channelOverride = default, string messageContentOverride = default, bool wasAutoModBlock = false)
         {
             if (colour is null)
                 colour = new DiscordColor(0xf03916);
 
             var embed = new DiscordEmbedBuilder()
-            .WithDescription(infringingMessage.Content)
+            .WithDescription(string.IsNullOrWhiteSpace(messageContentOverride) ? infringingMessage.Content : messageContentOverride)
             .WithColor((DiscordColor)colour)
             .WithTimestamp(infringingMessage.Timestamp)
             .WithFooter(

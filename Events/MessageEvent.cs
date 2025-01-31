@@ -71,12 +71,12 @@ namespace Cliptok.Events
             await DiscordHelpers.DoEmptyThreadCleanupAsync(e.Channel, e.Message);
         }
 
-        static async Task DeleteAndWarnAsync(DiscordMessage message, string reason, DiscordClient client)
+        static async Task DeleteAndWarnAsync(DiscordMessage message, string reason, DiscordClient client, string messageContentOverride = default)
         {
-            await DeleteAndWarnAsync(new MockDiscordMessage(message), reason, client);
+            await DeleteAndWarnAsync(new MockDiscordMessage(message), reason, client, messageContentOverride: messageContentOverride);
         }
         
-        static async Task DeleteAndWarnAsync(MockDiscordMessage message, string reason, DiscordClient client, bool wasAutoModBlock = false)
+        static async Task DeleteAndWarnAsync(MockDiscordMessage message, string reason, DiscordClient client, bool wasAutoModBlock = false, string messageContentOverride = default)
         {
             var channel = message.Channel;
             DiscordMessage msg;
@@ -100,7 +100,7 @@ namespace Cliptok.Events
 
             try
             {
-                _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, wasAutoModBlock: wasAutoModBlock);
+                _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
             }
             catch
             {
@@ -121,7 +121,8 @@ namespace Cliptok.Events
             
             string msgContentWithEmbedData = message.Content;
             var embeds = new List<DiscordEmbed>();
-            embeds.AddRange(message.Embeds);
+            if (message.Embeds is not null)
+                embeds.AddRange(message.Embeds.Where(embed => embed.Type != "auto_moderation_message"));
             
             if (message.MessageSnapshots is not null)
                 foreach (var snapshot in message.MessageSnapshots)
@@ -347,8 +348,8 @@ namespace Cliptok.Events
                         var mentionCount = message.MentionedUsers is not null && message.MentionedUsers.Count > 0 ? message.MentionedUsers.Count : message.MentionedUsersCount;
                         string content = $"{Program.cfgjson.Emoji.Banned} {message.Author.Mention} was automatically banned for mentioning **{mentionCount}** users.";
                         var chatMsg = await channel.SendMessageAsync(content);
-                        _ = InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, "Mass mentions (Ban threshold)", DiscordHelpers.MessageLink(chatMsg), content: content, wasAutoModBlock: wasAutoModBlock);
-                        _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, "Mass mentions (Ban threshold)", DiscordHelpers.MessageLink(chatMsg), content: content, wasAutoModBlock: wasAutoModBlock);
+                        _ = InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, "Mass mentions (Ban threshold)", DiscordHelpers.MessageLink(chatMsg), content: content, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
+                        _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, "Mass mentions (Ban threshold)", DiscordHelpers.MessageLink(chatMsg), content: content, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                         return;
                     }
 
@@ -374,7 +375,7 @@ namespace Cliptok.Events
                                 string reason = listItem.Reason;
                                 try
                                 {
-                                    await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, wasAutoModBlock: wasAutoModBlock);
+                                    await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                                 }
                                 catch
                                 {
@@ -393,7 +394,7 @@ namespace Cliptok.Events
 
                                 DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock, 1);
                                 var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-                                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField: ("Match", flaggedWord, true), wasAutoModBlock: wasAutoModBlock);
+                                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField: ("Match", flaggedWord, true), messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                                 return;
                             }
                         }
@@ -423,7 +424,7 @@ namespace Cliptok.Events
                         string reason = "Sent an unapproved invite";
                         try
                         {
-                            _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, wasAutoModBlock: wasAutoModBlock);
+                            _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                         }
                         catch
                         {
@@ -432,7 +433,7 @@ namespace Cliptok.Events
 
                         DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock, 1);
                         var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-                        await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, wasAutoModBlock: wasAutoModBlock);
+                        await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                         match = true;
                         return;
                     }
@@ -442,7 +443,7 @@ namespace Cliptok.Events
                     if ((await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && inviteMatches.Count > 3)
                     {
                         string reason = "Sent too many invites";
-                        await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock);
+                        await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock, messageContentOverride: msgContentWithEmbedData);
                         match = true;
                         return;
                     }
@@ -469,7 +470,7 @@ namespace Cliptok.Events
                                 if (!match)
                                 {
                                     string reason = "Sent an unapproved invite";
-                                    await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock);
+                                    await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock, messageContentOverride: msgContentWithEmbedData);
                                     match = true;
                                 }
                                 break;
@@ -502,7 +503,7 @@ namespace Cliptok.Events
                             string responseToSend = $"```json\n{JsonConvert.SerializeObject(maliciousCache)}\n```";
 
                             (string name, string value, bool inline) extraField = new("Cached API response", responseToSend, false);
-                            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField, wasAutoModBlock: wasAutoModBlock);
+                            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
 
                             match = true;
                             break;
@@ -530,7 +531,7 @@ namespace Cliptok.Events
                             if (!match)
                             {
                                 string reason = "Sent an unapproved invite";
-                                await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock);
+                                await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock, messageContentOverride: msgContentWithEmbedData);
                             }
                             return;
                         }
@@ -592,7 +593,7 @@ namespace Cliptok.Events
                                     pardonOutput = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention} Your message was automatically deleted for mass emoji.";
 
                                 var msgOut = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, pardonOutput, wasAutoModBlock);
-                                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, DiscordHelpers.MessageLink(msgOut), wasAutoModBlock: wasAutoModBlock);
+                                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, DiscordHelpers.MessageLink(msgOut), messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                                 return;
                             }
 
@@ -605,7 +606,7 @@ namespace Cliptok.Events
 
                             DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, output, wasAutoModBlock);
                             var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-                            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, wasAutoModBlock: wasAutoModBlock);
+                            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                             return;
                         }
 
@@ -684,7 +685,7 @@ namespace Cliptok.Events
                                 string responseToSend = await StringHelpers.CodeOrHasteBinAsync(responseText, "json", 1000, true);
 
                                 (string name, string value, bool inline) extraField = new("API Response", responseToSend, false);
-                                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField, wasAutoModBlock: wasAutoModBlock);
+                                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                                 return;
                             }
                         }
@@ -708,7 +709,7 @@ namespace Cliptok.Events
                         string reason = "Attempted to ping everyone/here";
                         DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock);
                         var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-                        await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, wasAutoModBlock: wasAutoModBlock);
+                        await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                         return;
                     }
 
@@ -727,7 +728,7 @@ namespace Cliptok.Events
                         string reason = "Mass mentions";
                         try
                         {
-                            _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, wasAutoModBlock: wasAutoModBlock);
+                            _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                         }
                         catch
                         {
@@ -736,7 +737,7 @@ namespace Cliptok.Events
 
                         DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock);
                         var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-                        await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, wasAutoModBlock: wasAutoModBlock);
+                        await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                         return;
                     }
 
@@ -783,7 +784,7 @@ namespace Cliptok.Events
                             {
                                 msg = await channel.SendMessageAsync(messageBuilder);
                             }
-                            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, DiscordHelpers.MessageLink(msg), wasAutoModBlock: wasAutoModBlock);
+                            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, DiscordHelpers.MessageLink(msg), messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                             return;
                         }
                         else
@@ -805,7 +806,7 @@ namespace Cliptok.Events
                             }
 
                             var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-                            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, wasAutoModBlock: wasAutoModBlock);
+                            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
 
                             return;
                         }
@@ -892,6 +893,7 @@ namespace Cliptok.Events
                                     colour: new DiscordColor(0xFEC13D),
                                     channelOverride: logChannel,
                                     extraField: extraField,
+                                    messageContentOverride: msgContentWithEmbedData,
                                     wasAutoModBlock: wasAutoModBlock
                                 );
                             }
