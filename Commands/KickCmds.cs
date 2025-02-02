@@ -7,13 +7,16 @@ namespace Cliptok.Commands
         [Description("Kicks a user, removing them from the server until they rejoin.")]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermission.KickMembers)]
-        public async Task KickCmd(CommandContext ctx, [Parameter("user"), Description("The user you want to kick from the server.")] DiscordUser target, [Parameter("reason"), Description("The reason for kicking this user.")] string reason = "No reason specified.")
+        public async Task KickCmd(CommandContext ctx, [Parameter("user"), Description("The user you want to kick from the server.")] DiscordUser target, [Parameter("reason"), Description("The reason for kicking this user."), RemainingText] string reason = "No reason specified.")
         {
             if (target.IsBot)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} To prevent accidents, I won't kick bots. If you really need to do this, do it manually in Discord.");
                 return;
             }
+            
+            if (ctx is TextCommandContext)
+                await ctx.As<TextCommandContext>().Message.DeleteAsync();
 
             reason = reason.Replace("`", "\\`").Replace("*", "\\*");
 
@@ -34,7 +37,8 @@ namespace Cliptok.Commands
                 {
                     await KickAndLogAsync(member, reason, ctx.Member);
                     await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Ejected} {target.Mention} has been kicked: **{reason}**");
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Done!", ephemeral: true);
+                    if (ctx is SlashCommandContext)
+                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Done!", ephemeral: true);
                     return;
                 }
                 else
