@@ -34,7 +34,7 @@ namespace Cliptok.Events
                 return;
 
             // avoid conflicts with modmail
-            if (commandName == "edit" || commandName == "timestamp")
+            if (commandName == "edit" || commandName.Contains("timestamp"))
                 return;
 
             e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Exception occurred during {user}s invocation of {command}", e.Context.User.Username, commandName);
