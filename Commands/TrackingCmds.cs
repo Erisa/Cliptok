@@ -98,13 +98,25 @@
                 }
 
                 await Program.db.SetAddAsync("trackedUsers", discordUser.Id);
+                
+                string response = $"{Program.cfgjson.Emoji.On} Now tracking {discordUser.Mention} in this thread! :eyes:";
+                if (filterChannels.Count > 0)
+                {
+                    string channelList = "";
+                    foreach (var channel in filterChannels)
+                    {
+                        channelList += $"<#{channel}>, ";
+                    }
+                    channelList = channelList.Trim(',', ' ');
+                    response += $"\nTracking in: {channelList}";
+                }
 
                 if (Program.db.HashExists("trackingThreads", discordUser.Id))
                 {
                     var channelId = Program.db.HashGet("trackingThreads", discordUser.Id);
                     DiscordThreadChannel thread = (DiscordThreadChannel)await ctx.Client.GetChannelAsync((ulong)channelId);
 
-                    await thread.SendMessageAsync($"{Program.cfgjson.Emoji.On} Now tracking {discordUser.Mention} in this thread! :eyes:");
+                    await thread.SendMessageAsync(response);
                     thread.AddThreadMemberAsync(ctx.Member);
                     await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.On} Now tracking {discordUser.Mention} in {thread.Mention}!"));
 
@@ -113,7 +125,7 @@
                 {
                     var thread = await LogChannelHelper.ChannelCache["investigations"].CreateThreadAsync(DiscordHelpers.UniqueUsername(discordUser), DiscordAutoArchiveDuration.Week, DiscordChannelType.PublicThread);
                     await Program.db.HashSetAsync("trackingThreads", discordUser.Id, thread.Id);
-                    await thread.SendMessageAsync($"{Program.cfgjson.Emoji.On} Now tracking {discordUser.Mention} in this thread! :eyes:");
+                    await thread.SendMessageAsync(response);
                     await thread.AddThreadMemberAsync(ctx.Member);
                     await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.On} Now tracking {discordUser.Mention} in {thread.Mention}!"));
                 }
