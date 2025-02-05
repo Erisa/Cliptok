@@ -48,8 +48,10 @@
                 });
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                if (ex is DSharpPlus.Exceptions.BadRequestException)
+                    Program.discord.Logger.LogInformation(Program.CliptokEventID, "Failed to dehoist member {memberId}! Discord said Bad Request. If this member's nickname is in violation of AutoMod rules, this is expected!", targetMember.Id);
                 return false;
             }
         }
