@@ -369,6 +369,9 @@
         {
             if (userID == default)
                 userID = warning.TargetUserId;
+            
+            if (Program.db.HashExists("automaticWarnings", warning.WarningId))
+                await Program.db.HashDeleteAsync("automaticWarnings", warning.WarningId);
 
             if (Program.db.HashExists(userID.ToString(), warning.WarningId))
             {
