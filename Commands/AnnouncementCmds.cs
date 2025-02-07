@@ -26,8 +26,8 @@ namespace Cliptok.Commands
             [Parameter("flavour_text"), Description("Extra text appended on the end of the main line, replacing :WindowsInsider: or :Windows10:")] string flavourText = "",
             [Parameter("autothread_name"), Description("If no thread is given, create a thread with this name.")] string autothreadName = "Build {0} ({1})",
 
-            [Parameter("lockdown"), Description("Set 0 to not lock. Lock the channel for a certain period of time after announcing the build.")] string lockdownTime = "auto"
-        )
+            [Parameter("lockdown"), Description("Set 0 to not lock. Lock the channel for a certain period of time after announcing the build.")] string lockdownTime = "auto",
+            [Parameter("force_reannounce"), Description("Whether to ignore the check for duplicate announcements and send this one anyway.")] bool forceReannounce = false)
         {
             if (Program.cfgjson.InsidersChannel != 0 && ctx.Channel.Id != Program.cfgjson.InsidersChannel)
             {
@@ -45,6 +45,14 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync(text: $"{Program.cfgjson.Emoji.Error} Windows 10 only has a Release Preview Channel.", ephemeral: true);
                 return;
             }
+            
+            // Avoid duplicate announcements
+            if (await Program.db.SetContainsAsync("announcedInsiderBuilds", buildNumber) && !forceReannounce)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Build {buildNumber} has already been announced! If you are sure you want to announce it again, set `force_reannounce` to True.", ephemeral: true);
+                return;
+            }
+            await Program.db.SetAddAsync("announcedInsiderBuilds", buildNumber);
 
             if (flavourText == "" && windowsVersion == 10)
             {
