@@ -6,9 +6,34 @@ namespace Cliptok.Commands
         [Description("Grant a user Tier 1, bypassing any verification requirements.")]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
-        public async Task Grant(CommandContext ctx, [Parameter("user"), Description("The user to grant Tier 1 to.")] DiscordUser _)
+        public async Task Grant(CommandContext ctx, [Parameter("user"), Description("The user to grant Tier 1 to.")] DiscordUser user)
         {
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command is deprecated and no longer works. Please right click (or tap and hold on mobile) the user and click \"Verify Member\" if available.");
+            DiscordMember member = default;
+            try
+            {
+                member = await ctx.Guild.GetMemberAsync(user.Id);
+            }
+            catch (Exception)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user does not appear to be in the server!");
+                return;
+            }
+
+            if (!DiscordHelpers.AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I don't have permission to grant {member.Mention}! Check the role order.");
+                return;
+            }
+
+            if (member.MemberFlags.Value.HasFlag(DiscordMemberFlags.BypassesVerification))
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {member.Mention} has already been allowed access to the server!");
+                return;
+            }
+
+            await member.ModifyAsync(x => x.MemberFlags = (DiscordMemberFlags)member.MemberFlags | DiscordMemberFlags.BypassesVerification);
+            
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {member.Mention} can now access the server!");
         }
 
         [HomeServer]
