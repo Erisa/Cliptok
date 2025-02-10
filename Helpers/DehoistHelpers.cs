@@ -38,6 +38,9 @@
 
                 return false;
             }
+            
+            if (targetMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername))
+                return false;
 
             try
             {
@@ -78,7 +81,7 @@
             // If member is dehoisted already, but NOT permadehoisted, skip updating nickname.
 
             // If member is not dehoisted
-            if (discordMember.DisplayName[0] != dehoistCharacter)
+            if (discordMember.DisplayName[0] != dehoistCharacter && !discordMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername))
             {
                 // Dehoist member
                 try
@@ -131,7 +134,7 @@
                 }
 
                 // Un-dehoist member
-                if (discordMember.DisplayName[0] == dehoistCharacter)
+                if (discordMember.DisplayName[0] == dehoistCharacter && !discordMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername))
                 {
                     var newNickname = discordMember.DisplayName[1..];
                     try

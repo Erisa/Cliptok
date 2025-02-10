@@ -24,6 +24,12 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {member.Mention} is already dehoisted!", ephemeral: true);
                 return;
             }
+            
+            if (member.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername))
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {member.Mention} is quarantined because their name is in violation of AutoMod rules! Discord will not let me dehoist them. Please change their nickname manually.", ephemeral: true);
+                return;
+            }
 
             try
             {
@@ -186,7 +192,7 @@ namespace Cliptok.Commands
                         continue;
                     }
 
-                    if (member.DisplayName[0] == DehoistHelpers.dehoistCharacter)
+                    if (member.DisplayName[0] == DehoistHelpers.dehoistCharacter && !member.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername))
                     {
                         var newNickname = member.Nickname[1..];
                         await member.ModifyAsync(a =>
