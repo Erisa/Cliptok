@@ -32,7 +32,7 @@ namespace Cliptok.Commands
             }
 
             await member.ModifyAsync(x => x.MemberFlags = (DiscordMemberFlags)member.MemberFlags | DiscordMemberFlags.BypassesVerification);
-            
+
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {member.Mention} can now access the server!");
         }
 
@@ -43,7 +43,7 @@ namespace Cliptok.Commands
         internal class RoleSlashCommands
         {
             [Command("grant")]
-			[Description("Opt into a role.")]
+            [Description("Opt into a role.")]
             public async Task GrantRole(
                 SlashCommandContext ctx,
                 [SlashAutoCompleteProvider(typeof(RolesAutocompleteProvider))]
@@ -83,7 +83,7 @@ namespace Cliptok.Commands
             }
 
             [Command("remove")]
-			[Description("Opt out of a role.")]
+            [Description("Opt out of a role.")]
             public async Task RemoveRole(
                 SlashCommandContext ctx,
                 [SlashAutoCompleteProvider(typeof(RolesAutocompleteProvider))]

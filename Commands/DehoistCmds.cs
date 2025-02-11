@@ -24,7 +24,7 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {member.Mention} is already dehoisted!", ephemeral: true);
                 return;
             }
-            
+
             if (member.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername))
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {member.Mention} is quarantined because their name is in violation of AutoMod rules! Discord will not let me dehoist them. Please change their nickname manually.", ephemeral: true);
@@ -94,7 +94,7 @@ namespace Cliptok.Commands
             }
 
             [Command("enable")]
-			[Description("Permanently dehoist a member. They will be automatically dehoisted until disabled.")]
+            [Description("Permanently dehoist a member. They will be automatically dehoisted until disabled.")]
             public async Task PermadehoistEnableSlashCmd(CommandContext ctx, [Parameter("member"), Description("The member to permadehoist.")] DiscordUser discordUser)
             {
                 var (success, isPermissionError) = await DehoistHelpers.PermadehoistMember(discordUser, ctx.User, ctx.Guild);
@@ -110,7 +110,7 @@ namespace Cliptok.Commands
             }
 
             [Command("disable")]
-			[Description("Disable permadehoist for a member.")]
+            [Description("Disable permadehoist for a member.")]
             public async Task PermadehoistDisableSlashCmd(CommandContext ctx, [Parameter("member"), Description("The member to remove the permadehoist for.")] DiscordUser discordUser)
             {
                 var (success, isPermissionError) = await DehoistHelpers.UnpermadehoistMember(discordUser, ctx.User, ctx.Guild);
@@ -126,7 +126,7 @@ namespace Cliptok.Commands
             }
 
             [Command("status")]
-			[Description("Check the status of permadehoist for a member.")]
+            [Description("Check the status of permadehoist for a member.")]
             public async Task PermadehoistStatusSlashCmd(CommandContext ctx, [Parameter("member"), Description("The member whose permadehoist status to check.")] DiscordUser discordUser)
             {
                 if (await Program.db.SetContainsAsync("permadehoists", discordUser.Id))

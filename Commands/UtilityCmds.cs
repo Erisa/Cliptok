@@ -10,7 +10,7 @@ namespace Cliptok.Commands
             var rawMsgData = JsonConvert.SerializeObject(targetMessage, Formatting.Indented);
             await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(rawMsgData, "json"), ephemeral: true);
         }
-        
+
         [Command("Show Avatar")]
         [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
         [AllowedProcessors(typeof(UserCommandProcessor))]

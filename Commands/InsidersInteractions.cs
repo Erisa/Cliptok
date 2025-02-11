@@ -11,13 +11,13 @@ namespace Cliptok.Commands.InteractionCommands
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command only works in <#{Program.cfgjson.InsiderInfoChannel}>!", ephemeral: true);
                 return;
             }
-            
+
             DiscordComponent[] buttons =
             [
                 new DiscordButtonComponent(DiscordButtonStyle.Primary, "insiders-info-roles-menu-callback", "Choose your Insider roles"),
                 new DiscordButtonComponent(DiscordButtonStyle.Secondary, "insiders-info-chat-btn-callback", "I just want to chat for now")
             ];
-            
+
             string insidersChannelMention;
             if (Program.cfgjson.InsidersChannel == 0)
             {
@@ -28,11 +28,11 @@ namespace Cliptok.Commands.InteractionCommands
             {
                 insidersChannelMention = $"<#{Program.cfgjson.InsidersChannel}>";
             }
-            
+
             var builder = new DiscordInteractionResponseBuilder()
                 .WithContent($"{Program.cfgjson.Emoji.Insider} Choose your Insider roles here! Or, you can choose to chat in {insidersChannelMention} without being notified about new builds.")
                 .AddComponents(buttons);
-            
+
             await ctx.RespondAsync(builder);
         }
     }

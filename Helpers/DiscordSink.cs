@@ -21,7 +21,7 @@ namespace Cliptok
         {
             // wait for exceptions to propagate
             // TODO(erisa): find a better way to do this
-            if (logEvent.Exception is not null )
+            if (logEvent.Exception is not null)
                 await Task.Delay(100);
 
             if (logEvent is null) throw new ArgumentNullException(nameof(logEvent));

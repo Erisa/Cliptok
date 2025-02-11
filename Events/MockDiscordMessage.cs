@@ -1,6 +1,3 @@
-using System.Data.Common;
-using System.Runtime.CompilerServices;
-
 namespace Cliptok.Events
 {
     public class MockDiscordMessage
@@ -26,7 +23,7 @@ namespace Cliptok.Events
             Stickers = baseMessage.Stickers;
             Timestamp = baseMessage.Timestamp;
         }
-        
+
         public MockDiscordMessage(IReadOnlyList<DiscordAttachment> attachments = default, DiscordUser author = default, DiscordChannel channel = default, ulong channelId = default, string content = default, IReadOnlyList<DiscordEmbed> embeds = default, ulong id = default, Uri jumpLink = default, IReadOnlyList<DiscordUser> mentionedUsers = default, int mentionedUsersCount = default, IReadOnlyList<DiscordMessageSnapshot> messageSnapshots = default, IReadOnlyList<DiscordReaction> reactions = default, DiscordMessage referencedMessage = default, IReadOnlyList<DiscordMessageSticker> stickers = default, DateTimeOffset? timestamp = default)
         {
             Attachments = attachments;
@@ -45,7 +42,7 @@ namespace Cliptok.Events
             Stickers = stickers;
             Timestamp = timestamp;
         }
-        
+
         public IReadOnlyList<DiscordAttachment> Attachments { get; }
         public DiscordUser Author { get; }
         public DiscordMessage BaseMessage { get; }

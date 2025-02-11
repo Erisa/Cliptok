@@ -408,7 +408,8 @@ namespace Cliptok.Commands
             }
 
             // this gets updated with a full warning object later, shove a stub in for now
-            mostRecentWarning = new(){
+            mostRecentWarning = new()
+            {
                 TargetUserId = targetUser.Id,
                 ModUserId = ctx.User.Id,
                 WarnTimestamp = DateTime.Now,

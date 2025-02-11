@@ -20,7 +20,7 @@ namespace Cliptok.Commands
         public class UserNoteSlashCommands
         {
             [Command("add")]
-			[Description("Add a note to a user. Only visible to mods.")]
+            [Description("Add a note to a user. Only visible to mods.")]
             public async Task AddUserNoteAsync(SlashCommandContext ctx,
                 [Parameter("user"), Description("The user to add a note for.")] DiscordUser user,
                 [Parameter("note"), Description("The note to add.")] string noteText,
@@ -60,7 +60,7 @@ namespace Cliptok.Commands
             }
 
             [Command("delete")]
-			[Description("Delete a note.")]
+            [Description("Delete a note.")]
             public async Task RemoveUserNoteAsync(SlashCommandContext ctx,
                 [Parameter("user"), Description("The user whose note to delete.")] DiscordUser user,
                 [SlashAutoCompleteProvider(typeof(NotesAutocompleteProvider))][Parameter("note"), Description("The note to delete.")] string targetNote)
@@ -96,7 +96,7 @@ namespace Cliptok.Commands
             }
 
             [Command("edit")]
-			[Description("Edit a note for a user.")]
+            [Description("Edit a note for a user.")]
             public async Task EditUserNoteAsync(SlashCommandContext ctx,
                 [Parameter("user"), Description("The user to edit a note for.")] DiscordUser user,
                 [SlashAutoCompleteProvider(typeof(NotesAutocompleteProvider))][Parameter("note"), Description("The note to edit.")] string targetNote,
@@ -170,7 +170,7 @@ namespace Cliptok.Commands
             }
 
             [Command("list")]
-			[Description("List all notes for a user.")]
+            [Description("List all notes for a user.")]
             public async Task ListUserNotesAsync(SlashCommandContext ctx,
                 [Parameter("user"), Description("The user whose notes to list.")] DiscordUser user,
                 [Parameter("public"), Description("Whether to show the notes in public chat. Default: false")] bool showPublicly = false)
@@ -179,7 +179,7 @@ namespace Cliptok.Commands
             }
 
             [Command("details")]
-			[Description("Show the details of a specific note for a user.")]
+            [Description("Show the details of a specific note for a user.")]
             public async Task ShowUserNoteAsync(SlashCommandContext ctx,
                 [Parameter("user"), Description("The user whose note to show details for.")] DiscordUser user,
                 [SlashAutoCompleteProvider(typeof(NotesAutocompleteProvider))][Parameter("note"), Description("The note to show.")] string targetNote,

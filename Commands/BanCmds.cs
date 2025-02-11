@@ -105,7 +105,7 @@ namespace Cliptok.Commands
                     return;
                 }
             }
-            
+
             webhookOut.Content = $"{Program.cfgjson.Emoji.Success} User was successfully bonked.";
             await ctx.EditResponseAsync(webhookOut);
         }
@@ -163,7 +163,7 @@ namespace Cliptok.Commands
                     reason += $"{word} ";
             }
             reason = reason.Trim();
-            
+
             if (users.Count == 1 || users.Count == 0)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Not accepting a massban with a single user. Please use `!ban`.");

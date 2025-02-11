@@ -9,7 +9,7 @@ namespace Cliptok.Migrations
             // Migration from joinwatch to user notes
             if (!await db.KeyExistsAsync("joinWatchedUsers"))
                 return;
-            
+
             var joinWatchedUsersList = await Program.db.ListRangeAsync("joinWatchedUsers");
             var joinWatchNotesList = await Program.db.HashGetAllAsync("joinWatchedUsersNotes");
             int successfulMigrations = 0;
@@ -22,7 +22,7 @@ namespace Cliptok.Migrations
                     noteText = "N/A; imported from joinwatch without context";
                 else
                     noteText = joinWatchNotesList.First(x => x.Name == user).Value;
-                
+
                 // Construct note
                 var note = new UserNote
                 {
@@ -38,19 +38,19 @@ namespace Cliptok.Migrations
                     Timestamp = DateTime.Now,
                     Type = WarningType.Note
                 };
-                
+
                 // Save note & remove joinwatch
                 await db.HashSetAsync(note.TargetUserId.ToString(), note.NoteId, JsonConvert.SerializeObject(note));
                 await db.ListRemoveAsync("joinWatchedUsers", note.TargetUserId);
                 await db.HashDeleteAsync("joinWatchedUsersNotes", note.TargetUserId);
                 successfulMigrations++;
             }
-            
+
             if (successfulMigrations > 0)
             {
                 discord.Logger.LogInformation(CliptokEventID, "Successfully migrated {count}/{total} joinwatches to notes.", successfulMigrations, numJoinWatches);
             }
-            
+
             if (numJoinWatches != 0 && successfulMigrations != numJoinWatches)
             {
                 discord.Logger.LogError(CliptokEventID, "Failed to migrate {count} joinwatches to notes!", numJoinWatches - successfulMigrations);

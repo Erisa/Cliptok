@@ -20,7 +20,7 @@ namespace Cliptok.Commands
             }
 
             [Command("add")]
-			[Description("Watch for joins and leaves of a given user. Output goes to #investigations.")]
+            [Description("Watch for joins and leaves of a given user. Output goes to #investigations.")]
             public async Task JoinwatchAdd(CommandContext ctx,
                 [Parameter("user"), Description("The user to watch for joins and leaves of.")] DiscordUser user,
                 [Parameter("note"), Description("An optional note for context.")] string note = "")
@@ -29,7 +29,7 @@ namespace Cliptok.Commands
             }
 
             [Command("remove")]
-			[Description("Stop watching for joins and leaves of a user.")]
+            [Description("Stop watching for joins and leaves of a user.")]
             public async Task JoinwatchRemove(CommandContext ctx,
                 [Parameter("user"), Description("The user to stop watching for joins and leaves of.")] DiscordUser user)
             {
@@ -37,7 +37,7 @@ namespace Cliptok.Commands
             }
 
             [Command("status")]
-			[Description("Check the joinwatch status for a user.")]
+            [Description("Check the joinwatch status for a user.")]
             public async Task JoinwatchStatus(CommandContext ctx,
                 [Parameter("user"), Description("The user whose joinwatch status to check.")] DiscordUser user)
             {

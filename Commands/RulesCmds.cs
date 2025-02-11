@@ -9,7 +9,7 @@ namespace Cliptok.Commands
         internal class RulesSlashCommands
         {
             [Command("all")]
-			[Description("Shows all of the community rules.")]
+            [Description("Shows all of the community rules.")]
             public async Task RulesAllCommand(SlashCommandContext ctx, [Parameter("public"), Description("Whether to show the response publicly.")] bool? isPublic = null)
             {
                 var publicResponse = await DeterminePublicResponse(ctx.Member, ctx.Channel, isPublic);
@@ -40,7 +40,7 @@ namespace Cliptok.Commands
             }
 
             [Command("rule")]
-			[Description("Shows a specific rule.")]
+            [Description("Shows a specific rule.")]
             public async Task RuleCommand(SlashCommandContext ctx,
                 [Parameter("rule_number"), Description("The rule number to show.")] long ruleNumber,
                 [Parameter("public"), Description("Whether to show the response publicly.")] bool? isPublic = null)
@@ -73,7 +73,7 @@ namespace Cliptok.Commands
             }
 
             [Command("search")]
-			[Description("Search for a rule by keyword.")]
+            [Description("Search for a rule by keyword.")]
             public async Task RuleSearchCommand(SlashCommandContext ctx,
                 [Parameter("keyword"), Description("The keyword to search for.")] string keyword,
                 [Parameter("public"), Description("Whether to show the response publicly.")] bool? isPublic = null)

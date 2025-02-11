@@ -9,13 +9,13 @@
         public class TrackingSlashCommands
         {
             [Command("add")]
-			[Description("Track a users messages.")]
+            [Description("Track a users messages.")]
             public async Task TrackingAddSlashCmd(SlashCommandContext ctx, [Parameter("member"), Description("The member to track.")] DiscordUser discordUser, [Parameter("channels"), Description("Optional channels to filter to. Use IDs or mentions, and separate with commas or spaces.")] string channels = "")
             {
                 await ctx.DeferResponseAsync(ephemeral: false);
-                
+
                 var channelsUpdated = false;
-                
+
                 // Resolve list of filter channels
                 List<ulong> filterChannels = new();
                 if (!string.IsNullOrEmpty(channels))
@@ -27,10 +27,10 @@
                         // skip some common obviously-invalid entries
                         if (channel == "" || channel == " ")
                             continue;
-   
+
                         // If this is a channel mention, get the ID first
                         var channelId = channel.Replace("<#", "").Replace(">", "");
-                        
+
                         if (ulong.TryParse(channelId, out var id))
                         {
                             if (!filterChannels.Contains(id))
@@ -44,9 +44,9 @@
                         }
                     }
                 }
-                
+
                 // If we were passed nothing, filterChannels remains an empty List. Otherwise, it is populated with the parsed channel IDs
-                
+
                 // Compare to db; if there is a mismatch, replace whatever is already in the db with what was passed to this command
                 if (Program.db.HashExists("trackingChannels", discordUser.Id))
                 {
@@ -79,7 +79,7 @@
                     // If nothing was passed, don't add anything
                     if (filterChannels.Count > 0)
                     {
-                        var newChannels = JsonConvert.SerializeObject(filterChannels); 
+                        var newChannels = JsonConvert.SerializeObject(filterChannels);
                         await Program.db.HashSetAsync("trackingChannels", discordUser.Id, newChannels);
                         channelsUpdated = true;
                     }
@@ -92,13 +92,13 @@
                         await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Successfully updated tracking for {discordUser.Mention}!"));
                         return;
                     }
-                    
+
                     await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} This user is already tracked!"));
                     return;
                 }
 
                 await Program.db.SetAddAsync("trackedUsers", discordUser.Id);
-                
+
                 string response = $"{Program.cfgjson.Emoji.On} Now tracking {discordUser.Mention} in this thread! :eyes:";
                 if (filterChannels.Count > 0)
                 {
@@ -132,7 +132,7 @@
             }
 
             [Command("remove")]
-			[Description("Stop tracking a users messages.")]
+            [Description("Stop tracking a users messages.")]
             public async Task TrackingRemoveSlashCmd(SlashCommandContext ctx, [Parameter("member"), Description("The member to track.")] DiscordUser discordUser)
             {
                 await ctx.DeferResponseAsync(ephemeral: false);

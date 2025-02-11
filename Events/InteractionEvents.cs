@@ -112,11 +112,11 @@ namespace Cliptok.Events
                         var currentAllowedPerms = (overwrites[channelId.ToString()].Allowed).ToString("name");
                         if (string.IsNullOrWhiteSpace(currentAllowedPerms))
                             currentAllowedPerms = "None";
-                        
+
                         var currentDeniedPerms = (overwrites[channelId.ToString()].Denied).ToString("name");
                         if (string.IsNullOrWhiteSpace(currentDeniedPerms))
                             currentDeniedPerms = "None";
-                        
+
                         var mergeConfirmResponse = new DiscordMessageBuilder()
                             .WithContent($"{cfgjson.Emoji.Warning} **Caution:** This user already has an override for <#{channelId}>! Do you want to merge the permissions? Here are their **current** permissions:\n**Allowed:** {currentAllowedPerms}\n**Denied:** {currentDeniedPerms}")
                             .AddComponents(new DiscordButtonComponent(DiscordButtonStyle.Danger, "debug-overrides-add-merge-confirm-callback", "Merge"), new DiscordButtonComponent(DiscordButtonStyle.Primary, "debug-overrides-add-cancel-callback", "Cancel"));
@@ -139,11 +139,11 @@ namespace Cliptok.Events
                 var allowedPermsStr = newOverwrite.Allowed.ToString("name");
                 if (string.IsNullOrWhiteSpace(allowedPermsStr))
                     allowedPermsStr = "None";
-                
+
                 var deniedPermsStr = newOverwrite.Denied.ToString("name");
                 if (string.IsNullOrWhiteSpace(deniedPermsStr))
                     deniedPermsStr = "None";
-                
+
                 await e.Message.ModifyAsync(new DiscordMessageBuilder().WithContent($"{cfgjson.Emoji.Success} Successfully added the following override for <@{newOverwrite.Id}> to <#{pendingOverride.ChannelId}>!\n**Allowed:** {allowedPermsStr}\n**Denied:** {deniedPermsStr}"));
             }
             else if (e.Id == "debug-overrides-add-cancel-callback")
@@ -217,23 +217,23 @@ namespace Cliptok.Events
                 var allowedPermsStr = newOverwrite.Allowed.ToString("name");
                 if (string.IsNullOrWhiteSpace(allowedPermsStr))
                     allowedPermsStr = "None";
-                
+
                 var deniedPermsStr = newOverwrite.Denied.ToString("name");
                 if (string.IsNullOrWhiteSpace(deniedPermsStr))
                     deniedPermsStr = "None";
-                
+
                 await e.Message.ModifyAsync(new DiscordMessageBuilder().WithContent($"{cfgjson.Emoji.Success} Override successfully added. <@{newOverwrite.Id}> already had an override in <#{pendingOverride.ChannelId}>, so here are their new permissions:\n**Allowed:** {allowedPermsStr}\n**Denied:** {deniedPermsStr}"));
             }
             else if (e.Id == "insiders-info-roles-menu-callback")
             {
                 // Shows a menu in #insider-info that allows a user to toggle their Insider roles
-                
+
                 // Defer interaction
                 await e.Interaction.DeferAsync(ephemeral: true);
-                
+
                 // Fetch member
                 var member = await e.Guild.GetMemberAsync(e.User.Id);
-                
+
                 // Fetch Insider roles to check whether member already has them
                 var insiderCanaryRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderCanary);
                 var insiderDevRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderDev);
@@ -241,7 +241,7 @@ namespace Cliptok.Events
                 var insiderRPRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderRP);
                 var insider10RPRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.Insider10RP);
                 var patchTuesdayRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.PatchTuesday);
-                
+
                 // Show menu with current Insider roles, apply new roles based on user selection
                 var menu = new DiscordSelectComponent("insiders-info-roles-menu-response-callback", "Choose your Insider roles",
                     new List<DiscordSelectComponentOption>()
@@ -253,25 +253,25 @@ namespace Cliptok.Events
                         new("Windows 10 Release Preview channel", "insiders-info-w10-rp", isDefault: member.Roles.Contains(insider10RPRole)),
                         new("Patch Tuesday", "insiders-info-pt", isDefault: member.Roles.Contains(patchTuesdayRole)),
                     }, minOptions: 0, maxOptions: 6);
-                
+
                 var builder = new DiscordFollowupMessageBuilder()
                     .WithContent($"{cfgjson.Emoji.Insider} Use the menu below to toggle your Insider roles!")
                     .AddComponents(menu)
                     .AsEphemeral(true);
-                
+
                 await e.Interaction.CreateFollowupMessageAsync(builder);
             }
             else if (e.Id == "insiders-info-roles-menu-response-callback")
             {
                 // User has selected new Insider roles w/ menu above
                 // Compare selection against current roles; add or remove roles as necessary to match selection
-                
+
                 // Defer
                 await e.Interaction.DeferAsync(ephemeral: true);
-                
+
                 // Get member
                 var member = await e.Guild.GetMemberAsync(e.User.Id);
-                
+
                 // Map role select options to role IDs
                 var insiderRoles = new Dictionary<string, ulong>
                 {
@@ -282,17 +282,17 @@ namespace Cliptok.Events
                     { "insiders-info-w10-rp", cfgjson.UserRoles.Insider10RP },
                     { "insiders-info-pt", cfgjson.UserRoles.PatchTuesday }
                 };
-                
+
                 // Get a list of the member's current roles that we can add to or remove from
                 // Then we can apply this in a single request with member.ModifyAsync to avoid making repeated member update requests
                 List<DiscordRole> memberRoles = member.Roles.ToList();
-                
+
                 var selection = e.Values.Select(x => insiderRoles[x]).ToList();
-                
+
                 foreach (var roleId in insiderRoles.Values)
                 {
                     var role = await e.Guild.GetRoleAsync(roleId);
-                    
+
                     if (selection.Contains(roleId))
                     {
                         // Member should have the role
@@ -306,25 +306,25 @@ namespace Cliptok.Events
                             memberRoles.Remove(role);
                     }
                 }
-                
+
                 // Apply roles
                 await member.ModifyAsync(x => x.Roles = memberRoles);
-                
+
                 await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent($"{cfgjson.Emoji.Success} Your Insider roles have been updated!").AsEphemeral(true));
             }
             else if (e.Id == "insiders-info-chat-btn-callback")
             {
                 // Button in #insiders-info that checks whether user has 'insiderChat' role and asks them to confirm granting/revoking it
-                
+
                 // Defer
                 await e.Interaction.DeferAsync(ephemeral: true);
-                
+
                 // Get member
                 var member = await e.Guild.GetMemberAsync(e.User.Id);
-                
+
                 // Get insider chat role
                 var insiderChatRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderChat);
-                
+
                 // Check whether member already has any insider roles
                 var insiderRoles = new List<ulong>()
                 {
@@ -339,7 +339,7 @@ namespace Cliptok.Events
                 {
                     // Member already has an insider role, thus already has access to #insiders
                     // No need for the chat role too
-                    
+
                     string insidersMention;
                     if (cfgjson.InsidersChannel == 0)
                         insidersMention = "#insiders";
@@ -349,10 +349,10 @@ namespace Cliptok.Events
                     await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                         .WithContent($"You already have Insider roles, so you already have access to chat in {insidersMention}!")
                         .AsEphemeral(true));
-                    
+
                     return;
                 }
-                
+
                 if (member.Roles.Contains(insiderChatRole))
                 {
                     // Member already has the role
@@ -360,7 +360,7 @@ namespace Cliptok.Events
                     var confirmResponse = new DiscordFollowupMessageBuilder()
                         .WithContent($"{cfgjson.Emoji.Warning} You already have the {insiderChatRole.Mention} role! Would you like to remove it?")
                         .AddComponents(new DiscordButtonComponent(DiscordButtonStyle.Danger, "insiders-info-chat-btn-remove-confirm-callback", "Remove"));
-                    
+
                     await e.Interaction.CreateFollowupMessageAsync(confirmResponse);
                 }
                 else
@@ -374,31 +374,31 @@ namespace Cliptok.Events
             else if (e.Id == "insiders-info-chat-btn-confirm-callback")
             {
                 // Confirmation for granting insiderChat role, see above
-                
+
                 // Defer
                 await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredMessageUpdate);
-                
+
                 // Give member insider chat role
                 var member = await e.Guild.GetMemberAsync(e.User.Id);
                 var insiderChatRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderChat);
                 await member.GrantRoleAsync(insiderChatRole);
-                
+
                 // Respond
                 await e.Interaction.EditFollowupMessageAsync(e.Message.Id, new DiscordWebhookBuilder().WithContent($"{cfgjson.Emoji.Success} You have been given the {insiderChatRole.Mention} role!"));
             }
             else if (e.Id == "insiders-info-chat-btn-remove-confirm-callback")
             {
                 // Confirmation for revoking insiderChat role, see above
-                
+
                 // Defer
                 await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredMessageUpdate);
-                
+
                 // Get member
                 var member = await e.Guild.GetMemberAsync(e.User.Id);
-                
+
                 var insiderChatRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderChat);
                 await member.RevokeRoleAsync(insiderChatRole);
-                
+
                 await e.Interaction.EditFollowupMessageAsync(e.Message.Id, new DiscordWebhookBuilder().WithContent($"{cfgjson.Emoji.Success} You have been removed from the {insiderChatRole.Mention} role!"));
             }
             else

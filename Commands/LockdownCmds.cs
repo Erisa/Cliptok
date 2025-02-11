@@ -13,7 +13,7 @@ namespace Cliptok.Commands
         {
             [DefaultGroupCommand]
             [Command("channel")]
-			[Description("Lock the current channel. See also: unlock channel")]
+            [Description("Lock the current channel. See also: unlock channel")]
             public async Task LockdownChannelCommand(
                 CommandContext ctx,
                 [Parameter("reason"), Description("The reason for the lockdown.")] string reason = "No reason specified.",
@@ -93,7 +93,7 @@ namespace Cliptok.Commands
             }
 
             [Command("all")]
-			[Description("Lock all lockable channels in the server. See also: unlock all")]
+            [Description("Lock all lockable channels in the server. See also: unlock all")]
             public async Task LockdownAllCommand(
                 CommandContext ctx,
                 [Parameter("reason"), Description("The reason for the lockdown.")] string reason = "",
@@ -150,7 +150,7 @@ namespace Cliptok.Commands
         {
             [DefaultGroupCommand]
             [Command("channel")]
-			[Description("Unlock the current channel. See also: lockdown")]
+            [Description("Unlock the current channel. See also: lockdown")]
             public async Task UnlockChannelCommand(CommandContext ctx, [Parameter("reason"), Description("The reason for the unlock.")] string reason = "")
             {
                 if (ctx is SlashCommandContext)
@@ -188,7 +188,7 @@ namespace Cliptok.Commands
             }
 
             [Command("all")]
-			[Description("Unlock all lockable channels in the server. See also: lockdown all")]
+            [Description("Unlock all lockable channels in the server. See also: lockdown all")]
             public async Task UnlockAllCommand(CommandContext ctx, [Parameter("reason"), Description("The reason for the unlock.")] string reason = "")
             {
                 if (ctx is SlashCommandContext)

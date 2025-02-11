@@ -14,7 +14,7 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} To prevent accidents, I won't kick bots. If you really need to do this, do it manually in Discord.");
                 return;
             }
-            
+
             if (ctx is TextCommandContext)
                 await ctx.As<TextCommandContext>().Message.DeleteAsync();
 
@@ -72,7 +72,7 @@ namespace Cliptok.Commands
                     reason += $"{word} ";
             }
             reason = reason.Trim();
-            
+
             if (users.Count == 1 || users.Count == 0)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Not accepting a masskick with a single user. Please use `!ban`.");

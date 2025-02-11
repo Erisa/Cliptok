@@ -5,7 +5,7 @@ namespace Cliptok.Commands
     public class GlobalCmds
     {
         // These commands will be registered outside of the home server and can be used anywhere, even in DMs.
-        
+
         // Most of this is taken from DSharpPlus.CommandsNext and adapted to fit here.
         // https://github.com/DSharpPlus/DSharpPlus/blob/1c1aa15/DSharpPlus.CommandsNext/CommandsNextExtension.cs#L829
         [Command("helptextcmd"), Description("Displays command help.")]
@@ -14,21 +14,21 @@ namespace Cliptok.Commands
         public async Task Help(CommandContext ctx, [Description("Command to provide help for."), RemainingText] string command = "")
         {
             var commandSplit = command.Split(' ');
-            
+
             DiscordEmbedBuilder helpEmbed = new()
             {
                 Title = "Help",
                 Color = new DiscordColor("#0080ff")
             };
-            
-           IEnumerable<Command> cmds = ctx.Extension.Commands.Values.Where(cmd =>
-                cmd.Attributes.Any(attr => attr is AllowedProcessorsAttribute apAttr
-                                           && apAttr.Processors.Contains(typeof(TextCommandProcessor))));
-            
+
+            IEnumerable<Command> cmds = ctx.Extension.Commands.Values.Where(cmd =>
+                 cmd.Attributes.Any(attr => attr is AllowedProcessorsAttribute apAttr
+                                            && apAttr.Processors.Contains(typeof(TextCommandProcessor))));
+
             if (commandSplit.Length != 0 && commandSplit[0] != "")
             {
                 commandSplit[0] += "textcmd";
-                
+
                 Command? cmd = null;
                 IEnumerable<Command>? searchIn = cmds;
                 for (int i = 0; i < commandSplit.Length; i++)
@@ -69,11 +69,11 @@ namespace Cliptok.Commands
                                     await ctx.RespondAsync(
                                         $"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{command.Replace("textcmd", "")}**!\n" +
                                         $"Required: `{att.TargetLvl}`\nYou have: `{levelText}`");
-                                
+
                                     return;
                                 }
                             }
-                        
+
                             return;
                         }
                     }
@@ -85,16 +85,16 @@ namespace Cliptok.Commands
                 {
                     throw new CommandNotFoundException(string.Join(" ", commandSplit));
                 }
-                
+
                 helpEmbed.Description = $"`{cmd.Name.Replace("textcmd", "")}`: {cmd.Description ?? "No description provided."}";
-                
-                
+
+
                 if (cmd.Subcommands.Count > 0 && cmd.Subcommands.Any(subCommand => subCommand.Attributes.Any(attr => attr is DefaultGroupCommandAttribute)))
                 {
                     helpEmbed.Description += "\n\nThis group can be executed as a standalone command.";
                 }
-                
-                var aliases = cmd.Method?.GetCustomAttributes<TextAliasAttribute>().FirstOrDefault()?.Aliases ?? (cmd.Attributes.FirstOrDefault(x => x is TextAliasAttribute) as TextAliasAttribute)?.Aliases ?? null; 
+
+                var aliases = cmd.Method?.GetCustomAttributes<TextAliasAttribute>().FirstOrDefault()?.Aliases ?? (cmd.Attributes.FirstOrDefault(x => x is TextAliasAttribute) as TextAliasAttribute)?.Aliases ?? null;
                 if (aliases is not null && (aliases.Length > 1 || (aliases.Length == 1 && aliases[0] != cmd.Name.Replace("textcmd", ""))))
                 {
                     var aliasStr = "";
@@ -102,13 +102,13 @@ namespace Cliptok.Commands
                     {
                         if (alias == cmd.Name.Replace("textcmd", ""))
                             continue;
-                        
+
                         aliasStr += $"`{alias}`, ";
                     }
                     aliasStr = aliasStr.TrimEnd(',', ' ');
                     helpEmbed.AddField("Aliases", aliasStr);
                 }
-                
+
                 var arguments = cmd.Method?.GetParameters();
                 if (arguments is not null && arguments.Length > 0)
                 {
@@ -117,21 +117,21 @@ namespace Cliptok.Commands
                     {
                         if (arg.ParameterType == typeof(CommandContext) || arg.ParameterType.IsSubclassOf(typeof(CommandContext)))
                             continue;
-                        
+
                         bool isCatchAll = arg.GetCustomAttribute<RemainingTextAttribute>() != null;
                         argumentsStr += $"{(arg.IsOptional || isCatchAll ? " [" : " <")}{arg.Name}{(isCatchAll ? "..." : "")}{(arg.IsOptional || isCatchAll ? "]" : ">")}";
                     }
-                    
+
                     argumentsStr += "`\n";
-                    
+
                     foreach (var arg in arguments)
                     {
                         if (arg.ParameterType == typeof(CommandContext) || arg.ParameterType.IsSubclassOf(typeof(CommandContext)))
                             continue;
-                        
+
                         argumentsStr += $"`{arg.Name} ({arg.ParameterType.Name})`: {arg.GetCustomAttribute<DescriptionAttribute>()?.Description ?? "No description provided."}\n";
                     }
-                    
+
                     helpEmbed.AddField("Arguments", argumentsStr.Trim());
                 }
                 //helpBuilder.WithCommand(cmd);
@@ -143,7 +143,7 @@ namespace Cliptok.Commands
                     foreach (Command? candidateCommand in commandsToSearch)
                     {
                         var executionChecks = candidateCommand.Attributes.Where(x => x is ContextCheckAttribute);
-                        
+
                         if (executionChecks == null || !executionChecks.Any())
                         {
                             eligibleCommands.Add(candidateCommand);
@@ -209,7 +209,7 @@ namespace Cliptok.Commands
 
             await ctx.RespondAsync(builder);
         }
-        
+
         [Command("pingtextcmd")]
         [TextAlias("ping")]
         [Description("Pong? This command lets you know whether I'm working well.")]
@@ -225,7 +225,7 @@ namespace Cliptok.Commands
                                              $"• It took me `{ping}ms` to reply to your message!\n" +
                                              $"• Last Websocket Heartbeat took `{Math.Round(ctx.Client.GetConnectionLatency(0).TotalMilliseconds, 0)}ms`!");
         }
-        
+
         [Command("userinfo")]
         [TextAlias("user-info", "whois")]
         [Description("Show info about a user.")]
@@ -283,7 +283,7 @@ namespace Cliptok.Commands
             await Program.db.ListRightPushAsync("reminders", JsonConvert.SerializeObject(reminderObject));
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} I'll try my best to remind you about that on <t:{TimeHelpers.ToUnixTimestamp(t)}:f> (<t:{TimeHelpers.ToUnixTimestamp(t)}:R>)"); // (In roughly **{TimeHelpers.TimeToPrettyFormat(t.Subtract(ctx.Message.Timestamp.DateTime), false)}**)");
         }
-        
+
         public class Reminder
         {
             [JsonProperty("userID")]
@@ -307,7 +307,7 @@ namespace Cliptok.Commands
             [JsonProperty("originalTime")]
             public DateTime OriginalTime { get; set; }
         }
-        
+
         // Runs command context checks manually. Returns a list of failed checks.
         // Unfortunately DSharpPlus.Commands does not provide a way to execute a command's context checks manually,
         // so this will have to do. This may not include all checks, but it includes everything I could think of. -Milkshake
@@ -344,7 +344,7 @@ namespace Cliptok.Commands
                 {
                     failedChecks.Add(homeServerAttribute);
                 }
-                
+
                 if (check is RequireHomeserverPermAttribute requireHomeserverPermAttribute)
                 {
                     // Fail if guild is wrong but this command does not work outside of the home server
@@ -377,7 +377,7 @@ namespace Cliptok.Commands
                         failedChecks.Add(requirePermissionsAttribute);
                     }
                 }
-                
+
                 if (check is IsBotOwnerAttribute isBotOwnerAttribute)
                 {
                     if (!Program.cfgjson.BotOwners.Contains(ctx.User.Id))
@@ -385,7 +385,7 @@ namespace Cliptok.Commands
                         failedChecks.Add(isBotOwnerAttribute);
                     }
                 }
-                
+
                 if (check is UserRolesPresentAttribute userRolesPresentAttribute)
                 {
                     if (Program.cfgjson.UserRoles is null)

@@ -180,7 +180,7 @@ namespace Cliptok.Events
                     x => x.Name.ToString(),
                     x => JsonConvert.DeserializeObject<UserNote>(x.Value)
                 );
-            
+
             DiscordEmbed notesEmbed;
             if (userNotes.Count > 0)
             {

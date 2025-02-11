@@ -5,10 +5,10 @@ namespace Cliptok.Tasks
         public static Dictionary<DateTime, ChannelCreatedEventArgs> PendingChannelCreateEvents = new();
         public static Dictionary<DateTime, ChannelUpdatedEventArgs> PendingChannelUpdateEvents = new();
         public static Dictionary<DateTime, ChannelDeletedEventArgs> PendingChannelDeleteEvents = new();
-        
+
         // populated in Channel Create & Update handlers to save API calls in IsMemberInServer method
         private static List<MemberPunishment> CurrentBans = new();
-        
+
         // set to true if the last attempt to populate CurrentBans failed, to suppress warnings in case of repeated failures
         private static bool LastBanListPopulationFailed = false;
 
@@ -16,7 +16,7 @@ namespace Cliptok.Tasks
         public static async Task<bool> HandlePendingChannelCreateEventsAsync()
         {
             bool success = false;
-            
+
             // populate CurrentBans list
             try
             {
@@ -24,16 +24,16 @@ namespace Cliptok.Tasks
                     x => x.Name.ToString(),
                     x => JsonConvert.DeserializeObject<MemberPunishment>(x.Value)
                 );
-                
+
                 CurrentBans = bans.Values.ToList();
-                
+
                 LastBanListPopulationFailed = false;
             }
             catch (Exception ex)
             {
                 if (!LastBanListPopulationFailed)
                     Program.discord.Logger.LogWarning(ex, "Failed to populate list of current bans during override persistence checks! This warning will be suppressed until the next success!");
-                
+
                 // Since this is likely caused by corrupt or otherwise unreadable data in the db, set a flag so that this warning is not spammed
                 // The flag will be reset on the next successful attempt to populate the CurrentBans list
                 LastBanListPopulationFailed = true;
@@ -187,11 +187,11 @@ namespace Cliptok.Tasks
             Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked pending channel create events at {time} with result: {success}", DateTime.Now, success);
             return success;
         }
-        
+
         public static async Task<bool> HandlePendingChannelUpdateEventsAsync()
         {
             bool success = false;
-            
+
             // populate CurrentBans list
             try
             {
@@ -199,16 +199,16 @@ namespace Cliptok.Tasks
                     x => x.Name.ToString(),
                     x => JsonConvert.DeserializeObject<MemberPunishment>(x.Value)
                 );
-                
+
                 CurrentBans = bans.Values.ToList();
-                
+
                 LastBanListPopulationFailed = false;
             }
             catch (Exception ex)
             {
                 if (!LastBanListPopulationFailed)
                     Program.discord.Logger.LogWarning(ex, "Failed to populate list of current bans during override persistence checks! This warning will be suppressed until the next success!");
-                
+
                 // Since this is likely caused by corrupt or otherwise unreadable data in the db, set a flag so that this warning is not spammed
                 // The flag will be reset on the next successful attempt to populate the CurrentBans list
                 LastBanListPopulationFailed = true;
@@ -446,19 +446,19 @@ namespace Cliptok.Tasks
 
             return a.Allowed == b.Allowed && a.Denied == b.Denied && a.Id == b.Id && a.Type == b.Type && a.CreationTimestamp == b.CreationTimestamp;
         }
-        
+
         private static async Task<bool> IsMemberInServer(ulong userId, DiscordGuild guild)
         {
             bool isMemberInServer = false;
-            
+
             // Check cache first
             if (guild.Members.ContainsKey(userId))
                 return true;
-            
+
             // If the user isn't cached, maybe they are banned? Check before making any API calls.
             if (CurrentBans.Any(b => b.MemberId == userId))
                 return false;
-            
+
             // If the user isn't cached or banned, try fetching them to confirm
             try
             {
@@ -469,10 +469,10 @@ namespace Cliptok.Tasks
             {
                 // Member is not in the server
                 // isMemberInServer is already false
-                
+
                 Program.discord.Logger.LogInformation(Program.CliptokEventID, "Failed to fetch member {userId} during override persistence checks. This and the accompanying 404 are expected if the user is not in the server.", userId);
             }
-            
+
             return isMemberInServer;
         }
     }

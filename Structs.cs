@@ -265,13 +265,13 @@
 
         [JsonProperty("forumIntroPosts")]
         public List<ulong> ForumIntroPosts { get; private set; } = new();
-        
+
         [JsonProperty("insiderInfoChannel")]
         public ulong InsiderInfoChannel { get; private set; }
 
         [JsonProperty("insiderAnnouncementChannel")]
         public ulong InsiderAnnouncementChannel { get; private set; } = 0;
-        
+
         private ulong insidersChannel;
         [JsonProperty("insidersChannel")]
         public ulong InsidersChannel
@@ -300,7 +300,7 @@
 
         [JsonProperty("autoWarnMsgAutoDeleteDays")]
         public int AutoWarnMsgAutoDeleteDays { get; private set; }
-        
+
         [JsonProperty("compromisedAccountBanMsgAutoDeleteDays")]
         public int CompromisedAccountBanMsgAutoDeleteDays { get; private set; }
 
@@ -315,10 +315,10 @@
 
         [JsonProperty("voiceChannelPurge")]
         public bool VoiceChannelPurge { get; private set; } = true;
-        
+
         [JsonProperty("forumChannelAutoWarnFallbackChannel")]
         public ulong ForumChannelAutoWarnFallbackChannel { get; private set; } = 0;
-        
+
         [JsonProperty("rulesAllowedPublicChannels")]
         public List<ulong> RulesAllowedPublicChannels { get; private set; } = new();
 
@@ -506,7 +506,7 @@
 
         [JsonProperty("insider10RP")]
         public ulong Insider10RP { get; private set; }
-        
+
         [JsonProperty("insiderChat")]
         public ulong InsiderChat { get; private set; }
 

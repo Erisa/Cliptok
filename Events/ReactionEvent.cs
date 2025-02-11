@@ -1,5 +1,5 @@
-﻿using static Cliptok.Program;
-using static Cliptok.Constants.RegexConstants;
+﻿using static Cliptok.Constants.RegexConstants;
+using static Cliptok.Program;
 
 namespace Cliptok.Events
 {

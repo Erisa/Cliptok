@@ -79,13 +79,13 @@ namespace Cliptok.Checks
                                 { "υ", "y" },
                                 { "ζ", "z" },
                             };
-        
+
         public static (bool success, string? flaggedWord) CheckForNaughtyWords(string input, WordListJson naughtyWordList)
         {
             // Replace any lookalike letters found in message with Latin characters, if in the dictionary
             foreach (var letter in lookalikeAlphabetMap)
                 input = input.Replace(letter.Key, letter.Value);
-            
+
             string[] naughtyWords = naughtyWordList.Words;
             input = input.Replace("\0", "");
             if (naughtyWordList.WholeWord)

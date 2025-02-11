@@ -63,17 +63,17 @@
         {
             if (Program.cfgjson.AutoWarnMsgAutoDeleteDays == 0 && Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays == 0)
                 return false;
-            
+
             // The success value will be changed later if any of the message deletes are successful.
             bool success = false;
-            
+
             if (Program.cfgjson.AutoWarnMsgAutoDeleteDays > 0)
             {
                 Dictionary<string, UserWarning> warnList = (await Program.db.HashGetAllAsync("automaticWarnings")).ToDictionary(
                     x => x.Name.ToString(),
                     x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
                 );
-                
+
                 foreach (KeyValuePair<string, UserWarning> entry in warnList)
                 {
                     UserWarning warn = entry.Value;
@@ -99,7 +99,7 @@
                     }
                 }
             }
-            
+
             if (Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays > 0)
             {
                 Dictionary<string, MemberPunishment> banList = (await Program.db.HashGetAllAsync("compromisedAccountBans")).ToDictionary(
@@ -132,7 +132,7 @@
                     }
                 }
             }
-            
+
             Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked for auto-warn and compromised account ban messages at {time} with result: {result}", DateTime.Now, success);
             return success;
         }

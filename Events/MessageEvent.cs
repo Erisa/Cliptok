@@ -75,7 +75,7 @@ namespace Cliptok.Events
         {
             await DeleteAndWarnAsync(new MockDiscordMessage(message), reason, client, messageContentOverride: messageContentOverride);
         }
-        
+
         static async Task DeleteAndWarnAsync(MockDiscordMessage message, string reason, DiscordClient client, bool wasAutoModBlock = false, string messageContentOverride = default)
         {
             var channel = message.Channel;
@@ -94,7 +94,7 @@ namespace Cliptok.Events
                     else
                         channel = Program.ForumChannelAutoWarnFallbackChannel;
                 }
-                
+
                 msg = await channel.SendMessageAsync(warnMsgReason);
             }
 
@@ -118,51 +118,51 @@ namespace Cliptok.Events
         {
             // Get forwarded msg & embeds, if any, and combine with content to evaluate
             // Combined as a single long string
-            
+
             string msgContentWithEmbedData = message.Content;
             var embeds = new List<DiscordEmbed>();
             if (message.Embeds is not null)
                 embeds.AddRange(message.Embeds.Where(embed => embed.Type != "auto_moderation_message"));
-            
+
             if (message.MessageSnapshots is not null)
                 foreach (var snapshot in message.MessageSnapshots)
                 {
                     msgContentWithEmbedData += $" {snapshot.Message.Content}";
                     embeds.AddRange(snapshot.Message.Embeds);
                 }
-            
+
             foreach (var embed in embeds)
             {
                 // Add any text from the embed into the content to be checked
-                
+
                 if (embed.Author is not null)
                 {
                     if (embed.Author.Name is not null)
                         msgContentWithEmbedData += $" {embed.Author.Name}";
-                
+
                     if (embed.Author.Url is not null)
                         msgContentWithEmbedData += $" {embed.Author.Url}";
                 }
-                
+
                 if (embed.Title is not null)
                     msgContentWithEmbedData += $" {embed.Title}";
-                
+
                 if (embed.Url is not null)
                     msgContentWithEmbedData += $" {embed.Url}";
-                
+
                 if (embed.Description is not null)
                     msgContentWithEmbedData += $" {embed.Description}";
-                
+
                 if (embed.Footer is not null && embed.Footer.Text is not null)
                     msgContentWithEmbedData += $" {embed.Footer.Text}";
-                
+
                 if (embed.Fields is not null)
                     foreach (var field in embed.Fields)
                     {
                         msgContentWithEmbedData += $" {field.Name} {field.Value}";
                     }
             }
-            
+
             try
             {
                 if (message.Timestamp is not null && message.Timestamp.Value.Year < (DateTime.Now.Year - 2))
@@ -173,7 +173,7 @@ namespace Cliptok.Events
 
                 if (message.Author is null || message.Author.Id == client.CurrentUser.Id)
                     return;
-                
+
                 if (wasAutoModBlock)
                 {
                     Program.discord.Logger.LogDebug("Processing AutoMod-blocked message in {channelId} by user {userId}", channel.Id, message.Author.Id);
@@ -194,7 +194,7 @@ namespace Cliptok.Events
                         if (trackingChannels.HasValue)
                         {
                             var trackingChannelsList = JsonConvert.DeserializeObject<List<ulong>>(trackingChannels);
-                            
+
                             // Relay if this user's tracking is not filtered to any channels, or if this msg is in a channel the tracking is filtered to
                             var channels = JsonConvert.DeserializeObject<List<ulong>>(trackingChannels);
                             if (trackingChannelsList.Count == 0 || channels.Contains(channel.Id) || (channel.Parent is not null && channels.Contains(channel.Parent.Id)))
@@ -371,7 +371,7 @@ namespace Cliptok.Events
                                     Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered word list filter", channel.Id, message.Author.Id);
                                 else
                                     Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered word list filter", message.Id, channel.Id, message.Author.Id);
-                                
+
                                 string reason = listItem.Reason;
                                 try
                                 {
@@ -677,7 +677,7 @@ namespace Cliptok.Events
                                 {
                                     Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered phishing message filter", message.Id, channel.Id, message.Author.Id);
                                 }
-                                
+
                                 string reason = "Sending phishing URL(s)";
                                 DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock);
                                 var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
@@ -724,7 +724,7 @@ namespace Cliptok.Events
                         {
                             Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered mass mention filter", message.Id, channel.Id, message.Author.Id);
                         }
-                        
+
                         string reason = "Mass mentions";
                         try
                         {
@@ -758,7 +758,7 @@ namespace Cliptok.Events
                             Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered line limit filter", message.Id, channel.Id, message.Author.Id);
                             await DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(message);
                         }
-                        
+
                         string reason = "Too many lines in a single message";
 
                         if (!Program.db.HashExists("linePardoned", message.Author.Id.ToString()))
@@ -991,7 +991,7 @@ namespace Cliptok.Events
                 return false;
             }
         }
-        
+
         private static async Task RelayTrackedMessageAsync(DiscordClient client, DiscordMessage message)
         {
             await RelayTrackedMessageAsync(client, new MockDiscordMessage(message));

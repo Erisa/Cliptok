@@ -176,7 +176,7 @@ namespace Cliptok.Events
                     discord.Logger.LogError("Heartbeat ping sent: {status} {content}", (int)response.StatusCode, await response.Content.ReadAsStringAsync());
                 }
             }
-            
+
             try
             {
                 await Migrations.JoinwatchMigration.MigrateJoinwatchesToNotesAsync();

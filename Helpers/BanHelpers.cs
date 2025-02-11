@@ -19,7 +19,7 @@
             }
 
             (DiscordMessage? dmMessage, DiscordMessage? chatMessage) output = new();
-            
+
             reason = reason.Replace("`", "\\`").Replace("*", "\\*");
             if (channel is not null)
             {
@@ -55,7 +55,7 @@
             {
                 // A DM failing to send isn't important.
             }
-            
+
             MemberPunishment newBan = new()
             {
                 MemberId = targetUserId,
@@ -65,7 +65,7 @@
                 ActionTime = actionTime,
                 Reason = reason
             };
-            
+
             if (output.chatMessage is not null)
                 newBan.ContextMessageReference = new()
                 {
@@ -81,7 +81,7 @@
                 };
 
             await Program.db.HashSetAsync("bans", targetUserId, JsonConvert.SerializeObject(newBan));
-            
+
             // If ban is for a compromised account, add to list so the context message can be more-easily deleted later
             if (compromisedAccount)
                 Program.db.HashSet("compromisedAccountBans", targetUserId, JsonConvert.SerializeObject(newBan));

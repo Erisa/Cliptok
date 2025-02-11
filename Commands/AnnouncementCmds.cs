@@ -45,7 +45,7 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync(text: $"{Program.cfgjson.Emoji.Error} Windows 10 only has a Release Preview Channel.", ephemeral: true);
                 return;
             }
-            
+
             // Avoid duplicate announcements
             if (await Program.db.SetContainsAsync("announcedInsiderBuilds", buildNumber) && !forceReannounce)
             {

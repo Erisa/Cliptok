@@ -12,7 +12,7 @@ namespace Cliptok.Commands
         {
             [DefaultGroupCommand]
             [Command("status")]
-			[Description("Check the current state of raidmode.")]
+            [Description("Check the current state of raidmode.")]
             public async Task RaidmodeStatus(CommandContext ctx)
             {
                 // Avoid conflicts with Modmail's !raidmode
@@ -42,7 +42,7 @@ namespace Cliptok.Commands
             }
 
             [Command("on")]
-			[Description("Enable raidmode. Defaults to 3 hour length if not specified.")]
+            [Description("Enable raidmode. Defaults to 3 hour length if not specified.")]
             public async Task RaidmodeOnSlash(CommandContext ctx,
                 [Parameter("duration"), Description("How long to keep raidmode enabled for.")] string duration = default,
                 [Parameter("allowed_account_age"), Description("How old an account can be to be allowed to bypass raidmode. Relative to right now.")] string allowedAccountAge = ""
@@ -115,7 +115,7 @@ namespace Cliptok.Commands
             }
 
             [Command("off")]
-			[Description("Disable raidmode immediately.")]
+            [Description("Disable raidmode immediately.")]
             public async Task RaidmodeOffSlash(CommandContext ctx)
             {
                 // Avoid conflicts with Modmail's !raidmode

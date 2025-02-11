@@ -38,7 +38,7 @@
 
                 return false;
             }
-            
+
             if (targetMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername))
                 return false;
 

@@ -239,7 +239,7 @@
             if (!modUser.IsBot)
             {
                 mostRecentWarning = warning;
-            // If warning is automatic (if responsible moderator is a bot), add to list so the context message can be more-easily deleted later
+                // If warning is automatic (if responsible moderator is a bot), add to list so the context message can be more-easily deleted later
             }
             else
             {
@@ -369,7 +369,7 @@
         {
             if (userID == default)
                 userID = warning.TargetUserId;
-            
+
             if (Program.db.HashExists("automaticWarnings", warning.WarningId))
                 await Program.db.HashDeleteAsync("automaticWarnings", warning.WarningId);
 
@@ -406,23 +406,23 @@
                 return null;
             }
         }
-        
+
         public static async Task<DiscordMessage> SendPublicWarningMessageAndDeleteInfringingMessageAsync(DiscordMessage infringingMessage, string warningMessageContent, bool wasAutoModBlock = false, int minMessages = 0)
         {
             return await SendPublicWarningMessageAndDeleteInfringingMessageAsync(new MockDiscordMessage(infringingMessage), warningMessageContent, wasAutoModBlock, minMessages);
         }
-        
+
         public static async Task<DiscordMessage> SendPublicWarningMessageAndDeleteInfringingMessageAsync(MockDiscordMessage infringingMessage, string warningMessageContent, bool wasAutoModBlock = false, int minMessages = 0)
         {
             // If this is a `GuildForum` channel, delete the thread if it is empty; if not empty, just delete the infringing message.
             // Then, based on whether the thread was deleted, send the warning message into the thread or into the configured fallback channel.
             // If this was an AutoMod block, don't delete anything.
             // Return the sent warning message for logging.
-            
+
             bool wasThreadDeleted = false;
             if (!wasAutoModBlock)
                 wasThreadDeleted = await DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(infringingMessage, minMessages);
-            
+
             DiscordChannel targetChannel = infringingMessage.Channel;
             if (wasThreadDeleted || targetChannel.Id == Program.cfgjson.SupportForumId)
             {
@@ -431,7 +431,7 @@
                 else
                     targetChannel = Program.ForumChannelAutoWarnFallbackChannel;
             }
-            
+
             var warningMessage = await targetChannel.SendMessageAsync(warningMessageContent);
             return warningMessage;
         }

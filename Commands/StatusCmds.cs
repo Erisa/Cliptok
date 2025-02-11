@@ -11,12 +11,12 @@
         {
 
             [Command("set")]
-			[Description("Set Cliptoks status.")]
+            [Description("Set Cliptoks status.")]
             [AllowedProcessors(typeof(SlashCommandProcessor))]
             public async Task StatusSetCommand(
                 SlashCommandContext ctx,
                 [Parameter("text"), Description("The text to use for the status.")] string statusText,
-                [Parameter("type"), Description("Defaults to custom. The type of status to use.")]  DiscordActivityType statusType = DiscordActivityType.Custom
+                [Parameter("type"), Description("Defaults to custom. The type of status to use.")] DiscordActivityType statusType = DiscordActivityType.Custom
             )
             {
                 if (statusText.Length > 128)
@@ -33,7 +33,7 @@
             }
 
             [Command("clear")]
-			[Description("Clear Cliptoks status.")]
+            [Description("Clear Cliptoks status.")]
             [AllowedProcessors(typeof(SlashCommandProcessor))]
             public async Task StatusClearCommand(SlashCommandContext ctx)
             {

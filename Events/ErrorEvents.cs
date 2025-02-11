@@ -9,10 +9,10 @@ namespace Cliptok.Events
             // Because we no longer have DSharpPlus.CommandsNext or DSharpPlus.SlashCommands (only DSharpPlus.Commands), we can't point to different
             // error handlers based on command type in our command handler configuration. Instead, we can start here, and jump to the correct
             // handler based on the command type.
-            
+
             // This is a lazy approach that just takes error type and points to the error handlers we already had.
             // Maybe it can be improved later?
-            
+
             if (e.Context is TextCommandContext)
             {
                 // Text command error
@@ -24,12 +24,12 @@ namespace Cliptok.Events
                 await InteractionEvents.SlashCommandErrored(e);
             }
         }
-        
+
         public static async Task TextCommandErrored(CommandErroredEventArgs e)
         {
             // strip out "textcmd" from text command names
             var commandName = e.Context.Command.FullName.Replace("textcmd", "");
-            
+
             if (e.Exception is CommandNotFoundException && (e.Context.Command is null || commandName != "help"))
                 return;
 
@@ -49,7 +49,7 @@ namespace Cliptok.Events
             {
                 if (ex is CommandNotFoundException && (e.Context.Command is null || commandName != "help"))
                     return;
-                
+
                 // If the only exception thrown was an ArgumentParseException, run permission checks.
                 // If the user fails the permission checks, show a permission error instead of the ArgumentParseException.
                 if (ex is ArgumentParseException && exs.Count == 1)
@@ -75,7 +75,7 @@ namespace Cliptok.Events
                     // Only evaluate the last one, so that if we are looking at a command in a group (say, debug shutdown),
                     // we only evaluate against permissions for the command (shutdown) instead of the group (debug) in case they differ.
                     var permErrIndex = 1;
-                    foreach(var permErr in cfex.Errors.Where(x => x.ContextCheckAttribute is RequireHomeserverPermAttribute))
+                    foreach (var permErr in cfex.Errors.Where(x => x.ContextCheckAttribute is RequireHomeserverPermAttribute))
                     {
                         // Only evaluate the last failed RequireHomeserverPermAttribute
                         if (permErrIndex == cfex.Errors.Count(x => x.ContextCheckAttribute is RequireHomeserverPermAttribute))
@@ -89,7 +89,7 @@ namespace Cliptok.Events
                             await e.Context.RespondAsync(
                                 $"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{commandName}**!\n" +
                                 $"Required: `{att.TargetLvl}`\nYou have: `{levelText}`");
-                            
+
                             return;
                         }
                         permErrIndex++;
