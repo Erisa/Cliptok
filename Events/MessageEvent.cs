@@ -871,7 +871,7 @@ namespace Cliptok.Events
                         }
                         else
                         {
-                            (bool success, string flaggedWord) = Checks.ListChecks.CheckForNaughtyWords(msgContentWithEmbedData.ToLower(), listItem);
+                            (bool success, string flaggedWord) = Checks.ListChecks.CheckForNaughtyWords(message.Content.ToLower(), listItem);
                             if (success)
                             {
                                 DiscordChannel logChannel = default;
