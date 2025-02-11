@@ -893,7 +893,6 @@ namespace Cliptok.Events
                                     colour: new DiscordColor(0xFEC13D),
                                     channelOverride: logChannel,
                                     extraField: extraField,
-                                    messageContentOverride: msgContentWithEmbedData,
                                     wasAutoModBlock: wasAutoModBlock
                                 );
                             }
