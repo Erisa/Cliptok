@@ -1,5 +1,5 @@
 FROM --platform=${BUILDPLATFORM} \
-    mcr.microsoft.com/dotnet/sdk:9.0.102 AS build-env
+    mcr.microsoft.com/dotnet/sdk:9.0.200 AS build-env
 WORKDIR /app
 
 # Copy csproj and restore as distinct layers
@@ -11,7 +11,7 @@ COPY . ./
 RUN dotnet publish Cliptok.csproj -c Release --property:PublishDir=$PWD/out
 
 # We already have this image pulled, its actually quicker to reuse it
-FROM mcr.microsoft.com/dotnet/sdk:9.0.102 AS git-collector
+FROM mcr.microsoft.com/dotnet/sdk:9.0.200 AS git-collector
 WORKDIR /out
 COPY . .
 RUN touch dummy.txt && \
@@ -22,7 +22,7 @@ RUN touch dummy.txt && \
     fi
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/runtime:9.0.1-alpine3.21
+FROM mcr.microsoft.com/dotnet/runtime:9.0.2-alpine3.21
 LABEL com.centurylinklabs.watchtower.enable=true
 WORKDIR /app
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
