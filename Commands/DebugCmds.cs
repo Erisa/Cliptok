@@ -322,6 +322,32 @@ namespace Cliptok.Commands
                 }
                 await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(JsonConvert.SerializeObject(WarningHelpers.mostRecentWarning, Formatting.Indented), "json"));
             }
+
+            [Command("bancache")]
+            [Description("Dump the most recent manual warning")]
+            public async Task BanCacheCmd(TextCommandContext ctx)
+            {
+                if (BanHelpers.MostRecentBan is null)
+                {
+                    await ctx.RespondAsync("No cached ban found.");
+                    return;
+                }
+                await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(JsonConvert.SerializeObject(BanHelpers.MostRecentBan, Formatting.Indented), "json"));
+            }
+
+
+            [Command("mutecache")]
+            [Description("Dump the most recent manual warning")]
+            public async Task MuteCacheCmd(TextCommandContext ctx)
+            {
+                if (MuteHelpers.MostRecentMute is null)
+                {
+                    await ctx.RespondAsync("No cached mute found.");
+                    return;
+                }
+                await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(JsonConvert.SerializeObject(MuteHelpers.MostRecentMute, Formatting.Indented), "json"));
+            }
+
         }
 
         class OverridesCmd

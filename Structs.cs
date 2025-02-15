@@ -67,6 +67,9 @@
 
         [JsonProperty("dmMessageReference")]
         public MessageReference DmMessageReference { get; set; }
+
+        [JsonProperty("stub")]
+        public bool Stub { get; set; } = false;
     }
 
     public class ConfigJson

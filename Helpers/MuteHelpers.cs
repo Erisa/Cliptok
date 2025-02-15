@@ -2,6 +2,8 @@
 {
     public class MuteHelpers
     {
+        public static MemberPunishment MostRecentMute;
+
         public static async Task<DiscordEmbed> MuteStatusEmbed(DiscordUser user, DiscordGuild guild)
         {
             DiscordMember member = default;
@@ -312,6 +314,7 @@
             }
 
             await Program.db.HashSetAsync("mutes", naughtyUser.Id, JsonConvert.SerializeObject(newMute));
+            MostRecentMute = newMute;
 
             return output;
         }

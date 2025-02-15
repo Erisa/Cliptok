@@ -17,6 +17,33 @@ namespace Cliptok.Commands
             [Parameter("compromised_account"), Description("Whether to include special instructions for compromised accounts")] bool compromisedAccount = false
         )
         {
+            // collision detection
+            if (MostRecentBan is not null && MostRecentBan.MemberId == user.Id)
+            {
+                var timeSinceLastBan = DateTime.UtcNow.Subtract((DateTime)MostRecentBan.ActionTime);
+                if (timeSinceLastBan <= TimeSpan.FromSeconds(5))
+                {
+                    var response = new DiscordInteractionResponseBuilder()
+        .WithContent($"{Program.cfgjson.Emoji.Error} {user.Mention} was already banned a few seconds ago, refusing yours to prevent collisions. If you meant to ban them again, try again in a few seconds.")
+        .AsEphemeral(true);
+                    if (!MostRecentBan.Stub)
+                        response.AddEmbed(await BanStatusEmbed(user, ctx.Guild));
+
+                    await ctx.RespondAsync(response);
+                    return;
+                }
+            }
+
+            MostRecentBan = new()
+            {
+                MemberId = user.Id,
+                ActionTime = ctx.Interaction.CreationTimestamp.DateTime,
+                ModId = ctx.User.Id,
+                ServerId = ctx.Guild.Id,
+                Reason = reason,
+                Stub = true
+            };
+
             // Initial response to avoid the 3 second timeout, will edit later.
             var eout = new DiscordInteractionResponseBuilder().AsEphemeral(true);
             await ctx.DeferResponseAsync(true);
@@ -205,6 +232,29 @@ namespace Cliptok.Commands
          [Description("The user you wish to ban. Should be a mention or ID.")] DiscordUser targetMember,
          [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling' NOTE: Add 'appeal' to the start of the reason to include an appeal link")] string timeAndReason = "No reason specified.")
         {
+            // collision detection
+            if (MostRecentBan is not null && targetMember.Id == MostRecentBan.MemberId)
+            {
+                var timeSinceLastWarning = DateTime.UtcNow.Subtract((DateTime)MostRecentBan.ActionTime);
+                if (timeSinceLastWarning <= TimeSpan.FromSeconds(5))
+                {
+                    await ctx.Message.DeleteAsync();
+                    var resp = await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.BSOD} I was asked to ban someone twice within a few seconds, but I'm not going to. If I'm wrong, try again in a few seconds.");
+                    await Task.Delay(5000);
+                    await resp.DeleteAsync();
+                    return;
+                }
+            }
+
+            MostRecentBan = new()
+            {
+                MemberId = targetMember.Id,
+                ActionTime = DateTime.UtcNow,
+                ModId = ctx.User.Id,
+                ServerId = ctx.Guild.Id,
+                Reason = timeAndReason,
+                Stub = true
+            };
 
             if (targetMember.IsBot)
             {
@@ -292,6 +342,31 @@ namespace Cliptok.Commands
         [Description("The user you wish to ban. Should be a mention or ID.")] DiscordUser targetMember,
         [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling' NOTE: Add 'appeal' to the start of the reason to include an appeal link")] string timeAndReason = "No reason specified.")
         {
+            // collision detection
+            if (MostRecentBan is not null && targetMember.Id == MostRecentBan.MemberId)
+            {
+                var timeSinceLastWarning = DateTime.UtcNow.Subtract((DateTime)MostRecentBan.ActionTime);
+                if (timeSinceLastWarning <= TimeSpan.FromSeconds(5))
+                {
+                    await ctx.Message.DeleteAsync();
+                    var resp = await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.BSOD} I was asked to ban someone twice within a few seconds, but I'm not going to. If I'm wrong, try again in a few seconds.");
+                    await Task.Delay(5000);
+                    await resp.DeleteAsync();
+                    return;
+                }
+            }
+
+
+            MostRecentBan = new()
+            {
+                MemberId = targetMember.Id,
+                ActionTime = DateTime.UtcNow,
+                ModId = ctx.User.Id,
+                ServerId = ctx.Guild.Id,
+                Reason = timeAndReason,
+                Stub = true
+            };
+
             bool appealable = false;
             bool timeParsed = false;
 

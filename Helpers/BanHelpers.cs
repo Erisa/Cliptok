@@ -2,6 +2,8 @@
 {
     public class BanHelpers
     {
+        public static MemberPunishment MostRecentBan; 
+
         public static async Task<bool> BanFromServerAsync(ulong targetUserId, string reason, ulong moderatorId, DiscordGuild guild, int deleteDays = 7, DiscordChannel channel = null, TimeSpan banDuration = default, bool appealable = false, bool compromisedAccount = false)
         {
             bool permaBan = false;
@@ -81,6 +83,9 @@
                 };
 
             await Program.db.HashSetAsync("bans", targetUserId, JsonConvert.SerializeObject(newBan));
+
+            // used for collision detection
+            MostRecentBan = newBan;
 
             // If ban is for a compromised account, add to list so the context message can be more-easily deleted later
             if (compromisedAccount)

@@ -14,6 +14,33 @@ namespace Cliptok.Commands
             [Parameter("time"), Description("The length of time to mute for.")] string time = ""
         )
         {
+            // collision detection
+            if (MuteHelpers.MostRecentMute is not null && MuteHelpers.MostRecentMute.MemberId == targetUser.Id)
+            {
+                var timeSinceLastBan = DateTime.UtcNow.Subtract((DateTime)MuteHelpers.MostRecentMute.ActionTime);
+                if (timeSinceLastBan <= TimeSpan.FromSeconds(5))
+                {
+                    var response = new DiscordInteractionResponseBuilder()
+        .WithContent($"{Program.cfgjson.Emoji.Error} {targetUser.Mention} was already muted a few seconds ago, refusing yours to prevent collisions. If you meant to mute them again, try again in a few seconds.")
+        .AsEphemeral(true);
+                    if (!MuteHelpers.MostRecentMute.Stub)
+                        response.AddEmbed(await MuteHelpers.MuteStatusEmbed(targetUser, ctx.Guild));
+
+                    await ctx.RespondAsync(response);
+                    return;
+                }
+            }
+
+            MuteHelpers.MostRecentMute = new()
+            {
+                MemberId = targetUser.Id,
+                ActionTime = ctx.Interaction.CreationTimestamp.DateTime,
+                ModId = ctx.User.Id,
+                ServerId = ctx.Guild.Id,
+                Reason = reason,
+                Stub = true
+            };
+
             await ctx.DeferResponseAsync(ephemeral: true);
             DiscordMember targetMember = default;
             try
@@ -242,6 +269,30 @@ namespace Cliptok.Commands
             [RemainingText, Description("Combined argument for the time and reason for the mute. For example '1h rule 7' or 'rule 10'")] string timeAndReason = "No reason specified."
         )
         {
+            // collision detection
+            if (MuteHelpers.MostRecentMute is not null && targetUser.Id == MuteHelpers.MostRecentMute.MemberId)
+            {
+                var timeSinceLastWarning = DateTime.UtcNow.Subtract((DateTime)MuteHelpers.MostRecentMute.ActionTime);
+                if (timeSinceLastWarning <= TimeSpan.FromSeconds(5))
+                {
+                    await ctx.Message.DeleteAsync();
+                    var resp = await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.BSOD} I was asked to mute someone twice within a few seconds, but I'm not going to. If I'm wrong, try again in a few seconds.");
+                    await Task.Delay(5000);
+                    await resp.DeleteAsync();
+                    return;
+                }
+            }
+
+            MuteHelpers.MostRecentMute = new()
+            {
+                MemberId = targetUser.Id,
+                ActionTime = DateTime.UtcNow,
+                ModId = ctx.User.Id,
+                ServerId = ctx.Guild.Id,
+                Reason = timeAndReason,
+                Stub = true
+            };
+
             DiscordMember targetMember = default;
             try
             {
