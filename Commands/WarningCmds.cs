@@ -464,6 +464,32 @@ namespace Cliptok.Commands
             [RemainingText, Description("The reason for giving this warning.")] string reason = null
         )
         {
+            // collision detection
+            if (mostRecentWarning is not null && targetUser.Id == mostRecentWarning.TargetUserId)
+            {
+                var timeSinceLastWarning = DateTime.UtcNow.Subtract(mostRecentWarning.WarnTimestamp);
+                if (timeSinceLastWarning <= TimeSpan.FromSeconds(5))
+                {
+                    var response = new DiscordInteractionResponseBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.Error} {targetUser.Mention} was already warned a few seconds ago, refusing yours to prevent collisions. If your warning is unrelated, try again in a few seconds.")
+                            .AsEphemeral(true);
+                    if (!mostRecentWarning.Stub)
+                        response.AddEmbed(await FancyWarnEmbedAsync(mostRecentWarning, detailed: true));
+
+                    await ctx.RespondAsync(response);
+                    return;
+                }
+            }
+
+            // this gets updated with a full warning object later, shove a stub in for now
+            mostRecentWarning = new()
+            {
+                TargetUserId = targetUser.Id,
+                ModUserId = ctx.User.Id,
+                WarnTimestamp = DateTime.Now,
+                Stub = true // make it clear this isn't a real warning
+            };
+
             DiscordMember targetMember;
             try
             {
