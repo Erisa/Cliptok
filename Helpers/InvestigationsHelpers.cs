@@ -10,6 +10,10 @@
         {
             if (colour is null)
                 colour = new DiscordColor(0xf03916);
+            
+            // If logging to #investigations and there is embed/forward data, leave it out & add a note to check #mod-logs instead
+            if (logChannelKey == "investigations" && !string.IsNullOrEmpty(messageContentOverride) && messageContentOverride != infringingMessage.Content)
+                messageContentOverride = $"{infringingMessage.Content}\n[...embed content omitted, check <#{Program.cfgjson.LogChannels["mod"].ChannelId}>...]";
 
             var embed = new DiscordEmbedBuilder()
             .WithDescription(string.IsNullOrWhiteSpace(messageContentOverride) ? infringingMessage.Content : messageContentOverride)
