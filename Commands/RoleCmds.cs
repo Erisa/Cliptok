@@ -3,10 +3,10 @@ namespace Cliptok.Commands
     public class RoleCmds
     {
         [Command("grant")]
-        [Description("Grant a user Tier 1, bypassing any verification requirements.")]
+        [Description("Grant a user access to the server, bypassing any verification requirements.")]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
-        public async Task Grant(CommandContext ctx, [Parameter("user"), Description("The user to grant Tier 1 to.")] DiscordUser user)
+        public async Task Grant(CommandContext ctx, [Parameter("user"), Description("The user to grant server access to.")] DiscordUser user)
         {
             DiscordMember member = default;
             try
@@ -31,7 +31,11 @@ namespace Cliptok.Commands
                 return;
             }
 
-            await member.ModifyAsync(x => x.MemberFlags = (DiscordMemberFlags)member.MemberFlags | DiscordMemberFlags.BypassesVerification);
+            await member.ModifyAsync(x =>
+            {
+                x.MemberFlags = (DiscordMemberFlags)member.MemberFlags | DiscordMemberFlags.BypassesVerification;
+                x.AuditLogReason = $"grant command used by {DiscordHelpers.UniqueUsername(ctx.User)}";
+            });
 
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {member.Mention} can now access the server!");
         }
