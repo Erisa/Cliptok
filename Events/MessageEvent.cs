@@ -121,8 +121,6 @@ namespace Cliptok.Events
 
             string msgContentWithEmbedData = message.Content;
             var embeds = new List<DiscordEmbed>();
-            if (message.Embeds is not null)
-                embeds.AddRange(message.Embeds.Where(embed => embed.Type != "auto_moderation_message"));
 
             if (message.MessageSnapshots is not null)
                 foreach (var snapshot in message.MessageSnapshots)
