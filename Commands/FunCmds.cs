@@ -71,9 +71,10 @@ namespace Cliptok.Commands
             {
                 await channelObj.SendMessageAsync(new DiscordMessageBuilder().WithContent(input).WithReply(Convert.ToUInt64(replyID), pingreply, false));
             }
-            catch
+            catch (Exception e)
             {
                 await ctx.RespondAsync($"Your dumb message didn't want to send. Congrats, I'm proud of you.", ephemeral: true);
+                ctx.Client.Logger.LogError(e, "An error ocurred trying to send a tellraw message.");
                 return;
             }
             await ctx.RespondAsync($"I sent your stupid message to {channelObj.Mention}.", ephemeral: true);
