@@ -116,6 +116,7 @@ namespace Cliptok.Events
         }
         public static async Task MessageHandlerAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
+            #region combine all message text
             // Get forwarded msg & embeds, if any, and combine with content to evaluate
             // Combined as a single long string
 
@@ -160,9 +161,11 @@ namespace Cliptok.Events
                         msgContentWithEmbedData += $" {field.Name} {field.Value}";
                     }
             }
+            #endregion
 
             try
             {
+                #region return early checks
                 if (message.Timestamp is not null && message.Timestamp.Value.Year < (DateTime.Now.Year - 2))
                     return;
 
@@ -171,7 +174,9 @@ namespace Cliptok.Events
 
                 if (message.Author is null || message.Author.Id == client.CurrentUser.Id)
                     return;
+                #endregion
 
+                #region debug logging
                 if (wasAutoModBlock)
                 {
                     Program.discord.Logger.LogDebug("Processing AutoMod-blocked message in {channelId} by user {userId}", channel.Id, message.Author.Id);
@@ -182,9 +187,11 @@ namespace Cliptok.Events
                 {
                     Program.discord.Logger.LogDebug("Processing message {messageId} in {channelId} by user {userId}", message.Id, channel.Id, message.Author.Id);
                 }
+                #endregion
 
                 if (!limitFilters)
                 {
+                    #region tracked user relaying
                     if (Program.db.SetContains("trackedUsers", message.Author.Id))
                     {
                         // Check current channel against tracking channels
@@ -206,13 +213,17 @@ namespace Cliptok.Events
                             await RelayTrackedMessageAsync(client, message);
                         }
                     }
+                    #endregion
 
+                    #region DM relaying
                     if (!isAnEdit && channel.IsPrivate && Program.cfgjson.LogChannels.ContainsKey("dms"))
                     {
                         DirectMessageEvent.DirectMessageEventHandler(message.BaseMessage);
                         return;
                     }
+                    #endregion
 
+                    #region modmail thread handling
                     if (!isAnEdit && message.Author.Id == Program.cfgjson.ModmailUserId && message.Content == "@here" && message.Embeds[0].Footer.Text.Contains("User ID:"))
                     {
                         Program.discord.Logger.LogDebug(Program.CliptokEventID, "Processing modmail message {message} in {channel}", message.Id, channel);
@@ -274,7 +285,9 @@ namespace Cliptok.Events
                             await LogChannelHelper.LogMessageAsync("mod", $"{Program.cfgjson.Emoji.Deleted} Note `{note.Value.NoteId}` was automatically deleted after modmail thread creation (belonging to {modmailMember.Mention})", embed);
                         }
                     }
+                    #endregion
 
+                    #region giveaways handling
                     // handle #giveaways
                     if (!isAnEdit && message.Author.Id == Program.cfgjson.GiveawayBot && channel.Id == Program.cfgjson.GiveawaysChannel && message.Content == Program.cfgjson.GiveawayTriggerMessage)
                     {
@@ -287,9 +300,10 @@ namespace Cliptok.Events
 
                         await message.BaseMessage.CreateThreadAsync(giveawayTitle, DiscordAutoArchiveDuration.ThreeDays, "Automatically creating giveaway thread.");
                     }
+                    #endregion
                 }
 
-                // automatic listupdate for private lists
+                #region automatic listupdate for private lists
                 if (
                     Program.cfgjson.GitListDirectory is not null
                     && Program.cfgjson.GitListDirectory != ""
@@ -316,18 +330,23 @@ namespace Cliptok.Events
                         await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully updated and reloaded private lists!\n```\n{result}\n```");
                     }
                 }
+                #endregion
 
-                // Skip DMs, external guilds, and messages from bots, beyond this point.
+                #region Skip DMs, external guilds, and messages from bots, beyond this point.
                 if (channel.IsPrivate || channel.Guild.Id != Program.cfgjson.ServerID || message.Author.IsBot)
                     return;
+                #endregion
 
+                #region mention relaying
                 if (!limitFilters && !Program.cfgjson.MentionTrackExcludedChannels.Contains(channel.Id) && (channel.ParentId is null || !Program.cfgjson.MentionTrackExcludedChannels.Contains((ulong)channel.ParentId)))
                 {
                     // track mentions
                     if (message.MentionedUsers.Any(x => x.Id == Program.discord.CurrentUser.Id))
                         await LogChannelHelper.LogMessageAsync("mentions", await DiscordHelpers.GenerateMessageRelay(message.BaseMessage, true, true, false));
                 }
+                #endregion
 
+                #region retrieve member object
                 DiscordMember member;
                 try
                 {
@@ -340,10 +359,12 @@ namespace Cliptok.Events
 
                 if (member == default)
                     return;
+                #endregion
 
-                // Skip messages from moderators beyond this point.
+                #region content filters
                 if ((await GetPermLevelAsync(member)) < ServerPermLevel.TrialModerator)
                 {
+                    #region block messages in forum intro thread
                     if (!limitFilters)
                     {
                         if ((channel.Id == Program.cfgjson.SupportForumIntroThreadId ||
@@ -357,7 +378,9 @@ namespace Cliptok.Events
                             return;
                         }
                     }
+                    #endregion
 
+                    #region mass mentions ban filter
                     if ((message.MentionedUsers is not null && message.MentionedUsers.Count > Program.cfgjson.MassMentionBanThreshold) || (message.MentionedUsersCount > Program.cfgjson.MassMentionBanThreshold))
                     {
                         if (wasAutoModBlock)
@@ -378,7 +401,10 @@ namespace Cliptok.Events
                         _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, "Mass mentions (Ban threshold)", DiscordHelpers.MessageLink(chatMsg), content: content, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                         return;
                     }
+                    #endregion
 
+
+                    #region restricted word list filters
                     bool match = false;
 
                     // Matching word list
@@ -431,7 +457,9 @@ namespace Cliptok.Events
                     if (match)
                         return;
 
-                    // Unapproved invites
+                    #endregion
+
+                    #region invite filter
                     string checkedMessage = msgContentWithEmbedData.Replace('\\', '/');
 
                     if ((await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && checkedMessage.Contains("dsc.gg/") ||
@@ -571,7 +599,9 @@ namespace Cliptok.Events
                     if (match)
                         return;
 
-                    // Mass emoji
+                    #endregion
+
+                    #region mass emoji filter
                     if (!Program.cfgjson.UnrestrictedEmojiChannels.Contains(channel.Id) && msgContentWithEmbedData.Length >= Program.cfgjson.MassEmojiThreshold)
                     {
                         char[] tempArray = msgContentWithEmbedData.Replace("🏻", "").Replace("🏼", "").Replace("🏽", "").Replace("🏾", "").Replace("🏿", "").ToCharArray();
@@ -635,7 +665,9 @@ namespace Cliptok.Events
                             await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                             return;
                         }
+                        #endregion
 
+                        #region tech support relaying
                         if (!limitFilters)
                         {
                             if (channel.Id == Program.cfgjson.TechSupportChannel &&
@@ -683,9 +715,10 @@ namespace Cliptok.Events
                                 _ = logOut.CreateReactionAsync(DiscordEmoji.FromName(client, ":CliptokAcknowledge:", true));
                             }
                         }
+                        #endregion
                     }
 
-                    // phishing API
+                    #region phishing API
                     var urlMatches = url_rx.Matches(msgContentWithEmbedData);
                     if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") is not null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
                     {
@@ -716,8 +749,9 @@ namespace Cliptok.Events
                             }
                         }
                     }
+                    #endregion
 
-                    // attempted to ping @everyone/@here
+                    #region everyone/here ping filter
                     var msgContent = msgContentWithEmbedData;
                     foreach (var letter in Checks.ListChecks.lookalikeAlphabetMap)
                         msgContent = msgContent.Replace(letter.Key, letter.Value);
@@ -738,8 +772,9 @@ namespace Cliptok.Events
                         await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                         return;
                     }
+                    #endregion
 
-                    // Mass mentions
+                    #region mass mentions warn filter
                     if (((message.MentionedUsers is not null && message.MentionedUsers.Count >= Program.cfgjson.MassMentionThreshold) || (message.MentionedUsersCount >= Program.cfgjson.MassMentionThreshold)) && (await GetPermLevelAsync(member)) < ServerPermLevel.Tier3)
                     {
                         if (wasAutoModBlock)
@@ -766,8 +801,9 @@ namespace Cliptok.Events
                         await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                         return;
                     }
+                    #endregion
 
-                    // line limit
+                    #region line limit filter
                     var lineCount = CountNewlines(msgContentWithEmbedData);
 
                     if (!Program.cfgjson.LineLimitExcludedChannels.Contains(channel.Id)
@@ -838,11 +874,13 @@ namespace Cliptok.Events
                         }
 
                     }
+                    #endregion
                 }
+                #endregion
 
                 if (!limitFilters)
                 {
-                    // feedback hub forum
+                    #region feedback hub forum validation
                     if ((await GetPermLevelAsync(member)) < ServerPermLevel.TrialModerator && !isAnEdit && channel.IsThread && channel.ParentId == Program.cfgjson.FeedbackHubForum && !Program.db.SetContains("processedFeedbackHubThreads", channel.Id))
                     {
                         var thread = (DiscordThreadChannel)channel;
@@ -884,7 +922,9 @@ namespace Cliptok.Events
                             }
                         }
                     }
+                    #endregion
 
+                    #region passive list matching
                     // Check the passive lists AFTER all other checks.
                     if ((await GetPermLevelAsync(member)) >= ServerPermLevel.TrialModerator)
                         return;
@@ -924,6 +964,7 @@ namespace Cliptok.Events
                             }
                         }
                     }
+                    #endregion
                 }
             }
             catch (Exception e)
