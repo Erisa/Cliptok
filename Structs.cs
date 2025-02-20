@@ -335,7 +335,7 @@
         public bool PingBotOwnersOnBadErrors { get; private set; } = false;
 
         [JsonProperty("githubWorkflowSucessString")]
-        public string HithubWorkflowSucessString { get; private set; } = "";
+        public string GithubWorkflowSucessString { get; private set; } = "";
     }
 
     public enum Level { Information, Warning, Error, Debug, Verbose }

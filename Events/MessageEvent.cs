@@ -297,7 +297,7 @@ namespace Cliptok.Events
                     && message.Author.Discriminator == "0000"
                     && message.Embeds is not null
                     && message.Embeds.Count > 0
-                    && message.Embeds[0].Title.StartsWith("[lists] fileappend success"))
+                    && message.Embeds[0].Title.StartsWith(Program.cfgjson.GithubWorkflowSucessString))
                 {
                     string command = $"cd Lists/{Program.cfgjson.GitListDirectory} && git pull";
                     var msg = await LogChannelHelper.LogMessageAsync("home", $"{Program.cfgjson.Emoji.Loading} Updating private lists..");
