@@ -67,18 +67,21 @@
             [RemainingText, Description("The text to add the list. Can be in a codeblock and across multiple line.")] string content
         )
         {
-            if (Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") is null)
+            var githubToken = Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN");
+            var githubTokenPrivate = Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN_PRIVATE");
+
+            if (githubToken is null)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} `CLIPTOK_GITHUB_TOKEN` was not set, so GitHub API commands cannot be used.");
                 return;
             }
-
             if (!fileName.EndsWith(".txt"))
                 fileName += ".txt";
 
+
             if (content.Length < 3)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Your input is too short, please reconsider.");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Your input is too short, please don't add this to the list.");
                 return;
             }
 
@@ -88,28 +91,43 @@
                 content = content.Replace("```", "").Trim();
 
             string[] lines = content.Split(
-                new string[] { "\r\n", "\r", "\n" },
+                ["\r\n", "\r", "\n"],
                 StringSplitOptions.None
             );
 
             if (lines.Any(line => line.Length < 4))
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} One of your lines is shorter than 4 characters.\nFor safety reasons I can't accept this input over command. Please submit a PR manually.");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} One of your lines is shorter than 4 characters.\nTo prevent accidents I can't accept this input over command. Please submit a PR manually.");
                 return;
             }
 
             string nameToSend = $"{DiscordHelpers.UniqueUsername(ctx.User)}";
+
+            var workflowId = Program.cfgjson.GitHubWorkflow.WorkflowId;
+            var refName = Program.cfgjson.GitHubWorkflow.Ref;
+            var repoName = Program.cfgjson.GitHubWorkflow.Repo;
+
+            if (
+                Program.cfgjson.GitHubWorkflowPrivate is not null
+                && githubTokenPrivate is not null
+                && Directory.GetFiles($"Lists/{Program.cfgjson.GitListDirectory}").Any(x => x.EndsWith(fileName)) )
+            {
+                workflowId = Program.cfgjson.GitHubWorkflowPrivate.WorkflowId;
+                refName = Program.cfgjson.GitHubWorkflowPrivate.Ref;
+                repoName = Program.cfgjson.GitHubWorkflowPrivate.Repo;
+                githubToken = githubTokenPrivate;
+            }
 
             using HttpClient httpClient = new()
             {
                 BaseAddress = new Uri("https://api.github.com/")
             };
 
-            httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
-            httpClient.DefaultRequestHeaders.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("Cliptok", "1.0"));
-            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Token", Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN"));
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Cliptok", "1.0"));
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", githubToken);
 
-            HttpRequestMessage request = new(HttpMethod.Post, $"/repos/{Program.cfgjson.GitHubWorkFlow.Repo}/actions/workflows/{Program.cfgjson.GitHubWorkFlow.WorkflowId}/dispatches");
+            HttpRequestMessage request = new(HttpMethod.Post, $"/repos/{repoName}/actions/workflows/{workflowId}/dispatches");
 
             GitHubDispatchInputs inputs = new()
             {
@@ -120,7 +138,7 @@
 
             GitHubDispatchBody body = new()
             {
-                Ref = Program.cfgjson.GitHubWorkFlow.Ref,
+                Ref = refName,
                 Inputs = inputs
             };
 
@@ -131,7 +149,7 @@
 
             if (response.IsSuccessStatusCode)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} The request was successful.\n" +
-                    $"You should see the result in <#{Program.cfgjson.HomeChannel}> soon or can check at <https://github.com/{Program.cfgjson.GitHubWorkFlow.Repo}/actions>");
+                    $"You should see the result in <#{Program.cfgjson.HomeChannel}> soon or can check at <https://github.com/{repoName}/actions>");
             else
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} An error with code `{response.StatusCode}` was returned when trying to request the Action run.\n" +
                     $"Body: ```json\n{responseText}```");

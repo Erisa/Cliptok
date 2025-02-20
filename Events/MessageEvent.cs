@@ -289,6 +289,34 @@ namespace Cliptok.Events
                     }
                 }
 
+                // automatic listupdate for private lists
+                if (
+                    Program.cfgjson.GitListDirectory is not null
+                    && Program.cfgjson.GitListDirectory != ""
+                    && message.Channel.Id == Program.cfgjson.HomeChannel
+                    && message.Author.Discriminator == "0000"
+                    && message.Embeds is not null
+                    && message.Embeds.Count > 0
+                    && message.Embeds[0].Title.StartsWith("[lists] fileappend success"))
+                {
+                    string command = $"cd Lists/{Program.cfgjson.GitListDirectory} && git pull";
+                    var msg = await LogChannelHelper.LogMessageAsync("home", $"{Program.cfgjson.Emoji.Loading} Updating private lists..");
+
+                    ShellResult finishedShell = RunShellCommand(command);
+
+                    string result = Regex.Replace(finishedShell.result, "(?:ghp)|(?:github_pat)_[0-9a-zA-Z_]+", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED");
+
+                    if (finishedShell.proc.ExitCode != 0)
+                    {
+                        await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} An error occurred trying to update private lists!\n```\n{result}\n```");
+                    }
+                    else
+                    {
+                        Program.UpdateLists();
+                        await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully updated and reloaded private lists!\n```\n{result}\n```");
+                    }
+                }
+
                 // Skip DMs, external guilds, and messages from bots, beyond this point.
                 if (channel.IsPrivate || channel.Guild.Id != Program.cfgjson.ServerID || message.Author.IsBot)
                     return;

@@ -252,6 +252,11 @@
     "ref": "main",
     "workflowId": "append-lists-txt.yml"
   },
+  "githubWorkflowPrivate": {
+    "repo": "Microsoft-community/lists",
+    "ref": "main",
+    "workflowId": "append-lists-txt.yml"
+  },
   "everyoneFilter": true,
   "logChannels": {
     "mod": {
@@ -327,7 +332,7 @@
   "logLevel": "Debug",
   "lokiURL": "http://100.79.19.82:3100",
   "lokiServiceName": "cliptok",
-  "voiceChannelPurge":  true,
+  "voiceChannelPurge": true,
   "forumChannelAutoWarnFallbackChannel": 150662382874525696,
   "rulesAllowedPublicChannels": [
     150909451270881280,
@@ -342,5 +347,6 @@
     593381041629298688,
     450181490345508884
   ],
-  "pingBotOwnersOnBadErrors": true
+  "pingBotOwnersOnBadErrors": true,
+  "githubWorkflowSucessString": "[lists:main] 1 new commit"
 }

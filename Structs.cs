@@ -216,7 +216,10 @@
         public string GiveawayTriggerMessage { get; private set; }
 
         [JsonProperty("githubWorkflow")]
-        public WorkflowConfig GitHubWorkFlow { get; private set; }
+        public WorkflowConfig GitHubWorkflow { get; private set; }
+
+        [JsonProperty("githubWorkflowPrivate")]
+        public WorkflowConfig GitHubWorkflowPrivate { get; private set; }
 
         [JsonProperty("everyoneExcludedChannels")]
         public List<ulong> EveryoneExcludedChannels { get; private set; } = new();
@@ -330,6 +333,9 @@
 
         [JsonProperty("pingBotOwnersOnBadErrors")]
         public bool PingBotOwnersOnBadErrors { get; private set; } = false;
+
+        [JsonProperty("githubWorkflowSucessString")]
+        public string HithubWorkflowSucessString { get; private set; } = "";
     }
 
     public enum Level { Information, Warning, Error, Debug, Verbose }
