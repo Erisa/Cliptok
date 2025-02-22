@@ -180,7 +180,7 @@ namespace Cliptok.Events
             try
             {
                 await Migrations.JoinwatchMigration.MigrateJoinwatchesToNotesAsync();
-                await Migrations.LinePardonMigrations.MigrateLinePardeonToSetAsync();
+                await Migrations.LinePardonMigrations.MigrateLinePardonToSetAsync();
             }
             catch (Exception ex)
             {

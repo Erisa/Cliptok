@@ -2,7 +2,7 @@
 {
     class LinePardonMigrations
     {
-        public static async Task MigrateLinePardeonToSetAsync()
+        public static async Task MigrateLinePardonToSetAsync()
         {
            if (!Program.db.KeyExists("linePardoned") || Program.db.KeyType("linePardoned") == RedisType.Set)
                 return;
