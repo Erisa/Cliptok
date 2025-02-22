@@ -180,10 +180,11 @@ namespace Cliptok.Events
             try
             {
                 await Migrations.JoinwatchMigration.MigrateJoinwatchesToNotesAsync();
+                await Migrations.LinePardonMigrations.MigrateLinePardeonToSetAsync();
             }
             catch (Exception ex)
             {
-                client.Logger.LogError(ex, "Failed to migrate joinwatches to notes!");
+                client.Logger.LogError(ex, "Failed to run migrations!");
             }
 
             client.Logger.LogInformation(CliptokEventID, "Startup event complete, logged in as {user}", $"{DiscordHelpers.UniqueUsername(client.CurrentUser)}");

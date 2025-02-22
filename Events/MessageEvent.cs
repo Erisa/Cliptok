@@ -823,9 +823,9 @@ namespace Cliptok.Events
 
                         string reason = "Too many lines in a single message";
 
-                        if (!Program.db.HashExists("linePardoned", message.Author.Id.ToString()))
+                        if (!Program.db.SetContains("linePardoned", message.Author.Id.ToString()))
                         {
-                            await Program.db.HashSetAsync("linePardoned", member.Id.ToString(), false);
+                            await Program.db.SetAddAsync("linePardoned", member.Id.ToString());
                             string output;
                             if (wasAutoModBlock)
                                 output = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, your message contained too many lines.\n" +
