@@ -107,7 +107,7 @@ namespace Cliptok.Events
                 // still warn anyway
             }
             var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, wasAutoModBlock: wasAutoModBlock);
+            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
         }
 
         public static async Task MessageHandlerAsync(DiscordClient client, DiscordMessage message, DiscordChannel channel, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
@@ -581,7 +581,7 @@ namespace Cliptok.Events
                         )
                         {
                             disallowedInviteCodes.Add(code);
-                            match = await InviteCheck(invite, message, client, wasAutoModBlock);
+                            match = await InviteCheck(invite, message, client, msgContentWithEmbedData, wasAutoModBlock);
                             if (!match)
                             {
                                 string reason = "Sent an unapproved invite";
@@ -591,7 +591,7 @@ namespace Cliptok.Events
                         }
                         else
                         {
-                            match = await InviteCheck(invite, message, client, wasAutoModBlock);
+                            match = await InviteCheck(invite, message, client, msgContentWithEmbedData, wasAutoModBlock);
                         }
 
                     }
@@ -1020,7 +1020,7 @@ namespace Cliptok.Events
             return count;
         }
 
-        public static async Task<bool> InviteCheck(DiscordInvite? invite, MockDiscordMessage message, DiscordClient client, bool wasAutoModBlock = false)
+        public static async Task<bool> InviteCheck(DiscordInvite? invite, MockDiscordMessage message, DiscordClient client, string messageContentOverride = null, bool wasAutoModBlock = false)
         {
             if (invite is null || invite.Guild is null)
                 return false;
@@ -1044,7 +1044,7 @@ namespace Cliptok.Events
                 string responseToSend = $"```json\n{responseString}\n```";
 
                 (string name, string value, bool inline) extraField = new("API Response", responseToSend, false);
-                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField, wasAutoModBlock: wasAutoModBlock);
+                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
 
                 var newEntry = JsonConvert.DeserializeObject<ServerApiResponseJson>(responseString);
                 newEntry.Invite = invite.Code;
