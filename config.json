@@ -348,5 +348,6 @@
     450181490345508884
   ],
   "pingBotOwnersOnBadErrors": true,
-  "githubWorkflowSucessString": "[lists:main] 1 new commit"
+  "githubWorkflowSucessString": "[lists:main] 1 new commit",
+  "botCommandsChannel": 740272437719072808
 }

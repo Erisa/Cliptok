@@ -223,16 +223,17 @@ namespace Cliptok.Commands
                 return;
             }
             
-            // Only allow usage in #tech-support, #tech-support-forum, and their threads
+            // Only allow usage in #tech-support, #tech-support-forum, and their threads + #bot-commands
             if (ctx.Channel.Id != Program.cfgjson.TechSupportChannel &&
                 ctx.Channel.Id != Program.cfgjson.SupportForumId &&
                 ctx.Channel.Parent.Id != Program.cfgjson.TechSupportChannel &&
-                ctx.Channel.Parent.Id != Program.cfgjson.SupportForumId)
+                ctx.Channel.Parent.Id != Program.cfgjson.SupportForumId &&
+                ctx.Channel.Id != Program.cfgjson.BotCommandsChannel)
             {
                 if (ctx is SlashCommandContext)
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} This command can only be used in <#{Program.cfgjson.TechSupportChannel}>, <#{Program.cfgjson.SupportForumId}>, and threads in those channels!"));
                 else
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command can only be used in <#{Program.cfgjson.TechSupportChannel}>, <#{Program.cfgjson.SupportForumId}>, and threads in those channels!");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command can only be used in <#{Program.cfgjson.TechSupportChannel}>, <#{Program.cfgjson.SupportForumId}>, their threads, and <#{Program.cfgjson.BotCommandsChannel}>!");
                 return;
             }
             
@@ -248,7 +249,12 @@ namespace Cliptok.Commands
             }
             catch (DSharpPlus.Exceptions.NotFoundException)
             {
-                // handled below
+                // couldn't fetch member, fail
+                if (ctx is SlashCommandContext)
+                    await ctx.EditResponseAsync($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be in the server!");
+                else
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be in the server!");
+                return;
             }
 
             if (await Program.db.HashExistsAsync("mutes", targetUser.Id) && targetMember is not null && targetMember.Roles.Contains(tqsMutedRole))
@@ -269,14 +275,6 @@ namespace Cliptok.Commands
                     await ctx.EditResponseAsync($"{Program.cfgjson.Emoji.Success} Successfully unmuted {targetUser.Mention}!");
                 else
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully unmuted {targetUser.Mention}!");
-            }
-            else if (targetMember is null)
-            {
-                // couldn't fetch member, fail
-                if (ctx is SlashCommandContext)
-                    await ctx.EditResponseAsync($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be in the server!");
-                else
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be in the server!");
             }
             else
             {
