@@ -336,6 +336,9 @@
 
         [JsonProperty("githubWorkflowSucessString")]
         public string GithubWorkflowSucessString { get; private set; } = "";
+        
+        [JsonProperty("botCommandsChannel")]
+        public ulong BotCommandsChannel { get; private set; }
     }
 
     public enum Level { Information, Warning, Error, Debug, Verbose }

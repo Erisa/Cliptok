@@ -319,8 +319,12 @@
             return output;
         }
 
-        public static async Task<bool> UnmuteUserAsync(DiscordUser targetUser, string reason = "", bool manual = true, DiscordUser modUser = default)
+        public static async Task<bool> UnmuteUserAsync(DiscordUser targetUser, string reason = "", bool manual = true, DiscordUser modUser = default, bool isTqsUnmute = false)
         {
+            var auditLogReason = reason;
+            if (manual && modUser is not null)
+                auditLogReason = $"[Manual {(isTqsUnmute ? "TQS " : "")}unmute by {DiscordHelpers.UniqueUsername(modUser)}]: {reason}";
+            
             var muteDetailsJson = await Program.db.HashGetAsync("mutes", targetUser.Id);
             bool success = false;
             bool wasTqsMute = false;
@@ -346,7 +350,7 @@
             {
                 await LogChannelHelper.LogMessageAsync("mod",
                     new DiscordMessageBuilder()
-                        .WithContent($"{Program.cfgjson.Emoji.Information} Attempt to remove Muted role from {targetUser.Mention} failed because the user could not be found.\nThis is expected if the user was banned or left.")
+                        .WithContent($"{Program.cfgjson.Emoji.Information} Attempt to remove {(isTqsUnmute ? "TQS " : "")}Muted role from {targetUser.Mention} failed because the user could not be found.\nThis is expected if the user was banned or left.")
                         .WithAllowedMentions(Mentions.None)
                     );
             }
@@ -361,29 +365,33 @@
                     // If both attempts fail, do standard failure error handling.
                     try
                     {
-                        await member.RevokeRoleAsync(role: mutedRole, reason);
+                        await member.RevokeRoleAsync(role: mutedRole, auditLogReason);
                     }
                     finally
                     {
                         // Check member roles for TQS mute role
                         if (member.Roles.Contains(tqsMutedRole))
                         {
-                            await member.RevokeRoleAsync(role: tqsMutedRole, reason);
+                            await member.RevokeRoleAsync(role: tqsMutedRole, auditLogReason);
                             wasTqsMute = true; // only true if TQS mute role was found & removed
                         }
                     }
 
-                    foreach (var role in member.Roles)
+                    // Skip if not TQS unmute...
+                    if (!isTqsUnmute)
                     {
-                        if (role.Name == "Muted" && role.Id != Program.cfgjson.MutedRole)
+                        foreach (var role in member.Roles)
                         {
-                            try
+                            if (role.Name == "Muted" && role.Id != Program.cfgjson.MutedRole)
                             {
-                                await member.RevokeRoleAsync(role: role, reason: reason);
-                            }
-                            catch
-                            {
-                                // ignore, continue to next role
+                                try
+                                {
+                                    await member.RevokeRoleAsync(role: role, reason: auditLogReason);
+                                }
+                                catch
+                                {
+                                    // ignore, continue to next role
+                                }
                             }
                         }
                     }
@@ -393,7 +401,7 @@
                 {
                     await LogChannelHelper.LogMessageAsync("mod",
                         new DiscordMessageBuilder()
-                            .WithContent($"{Program.cfgjson.Emoji.Error} Attempt to removed Muted role from {targetUser.Mention} failed because of a Discord API error!" +
+                            .WithContent($"{Program.cfgjson.Emoji.Error} Attempt to remove {(isTqsUnmute ? "TQS " : "")}Muted role from {targetUser.Mention} failed because of a Discord API error!" +
                                 $"\nIf the role was removed manually, this error can be disregarded safely.")
                             .WithAllowedMentions(Mentions.None)
                         );
@@ -404,7 +412,7 @@
                     // TQS mutes are not server-wide so this would fail every time for TQS mutes,
                     // and we don't want to log a failure for every removed TQS mute
                     if (!wasTqsMute)
-                        await member.TimeoutAsync(until: null, reason: reason);
+                        await member.TimeoutAsync(until: null, reason: auditLogReason);
                 }
                 catch (Exception ex)
                 {
@@ -414,7 +422,7 @@
                 if (success)
                 {
                     string unmuteMsg = manual
-                        ? $"{Program.cfgjson.Emoji.Information} {targetUser.Mention} was successfully unmuted by {modUser.Mention}!"
+                        ? $"{Program.cfgjson.Emoji.Information} {targetUser.Mention} was successfully {(isTqsUnmute ? "TQS-" : "")}unmuted by {modUser.Mention}!\nReason: **{reason}**"
                         : $"{Program.cfgjson.Emoji.Information} Successfully unmuted {targetUser.Mention}!";
 
                     await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder().WithContent(unmuteMsg).WithAllowedMentions(Mentions.None));
