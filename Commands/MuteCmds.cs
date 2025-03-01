@@ -147,11 +147,12 @@ namespace Cliptok.Commands
                 return;
             }
 
-            // Only allow usage in #tech-support, #tech-support-forum, and their threads
+            // Only allow usage in #tech-support, #tech-support-forum, and their threads + #bot-commands
             if (ctx.Channel.Id != Program.cfgjson.TechSupportChannel &&
                 ctx.Channel.Id != Program.cfgjson.SupportForumId &&
                 ctx.Channel.Parent.Id != Program.cfgjson.TechSupportChannel &&
-                ctx.Channel.Parent.Id != Program.cfgjson.SupportForumId)
+                ctx.Channel.Parent.Id != Program.cfgjson.SupportForumId &&
+                ctx.Channel.Id != Program.cfgjson.BotCommandsChannel)
             {
                 if (ctx is SlashCommandContext)
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} This command can only be used in <#{Program.cfgjson.TechSupportChannel}>, <#{Program.cfgjson.SupportForumId}>, and threads in those channels!"));
