@@ -143,16 +143,20 @@ namespace Cliptok.Commands
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.BanMembers)]
         public async Task UnbanCmd(CommandContext ctx, [Description("The user to unban, usually a mention or ID")] DiscordUser targetUser, [RemainingText, Description("Used in audit log only currently")] string reason = "No reason specified.")
         {
-            if ((await Program.db.HashExistsAsync("bans", targetUser.Id)))
+            var unbanMsg = $"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned **{DiscordHelpers.UniqueUsername(targetUser)}**";
+            if (reason != "No reason specified.")
+                unbanMsg += $": **{reason}**";
+
+            if (await Program.db.HashExistsAsync("bans", targetUser.Id))
             {
                 await UnbanUserAsync(ctx.Guild, targetUser, $"[Unban by {DiscordHelpers.UniqueUsername(ctx.User)}]: {reason}");
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned **{DiscordHelpers.UniqueUsername(targetUser)}**.");
+                await ctx.RespondAsync(unbanMsg);
             }
             else
             {
                 bool banSuccess = await UnbanUserAsync(ctx.Guild, targetUser);
                 if (banSuccess)
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned **{DiscordHelpers.UniqueUsername(targetUser)}**.");
+                    await ctx.RespondAsync(unbanMsg);
                 else
                 {
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.Member.Mention}, that user doesn't appear to be banned, *and* an error occurred while attempting to unban them anyway.\nPlease contact the bot owner if this wasn't expected, the error has been logged.");
