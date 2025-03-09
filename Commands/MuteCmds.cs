@@ -77,62 +77,6 @@ namespace Cliptok.Commands
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Command completed successfully."));
         }
 
-        [Command("unmute")]
-        [Description("Unmute a user.")]
-        [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [RequirePermissions(DiscordPermission.ModerateMembers)]
-        public async Task UnmuteSlashCommand(
-            SlashCommandContext ctx,
-            [Parameter("user"), Description("The user you wish to mute.")] DiscordUser targetUser,
-            [Parameter("reason"), Description("The reason for the unmute.")] string reason = "No reason specified."
-            )
-        {
-            await ctx.DeferResponseAsync(ephemeral: false);
-
-            var auditReason = $"[Manual unmute by {DiscordHelpers.UniqueUsername(ctx.User)}]: {reason}";
-
-            // todo: store per-guild
-            DiscordRole mutedRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.MutedRole);
-
-            DiscordMember member = default;
-            try
-            {
-                member = await ctx.Guild.GetMemberAsync(targetUser.Id);
-            }
-            catch (DSharpPlus.Exceptions.NotFoundException ex)
-            {
-                Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, exception: ex, message: "Failed to unmute {user} in {server} because they weren't in the server.", $"{DiscordHelpers.UniqueUsername(targetUser)}", ctx.Guild.Name);
-            }
-
-            if ((await Program.db.HashExistsAsync("mutes", targetUser.Id)) || (member != default && member.Roles.Contains(mutedRole)))
-            {
-                await MuteHelpers.UnmuteUserAsync(targetUser, auditReason, true, ctx.User);
-                var unmuteMsg = $"{Program.cfgjson.Emoji.Information} Successfully unmuted **{DiscordHelpers.UniqueUsername(targetUser)}**";
-
-                if (reason != "No reason specified.")
-                    unmuteMsg += $": **{reason}**";
-
-                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent(unmuteMsg));
-            }
-            else
-                try
-                {
-                    await MuteHelpers.UnmuteUserAsync(targetUser, auditReason, true, ctx.User);
-                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Warning} According to Discord that user is not muted, but I tried to unmute them anyway. Hope it works."));
-                }
-                catch (Exception e)
-                {
-                    Program.discord.Logger.LogError(e, "An error occurred unmuting {user}", targetUser.Id);
-                    var errorMsg = $"{Program.cfgjson.Emoji.Error} That user doesn't appear to be muted, *and* an error occurred while attempting to unmute them anyway. Please contact the bot owner, the error has been logged.";
-
-                    if (reason != "No reason specified.")
-                        errorMsg += $"\nReason: **{reason}**";
-
-                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent(errorMsg));
-                }
-        }
-
         [Command("tqsmute")]
         [Description("Temporarily mute a user in tech support channels.")]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
@@ -310,13 +254,17 @@ namespace Cliptok.Commands
             await ctx.RespondAsync(embed: await MuteHelpers.MuteStatusEmbed(targetUser, ctx.Guild), ephemeral: !isPublic);
         }
 
-        [Command("unmutetextcmd")]
-        [TextAlias("unmute", "umute")]
+        [Command("unmute")]
+        [TextAlias("umute")]
         [Description("Unmutes a previously muted user, typically ahead of the standard expiration time. See also: mute")]
-        [AllowedProcessors(typeof(TextCommandProcessor))]
+        [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public async Task UnmuteCmd(TextCommandContext ctx, [Description("The user you're trying to unmute.")] DiscordUser targetUser, string reason = "No reason provided.")
+        [RequirePermissions(DiscordPermission.ModerateMembers)]
+        public async Task UnmuteCmd(CommandContext ctx, [Parameter("user"), Description("The user you're trying to unmute.")] DiscordUser targetUser, [Parameter("reason"), Description("The reason for the unmute."), RemainingText] string reason = "No reason specified.")
         {
+            if (ctx is SlashCommandContext)
+                await ctx.DeferResponseAsync();
+            
             // todo: store per-guild
             DiscordRole mutedRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.MutedRole);
             DiscordRole tqsMutedRole = default;
@@ -352,7 +300,7 @@ namespace Cliptok.Commands
                     if (reason != "No reason specified.")
                         errorMsg += $"\nReason: **{reason}**";
 
-                    await ctx.RespondAsync();
+                    await ctx.RespondAsync(errorMsg);
                 }
                 catch (Exception e)
                 {
