@@ -407,6 +407,47 @@ namespace Cliptok.Events
             }
 
         }
+        
+        public static async Task ModalSubmitted(DiscordClient _, ModalSubmittedEventArgs e)
+        {
+            if (e.Id == "editannounce-modal-callback")
+            {
+                // Get roles & make mentionable
+                var ctx = Commands.AnnouncementCmds.EditAnnounceCache;
+                DiscordRole role1 = await e.Interaction.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[ctx.role1]);
+                await role1.ModifyAsync(mentionable: true);
+                
+                DiscordRole role2 = null;
+                if (ctx.role2 is not null)
+                {
+                    role2 = await e.Interaction.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[ctx.role2]);
+                    await role2.ModifyAsync(mentionable: true);
+                }
+                
+                try
+                {
+                    var msg = await e.Interaction.Channel.GetMessageAsync(ctx.msgId);
+                    string content = role1.Mention;
+                    if (role2 is not null)
+                        content += $" {role2.Mention}";
+                    content += $" {e.Values["editannounce-modal-new-text"]}";
+                    await msg.ModifyAsync(new DiscordMessageBuilder().WithContent(content).WithAllowedMentions(Mentions.All));
+                    
+                    await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Done!").AsEphemeral(true));
+                }
+                catch
+                {
+                    // We still need to remember to make it unmentionable even if the msg fails.
+                }
+                await role1.ModifyAsync(mentionable: false);
+                if (role2 is not null)
+                    await role2.ModifyAsync(mentionable: false);
+            }
+            else
+            {
+                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Unknown interaction. I don't know what you are asking me for.").AsEphemeral(true));
+            }
+        }
 
         public static async Task SlashCommandErrored(CommandErroredEventArgs e)
         {

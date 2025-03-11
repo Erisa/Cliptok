@@ -10,6 +10,7 @@
         readonly public static Regex discord_link_rx = new(@".*discord(?:app)?.com\/channels\/((?:@)?[a-z0-9]*)\/([0-9]*)(?:\/)?([0-9]*)");
         readonly public static Regex channel_rx = new("<#([0-9]+)>");
         readonly public static Regex user_rx = new("<@([0-9]+)>");
+        readonly public static Regex role_rx = new("<@&([0-9]+)>");
         readonly public static Regex warn_msg_rx = new($"{Program.cfgjson.Emoji.Warning} <@!?[0-9]+> was warned");
         readonly public static Regex auto_warn_msg_rx = new($"{Program.cfgjson.Emoji.Denied} <@!?[0-9]+> was automatically warned");
         readonly public static Regex mute_msg_rx = new($"{Program.cfgjson.Emoji.Muted} <@!?[0-9]+> has been muted");

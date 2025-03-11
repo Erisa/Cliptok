@@ -211,6 +211,7 @@ namespace Cliptok
             discordBuilder.ConfigureEventHandlers
             (
                 builder => builder.HandleComponentInteractionCreated(InteractionEvents.ComponentInteractionCreateEvent)
+                                  .HandleModalSubmitted(InteractionEvents.ModalSubmitted)
                                   .HandleSessionCreated(ReadyEvent.OnReady)
                                   .HandleMessageCreated(MessageEvent.MessageCreated)
                                   .HandleMessageUpdated(MessageEvent.MessageUpdated)
