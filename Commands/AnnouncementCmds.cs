@@ -467,7 +467,10 @@ namespace Cliptok.Commands
                 List<DiscordApplicationCommandOptionChoice> list = new();
                 foreach (var role in Program.cfgjson.AnnouncementRoles)
                 {
-                    list.Add(new DiscordApplicationCommandOptionChoice(Program.cfgjson.AnnouncementRolesFriendlyNames[role.Key], role.Key));
+                    if (Program.cfgjson.AnnouncementRolesFriendlyNames is not null && Program.cfgjson.AnnouncementRolesFriendlyNames.ContainsKey(role.Key))
+                        list.Add(new DiscordApplicationCommandOptionChoice(Program.cfgjson.AnnouncementRolesFriendlyNames[role.Key], role.Key));
+                    else
+                        list.Add(new DiscordApplicationCommandOptionChoice(role.Key, role.Key));
                 }
                 return list;
             }
