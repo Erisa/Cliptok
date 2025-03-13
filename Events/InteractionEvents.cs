@@ -413,7 +413,7 @@ namespace Cliptok.Events
             if (e.Id == "editannounce-modal-callback")
             {
                 // Get roles & make mentionable
-                var ctx = Commands.AnnouncementCmds.EditAnnounceCache;
+                var ctx = Commands.AnnouncementCmds.EditAnnounceCache[e.Interaction.User.Id];
                 DiscordRole role1 = await e.Interaction.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[ctx.role1]);
                 await role1.ModifyAsync(mentionable: true);
                 

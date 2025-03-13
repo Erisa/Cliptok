@@ -3,7 +3,8 @@ namespace Cliptok.Commands
     public class AnnouncementCmds
     {
         // used to pass context to modal handling for /editannounce
-        public static (ulong msgId, string role1, string role2) EditAnnounceCache;
+        // keyed by user ID
+        public static Dictionary<ulong, (ulong msgId, string role1, string role2)> EditAnnounceCache = new();
         
         [Command("announcebuild")]
         [Description("Announce a Windows Insider build in the current channel.")]
@@ -311,7 +312,7 @@ namespace Cliptok.Commands
                 return;
             }
             
-            EditAnnounceCache = (Convert.ToUInt64(messageId), role1Name, role2Name);
+            EditAnnounceCache[ctx.User.Id] = (Convert.ToUInt64(messageId), role1Name, role2Name);
 
             await ctx.RespondWithModalAsync(new DiscordInteractionResponseBuilder().WithTitle("Edit Announcement").WithCustomId("editannounce-modal-callback").AddComponents(new DiscordTextInputComponent("New announcement text. Do not include roles!", "editannounce-modal-new-text", value: msg.Content, style: DiscordTextInputStyle.Paragraph)));
         }
