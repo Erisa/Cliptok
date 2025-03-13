@@ -296,7 +296,7 @@ namespace Cliptok.Commands
             
             if (msg.Author.Id != ctx.Client.CurrentUser.Id)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That message ID wasn't recognised!", ephemeral: true);
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That message wasn't sent by me, so I can't edit it!", ephemeral: true);
                 return;
             }
             
