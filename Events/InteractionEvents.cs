@@ -427,10 +427,14 @@ namespace Cliptok.Events
                 try
                 {
                     var msg = await e.Interaction.Channel.GetMessageAsync(ctx.msgId);
-                    string content = role1.Mention;
-                    if (role2 is not null)
-                        content += $" {role2.Mention}";
-                    content += $" {e.Values["editannounce-modal-new-text"]}";
+                    
+                    // Set up content, add role mentions if they arent anywhere else in the content already
+                    string content = e.Values["editannounce-modal-new-text"];
+                    if (role2 is not null && !content.Contains(role2.Id.ToString()))
+                        content = $"{role2.Mention} {content}";
+                    if (!content.Contains(role1.Id.ToString()))
+                        content = $"{role1.Mention} {content}";
+                    
                     await msg.ModifyAsync(new DiscordMessageBuilder().WithContent(content).WithAllowedMentions(Mentions.All));
                     
                     await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Done!").AsEphemeral(true));
@@ -445,7 +449,8 @@ namespace Cliptok.Events
             }
             else
             {
-                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Unknown interaction. I don't know what you are asking me for.").AsEphemeral(true));
+                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Unknown interaction! This should never happen. Please contact the bot owner(s)!").AsEphemeral(true));
+                Program.discord.Logger.LogError(Program.CliptokEventID, "Received unexpected modal submission with ID {id}!", e.Id);
             }
         }
 

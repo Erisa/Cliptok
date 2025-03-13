@@ -275,8 +275,10 @@ namespace Cliptok.Commands
         public async Task EditAnnounce(
             SlashCommandContext ctx,
             [Parameter("message"), Description("The ID of the message to edit.")] string messageId,
-            [Parameter("role1"), Description("The short name for the first role to ping.")] string role1Name,
-            [Parameter("role2"), Description("The short name for the second role to ping. Optional.")] string role2Name = null
+            [SlashChoiceProvider(typeof(AnnouncementRoleChoiceProvider))]
+            [Parameter("role1"), Description("The first role to ping.")] string role1Name,
+            [SlashChoiceProvider(typeof(AnnouncementRoleChoiceProvider))]
+            [Parameter("role2"), Description("The second role to ping. Optional.")] string role2Name = null
         )
         {
             // Validate msg ID
@@ -311,7 +313,7 @@ namespace Cliptok.Commands
             
             EditAnnounceCache = (Convert.ToUInt64(messageId), role1Name, role2Name);
 
-            await ctx.RespondWithModalAsync(new DiscordInteractionResponseBuilder().WithTitle("Edit Announcement").WithCustomId("editannounce-modal-callback").AddComponents(new DiscordTextInputComponent("New announcement text. Do not include roles!", "editannounce-modal-new-text", value: Regex.Replace(msg.Content, Constants.RegexConstants.role_rx.ToString(), ""), style: DiscordTextInputStyle.Paragraph)));
+            await ctx.RespondWithModalAsync(new DiscordInteractionResponseBuilder().WithTitle("Edit Announcement").WithCustomId("editannounce-modal-callback").AddComponents(new DiscordTextInputComponent("New announcement text. Do not include roles!", "editannounce-modal-new-text", value: msg.Content, style: DiscordTextInputStyle.Paragraph)));
         }
 
         [Command("announcetextcmd")]
@@ -454,6 +456,19 @@ namespace Cliptok.Commands
                     new("Beta Channel", "Beta"),
                     new("Release Preview Channel", "RP")
                 };
+            }
+        }
+        
+        internal class AnnouncementRoleChoiceProvider : IChoiceProvider
+        {
+            public async ValueTask<IEnumerable<DiscordApplicationCommandOptionChoice>> ProvideAsync(CommandParameter _)
+            {
+                List<DiscordApplicationCommandOptionChoice> list = new();
+                foreach (var role in Program.cfgjson.AnnouncementRoles)
+                {
+                    list.Add(new DiscordApplicationCommandOptionChoice(Program.cfgjson.AnnouncementRolesFriendlyNames[role.Key], role.Key));
+                }
+                return list;
             }
         }
     }

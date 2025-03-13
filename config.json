@@ -23,6 +23,14 @@
     "rp10": 910319453491839069,
     "patch": 445773142233710594
   },
+  "announcementRolesFriendlyNames": {
+    "canary": "Windows 11 Insiders (Canary)",
+    "dev": "Windows 11 Insiders (Dev)",
+    "beta": "Windows 11 Insiders (Beta)",
+    "rp": "Windows 11 Insiders (Release Preview)",
+    "rp10": "Windows 10 Insiders (Release Preview)",
+    "patch": "Patch Tuesday"
+  },
   "appealLink": "https://appeal.msft.chat",
   "inviteExclusion": [
     "microsoft",

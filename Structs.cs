@@ -187,6 +187,9 @@
 
         [JsonProperty("announcementRoles")]
         public Dictionary<string, ulong> AnnouncementRoles { get; private set; }
+        
+        [JsonProperty("announcementRolesFriendlyNames")]
+        public Dictionary<string, string> AnnouncementRolesFriendlyNames { get; private set; }
 
         [JsonProperty("hastebinEndpoint")]
         public string HastebinEndpoint { get; private set; }
