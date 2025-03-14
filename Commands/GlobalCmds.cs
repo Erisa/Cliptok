@@ -110,6 +110,13 @@ namespace Cliptok.Commands
                 }
 
                 var arguments = cmd.Method?.GetParameters();
+                if (arguments is null)
+                {
+                    // This is a group command; try to show the arguments for the default subcommand
+                    var defaultGroupCommand = cmd.Subcommands.FirstOrDefault(sc => sc.Attributes.Any(a => a is DefaultGroupCommandAttribute));
+                    arguments = defaultGroupCommand?.Method?.GetParameters();
+                }
+                
                 if (arguments is not null && arguments.Length > 0)
                 {
                     var argumentsStr = $"`{cmd.Name.Replace("textcmd", "")}";
