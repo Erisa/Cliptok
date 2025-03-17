@@ -302,6 +302,17 @@ namespace Cliptok.Events
                     }
                     #endregion
                 }
+                
+                #region Vortex anti-duplicate log forwarding
+                if (message.Author.Id == 240254129333731328
+                    && Program.cfgjson.LogChannels["mod"].ChannelId is not 0 && message.Channel.Id == Program.cfgjson.LogChannels["mod"].ChannelId
+                    && message.Content.Contains("Duplicate messages")
+                    && (message.Content.Contains("**Vortex**#8540 gave `1` strikes") || message.Content.Contains("**Vortex**#8540 muted"))
+                    )
+                {
+                    await LogChannelHelper.LogMessageAsync("investigations", message.Content);
+                }
+                #endregion
 
                 #region automatic listupdate for private lists
                 if (
