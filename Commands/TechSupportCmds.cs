@@ -106,6 +106,59 @@ namespace Cliptok.Commands
                 .WithColor(DiscordColor.Red)
             ));
         }
+        
+        [Command("solved")]
+        [Description("Mark a #tech-support-forum post as solved and close it.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
+        [HomeServer]
+        public async Task MarkTechSupportPostSolved(SlashCommandContext ctx)
+        {
+            await ctx.DeferResponseAsync(ephemeral: true);
+            
+            // Restrict to #tech-support-forum posts
+            if (ctx.Channel.Parent is null || ctx.Channel.Parent.Id != Program.cfgjson.SupportForumId)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command can only be used inside of a <#{Program.cfgjson.SupportForumId}> post!", ephemeral: true);
+                return;
+            }
+            
+            // Re-fetch channel to forcefully re-cache it, & cast to thread to read thread-specific data
+            var channel = await ctx.Guild.GetChannelAsync(ctx.Channel.Id, skipCache: true) as DiscordThreadChannel;
+
+            // Restrict to OP or TQS members
+            if (ctx.User.Id != channel.CreatorId && await GetPermLevelAsync(ctx.Member) < ServerPermLevel.TechnicalQueriesSlayer)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Only the original poster or a <@&{Program.cfgjson.TqsRoleId}> can mark this post as solved!");
+                return;
+            }
+            
+            var forum = await ctx.Client.GetChannelAsync(channel.Parent.Id) as DiscordForumChannel;
+            var solvedTagId = forum.AvailableTags.FirstOrDefault(x => x.Name == "Solved").Id;
+
+            // Add solved tag & archive thread
+            List<ulong> tags = channel.AppliedTags.Select(x => x.Id).ToList();
+            if (tags.Any(x => x == solvedTagId))
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This post is already marked as solved!", ephemeral: true);
+                return;
+            }
+            tags.Add(solvedTagId);
+            await channel.ModifyAsync(t => t.AppliedTags = tags);
+            await channel.ModifyAsync(t => t.IsArchived = true);
+            
+            // Try to DM the OP a link to their post so they can find it again
+            try
+            {
+                var member = await ctx.Guild.GetMemberAsync(channel.CreatorId);
+                await member.SendMessageAsync($"{Program.cfgjson.Emoji.Success} Your post **{channel.Name}** in <#{forum.Id}> has been marked as solved!\nIf you need to refer back to it, you can find it here: https://discord.com/channels/{channel.Guild.Id}/{channel.Id}");
+            }
+            catch
+            {
+                // Failing to send this DM isn't important
+            }
+            
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Post successfully marked as solved!", ephemeral: true);
+        }
     }
 
     internal class VcRedistChoiceProvider : IChoiceProvider
