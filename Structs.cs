@@ -342,6 +342,12 @@
         
         [JsonProperty("botCommandsChannel")]
         public ulong BotCommandsChannel { get; private set; }
+
+        [JsonProperty("duplicateMessageThreshold")]
+        public int DuplicateMessageThreshold { get; private set; } = 0;
+
+        [JsonProperty("duplicateMessageSeconds")]
+        public int DuplicateMessageSeconds { get; private set; } = 0;
     }
 
     public enum Level { Information, Warning, Error, Debug, Verbose }
@@ -663,6 +669,13 @@
 
         [JsonProperty("id")]
         public ulong Id { get; set; }
+    }
+
+    public class RecentMessageInfo
+    {
+        public string Content { get; set; }
+        public List<MockDiscordMessage> Messages { get; set; }
+        public DateTime LastMessageTime { get; set; }
     }
 
 }

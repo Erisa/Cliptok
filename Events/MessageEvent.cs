@@ -8,6 +8,8 @@ namespace Cliptok.Events
         public static Dictionary<ulong, DateTime> supportRatelimit = new();
 
         public static Dictionary<ulong, DiscordThreadChannel> trackingThreadCache = new();
+        public static Dictionary<ulong, RecentMessageInfo> duplicateMessageCache = [];
+        public static List<ulong> deletedMessageCache = [];
 
         public static List<string> allowedInviteCodes = new();
         public static List<string> disallowedInviteCodes = new();
@@ -302,17 +304,6 @@ namespace Cliptok.Events
                     }
                     #endregion
                 }
-                
-                #region Vortex anti-duplicate log forwarding
-                if (message.Author.Id == 240254129333731328
-                    && Program.cfgjson.LogChannels["mod"].ChannelId is not 0 && message.Channel.Id == Program.cfgjson.LogChannels["mod"].ChannelId
-                    && message.Content.Contains("Duplicate messages")
-                    && (message.Content.Contains("**Vortex**#8540 gave `1` strikes") || message.Content.Contains("**Vortex**#8540 muted"))
-                    )
-                {
-                    await LogChannelHelper.LogMessageAsync("investigations", message.Content);
-                }
-                #endregion
 
                 #region automatic listupdate for private lists
                 if (
@@ -414,6 +405,52 @@ namespace Cliptok.Events
                     }
                     #endregion
 
+                    #region duplicate message handling
+                    // skip empty and null content
+                    if (Program.cfgjson.DuplicateMessageSeconds != 0 && Program.cfgjson.DuplicateMessageThreshold != 0 && !isAnEdit && !limitFilters && !wasAutoModBlock && msgContentWithEmbedData is not null && msgContentWithEmbedData != "")
+                    {
+                        if (
+                            duplicateMessageCache.ContainsKey(message.Author.Id)
+                            && duplicateMessageCache[message.Author.Id].Content == msgContentWithEmbedData
+                            && (DateTime.Now - duplicateMessageCache[message.Author.Id].LastMessageTime).TotalSeconds < Program.cfgjson.DuplicateMessageSeconds)
+                        {
+                            duplicateMessageCache[message.Author.Id].Messages.Add(message);
+                            duplicateMessageCache[message.Author.Id].LastMessageTime = message.Timestamp.HasValue ? message.Timestamp.Value.UtcDateTime : DateTime.UtcNow;
+
+                            if (duplicateMessageCache[message.Author.Id].Messages.Count >= Program.cfgjson.DuplicateMessageThreshold)
+                            {
+                                duplicateMessageCache[message.Author.Id].Messages.ForEach(
+                                    // don't delete a message if it was deleted on a past run of this check, but keep it in the list
+                                    // also don't delete the current message because we'll do that later
+                                    async x => {
+                                        if (x.Id != message.Id && !deletedMessageCache.Contains(x.Id))
+                                        {
+                                            _ = DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(x);
+                                            deletedMessageCache.Add(x.Id);
+                                        }
+                                    }
+                                );
+                                
+                                string reason = "Duplicate message spam";
+                                string output = $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason}**";
+                                DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, output, wasAutoModBlock);
+                                deletedMessageCache.Add(message.Id);
+                                var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
+                                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
+                                return;
+                            }
+                        }
+                        else
+                        {                                
+                            duplicateMessageCache[message.Author.Id] = new RecentMessageInfo
+                            {
+                                Content = msgContentWithEmbedData,
+                                LastMessageTime = message.Timestamp.HasValue ? message.Timestamp.Value.UtcDateTime : DateTime.UtcNow,
+                                Messages = [message]
+                            };
+                        }
+                    }
+                    #endregion
 
                     #region restricted word list filters
                     bool match = false;

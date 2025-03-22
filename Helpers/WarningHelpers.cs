@@ -423,7 +423,11 @@
             if (!wasAutoModBlock)
                 wasThreadDeleted = await DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(infringingMessage, minMessages);
 
-            DiscordChannel targetChannel = infringingMessage.Channel;
+            return await ThreadAwareSendPublicWarningMessage(warningMessageContent, wasThreadDeleted, infringingMessage.Channel);
+        }
+
+        public static async Task<DiscordMessage> ThreadAwareSendPublicWarningMessage(string warningMessageContent, bool wasThreadDeleted, DiscordChannel targetChannel)
+        {
             if (wasThreadDeleted || targetChannel.Id == Program.cfgjson.SupportForumId)
             {
                 if (Program.cfgjson.ForumChannelAutoWarnFallbackChannel == 0)

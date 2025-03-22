@@ -357,5 +357,7 @@
   ],
   "pingBotOwnersOnBadErrors": true,
   "githubWorkflowSucessString": "[lists:main] 1 new commit",
-  "botCommandsChannel": 740272437719072808
+  "botCommandsChannel": 740272437719072808,
+  "duplicateMessageThreshold": 4,
+  "duplicateMessageSeconds": 10
 }
