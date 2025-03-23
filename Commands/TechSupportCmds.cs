@@ -144,6 +144,9 @@ namespace Cliptok.Commands
             }
             tags.Add(solvedTagId);
             await channel.ModifyAsync(t => t.AppliedTags = tags);
+            
+            await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Success} This post is solved and has been closed!\n**Unless you are the original poster, please do not reopen this post.** If you have a similar issue, please create your own post.");
+            
             await channel.ModifyAsync(t => t.IsArchived = true);
             
             // Try to DM the OP a link to their post so they can find it again
