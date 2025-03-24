@@ -19,10 +19,14 @@
             [Parameter("attachments_only"), Description("Optionally filter the deletion to only messages with attachments.")] bool attachmentsOnly = false,
             [Parameter("stickers_only"), Description("Optionally filter the deletion to only messages with stickers.")] bool stickersOnly = false,
             [Parameter("links_only"), Description("Optionally filter the deletion to only messages containing links.")] bool linksOnly = false,
-            [Parameter("dry_run"), Description("Don't actually delete the messages, just output what would be deleted.")] bool dryRun = false
+            [Parameter("dry_run"), Description("Don't actually delete the messages, just output what would be deleted.")] bool dryRun = false,
+            [Parameter("channel"), Description("Choose a specific channel to clear from. Defaults to the current channel.")] DiscordChannel channel = default
         )
         {
             await ctx.DeferResponseAsync(ephemeral: !dryRun);
+            
+            if (channel is null)
+                channel = ctx.Channel;
 
             // If all args are unset
             if (count == 0 && upTo == "" && user == default && ignoreMods == false && match == "" && botsOnly == false && humansOnly == false && attachmentsOnly == false && stickersOnly == false && linksOnly == false)
@@ -62,7 +66,7 @@
             List<DiscordMessage> messagesToClear = new();
             if (upTo == "")
             {
-                var messages = await ctx.Channel.GetMessagesAsync((int)count).ToListAsync();
+                var messages = await channel.GetMessagesAsync((int)count).ToListAsync();
                 messagesToClear = messages.ToList();
             }
             else
@@ -80,25 +84,33 @@
                 else
                 {
                     if (
-                        Constants.RegexConstants.discord_link_rx.Match(upTo).Groups[2].Value != ctx.Channel.Id.ToString()
+                        Constants.RegexConstants.discord_link_rx.Match(upTo).Groups[2].Value != channel.Id.ToString()
                         || !ulong.TryParse(Constants.RegexConstants.discord_link_rx.Match(upTo).Groups[3].Value, out messageId)
                     )
                     {
-                        await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Please provide a valid link to a message in this channel!").AsEphemeral(true));
+                        await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Please provide a valid link to a message in {channel.Mention}!").AsEphemeral(true));
                         return;
                     }
                 }
 
                 // This is the message we will delete up to. This message will not be deleted.
-                message = await ctx.Channel.GetMessageAsync(messageId);
+                try
+                {
+                    message = await channel.GetMessageAsync(messageId, skipCache: true);
+                }
+                catch
+                {
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I couldn't fetch the message you provided for `up_to`! Please provide a valid message link or ID.").AsEphemeral(true));
+                    return;
+                }
 
                 // List of messages to delete, up to (not including) the one we just got.
-                var firstMsg = (await ctx.Channel.GetMessagesAfterAsync(message.Id, 1).ToListAsync())[0];
+                var firstMsg = (await channel.GetMessagesAfterAsync(message.Id, 1).ToListAsync())[0];
                 var firstMsgId = firstMsg.Id;
                 messagesToClear.Add(firstMsg);
                 while (true)
                 {
-                    var newMessages = (await ctx.Channel.GetMessagesAfterAsync(firstMsgId, 100).ToListAsync()).ToList();
+                    var newMessages = (await channel.GetMessagesAfterAsync(firstMsgId, 100).ToListAsync()).ToList();
                     messagesToClear.AddRange(newMessages);
                     firstMsgId = newMessages.First().Id;
                     if (newMessages.Count() < 100)
@@ -246,7 +258,7 @@
             {
                 var msg = await LogChannelHelper.CreateDumpMessageAsync($"{Program.cfgjson.Emoji.Information} **{messagesToClear.Count}** messages would have been deleted, but are instead logged below.",
                     messagesToClear,
-                    ctx.Channel);
+                    channel);
                 await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent(msg.Content).AddFiles(msg.Files).AddEmbeds(msg.Embeds).AsEphemeral(false));
                 return;
             }
@@ -263,18 +275,18 @@
             {
                 if (messagesToClear.Count >= 1)
                 {
-                    await ctx.Channel.DeleteMessagesAsync(messagesToClear, $"[Clear by {DiscordHelpers.UniqueUsername(ctx.User)}]");
+                    await channel.DeleteMessagesAsync(messagesToClear, $"[Clear by {DiscordHelpers.UniqueUsername(ctx.User)}]");
                     if (skipped)
                     {
-                        await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Cleared **{messagesToClear.Count}** messages from {ctx.Channel.Mention}!\nSome messages were not deleted because they are older than 2 weeks.");
+                        await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Cleared **{messagesToClear.Count}** messages from {channel.Mention}!\nSome messages were not deleted because they are older than 2 weeks.");
                     }
                     else
                     {
-                        await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Cleared **{messagesToClear.Count}** messages from {ctx.Channel.Mention}!");
+                        await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Cleared **{messagesToClear.Count}** messages from {channel.Mention}!");
                     }
                     await LogChannelHelper.LogMessageAsync("mod",
                         new DiscordMessageBuilder()
-                            .WithContent($"{Program.cfgjson.Emoji.Deleted} **{messagesToClear.Count}** messages were cleared in {ctx.Channel.Mention} by {ctx.User.Mention}.")
+                            .WithContent($"{Program.cfgjson.Emoji.Deleted} **{messagesToClear.Count}** messages were cleared in {channel.Mention} by {ctx.User.Mention}.")
                             .WithAllowedMentions(Mentions.None)
                     );
                     await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Done!").AsEphemeral(true));
@@ -286,9 +298,9 @@
 
                 await LogChannelHelper.LogDeletedMessagesAsync(
                     "messages",
-                    $"{Program.cfgjson.Emoji.Deleted} **{messagesToClear.Count}** messages were cleared from {ctx.Channel.Mention} by {ctx.User.Mention}.",
+                    $"{Program.cfgjson.Emoji.Deleted} **{messagesToClear.Count}** messages were cleared from {channel.Mention} by {ctx.User.Mention}.",
                     messagesToClear,
-                    ctx.Channel
+                    channel
                 );
 
             }
