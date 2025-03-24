@@ -110,7 +110,7 @@
                 messagesToClear.Add(firstMsg);
                 while (true)
                 {
-                    var newMessages = (await channel.GetMessagesAfterAsync(firstMsgId, 100).ToListAsync()).ToList();
+                    var newMessages = (await channel.GetMessagesAfterAsync(firstMsgId, 100).ToListAsync()).OrderByDescending(x => x.Id).ToList();
                     messagesToClear.AddRange(newMessages);
                     firstMsgId = newMessages.First().Id;
                     if (newMessages.Count() < 100)
