@@ -235,6 +235,7 @@ namespace Cliptok
                                   .HandleChannelUpdated(ChannelEvents.ChannelUpdated)
                                   .HandleChannelDeleted(ChannelEvents.ChannelDeleted)
                                   .HandleAutoModerationRuleExecuted(AutoModEvents.AutoModerationRuleExecuted)
+                                  .HandleGuildAuditLogCreated(AuditLogEvents.GuildAuditLogCreated)
             );
 
             // TODO(erisa): At some point we might be forced to ConnectAsync() the builder directly
