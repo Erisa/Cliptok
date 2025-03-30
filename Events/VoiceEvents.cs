@@ -85,8 +85,10 @@
                     {
                         PendingPurge.Remove(e.Before.Channel.Id);
                         Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error ocurred trying to purge messages from {channel}", e.Before.Channel.Name);
-                        return;
                     }
+                    
+                    if (messages.Count == 0)
+                        return;
 
                     messages.Reverse();
 
