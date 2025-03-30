@@ -387,5 +387,101 @@ namespace Cliptok.Commands
 
             _ = MuteHelpers.MuteUserAsync(targetUser, reason, ctx.User.Id, ctx.Guild, ctx.Channel, muteDuration, true);
         }
+        
+        [Command("editmutetextcmd")]
+        [TextAlias("editmute")]
+        [Description("Edit the details of a mute. Updates the DM to the user, among other things.")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
+        public async Task EditMuteCmd(TextCommandContext ctx,
+            [Description("The user you wish to edit the mute of. Accepts many formats")] DiscordUser targetUser,
+            [RemainingText, Description("Combined argument for the time and reason for the mute. For example '1h rule 7' or 'rule 10'")] string timeAndReason = "No reason specified."
+        )
+        {
+            if (!await Program.db.HashExistsAsync("mutes", targetUser.Id))
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} There's no record of a mute for that user! Please make sure they're muted or you got the right user.");
+                return;
+            }
+            
+            (TimeSpan muteDuration, string reason, bool _) = PunishmentHelpers.UnpackTimeAndReason(timeAndReason, ctx.Message.Timestamp.DateTime);
+
+            var mute = JsonConvert.DeserializeObject<MemberPunishment>(await Program.db.HashGetAsync("mutes", targetUser.Id));
+            
+            mute.ModId = ctx.User.Id;
+            if (muteDuration == default)
+                mute.ExpireTime = null;
+            else
+                mute.ExpireTime = mute.ActionTime + muteDuration;
+            mute.Reason = reason;
+            
+            var guild = await Program.discord.GetGuildAsync(mute.ServerId);
+            
+            var contextMessage = await DiscordHelpers.GetMessageFromReferenceAsync(mute.ContextMessageReference);
+            var dmMessage = await DiscordHelpers.GetMessageFromReferenceAsync(mute.DmMessageReference);
+            
+            reason = reason.Replace("`", "\\`").Replace("*", "\\*");
+            
+            if (contextMessage is not null)
+            {
+                if (muteDuration == default)
+                    await contextMessage.ModifyAsync($"{Program.cfgjson.Emoji.Muted} {targetUser.Mention} has been muted: **{reason}**");
+                else
+                {
+                    await contextMessage.ModifyAsync($"{Program.cfgjson.Emoji.Muted} {targetUser.Mention} has been muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}**: **{reason}**");
+                }
+            }
+            
+            if (dmMessage is not null)
+            {
+                string dmContent = "";
+
+                if (mute.ExpireTime == null)
+                {
+                    dmContent = $"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}**!\nReason: **{reason}**";
+                }
+                else
+                {
+                    dmContent = $"{Program.cfgjson.Emoji.Muted} You have been muted in **{guild.Name}** for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}**!" +
+                                $"\nReason: **{reason}**" +
+                                $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(mute.ExpireTime)}:R>";
+                }
+
+                if (reason.ToLower().Contains("modmail"))
+                {
+                    dmContent += $"\n{Program.cfgjson.Emoji.Information} When contacting <@{Program.cfgjson.ModmailUserId}>, make sure to **enable DMs** from the server to allow your message to go through.";
+                }
+                await dmMessage.ModifyAsync(dmContent);
+            }
+            
+            try
+            {
+                var targetMember = await guild.GetMemberAsync(targetUser.Id);
+                await targetMember.TimeoutAsync(mute.ExpireTime + TimeSpan.FromSeconds(10), mute.Reason);
+            }
+            catch (Exception e)
+            {
+                Program.discord.Logger.LogError(e, "Failed to issue timeout to {user}", targetUser.Id);
+            }
+            
+            await Program.db.HashSetAsync("mutes", targetUser.Id.ToString(), JsonConvert.SerializeObject(mute));
+            
+            // Construct log message
+            string logOut = $"{Program.cfgjson.Emoji.MessageEdit} The mute for {targetUser.Mention} was edited by {ctx.User.Mention}!\nReason: **{reason}**";
+            
+            if (mute.ExpireTime == null)
+            {
+                logOut += "\nMute expires: **Never**";
+            }
+            else
+            {
+                logOut += $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(mute.ExpireTime)}:R>";
+            }
+            
+            // Log to mod log
+            await LogChannelHelper.LogMessageAsync("mod", logOut);
+            
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully edited the mute for {targetUser.Mention}!");
+        }
     }
 }

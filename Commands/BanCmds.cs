@@ -440,5 +440,90 @@ namespace Cliptok.Commands
                 }
             }
         }
+        
+        [Command("editbantextcmd")]
+        [TextAlias("editban")]
+        [Description("Edit the details of a ban. Updates the DM to the user, among other things.")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [AllowedProcessors(typeof(TextCommandProcessor))]
+        public async Task EditBanCmd(TextCommandContext ctx,
+            [Description("The user you wish to edit the ban of. Accepts many formats")] DiscordUser targetUser,
+            [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling' NOTE: Add 'appeal' to the start of the reason to include an appeal link")] string timeAndReason = "No reason specified."
+        )
+        {
+            if (!await Program.db.HashExistsAsync("bans", targetUser.Id))
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} There's no record of a ban for that user! Please make sure they're banned or you got the right user.");
+                return;
+            }
+            
+            (TimeSpan banDuration, string reason, bool appealable) = PunishmentHelpers.UnpackTimeAndReason(timeAndReason, ctx.Message.Timestamp.DateTime);
+
+            var ban = JsonConvert.DeserializeObject<MemberPunishment>(await Program.db.HashGetAsync("bans", targetUser.Id));
+            
+            ban.ModId = ctx.User.Id;
+            if (banDuration == default)
+                ban.ExpireTime = null;
+            else
+                ban.ExpireTime = ban.ActionTime + banDuration;
+            ban.Reason = reason;
+            
+            var guild = await Program.discord.GetGuildAsync(ban.ServerId);
+            
+            var contextMessage = await DiscordHelpers.GetMessageFromReferenceAsync(ban.ContextMessageReference);
+            var dmMessage = await DiscordHelpers.GetMessageFromReferenceAsync(ban.DmMessageReference);
+            
+            reason = reason.Replace("`", "\\`").Replace("*", "\\*");
+            
+            if (contextMessage is not null)
+            {
+                if (banDuration == default)
+                    await contextMessage.ModifyAsync($"{Program.cfgjson.Emoji.Banned} {targetUser.Mention} has been banned: **{reason}**");
+                else
+                    await contextMessage.ModifyAsync($"{Program.cfgjson.Emoji.Banned} {targetUser.Mention} has been banned for **{TimeHelpers.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
+            }
+            
+            if (dmMessage is not null)
+            {
+                if (ban.ExpireTime == null)
+                {
+                    if (appealable)
+                    {
+                        if (reason.ToLower().Contains("compromised"))
+                            await dmMessage.ModifyAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}**!\nReason: **{reason}**\nYou can appeal the ban here: <{Program.cfgjson.AppealLink}>\nBefore appealing, please follow these steps to protect your account:\n1. Reset your Discord account password. Even if you use MFA, this will reset all session tokens.\n2. Review active sessions and authorised app connections.\n3. Ensure your PC is free of malware.\n4. [Enable MFA](https://support.discord.com/hc/en-us/articles/219576828-Setting-up-Multi-Factor-Authentication) if not already.");
+                        else
+                            await dmMessage.ModifyAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}**!\nReason: **{reason}**\nYou can appeal the ban here: <{Program.cfgjson.AppealLink}>");
+                    }
+                    else
+                    {
+                        await dmMessage.ModifyAsync($"{Program.cfgjson.Emoji.Banned} You have been permanently banned from **{guild.Name}**!\nReason: **{reason}**");
+                    }
+                }
+                else
+                {
+                    await dmMessage.ModifyAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}** for {TimeHelpers.TimeToPrettyFormat(banDuration, false)}!\nReason: **{reason}**\nBan expires: <t:{TimeHelpers.ToUnixTimestamp(ban.ExpireTime)}:R>");
+                }
+            }
+            
+            await Program.db.HashSetAsync("bans", targetUser.Id.ToString(), JsonConvert.SerializeObject(ban));
+            
+            // Construct log message
+            string logOut = $"{Program.cfgjson.Emoji.MessageEdit} The ban for {targetUser.Mention} was edited by {ctx.User.Mention}!\nReason: **{reason}**";
+            
+            if (ban.ExpireTime == null)
+            {
+                logOut += "\nBan expires: **Never**"
+                    + $"\nAppealable: **{(appealable ? "Yes" : "No")}**";
+            }
+            else
+            {
+                logOut += $"\nBan expires: <t:{TimeHelpers.ToUnixTimestamp(ban.ExpireTime)}:R>";
+            }
+            
+            // Log to mod log
+            await LogChannelHelper.LogMessageAsync("mod", logOut);
+            
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully edited the ban for {targetUser.Mention}!");
+        }
     }
 }
