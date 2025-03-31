@@ -46,7 +46,7 @@ namespace Cliptok.Events
             if (e.User.Id == discord.CurrentUser.Id)
                 return;
             
-            if (e.Channel.Id != cfgjson.InvestigationsChannelId && e.Channel.Id != cfgjson.LogChannels["mod"].ChannelId)
+            if (e.Channel.Id != cfgjson.LogChannels["investigations"].ChannelId && e.Channel.Id != cfgjson.LogChannels["mod"].ChannelId)
                 return;
             
             var member = await e.Guild.GetMemberAsync(e.User.Id);
@@ -57,8 +57,17 @@ namespace Cliptok.Events
             
             if (e.Channel.Id == cfgjson.LogChannels["mod"].ChannelId)
             {
-                var warningId = targetMessage.Embeds[0].Fields?.First(x => x.Name == "Warning ID").Value;
-                if (warningId is null) // probably reacted to non-warning msg, ignore
+                string warningId;
+                try
+                {
+                    warningId = targetMessage.Embeds[0].Fields?.First(x => x.Name == "Warning ID").Value;
+                }
+                catch
+                {
+                    // probably reacted to invalid msg, ignore
+                    return;
+                }
+                if (warningId is null) // probably reacted to invalid msg, ignore
                     return;
                 
                 var targetUserId = Convert.ToUInt64(user_rx.Match(targetMessage.Content).Groups[1].ToString());
@@ -83,17 +92,96 @@ namespace Cliptok.Events
                             .AddEmbed(await WarningHelpers.FancyWarnEmbedAsync(warning, true, 0xf03916, true, targetUserId))
                             .WithAllowedMentions(Mentions.None)
                     );
-                    
-                    await targetMessage.DeleteReactionsEmojiAsync(recycleBinEmoji);
                 }
                 else
                 {
-                    await targetMessage.CreateReactionAsync(DiscordEmoji.FromName(discord, ":x:"));
+                    var errorEmoji = DiscordEmoji.FromGuildEmote(discord, Convert.ToUInt64(id_rx.Match(cfgjson.Emoji.Error).ToString()));
+                    await targetMessage.CreateReactionAsync(errorEmoji);
                 }
             }
             else
             {
-                // TODO #investigations
+                // Collect data from message
+                var userId = user_rx.Match(targetMessage.Content).Groups[1].ToString();
+                string reason;
+                try
+                {
+                    reason = targetMessage.Embeds[0].Fields?.First(x => x.Name == "Reason").Value;
+                }
+                catch
+                {
+                    // probably reacted to invalid msg, ignore
+                    return;
+                }
+                var userWarnings = (await Program.db.HashGetAllAsync(userId));
+                
+                // Try to match against user warnings;
+                // match warnings that have a reason that exactly matches the reason in the msg,
+                // and that are explicitly warnings (WarningType.Warning), not notes
+                
+                UserWarning warning = null;
+                
+                var matchingWarnings = userWarnings.Where(x =>
+                {
+                    var warn = JsonConvert.DeserializeObject<UserWarning>(x.Value);
+                    return warn.WarnReason == reason && warn.Type == WarningType.Warning;
+                }).Select(x => JsonConvert.DeserializeObject<UserWarning>(x.Value)).ToList();
+                
+                var errorEmoji = DiscordEmoji.FromGuildEmote(discord, Convert.ToUInt64(id_rx.Match(cfgjson.Emoji.Error).ToString()));
+                if (matchingWarnings.Count > 1)
+                {
+                    bool foundMatch = false;
+                    foreach (var match in matchingWarnings)
+                    {
+                        // timestamps of warning msg & warning are within a minute, this is most likely the correct warning
+                        if (targetMessage.Timestamp.ToUniversalTime() - match.WarnTimestamp.ToUniversalTime() < TimeSpan.FromMinutes(1))
+                        {
+                            warning = match;
+                            foundMatch = true;
+                            break;   
+                        }
+                    }
+                    if (!foundMatch)
+                    {
+                        await targetMessage.CreateReactionAsync(errorEmoji);
+                        return;
+                    }
+                }
+                else if (matchingWarnings.Count < 1)
+                {
+                    await targetMessage.CreateReactionAsync(errorEmoji);
+                    return;
+                }
+                else
+                {
+                    warning = matchingWarnings.First();
+                }
+                
+                if ((await GetPermLevelAsync(member)) == ServerPermLevel.TrialModerator && warning.ModUserId != e.User.Id && warning.ModUserId != discord.CurrentUser.Id)
+                {
+                    await targetMessage.CreateReactionAsync(errorEmoji);
+                }
+                else
+                {
+                    bool success = await WarningHelpers.DelWarningAsync(warning, warning.TargetUserId);
+                    if (success)
+                    {
+                        await LogChannelHelper.LogMessageAsync("mod",
+                            new DiscordMessageBuilder()
+                                .WithContent($"{Program.cfgjson.Emoji.Deleted} Warning deleted:" +
+                                             $"`{StringHelpers.Pad(warning.WarningId)}` (belonging to <@{warning.TargetUserId}>, deleted by {e.User.Mention})")
+                                .AddEmbed(await WarningHelpers.FancyWarnEmbedAsync(warning, true, 0xf03916, true, warning.TargetUserId))
+                                .WithAllowedMentions(Mentions.None)
+                        );
+                        
+                        var successEmoji = DiscordEmoji.FromGuildEmote(discord, Convert.ToUInt64(id_rx.Match(cfgjson.Emoji.Success).ToString()));
+                        await targetMessage.CreateReactionAsync(successEmoji);
+                    }
+                    else
+                    {
+                        await targetMessage.CreateReactionAsync(errorEmoji);
+                    }
+                }
             }
         }
     }
