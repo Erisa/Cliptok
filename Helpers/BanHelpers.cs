@@ -25,10 +25,16 @@
             reason = reason.Replace("`", "\\`").Replace("*", "\\*");
             if (channel is not null)
             {
+                string chatMessage;
                 if (banDuration == default)
-                    output.chatMessage = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> has been banned: **{reason}**");
+                    chatMessage = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> has been banned: **{reason}**";
                 else
-                    output.chatMessage = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> has been banned for **{TimeHelpers.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
+                    chatMessage = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> has been banned for **{TimeHelpers.TimeToPrettyFormat(banDuration, false)}**: **{reason}**";
+                
+                if (deleteDays == 0)
+                    chatMessage += "\n-# This user's messages have been kept.";
+                
+                output.chatMessage = await channel.SendMessageAsync(chatMessage);
             }
 
             try
@@ -110,6 +116,8 @@
                 {
                     logOut = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> was banned for {TimeHelpers.TimeToPrettyFormat(banDuration, false)} by {moderator.Mention}.\nReason: **{reason}**\nBan expires: <t:{TimeHelpers.ToUnixTimestamp(expireTime)}:R>";
                 }
+                if (deleteDays == 0)
+                    logOut += "\nThis user's messages have been kept.";
                 _ = LogChannelHelper.LogMessageAsync("mod", logOut);
 
                 if (channel is not null)
