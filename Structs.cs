@@ -297,9 +297,9 @@
 
         [JsonProperty("autoDeleteEmptyThreads")]
         public bool AutoDeleteEmptyThreads { get; private set; } = false;
-
-        [JsonProperty("insiderCanaryThread")]
-        public ulong InsiderCanaryThread { get; set; } = 0;
+        
+        [JsonProperty("insiderThreads")]
+        public Dictionary<string, ulong> InsiderThreads { get; set; } = new();
 
         [JsonProperty("tqsMutedRole")]
         public ulong TqsMutedRole { get; private set; } = 0;
