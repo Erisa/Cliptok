@@ -246,12 +246,26 @@
                 Program.db.HashSet("automaticWarnings", warningId, JsonConvert.SerializeObject(warning));
             }
 
-            LogChannelHelper.LogMessageAsync("mod",
+            var logMsg = await LogChannelHelper.LogMessageAsync("mod",
                 new DiscordMessageBuilder()
                     .WithContent($"{Program.cfgjson.Emoji.Warning} New warning for {targetUser.Mention}!")
                     .AddEmbed(await FancyWarnEmbedAsync(warning, true, 0xFEC13D, false, targetUser.Id))
                     .WithAllowedMentions(Mentions.None)
             );
+            try
+            {
+                var emoji = DiscordEmoji.FromGuildEmote(Program.discord, Convert.ToUInt64(Constants.RegexConstants.id_rx.Match(Program.cfgjson.Emoji.Deleted).ToString()));
+                await logMsg.CreateReactionAsync(emoji);
+                Task.Run(async () =>
+                {
+                    await Task.Delay(120000);
+                    await logMsg.DeleteOwnReactionAsync(emoji);
+                });
+            }
+            catch
+            {
+                // Don't really care if this fails
+            }
 
             // automute handling
             var warningsOutput = (await Program.db.HashGetAllAsync(targetUser.Id.ToString())).ToDictionary(
