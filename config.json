@@ -327,12 +327,18 @@
     1033197019164061756,
     1065659890036646019
   ],
+  "insiderThreads": {
+    "canary": 1082394217168523315,
+    "dev": 0,
+    "beta": 0,
+    "rp": 0,
+    "rp10": 0
+  },
   "insiderAnnouncementChannel": 1043898319883219004,
   "insiderInfoChannel": 1279201622651572317,
   "insidersChannel": 187649467611086849,
   "dmAutoresponseTimeLimit": 6,
   "autoDeleteEmptyThreads": true,
-  "insiderCanaryThread": 1082394217168523315,
   "tqsMutedRole": 752821045408563230,
   "tqsMuteDurationHours": 2,
   "autoWarnMsgAutoDeleteDays": 3,
