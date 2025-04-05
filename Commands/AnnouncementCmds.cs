@@ -25,8 +25,9 @@ namespace Cliptok.Commands
             [SlashChoiceProvider(typeof(WindowsInsiderChannelChoiceProvider))]
             [Parameter("insider_role2"), Description("The second insider role to ping.")] string insiderChannel2 = "",
 
-            [Parameter("canary_create_new_thread"), Description("Enable this option if you want to create a new Canary thread for some reason")] bool canaryCreateNewThread = false,
-            [Parameter("thread"), Description("The thread to mention in the announcement.")] DiscordChannel threadChannel = default,
+            [Parameter("create_new_thread"), Description("Enable this option if you want to create a new thread for some reason")] bool createNewThread = false,
+            [Parameter("thread1"), Description("The thread to mention in the announcement.")] DiscordChannel threadChannel = default,
+            [Parameter("thread2"), Description("The second thread to mention in the announcement.")] DiscordChannel threadChannel2 = default,
             [Parameter("flavour_text"), Description("Extra text appended on the end of the main line, replacing :WindowsInsider: or :Windows10:")] string flavourText = "",
             [Parameter("autothread_name"), Description("If no thread is given, create a thread with this name.")] string autothreadName = "Build {0} ({1})",
 
@@ -48,6 +49,18 @@ namespace Cliptok.Commands
             {
                 await ctx.RespondAsync(text: $"{Program.cfgjson.Emoji.Error} Windows 10 only has a Release Preview Channel.", ephemeral: true);
                 return;
+            }
+            
+            if (threadChannel != default && threadChannel == threadChannel2)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Both threads cannot be the same! Simply set one instead.", ephemeral: true);
+                return;
+            }
+            
+            if (threadChannel == default && threadChannel2 != default)
+            {
+                threadChannel = threadChannel2;
+                threadChannel2 = default;
             }
 
             // Avoid duplicate announcements
@@ -147,11 +160,52 @@ namespace Cliptok.Commands
                 if (threadChannel != default)
                 {
                     pingMsgString += $"\n\nDiscuss it here: {threadChannel.Mention}";
+                    if (threadChannel2 != default)
+                        pingMsgString += $" & {threadChannel2.Mention}";
                 }
-                else if (insiderChannel1 == "Canary" && insiderChannel2 == "" && Program.cfgjson.InsiderCanaryThread != 0 && autothreadName == "Build {0} ({1})" && !canaryCreateNewThread)
+                else if (!createNewThread)
                 {
-                    threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderCanaryThread);
+                    switch (insiderChannel1)
+                    {
+                        case "Canary":
+                            threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["canary"]);
+                            break;
+                        case "Dev":
+                            threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["dev"]);
+                            break;
+                        case "Beta":
+                            threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["beta"]);
+                            break;
+                        case "RP":
+                            if (windowsVersion == 10)
+                                threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp10"]);
+                            else
+                                threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp"]);
+                            break;
+                    }
+                    
+                    switch (insiderChannel2)
+                    {
+                        case "Canary":
+                            threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["canary"]);
+                            break;
+                        case "Dev":
+                            threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["dev"]);
+                            break;
+                        case "Beta":
+                            threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["beta"]);
+                            break;
+                        case "RP":
+                            if (windowsVersion == 10)
+                                threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp10"]);
+                            else
+                                threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp"]);
+                            break;
+                    }
+                        
                     pingMsgString += $"\n\nDiscuss it here: {threadChannel.Mention}";
+                    if (threadChannel2 != default)
+                        pingMsgString += $" & {threadChannel2.Mention}";
                     var msg = await threadChannel.SendMessageAsync(innerThreadMsgString);
                     try
                     {
@@ -184,22 +238,66 @@ namespace Cliptok.Commands
                 if (threadChannel != default)
                 {
                     noPingMsgString += $"\n\nDiscuss it here: {threadChannel.Mention}";
+                    if (threadChannel2 != default)
+                        noPingMsgString += $" & {threadChannel2.Mention}";
                 }
-                else if (insiderChannel1 == "Canary" && insiderChannel2 == "" && Program.cfgjson.InsiderCanaryThread != 0 && autothreadName == "Build {0} ({1})" && !canaryCreateNewThread)
+                else if (!createNewThread)
                 {
-                    threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderCanaryThread);
+                    switch (insiderChannel1)
+                    {
+                        case "Canary":
+                            threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["canary"]);
+                            break;
+                        case "Dev":
+                            threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["dev"]);
+                            break;
+                        case "Beta":
+                            threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["beta"]);
+                            break;
+                        case "RP":
+                            if (windowsVersion == 10)
+                                threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp10"]);
+                            else
+                                threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp"]);
+                            break;
+                    }
+                    
+                    switch (insiderChannel2)
+                    {
+                        case "Canary":
+                            threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["canary"]);
+                            break;
+                        case "Dev":
+                            threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["dev"]);
+                            break;
+                        case "Beta":
+                            threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["beta"]);
+                            break;
+                        case "RP":
+                            if (windowsVersion == 10)
+                                threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp10"]);
+                            else
+                                threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp"]);
+                            break;
+                    }
+                        
                     noPingMsgString += $"\n\nDiscuss it here: {threadChannel.Mention}";
+                    if (threadChannel2 != default)
+                        noPingMsgString += $" & {threadChannel2.Mention}";
                     var msg = await threadChannel.SendMessageAsync(innerThreadMsgString);
+                    DiscordMessage msg2 = default;
+                    if (threadChannel2 != default)
+                        msg2 = await threadChannel2.SendMessageAsync(innerThreadMsgString);
                     try
                     {
                         await msg.PinAsync();
+                        await msg2.PinAsync();
                     }
                     catch
                     {
                         // most likely we hit max pins, we can handle this later
                         // either way, lets ignore for now
                     }
-
                 }
                 else
                 {
@@ -229,6 +327,8 @@ namespace Cliptok.Commands
             if (Program.cfgjson.InsiderAnnouncementChannel != 0)
             {
                 pingMsgString = pingMsgBareString + $"\n\nDiscuss it here: {threadChannel.Mention}";
+                if (threadChannel2 != default)
+                    pingMsgString += $" & {threadChannel2.Mention}";
 
                 var announcementChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderAnnouncementChannel);
                 await insiderRole1.ModifyAsync(mentionable: true);
