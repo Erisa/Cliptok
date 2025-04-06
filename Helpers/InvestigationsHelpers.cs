@@ -57,7 +57,7 @@
                 await logMsg.CreateReactionAsync(emoji);
                 Task.Run(async () =>
                 {
-                    await Task.Delay(120000);
+                    await Task.Delay(TimeSpan.FromMinutes(Program.cfgjson.WarningLogReactionTimeMinutes));
                     await logMsg.DeleteOwnReactionAsync(emoji);
                 });
             }

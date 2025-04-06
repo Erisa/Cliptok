@@ -359,5 +359,6 @@
   "githubWorkflowSucessString": "[lists:main] 1 new commit",
   "botCommandsChannel": 740272437719072808,
   "duplicateMessageThreshold": 4,
-  "duplicateMessageSeconds": 10
+  "duplicateMessageSeconds": 10,
+  "warningLogReactionTimeMinutes": 5
 }
