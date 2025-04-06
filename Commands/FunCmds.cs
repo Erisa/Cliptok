@@ -40,6 +40,9 @@ namespace Cliptok.Commands
         [RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task TellRaw(CommandContext ctx, [Parameter("channel"), Description("Either mention or ID. Not a name.")] string discordChannel, [Parameter("input"), Description("???")] string input, [Parameter("reply_msg_id"), Description("ID of message to use in a reply context.")] string replyID = "0", [Parameter("pingreply"), Description("Ping pong.")] bool pingreply = true)
         {
+            if (ctx is SlashCommandContext)
+                await ctx.As<SlashCommandContext>().DeferResponseAsync(ephemeral: true);
+            
             DiscordChannel channelObj = default;
             ulong channelId;
             if (!ulong.TryParse(discordChannel, out channelId))
