@@ -348,6 +348,9 @@
 
         [JsonProperty("duplicateMessageSeconds")]
         public int DuplicateMessageSeconds { get; private set; } = 0;
+        
+        [JsonProperty("warningLogReactionTimeMinutes")]
+        public int WarningLogReactionTimeMinutes { get; private set; }
     }
 
     public enum Level { Information, Warning, Error, Debug, Verbose }
