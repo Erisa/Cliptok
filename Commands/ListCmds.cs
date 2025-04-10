@@ -85,7 +85,7 @@
                 return;
             }
 
-            await ctx.Channel.TriggerTypingAsync();
+            await DiscordHelpers.SafeTyping(ctx.Channel);
 
             if (content[..3] == "```")
                 content = content.Replace("```", "").Trim();
