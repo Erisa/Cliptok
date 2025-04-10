@@ -1,4 +1,7 @@
-﻿namespace Cliptok.Helpers
+﻿using Cliptok.Constants;
+using System.Globalization;
+
+namespace Cliptok.Helpers
 {
     public class LogChannelNotFoundException : Exception
     {
@@ -10,7 +13,7 @@
     public class LogChannelHelper
     {
         internal static Dictionary<string, DiscordChannel> ChannelCache = new();
-        internal static Dictionary<string, DiscordWebhookClient> WebhookCache = new();
+        internal static Dictionary<string, (DiscordWebhookClient webhookClient, ulong id)> WebhookCache = new();
         public static bool ready = false;
 
         public static async Task UnpackLogConfigAsync(ConfigJson config)
@@ -50,15 +53,32 @@
                     }
 
                     DiscordWebhookClient webhookClient = new DiscordWebhookClient();
+                    string webhookUrl = "";
                     if (logChannel.Value.WebhookEnvVar != "")
                     {
-                        await webhookClient.AddWebhookAsync(new Uri(Environment.GetEnvironmentVariable(logChannel.Value.WebhookEnvVar)));
-                        WebhookCache.Add(logChannel.Key, webhookClient);
+                        webhookUrl = Environment.GetEnvironmentVariable(logChannel.Value.WebhookEnvVar);
                     }
                     else if (logChannel.Value.WebhookUrl != "")
                     {
+                        webhookUrl = logChannel.Value.WebhookUrl;
+                    }
+
+                    if (webhookUrl != "")
+                    {
+                        Match m = RegexConstants.webhook_rx.Match(logChannel.Value.WebhookUrl);
+                        if (!m.Success)
+                        {
+                            throw new ArgumentException("Invalid webhook URL supplied.", nameof(logChannel.Value.WebhookUrl));
+                        }
+
+                        Group idraw = m.Groups["id"];
+                        if (!ulong.TryParse(idraw.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out ulong id))
+                        {
+                            throw new ArgumentException("Invalid webhook URL supplied.", nameof(logChannel.Value.WebhookUrl));
+                        }
+
                         await webhookClient.AddWebhookAsync(new Uri(logChannel.Value.WebhookUrl));
-                        WebhookCache.Add(logChannel.Key, webhookClient);
+                        WebhookCache.Add(logChannel.Key, (webhookClient, id));
                     }
                 }
             }
@@ -70,7 +90,7 @@
                     var channel = await Program.discord.GetChannelAsync(migration.Value);
                     ChannelCache.Add(migration.Key, channel);
                 }
-                else if (migration.Value == 0 && !ChannelCache.ContainsKey(migration.Key))
+                else if (migration.Value == 0 && !ChannelCache.ContainsKey(migration.Key) && !WebhookCache.ContainsKey(migration.Key))
                 {
                     // all channels that dont exist fallback to the home channel,
                     // which is the only channel that will always exist in config
@@ -112,7 +132,7 @@
                     if (ChannelCache.ContainsKey(key) && ChannelCache[key].IsThread)
                         builder.WithThreadId(ChannelCache[key].Id);
 
-                    var webhookResults = await WebhookCache[key].BroadcastMessageAsync(builder);
+                    var webhookResults = await WebhookCache[key].webhookClient.BroadcastMessageAsync(builder);
                     return webhookResults.FirstOrDefault().Value;
                 }
                 else if (ChannelCache.ContainsKey(key))
@@ -157,5 +177,19 @@
             return await LogMessageAsync(key, await CreateDumpMessageAsync(content, messages, channel));
         }
 
+        public static ulong GetLogChannelId(string key)
+        {
+            if (WebhookCache.ContainsKey(key))
+            {
+                if (ChannelCache.ContainsKey(key) && ChannelCache[key].IsThread)
+                    return ChannelCache[key].Id;
+                else
+                    return WebhookCache[key].webhookClient.GetRegisteredWebhook(WebhookCache[key].id).ChannelId;
+            }
+            else if (ChannelCache.ContainsKey(key))
+                return ChannelCache[key].Id;
+            else
+                throw new LogChannelNotFoundException($"A valid log channel for key '{key}' was not found!");
+        }
     }
 }

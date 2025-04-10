@@ -227,7 +227,7 @@
             {
                 foreach (var message in messagesToClear.ToList())
                 {
-                    if (!Constants.RegexConstants.url_rx.IsMatch(message.Content.ToLower()))
+                    if (!Constants.RegexConstants.domain_rx.IsMatch(message.Content.ToLower()))
                     {
                         messagesToClear.Remove(message);
                     }
