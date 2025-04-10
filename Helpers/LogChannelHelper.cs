@@ -65,19 +65,19 @@ namespace Cliptok.Helpers
 
                     if (webhookUrl != "")
                     {
-                        Match m = RegexConstants.webhook_rx.Match(logChannel.Value.WebhookUrl);
+                        Match m = RegexConstants.webhook_rx.Match(webhookUrl);
                         if (!m.Success)
                         {
-                            throw new ArgumentException("Invalid webhook URL supplied.", nameof(logChannel.Value.WebhookUrl));
+                            throw new ArgumentException("Invalid webhook URL supplied.", nameof(webhookUrl));
                         }
 
                         Group idraw = m.Groups["id"];
                         if (!ulong.TryParse(idraw.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out ulong id))
                         {
-                            throw new ArgumentException("Invalid webhook URL supplied.", nameof(logChannel.Value.WebhookUrl));
+                            throw new ArgumentException("Invalid webhook URL supplied.", nameof(webhookUrl));
                         }
 
-                        await webhookClient.AddWebhookAsync(new Uri(logChannel.Value.WebhookUrl));
+                        await webhookClient.AddWebhookAsync(new Uri(webhookUrl));
                         WebhookCache.Add(logChannel.Key, (webhookClient, id));
                     }
                 }
