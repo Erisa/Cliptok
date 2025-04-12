@@ -348,6 +348,9 @@
 
         [JsonProperty("duplicateMessageSeconds")]
         public int DuplicateMessageSeconds { get; private set; } = 0;
+
+        [JsonProperty("insiderThreadKeepLastPins")]
+        public int InsiderThreadKeepLastPins { get; private set; } = 50; // 50 is the pin limit, so it would be silly to allow infinite
     }
 
     public enum Level { Information, Warning, Error, Debug, Verbose }

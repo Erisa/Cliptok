@@ -315,5 +315,33 @@
             return wasThreadDeleted;
         }
 
+        public static async Task UpdateInsiderThreadPinsAsync(DiscordChannel thread, DiscordMessage message)
+        {
+            try
+            {
+                var pins = await thread.GetPinnedMessagesAsync();
+
+                foreach (var pin in pins)
+                {
+                    if (await Program.db.SetContainsAsync("insiderPins", pin.Id))
+                    {
+                        if (pins.Count > (Program.cfgjson.InsiderThreadKeepLastPins - 1))
+                        {
+                            await pin.UnpinAsync();
+                            await Program.db.SetRemoveAsync("insiderPins", pin.Id);
+                        }
+                    }
+                }
+
+                await message.PinAsync();
+                await Program.db.SetAddAsync("insiderPins", message.Id);
+            }
+            catch (Exception e)
+            {
+                // this shouldn't happen
+                Program.discord.Logger.LogError(e, "Failed to manage insider pins in {channel}", thread.Name);
+
+            }
+        }
     }
 }

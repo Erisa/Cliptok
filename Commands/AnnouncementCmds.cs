@@ -69,6 +69,7 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Build {buildNumber} has already been announced! If you are sure you want to announce it again, set `force_reannounce` to True.", ephemeral: true);
                 return;
             }
+
             await Program.db.SetAddAsync("announcedInsiderBuilds", buildNumber);
 
             if (flavourText == "" && windowsVersion == 10)
@@ -93,6 +94,9 @@ namespace Cliptok.Commands
             {
                 roleKey1 = insiderChannel1.ToLower();
             }
+
+            // defer since we're going to do lots of rest calls now
+            await ctx.DeferResponseAsync(ephemeral: false);
 
             DiscordRole insiderRole1 = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[roleKey1]);
             DiscordRole insiderRole2 = default;
@@ -207,15 +211,7 @@ namespace Cliptok.Commands
                     if (threadChannel2 != default)
                         pingMsgString += $" & {threadChannel2.Mention}";
                     var msg = await threadChannel.SendMessageAsync(innerThreadMsgString);
-                    try
-                    {
-                        await msg.PinAsync();
-                    }
-                    catch
-                    {
-                        // most likely we hit max pins, we can handle this later
-                        // either way, lets ignore for now
-                    }
+                    await DiscordHelpers.UpdateInsiderThreadPinsAsync(threadChannel, msg);
                 }
                 else
                 {
@@ -285,18 +281,12 @@ namespace Cliptok.Commands
                     if (threadChannel2 != default)
                         noPingMsgString += $" & {threadChannel2.Mention}";
                     var msg = await threadChannel.SendMessageAsync(innerThreadMsgString);
+                    await DiscordHelpers.UpdateInsiderThreadPinsAsync(threadChannel, msg);
                     DiscordMessage msg2 = default;
                     if (threadChannel2 != default)
+                    {
                         msg2 = await threadChannel2.SendMessageAsync(innerThreadMsgString);
-                    try
-                    {
-                        await msg.PinAsync();
-                        await msg2.PinAsync();
-                    }
-                    catch
-                    {
-                        // most likely we hit max pins, we can handle this later
-                        // either way, lets ignore for now
+                        await DiscordHelpers.UpdateInsiderThreadPinsAsync(threadChannel2, msg2);
                     }
                 }
                 else
