@@ -141,7 +141,7 @@ namespace Cliptok.Checks
             }
             else if (naughtyWordList.Url)
             {
-                var urlMatches = url_rx.Matches(input);
+                var urlMatches = domain_rx.Matches(input);
                 foreach (Match match in urlMatches)
                 {
                     if (naughtyWords.Contains(match.Value))

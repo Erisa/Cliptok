@@ -85,7 +85,7 @@
                 return;
             }
 
-            await ctx.Channel.TriggerTypingAsync();
+            await DiscordHelpers.SafeTyping(ctx.Channel);
 
             if (content[..3] == "```")
                 content = content.Replace("```", "").Trim();
@@ -161,7 +161,7 @@
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task ScamCheck(CommandContext ctx, [Parameter("input"), Description("Domain or message content to scan.")] string content)
         {
-            var urlMatches = Constants.RegexConstants.url_rx.Matches(content);
+            var urlMatches = Constants.RegexConstants.domain_rx.Matches(content);
             if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") is not null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
             {
                 var (match, httpStatus, responseText, _) = await APIs.PhishingAPI.PhishingAPICheckAsync(content);

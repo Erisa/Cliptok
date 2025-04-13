@@ -10,7 +10,7 @@ namespace Cliptok.Commands
         public async Task DmRelayBlockCommand(TextCommandContext ctx, [Description("The member to stop relaying DMs from.")] DiscordUser user)
         {
             // Only function in configured DM relay channel/thread; do nothing if in wrong channel
-            if (ctx.Channel.Id != Program.cfgjson.DmLogChannelId && Program.cfgjson.LogChannels.All(a => a.Value.ChannelId != ctx.Channel.Id)) return;
+            if (ctx.Channel.Id != LogChannelHelper.GetLogChannelId("dms")) return;
 
             // Check blocklist for user
             if (await Program.db.SetContainsAsync("dmRelayBlocklist", user.Id))

@@ -69,6 +69,13 @@ namespace Cliptok
             foreach (var list in cfgjson.WordListList)
             {
                 var listOutput = File.ReadAllLines($"Lists/{list.Name}");
+
+                // allow for multi-line scams with \n to separate lines
+                for (int i = 0; i < listOutput.Length; i++)
+                {
+                    listOutput[i] = listOutput[i].Replace("\\n", "\n").Replace("\\\n", "\\n");
+                }
+
                 cfgjson.WordListList[cfgjson.WordListList.FindIndex(a => a.Name == list.Name)].Words = listOutput;
             }
         }

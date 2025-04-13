@@ -165,6 +165,23 @@ namespace Cliptok.Events
             }
             #endregion
 
+            #region avoid url bypass
+
+            
+            var urls = url_rx.Matches(msgContentWithEmbedData);
+
+            // urldecode and replace all urls
+            if (urls != null)
+            {
+                foreach (Match match in urls)
+                {
+                    string decodedUrl = Uri.UnescapeDataString(match.Value);
+                    msgContentWithEmbedData = msgContentWithEmbedData.Replace(match.Value, decodedUrl);
+                }
+            }
+
+            #endregion
+
             try
             {
                 #region return early checks
@@ -767,7 +784,7 @@ namespace Cliptok.Events
                     }
 
                     #region phishing API
-                    var urlMatches = url_rx.Matches(msgContentWithEmbedData);
+                    var urlMatches = domain_rx.Matches(msgContentWithEmbedData);
                     if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") is not null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
                     {
                         var (phishingMatch, httpStatus, responseText, phishingResponse) = await APIs.PhishingAPI.PhishingAPICheckAsync(msgContentWithEmbedData);

@@ -327,12 +327,18 @@
     1033197019164061756,
     1065659890036646019
   ],
+  "insiderThreads": {
+    "canary": 1082394217168523315,
+    "dev": 1358210048777654352,
+    "beta": 1358210090880209066,
+    "rp": 1358210147683401819,
+    "rp10": 1358210188011638844
+  },
   "insiderAnnouncementChannel": 1043898319883219004,
   "insiderInfoChannel": 1279201622651572317,
   "insidersChannel": 187649467611086849,
   "dmAutoresponseTimeLimit": 6,
   "autoDeleteEmptyThreads": true,
-  "insiderCanaryThread": 1082394217168523315,
   "tqsMutedRole": 752821045408563230,
   "tqsMuteDurationHours": 2,
   "autoWarnMsgAutoDeleteDays": 3,
@@ -359,6 +365,7 @@
   "githubWorkflowSucessString": "[lists:main] 1 new commit",
   "botCommandsChannel": 740272437719072808,
   "duplicateMessageThreshold": 4,
-  "duplicateMessageSeconds": 10,
+  "duplicateMessageSeconds": 60,
+  "insiderThreadKeepLastPins": 3,
   "warningLogReactionTimeMinutes": 5
 }
