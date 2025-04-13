@@ -53,7 +53,7 @@ namespace Cliptok.Events
             if (await GetPermLevelAsync(member) < ServerPermLevel.TrialModerator)
                 return;
             
-            var recycleBinEmoji = DiscordEmoji.FromGuildEmote(discord, Convert.ToUInt64(id_rx.Match(cfgjson.Emoji.Deleted).ToString()));
+            var recycleBinEmoji = DiscordEmoji.FromName(discord, ":CliptokRecycleBin:", true);
             
             if (e.Channel.Id == cfgjson.LogChannels["mod"].ChannelId)
             {
@@ -95,7 +95,7 @@ namespace Cliptok.Events
                 }
                 else
                 {
-                    var errorEmoji = DiscordEmoji.FromGuildEmote(discord, Convert.ToUInt64(id_rx.Match(cfgjson.Emoji.Error).ToString()));
+                    var errorEmoji = DiscordEmoji.FromName(discord, ":CliptokCritical:", true);
                     await targetMessage.CreateReactionAsync(errorEmoji);
                 }
             }
@@ -127,7 +127,7 @@ namespace Cliptok.Events
                     return warn.WarnReason == reason && warn.Type == WarningType.Warning;
                 }).Select(x => JsonConvert.DeserializeObject<UserWarning>(x.Value)).ToList();
                 
-                var errorEmoji = DiscordEmoji.FromGuildEmote(discord, Convert.ToUInt64(id_rx.Match(cfgjson.Emoji.Error).ToString()));
+                var errorEmoji = DiscordEmoji.FromName(discord, ":CliptokCritical:", true);
                 if (matchingWarnings.Count > 1)
                 {
                     bool foundMatch = false;
@@ -174,7 +174,7 @@ namespace Cliptok.Events
                                 .WithAllowedMentions(Mentions.None)
                         );
                         
-                        var successEmoji = DiscordEmoji.FromGuildEmote(discord, Convert.ToUInt64(id_rx.Match(cfgjson.Emoji.Success).ToString()));
+                        var successEmoji = DiscordEmoji.FromName(discord, ":CliptokSuccess:", true);
                         await targetMessage.CreateReactionAsync(successEmoji);
                     }
                     else

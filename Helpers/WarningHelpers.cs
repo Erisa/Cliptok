@@ -254,7 +254,7 @@
             );
             try
             {
-                var emoji = DiscordEmoji.FromGuildEmote(Program.discord, Convert.ToUInt64(Constants.RegexConstants.id_rx.Match(Program.cfgjson.Emoji.Deleted).ToString()));
+                var emoji = DiscordEmoji.FromName(Program.discord, ":CliptokRecycleBin:", true);
                 await logMsg.CreateReactionAsync(emoji);
                 Task.Run(async () =>
                 {
