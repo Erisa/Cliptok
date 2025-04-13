@@ -44,10 +44,23 @@
                 else
                     content = $"{Program.cfgjson.Emoji.Denied} Deleted infringing message by {infringingMessage.Author.Mention} in {infringingMessage.Channel.Mention}:";
 
+            DiscordMessage logMsg;
             if (channelOverride == default)
-                await LogChannelHelper.LogMessageAsync(logChannelKey, content, embed);
+                logMsg = await LogChannelHelper.LogMessageAsync(logChannelKey, content, embed);
             else
-                await channelOverride.SendMessageAsync(new DiscordMessageBuilder().WithContent(content).AddEmbed(embed).WithAllowedMentions(Mentions.None));
+                logMsg = await channelOverride.SendMessageAsync(new DiscordMessageBuilder().WithContent(content).AddEmbed(embed).WithAllowedMentions(Mentions.None));
+            
+            // Add reaction to log message to be used to delete
+            if (logChannelKey == "investigations")
+            {
+                var emoji = DiscordEmoji.FromGuildEmote(Program.discord, Convert.ToUInt64(Constants.RegexConstants.id_rx.Match(Program.cfgjson.Emoji.Deleted).ToString()));
+                await logMsg.CreateReactionAsync(emoji);
+                Task.Run(async () =>
+                {
+                    await Task.Delay(TimeSpan.FromMinutes(Program.cfgjson.WarningLogReactionTimeMinutes));
+                    await logMsg.DeleteOwnReactionAsync(emoji);
+                });
+            }
         }
 
     }

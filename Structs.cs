@@ -351,6 +351,9 @@
 
         [JsonProperty("insiderThreadKeepLastPins")]
         public int InsiderThreadKeepLastPins { get; private set; } = 50; // 50 is the pin limit, so it would be silly to allow infinite
+        
+        [JsonProperty("warningLogReactionTimeMinutes")]
+        public int WarningLogReactionTimeMinutes { get; private set; }
     }
 
     public enum Level { Information, Warning, Error, Debug, Verbose }

@@ -366,5 +366,6 @@
   "botCommandsChannel": 740272437719072808,
   "duplicateMessageThreshold": 4,
   "duplicateMessageSeconds": 60,
-  "insiderThreadKeepLastPins": 3
+  "insiderThreadKeepLastPins": 3,
+  "warningLogReactionTimeMinutes": 5
 }
