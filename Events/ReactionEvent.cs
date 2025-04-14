@@ -55,6 +55,10 @@ namespace Cliptok.Events
             
             var recycleBinEmoji = DiscordEmoji.FromName(discord, ":CliptokRecycleBin:", true);
             
+            // Ignore reactions that are not the CliptokRecycleBin emoji!!
+            if (e.Emoji != recycleBinEmoji)
+                return;
+            
             if (e.Channel.Id == cfgjson.LogChannels["mod"].ChannelId)
             {
                 string warningId;
