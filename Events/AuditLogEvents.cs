@@ -12,6 +12,9 @@ namespace Cliptok.Events
             
             var entry = e.AuditLogEntry;
             
+            if (entry is null)
+                return;
+            
             // Log member role add/remove to user log
             if (entry.ActionType is DiscordAuditLogActionType.MemberRoleUpdate)
             {
