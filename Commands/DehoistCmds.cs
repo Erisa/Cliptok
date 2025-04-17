@@ -146,7 +146,7 @@ namespace Cliptok.Commands
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it. This will take a while.");
             var msg = await ctx.GetResponseAsync();
 
-            var (totalMembers, failedMembers) = await DehoistHelpers.MassDehoistAsync(ctx.Guild);
+            var (totalMembers, failedMembers) = await DehoistHelpers.MassDehoistAsync(ctx.Guild, ctx.User);
 
             _ = msg.DeleteAsync();
             await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Successfully dehoisted {totalMembers - failedMembers} of {totalMembers} member(s)! (Check Audit Log for details)").WithReply(ctx.Message.Id, true, false));

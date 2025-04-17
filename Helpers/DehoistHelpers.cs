@@ -171,14 +171,17 @@
             }
         }
 
-        public static async Task<(int totalMembers, int failedMembers)> MassDehoistAsync(DiscordGuild guild)
+        public static async Task<(int totalMembers, int failedMembers)> MassDehoistAsync(DiscordGuild guild, DiscordUser responsibleMod = default)
         {
+            if (responsibleMod == default)
+                responsibleMod = Program.discord.CurrentUser;
+
             var discordMembers = await guild.GetAllMembersAsync().ToListAsync();
             int failedCount = 0;
 
             foreach (DiscordMember discordMember in discordMembers)
             {
-                bool success = await CheckAndDehoistMemberAsync(discordMember, Program.discord.CurrentUser, true);
+                bool success = await CheckAndDehoistMemberAsync(discordMember, responsibleMod, true);
                 if (!success)
                     failedCount++;
             }
