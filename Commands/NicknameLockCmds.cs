@@ -24,23 +24,41 @@ namespace Cliptok.Commands
                     return;
                 }
 
+                await ctx.DeferResponseAsync();
+
                 var currentValue = await Program.db.HashGetAsync($"nicknamelock", discordUser.Id);
 
                 if (currentValue.HasValue && (nickname == "" || nickname == member.Nickname))
                 {
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {discordUser.Mention} is already nickname locked!", mentions: false);
+                    return;
                 }
-                else
-                {
-                    if (nickname == "")
-                        nickname = member.DisplayName;
 
-                    await Program.db.HashSetAsync("nicknamelock", discordUser.Id, nickname);
-                    await member.ModifyAsync(m => m.Nickname = nickname);
-                    var msg = $"{Program.cfgjson.Emoji.On} Nickname locked {discordUser.Mention} as `{nickname}`!";
-                    await ctx.RespondAsync(msg, mentions: false);
-                    await LogChannelHelper.LogMessageAsync("nicknames", msg);
+                bool dehoistable = false;
+
+                if (nickname == "")
+                {
+                    dehoistable = await DehoistHelpers.CheckAndDehoistMemberAsync(member, null, false, true);
+                    nickname = member.DisplayName;
+                } else
+                {
+                    dehoistable = await DehoistHelpers.CheckAndDehoistMemberAsync(member, null, false, true, nickname);
                 }
+
+                
+
+                if (dehoistable)
+                {
+                    nickname = DehoistHelpers.DehoistName(nickname);
+                }
+
+                await Program.db.HashSetAsync("nicknamelock", discordUser.Id, nickname);
+                await member.ModifyAsync(m => m.Nickname = nickname);
+                var msg = $"{Program.cfgjson.Emoji.On} Nickname locked {discordUser.Mention} as `{nickname}`!";
+                if (dehoistable)
+                    msg += $"\n{Program.cfgjson.Emoji.Information} The nickname was dehoistable, so it was dehoisted before locking. If this isn't desired, choose a different nickname.";
+                await ctx.RespondAsync(msg, mentions: false);
+                await LogChannelHelper.LogMessageAsync("nicknames", msg);
             }
 
             [Command("disable")]
