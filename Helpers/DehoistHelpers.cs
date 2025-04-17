@@ -16,6 +16,9 @@
         public static async Task<bool> CheckAndDehoistMemberAsync(DiscordMember targetMember, DiscordUser responsibleMod = default, bool isMassDehoist = false)
         {
 
+            if ((await GetPermLevelAsync(targetMember)) >= ServerPermLevel.TrialModerator || targetMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername))
+                return false;
+
             if (
                 !(
                     targetMember.DisplayName[0] != dehoistCharacter
@@ -38,9 +41,6 @@
 
                 return false;
             }
-
-            if (targetMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername))
-                return false;
 
             try
             {
