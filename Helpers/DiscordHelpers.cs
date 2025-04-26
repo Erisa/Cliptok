@@ -312,6 +312,9 @@
             else
                 await message.DeleteAsync();
 
+            // This stops duplicate message checks trying to delete the message again
+            MessageEvent.deletedMessageCache.Add(message.Id);
+
             return wasThreadDeleted;
         }
 
