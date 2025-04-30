@@ -2,7 +2,7 @@ namespace Cliptok.Helpers
 {
     public class UserNoteHelpers
     {
-        public static async Task<DiscordEmbed> GenerateUserNotesEmbedAsync(DiscordUser user, bool showOnlyWarningNotes = false, Dictionary<string, UserNote> notesToUse = default)
+        public static async Task<DiscordEmbed> GenerateUserNotesEmbedAsync(DiscordUser user, bool showOnlyWarningNotes = false, Dictionary<string, UserNote> notesToUse = default, bool showSimpleSingleNote = true, DiscordColor? colorOverride = null)
         {
             Dictionary<string, UserNote> notes;
 
@@ -27,8 +27,16 @@ namespace Cliptok.Helpers
             // If there is only one note in the set to show, just show its details
             if (notes.Count == 1)
             {
-                var noteDetailsEmbed = await GenerateUserNoteDetailEmbedAsync(notes.First().Value, user);
-                return new DiscordEmbedBuilder(noteDetailsEmbed).WithFooter($"{noteDetailsEmbed.Footer.Text}\nThis is the user's only note, so it is shown in detail.");
+                if (showSimpleSingleNote)
+                {
+                    var noteDetailsEmbed = await GenerateUserNoteSimpleEmbedAsync(notes.First().Value, user, colorOverride);
+                    return new DiscordEmbedBuilder(noteDetailsEmbed);
+                }
+                else
+                {
+                    var noteDetailsEmbed = await GenerateUserNoteDetailEmbedAsync(notes.First().Value, user, colorOverride);
+                    return new DiscordEmbedBuilder(noteDetailsEmbed);
+                }
             }
 
             var keys = notes.Keys.OrderByDescending(note => Convert.ToInt64(note));
@@ -36,7 +44,7 @@ namespace Cliptok.Helpers
 
             var embed = new DiscordEmbedBuilder()
                 .WithDescription(str)
-                .WithColor(new DiscordColor(0xFEC13D))
+                .WithColor(colorOverride ?? new DiscordColor(0xFEC13D))
                 .WithTimestamp(DateTime.Now)
                 .WithFooter(
                     $"User ID: {user.Id}",
@@ -75,11 +83,11 @@ namespace Cliptok.Helpers
             return embed;
         }
 
-        public static async Task<DiscordEmbed> GenerateUserNoteSimpleEmbedAsync(UserNote note, DiscordUser user)
+        public static async Task<DiscordEmbed> GenerateUserNoteSimpleEmbedAsync(UserNote note, DiscordUser user, DiscordColor? colorOverride = null)
         {
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithDescription($"**Note**\n{note.NoteText}")
-                .WithColor(new DiscordColor(0xFEC13D))
+                .WithColor(colorOverride ?? new DiscordColor(0xFEC13D))
                 .WithTimestamp(DateTime.Now)
                 .WithFooter(
                     $"User ID: {user.Id}",
@@ -100,11 +108,11 @@ namespace Cliptok.Helpers
             return embed;
         }
 
-        public static async Task<DiscordEmbed> GenerateUserNoteDetailEmbedAsync(UserNote note, DiscordUser user)
+        public static async Task<DiscordEmbed> GenerateUserNoteDetailEmbedAsync(UserNote note, DiscordUser user, DiscordColor? colorOverride = null)
         {
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithDescription($"**Note**\n{note.NoteText}")
-                .WithColor(new DiscordColor(0xFEC13D))
+                .WithColor(colorOverride ?? new DiscordColor(0xFEC13D))
                 .WithTimestamp(DateTime.Now)
                 .WithFooter(
                     $"User ID: {user.Id}",

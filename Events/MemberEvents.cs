@@ -36,8 +36,8 @@ namespace Cliptok.Events
 
             if (userNotes.Count > 0)
             {
-                var notesEmbed = await UserNoteHelpers.GenerateUserNotesEmbedAsync(e.Member, false, userNotes);
-                LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Warning} {e.Member.Mention} just joined the server with notes set to show on join!", notesEmbed);
+                var notesEmbed = await UserNoteHelpers.GenerateUserNotesEmbedAsync(e.Member, false, userNotes, colorOverride: new DiscordColor(0x3E9D28));
+                LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.UserJoin} {e.Member.Mention} just joined the server with {(userNotes.Count == 1 ? "a note" : "notes")} set to show on join!", notesEmbed);
             }
 
             if (db.HashExists("raidmode", e.Guild.Id))
@@ -181,11 +181,10 @@ namespace Cliptok.Events
                     x => JsonConvert.DeserializeObject<UserNote>(x.Value)
                 );
 
-            DiscordEmbed notesEmbed;
             if (userNotes.Count > 0)
             {
-                notesEmbed = await UserNoteHelpers.GenerateUserNotesEmbedAsync(e.Member, false, userNotes);
-                LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.Warning} {e.Member.Mention} just left the server with notes set to show on leave!", notesEmbed);
+                var notesEmbed = await UserNoteHelpers.GenerateUserNotesEmbedAsync(e.Member, false, userNotes, colorOverride: new DiscordColor(0xBA4119));
+                LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.UserLeave} {e.Member.Mention} just left the server with {(userNotes.Count == 1 ? "a note" : "notes")} set to show on leave!", notesEmbed);
             }
         }
 
