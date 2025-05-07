@@ -28,7 +28,7 @@ services:
     # uncomment this for bespoke setups
     network_mode: service:tailscale
   redis:
-    image: 'redis:7.2-alpine'
+    image: 'mirror.gcr.io/redis:7.2-alpine'
     restart: always
     volumes:
       - type: bind
@@ -55,7 +55,7 @@ services:
     command: --interval 30 --label-enable
     restart: always
   tailscale:
-    image: tailscale/tailscale:latest
+    image: ghcr.io/tailscale/tailscale:latest
     volumes:
       - ./data/ts-state:/var/lib/tailscale
     devices:
