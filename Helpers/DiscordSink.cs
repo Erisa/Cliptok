@@ -55,6 +55,16 @@ namespace Cliptok
                         extraText = string.Join(", ", pingList);
                     }
 
+                    // Skip errors caused by null values in audit log entries.
+                    if (
+                        logEvent.Exception is not null &&
+                        logEvent.Exception.GetType() == typeof(InvalidOperationException) &&
+                        logEvent.Exception.StackTrace.Contains("DSharpPlus.Entities.AuditLogs.AuditLogParser.ParseAuditLogEntryAsync")
+                    )
+                    {
+                        return;
+                    }
+
                     if (dummyWriter.ToString().Length > (1984 - extraText.Length) && dummyWriter.ToString().Length < (4096 - extraText.Length))
                     {
                         LogChannelHelper.LogMessageAsync("errors", new DiscordMessageBuilder().AddEmbed(new DiscordEmbedBuilder().WithDescription($"{extraText}\n```cs\n{dummyWriter}\n```")).WithAllowedMentions(Mentions.All));
