@@ -59,6 +59,7 @@ namespace Cliptok
                     if (
                         logEvent.Exception is not null &&
                         logEvent.Exception.GetType() == typeof(InvalidOperationException) &&
+                        logEvent.Exception.StackTrace is not null &&
                         logEvent.Exception.StackTrace.Contains("DSharpPlus.Entities.AuditLogs.AuditLogParser.ParseAuditLogEntryAsync")
                     )
                     {
