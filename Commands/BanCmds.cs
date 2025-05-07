@@ -179,9 +179,10 @@ namespace Cliptok.Commands
 
         [Command("massbantextcmd")]
         [TextAlias("massban", "bigbonk")]
+        [Description("Ban multiple users from the server at once.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task MassBanCmd(TextCommandContext ctx, [RemainingText] string input)
+        public async Task MassBanCmd(TextCommandContext ctx, [Description("The list of users to ban, separated by newlines or spaces, optionally followed by a reason."), RemainingText] string input)
         {
             List<string> inputString = input.Replace("\n", " ").Replace("\r", "").Split(' ').ToList();
             List<ulong> users = new();

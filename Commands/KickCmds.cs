@@ -56,9 +56,10 @@ namespace Cliptok.Commands
 
         [Command("masskicktextcmd")]
         [TextAlias("masskick")]
+        [Description("Kick multiple users from the server at once.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task MassKickCmd(TextCommandContext ctx, [RemainingText] string input)
+        public async Task MassKickCmd(TextCommandContext ctx, [Description("The list of users to kick, separated by newlines or spaces, optionally followed by a reason."), RemainingText] string input)
         {
 
             List<string> inputString = input.Replace("\n", " ").Replace("\r", "").Split(' ').ToList();
@@ -75,7 +76,7 @@ namespace Cliptok.Commands
 
             if (users.Count == 1 || users.Count == 0)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Not accepting a masskick with a single user. Please use `!ban`.");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Not accepting a masskick with a single user. Please use `!kick`.");
                 return;
             }
 
