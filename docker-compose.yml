@@ -43,13 +43,13 @@ services:
     env_file:
      - .exposer.env
   cloudflared:
-    image: erisamoe/cloudflared
+    image: ghcr.io/erisa/cloudflared
     restart: always
     command: tunnel --no-autoupdate run
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARED_TOKEN}
   watchtower:
-    image: containrrr/watchtower
+    image: ghcr.io/containrrr/watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 30 --label-enable
