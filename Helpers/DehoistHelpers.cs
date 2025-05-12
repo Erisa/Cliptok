@@ -15,6 +15,8 @@
 
         public static async Task<bool> CheckAndDehoistMemberAsync(DiscordMember targetMember, DiscordUser responsibleMod = default, bool isMassDehoist = false, bool dryRun = false, string nickname = default)
         {
+            Program.discord.Logger.LogDebug("Attempting to dehoist member {member}...", targetMember.Id);
+            
             string displayName = nickname;
             if (nickname == default)
             {
@@ -23,7 +25,10 @@
             }
 
             if ((await GetPermLevelAsync(targetMember)) >= ServerPermLevel.TrialModerator || targetMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername))
+            {
+                Program.discord.Logger.LogDebug("Skipped dehoisting member {member}: member is moderator or is automod-quarantined", targetMember.Id);
                 return false;
+            }
 
             if (
                 !(
@@ -45,6 +50,7 @@
                             a.AuditLogReason = responsibleMod != default ? isMassDehoist ? $"[Mass dehoist by {DiscordHelpers.UniqueUsername(responsibleMod)}]" : $"[Dehoist by {DiscordHelpers.UniqueUsername(responsibleMod)}]" : "[Automatic dehoist]";
                         });
                     }
+                    Program.discord.Logger.LogDebug("Successfully dehoisted member {memberId}", targetMember.Id);
                     return true;
                 }
 
@@ -61,12 +67,18 @@
                         a.AuditLogReason = responsibleMod != default ? isMassDehoist ? $"[Mass dehoist by {DiscordHelpers.UniqueUsername(responsibleMod)}]" : $"[Dehoist by {DiscordHelpers.UniqueUsername(responsibleMod)}]" : "[Automatic dehoist]";
                     });
                 }
+                Program.discord.Logger.LogDebug("Successfully dehoisted member {memberId}", targetMember.Id);
                 return true;
             }
             catch (Exception ex)
             {
                 if (ex is DSharpPlus.Exceptions.BadRequestException)
+                {
                     Program.discord.Logger.LogInformation(Program.CliptokEventID, "Failed to dehoist member {memberId}! Discord said Bad Request. If this member's profile is in violation of AutoMod rules, this is expected!", targetMember.Id);
+                    Program.discord.Logger.LogDebug("Failed to dehoist {memberId} with error Bad Request! Member has quarantined flag: {isQuarantined}; all flags: {memberFlags}", targetMember.Id, targetMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername), targetMember.MemberFlags.Value);
+                }
+
+                Program.discord.Logger.LogDebug(ex, "Failed to dehoist {memberId} with unexpected error:", targetMember.Id);
                 return false;
             }
         }
