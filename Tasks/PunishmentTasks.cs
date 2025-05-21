@@ -90,10 +90,13 @@
                             Program.db.HashDelete("automaticWarnings", warn.WarningId);
                             success = true;
                         }
-                        catch (NullReferenceException)
+                        catch (Exception ex)
                         {
-                            // it's fine. trust me. we'll live.
+                            // If we fail to delete the message, forget about it; this isn't incredibly important & we don't want to keep trying every task run
                             Program.db.HashDelete("automaticWarnings", warn.WarningId);
+                            
+                            // Log a warning too
+                            Program.discord.Logger.LogWarning(ex, "Failed to clean up automatic warning message: {messageLink}; it will be skipped", warn.ContextLink);
                             continue;
                         }
                     }
@@ -123,10 +126,16 @@
                             Program.db.HashDelete("compromisedAccountBans", ban.MemberId);
                             success = true;
                         }
-                        catch (NullReferenceException)
+                        catch (Exception ex)
                         {
-                            // it's fine. trust me. we'll live.
-                            Program.db.HashDelete("compromisedAccountBans", ban.MemberId);
+                            // If we fail to delete the message, forget about it; this isn't incredibly important & we don't want to keep trying every task run
+                            Program.db.HashDelete("automaticWarnings", ban.MemberId);
+                            
+                            // Log a warning too
+                            var messageLink = ban.ContextMessageReference is null
+                                ? "[no ContextMessageReference]"
+                                : $"https://discord.com/channels/{ban.ServerId}/{ban.ContextMessageReference.ChannelId}/{ban.ContextMessageReference.MessageId}";
+                            Program.discord.Logger.LogWarning(ex, "Failed to clean up compromised account ban message: {messageLink}; it will be skipped", messageLink);
                             continue;
                         }
                     }
