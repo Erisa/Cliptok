@@ -129,7 +129,7 @@
                         catch (Exception ex)
                         {
                             // If we fail to delete the message, forget about it; this isn't incredibly important & we don't want to keep trying every task run
-                            Program.db.HashDelete("automaticWarnings", ban.MemberId);
+                            Program.db.HashDelete("compromisedAccountBans", ban.MemberId);
                             
                             // Log a warning too
                             var messageLink = ban.ContextMessageReference is null
