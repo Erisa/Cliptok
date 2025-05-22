@@ -1,4 +1,4 @@
-namespace Cliptok.Commands.InteractionCommands
+namespace Cliptok.Commands
 {
     public class InsidersInteractions
     {
@@ -12,7 +12,7 @@ namespace Cliptok.Commands.InteractionCommands
                 return;
             }
 
-            DiscordComponent[] buttons =
+            DiscordButtonComponent[] buttons =
             [
                 new DiscordButtonComponent(DiscordButtonStyle.Primary, "insiders-info-roles-menu-callback", "Choose your Insider roles"),
                 new DiscordButtonComponent(DiscordButtonStyle.Secondary, "insiders-info-chat-btn-callback", "I just want to chat for now")
@@ -31,7 +31,7 @@ namespace Cliptok.Commands.InteractionCommands
 
             var builder = new DiscordInteractionResponseBuilder()
                 .WithContent($"{Program.cfgjson.Emoji.Insider} Choose your Insider roles here! Or, you can choose to chat in {insidersChannelMention} without being notified about new builds.")
-                .AddComponents(buttons);
+                .AddActionRowComponent(buttons);
 
             await ctx.RespondAsync(builder);
         }
