@@ -89,7 +89,7 @@
                     catch (Exception ex)
                     {
                         PendingPurge.Remove(channelBefore.Id);
-                        Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error ocurred trying to purge messages from {channel}", channelBefore.Name);
+                        Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error occurred trying to purge messages from {channel}", channelBefore.Name);
                     }
                     
                     if (messages.Count == 0)
@@ -221,7 +221,7 @@
             catch (Exception ex)
             {
                 PendingOverWrites.Remove(user.Id);
-                Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error ocurred trying to remove voice overwrites for {user} in {channel}", user.Username, channelBefore.Name);
+                Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error occurred trying to remove voice overwrites for {user} in {channel}", user.Username, channelBefore.Name);
             }
 
             PendingOverWrites.Remove(user.Id);
