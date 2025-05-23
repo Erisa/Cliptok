@@ -43,6 +43,7 @@ namespace Cliptok.Commands
             if (insiderChannel1 == insiderChannel2)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Both insider channels cannot be the same! Simply set one instead.", ephemeral: true);
+                return;
             }
 
             if (windowsVersion == 10 && insiderChannel1 != "RP")
