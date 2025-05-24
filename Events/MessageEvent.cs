@@ -903,7 +903,7 @@ namespace Cliptok.Events
                             DiscordMessage msg;
                             if (!wasAutoModBlock)
                             {
-                                messageBuilder.AddComponents(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
+                                messageBuilder.AddActionRowComponent(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
                                 msg = await channel.SendMessageAsync(messageBuilder);
                                 await Program.db.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
                             }
@@ -923,7 +923,7 @@ namespace Cliptok.Events
                             DiscordMessage msg;
                             if (!wasAutoModBlock)
                             {
-                                messageBuilder.AddComponents(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
+                                messageBuilder.AddActionRowComponent(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
                                 msg = await channel.SendMessageAsync(messageBuilder);
                                 await Program.db.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
                             }

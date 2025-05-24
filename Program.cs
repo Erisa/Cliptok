@@ -3,6 +3,7 @@ using DSharpPlus.Extensions;
 using DSharpPlus.Net.Gateway;
 using Serilog.Sinks.Grafana.Loki;
 using System.Reflection;
+using Serilog.Events;
 
 namespace Cliptok
 {
@@ -92,7 +93,8 @@ namespace Cliptok
                     lc.Filter.ByExcluding("EventId.Id = 1001")
                 .WriteTo.DiscordSink(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information, outputTemplate: logFormat)
                 )
-                .WriteTo.Console(outputTemplate: logFormat, theme: AnsiConsoleTheme.Literate);
+                .WriteTo.Console(outputTemplate: logFormat, theme: AnsiConsoleTheme.Literate)
+                .MinimumLevel.Override("System.Net.Http", LogEventLevel.Error);
 
             string token;
             var json = "";
