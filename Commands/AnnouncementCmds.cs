@@ -407,6 +407,88 @@ namespace Cliptok.Commands
 
             await ctx.RespondWithModalAsync(new DiscordInteractionResponseBuilder().WithTitle("Edit Announcement").WithCustomId("editannounce-modal-callback").AddComponents(new DiscordTextInputComponent("New announcement text. Do not include roles!", "editannounce-modal-new-text", value: msg.Content, style: DiscordTextInputStyle.Paragraph)));
         }
+        
+        [Command("announce")]
+        [Description("Announces something in the current channel, pinging an Insider role in the process.")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        public async Task AnounceSlashCmd(SlashCommandContext ctx,
+            [SlashChoiceProvider(typeof(WindowsVersionChoiceProvider))]
+            [Parameter("windows_version"), Description("The Windows version to announce for.")] long windowsVersion,
+            [SlashChoiceProvider(typeof(WindowsInsiderChannelChoiceProvider))]
+            [Parameter("role1"), Description("The first Insider role to ping.")] string insiderChannel1,
+            [Parameter("announcement_message"), Description("The message to announce.")] string announcementMessage,
+            [SlashChoiceProvider(typeof(WindowsInsiderChannelChoiceProvider))]
+            [Parameter("role2"), Description("The second Insider role to ping.")] string insiderChannel2 = "")
+        {
+            if (insiderChannel1 == insiderChannel2)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Both insider channels cannot be the same! Simply set one instead.", ephemeral: true);
+                return;
+            }
+
+            if (windowsVersion == 10 && insiderChannel1 != "RP")
+            {
+                await ctx.RespondAsync(text: $"{Program.cfgjson.Emoji.Error} Windows 10 only has a Release Preview Channel.", ephemeral: true);
+                return;
+            }
+            
+            string roleKey1;
+            if (windowsVersion == 10 && insiderChannel1 == "RP")
+            {
+                roleKey1 = "rp10";
+            }
+            else
+            {
+                roleKey1 = insiderChannel1.ToLower();
+            }
+
+            await ctx.DeferResponseAsync(ephemeral: true);
+
+            DiscordRole insiderRole1 = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[roleKey1]);
+            DiscordRole insiderRole2 = default;
+
+            if (insiderChannel2 != "")
+            {
+                string roleKey2;
+                if (windowsVersion == 10 && insiderChannel2 == "RP")
+                {
+                    roleKey2 = "rp10";
+                }
+                else if (windowsVersion == 10 && insiderChannel2 == "Beta")
+                {
+                    roleKey2 = "beta10";
+                }
+                else
+                {
+                    roleKey2 = insiderChannel2.ToLower();
+                }
+
+                insiderRole2 = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[roleKey2]);
+            }
+            
+            await insiderRole1.ModifyAsync(mentionable: true);
+            if (insiderRole2 != default)
+                await insiderRole2.ModifyAsync(mentionable: true);
+
+            try
+            {
+                var msg = insiderRole1.Mention;
+                if (insiderRole2 != default)
+                    msg += $" {insiderRole2.Mention}";
+                msg += $" {announcementMessage}";
+                await ctx.Channel.SendMessageAsync(msg);
+            }
+            catch
+            {
+                // We still need to remember to make it unmentionable even if the msg fails.
+            }
+
+            await insiderRole1.ModifyAsync(mentionable: false);
+            if (insiderRole2 != default)
+                await insiderRole2.ModifyAsync(mentionable: false);
+            
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Announcement sent successfully!");
+        }
 
         [Command("announcetextcmd")]
         [TextAlias("announce")]
