@@ -226,6 +226,7 @@ namespace Cliptok
                                   .HandleMessageCreated(MessageEvent.MessageCreated)
                                   .HandleMessageUpdated(MessageEvent.MessageUpdated)
                                   .HandleMessageDeleted(MessageEvent.MessageDeleted)
+                                  .HandleMessagesBulkDeleted(MessageEvent.MessagesBulkDeleted)
                                   .HandleGuildMemberAdded(MemberEvents.GuildMemberAdded)
                                   .HandleGuildMemberRemoved(MemberEvents.GuildMemberRemoved)
                                   .HandleMessageReactionAdded(ReactionEvent.OnReaction)
