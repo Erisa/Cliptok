@@ -211,10 +211,10 @@ namespace Cliptok.Events
                 if (!limitFilters)
                 {
                     #region tracked user relaying
-                    if (Program.db.SetContains("trackedUsers", message.Author.Id))
+                    if (Program.redis.SetContains("trackedUsers", message.Author.Id))
                     {
                         // Check current channel against tracking channels
-                        var trackingChannels = await Program.db.HashGetAsync("trackingChannels", message.Author.Id);
+                        var trackingChannels = await Program.redis.HashGetAsync("trackingChannels", message.Author.Id);
                         if (trackingChannels.HasValue)
                         {
                             var trackingChannelsList = JsonConvert.DeserializeObject<List<ulong>>(trackingChannels);
@@ -268,7 +268,7 @@ namespace Cliptok.Events
                         // Add notes to message if any exist & are set to show on modmail
 
                         // Get user notes
-                        var notes = (await Program.db.HashGetAllAsync(modmailMember.Id.ToString()))
+                        var notes = (await Program.redis.HashGetAllAsync(modmailMember.Id.ToString()))
                             .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note).ToDictionary(
                                 x => x.Name.ToString(),
                                 x => JsonConvert.DeserializeObject<UserNote>(x.Value)
@@ -297,7 +297,7 @@ namespace Cliptok.Events
                         foreach (var note in notesToNotify.Where(note => note.Value.ShowOnce))
                         {
                             // Delete note
-                            await Program.db.HashDeleteAsync(modmailMember.Id.ToString(), note.Key);
+                            await Program.redis.HashDeleteAsync(modmailMember.Id.ToString(), note.Key);
 
                             // Log deletion to mod-logs channel
                             var embed = new DiscordEmbedBuilder(await UserNoteHelpers.GenerateUserNoteDetailEmbedAsync(note.Value, modmailMember)).WithColor(0xf03916);
@@ -701,9 +701,9 @@ namespace Cliptok.Events
 
                             string reason = "Mass emoji";
 
-                            if ((await GetPermLevelAsync(member)) == ServerPermLevel.Nothing && !Program.db.HashExists("emojiPardoned", message.Author.Id.ToString()))
+                            if ((await GetPermLevelAsync(member)) == ServerPermLevel.Nothing && !Program.redis.HashExists("emojiPardoned", message.Author.Id.ToString()))
                             {
-                                await Program.db.HashSetAsync("emojiPardoned", member.Id.ToString(), false);
+                                await Program.redis.HashSetAsync("emojiPardoned", member.Id.ToString(), false);
                                 string pardonOutput;
                                 if (Program.cfgjson.UnrestrictedEmojiChannels.Count > 0)
                                     pardonOutput = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, if you want to play around with lots of emoji, please use <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.";
@@ -719,10 +719,10 @@ namespace Cliptok.Events
                             }
 
                             string output = $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**";
-                            if (Program.cfgjson.UnrestrictedEmojiChannels.Count > 0 && (!Program.db.HashExists("emojiPardoned", message.Author.Id.ToString()) || Program.db.HashGet("emojiPardoned", message.Author.Id.ToString()) == false))
+                            if (Program.cfgjson.UnrestrictedEmojiChannels.Count > 0 && (!Program.redis.HashExists("emojiPardoned", message.Author.Id.ToString()) || Program.redis.HashGet("emojiPardoned", message.Author.Id.ToString()) == false))
                             {
                                 output += $"\nIf you want to play around with lots of emoji, please use <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.";
-                                await Program.db.HashSetAsync("emojiPardoned", member.Id.ToString(), true);
+                                await Program.redis.HashSetAsync("emojiPardoned", member.Id.ToString(), true);
                             }
 
                             DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, output, wasAutoModBlock);
@@ -888,9 +888,9 @@ namespace Cliptok.Events
 
                         string reason = "Too many lines in a single message";
 
-                        if (!Program.db.SetContains("linePardoned", message.Author.Id.ToString()))
+                        if (!Program.redis.SetContains("linePardoned", message.Author.Id.ToString()))
                         {
-                            await Program.db.SetAddAsync("linePardoned", member.Id.ToString());
+                            await Program.redis.SetAddAsync("linePardoned", member.Id.ToString());
                             string output;
                             if (wasAutoModBlock)
                                 output = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, your message contained too many lines.\n" +
@@ -905,7 +905,7 @@ namespace Cliptok.Events
                             {
                                 messageBuilder.AddComponents(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
                                 msg = await channel.SendMessageAsync(messageBuilder);
-                                await Program.db.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
+                                await Program.redis.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
                             }
                             else
                             {
@@ -925,7 +925,7 @@ namespace Cliptok.Events
                             {
                                 messageBuilder.AddComponents(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
                                 msg = await channel.SendMessageAsync(messageBuilder);
-                                await Program.db.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
+                                await Program.redis.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
                             }
                             else
                             {
@@ -946,10 +946,10 @@ namespace Cliptok.Events
                 if (!limitFilters)
                 {
                     #region feedback hub forum validation
-                    if ((await GetPermLevelAsync(member)) < ServerPermLevel.TrialModerator && !isAnEdit && channel.IsThread && channel.ParentId == Program.cfgjson.FeedbackHubForum && !Program.db.SetContains("processedFeedbackHubThreads", channel.Id))
+                    if ((await GetPermLevelAsync(member)) < ServerPermLevel.TrialModerator && !isAnEdit && channel.IsThread && channel.ParentId == Program.cfgjson.FeedbackHubForum && !Program.redis.SetContains("processedFeedbackHubThreads", channel.Id))
                     {
                         var thread = (DiscordThreadChannel)channel;
-                        Program.db.SetAdd("processedFeedbackHubThreads", thread.Id);
+                        Program.redis.SetAdd("processedFeedbackHubThreads", thread.Id);
 
                         // we need to make sure this is the first message in the channel
                         if ((await thread.GetMessagesBeforeAsync(message.Id).ToListAsync()).Count == 0)
@@ -1138,7 +1138,7 @@ namespace Cliptok.Events
             else
             {
                 relayThread = (DiscordThreadChannel)await client.GetChannelAsync(
-                    (ulong)await Program.db.HashGetAsync("trackingThreads", message.Author.Id));
+                    (ulong)await Program.redis.HashGetAsync("trackingThreads", message.Author.Id));
                 trackingThreadCache.Add(message.Author.Id, relayThread);
             }
 

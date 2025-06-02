@@ -131,8 +131,8 @@ namespace Cliptok.Commands
                 return;
             }
 
-            var sourceWarnings = await Program.db.HashGetAllAsync(sourceUser.Id.ToString());
-            var targetWarnings = await Program.db.HashGetAllAsync(targetUser.Id.ToString());
+            var sourceWarnings = await Program.redis.HashGetAllAsync(sourceUser.Id.ToString());
+            var targetWarnings = await Program.redis.HashGetAllAsync(targetUser.Id.ToString());
 
             if (sourceWarnings.Length == 0)
             {
@@ -143,9 +143,9 @@ namespace Cliptok.Commands
             {
                 foreach (var warning in sourceWarnings)
                 {
-                    await Program.db.HashSetAsync(targetUser.Id.ToString(), warning.Name, warning.Value);
+                    await Program.redis.HashSetAsync(targetUser.Id.ToString(), warning.Name, warning.Value);
                 }
-                await Program.db.KeyDeleteAsync(sourceUser.Id.ToString());
+                await Program.redis.KeyDeleteAsync(sourceUser.Id.ToString());
             }
             else if (targetWarnings.Length > 0 && !forceOverride)
             {
@@ -156,12 +156,12 @@ namespace Cliptok.Commands
             }
             else if (targetWarnings.Length > 0 && forceOverride)
             {
-                await Program.db.KeyDeleteAsync(targetUser.Id.ToString());
-                await Program.db.KeyRenameAsync(sourceUser.Id.ToString(), targetUser.Id.ToString());
+                await Program.redis.KeyDeleteAsync(targetUser.Id.ToString());
+                await Program.redis.KeyRenameAsync(sourceUser.Id.ToString(), targetUser.Id.ToString());
             }
             else
             {
-                await Program.db.KeyRenameAsync(sourceUser.Id.ToString(), targetUser.Id.ToString());
+                await Program.redis.KeyRenameAsync(sourceUser.Id.ToString(), targetUser.Id.ToString());
             }
 
             string operationText = "";
@@ -191,7 +191,7 @@ namespace Cliptok.Commands
 
                 var user = await ctx.Client.GetUserAsync((ulong)useroption.Value);
 
-                var warnings = (await Program.db.HashGetAllAsync(user.Id.ToString()))
+                var warnings = (await Program.redis.HashGetAllAsync(user.Id.ToString()))
                     .Where(x => JsonConvert.DeserializeObject<UserWarning>(x.Value).Type == WarningType.Warning).ToDictionary(
                    x => x.Name.ToString(),
                   x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
@@ -685,7 +685,7 @@ namespace Cliptok.Commands
         {
             await DiscordHelpers.SafeTyping(ctx.Channel);
 
-            var server = Program.redis.GetServer(Program.redis.GetEndPoints()[0]);
+            var server = Program.redisConnection.GetServer(Program.redisConnection.GetEndPoints()[0]);
             var keys = server.Keys();
 
             Dictionary<string, int> counts = new();
@@ -693,7 +693,7 @@ namespace Cliptok.Commands
             {
                 if (ulong.TryParse(key.ToString(), out ulong number))
                 {
-                    counts[key.ToString()] = (await Program.db.HashGetAllAsync(key)).Count(x => JsonConvert.DeserializeObject<UserWarning>(x.Value.ToString()).Type == WarningType.Warning);
+                    counts[key.ToString()] = (await Program.redis.HashGetAllAsync(key)).Count(x => JsonConvert.DeserializeObject<UserWarning>(x.Value.ToString()).Type == WarningType.Warning);
                 }
             }
 
@@ -719,7 +719,7 @@ namespace Cliptok.Commands
         {
             await DiscordHelpers.SafeTyping(ctx.Channel);
 
-            var server = Program.redis.GetServer(Program.redis.GetEndPoints()[0]);
+            var server = Program.redisConnection.GetServer(Program.redisConnection.GetEndPoints()[0]);
             var keys = server.Keys();
 
             Dictionary<string, int> counts = new();
@@ -729,7 +729,7 @@ namespace Cliptok.Commands
             {
                 if (ulong.TryParse(key.ToString(), out ulong number))
                 {
-                    var warningsOutput = (await Program.db.HashGetAllAsync(key.ToString())).ToDictionary(
+                    var warningsOutput = (await Program.redis.HashGetAllAsync(key.ToString())).ToDictionary(
                         x => x.Name.ToString(),
                         x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
                     );
@@ -812,7 +812,7 @@ namespace Cliptok.Commands
             var reason = Constants.RegexConstants.warn_msg_rx.Match(reply.Content).Groups[1].Value;
             if (string.IsNullOrEmpty(reason))
                 reason = Constants.RegexConstants.auto_warn_msg_rx.Match(reply.Content).Groups[1].Value;
-            var userWarnings = (await Program.db.HashGetAllAsync(userId));
+            var userWarnings = (await Program.redis.HashGetAllAsync(userId));
             
             // Try to match against user warnings;
             // match warnings that have a reason that exactly matches the reason in the msg being replied to,

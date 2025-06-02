@@ -88,14 +88,14 @@
                     ChannelId = output.dmMessage.ChannelId
                 };
 
-            await Program.db.HashSetAsync("bans", targetUserId, JsonConvert.SerializeObject(newBan));
+            await Program.redis.HashSetAsync("bans", targetUserId, JsonConvert.SerializeObject(newBan));
 
             // used for collision detection
             MostRecentBan = newBan;
 
             // If ban is for a compromised account, add to list so the context message can be more-easily deleted later
             if (compromisedAccount)
-                Program.db.HashSet("compromisedAccountBans", targetUserId, JsonConvert.SerializeObject(newBan));
+                Program.redis.HashSet("compromisedAccountBans", targetUserId, JsonConvert.SerializeObject(newBan));
 
             try
             {
@@ -126,10 +126,10 @@
                 _ = FindModmailThreadAndSendMessage(guild, $"User ID: {targetUserId}", logOut);
 
                 // Remove user message tracking
-                if (await Program.db.SetContainsAsync("trackedUsers", targetUserId))
+                if (await Program.redis.SetContainsAsync("trackedUsers", targetUserId))
                 {
-                    await Program.db.SetRemoveAsync("trackedUsers", targetUserId);
-                    var channelId = Program.db.HashGet("trackingThreads", targetUserId);
+                    await Program.redis.SetRemoveAsync("trackedUsers", targetUserId);
+                    var channelId = Program.redis.HashGet("trackingThreads", targetUserId);
                     DiscordThreadChannel thread = (DiscordThreadChannel)await Program.discord.GetChannelAsync((ulong)channelId);
                     await thread.ModifyAsync(thread =>
                     {
@@ -179,12 +179,12 @@
             }
             // Even if the bot failed to unban, it reported that failure to a log channel and thus the ban record
             //  can be safely removed internally.
-            await Program.db.HashDeleteAsync("bans", targetUserId);
+            await Program.redis.HashDeleteAsync("bans", targetUserId);
         }
 
         public async static Task<bool> UnbanUserAsync(DiscordGuild guild, DiscordUser target, string reason = "")
         {
-            await Program.db.HashSetAsync("unbanned", target.Id, true);
+            await Program.redis.HashSetAsync("unbanned", target.Id, true);
             try
             {
                 await guild.UnbanMemberAsync(user: target, reason: reason);
@@ -195,7 +195,7 @@
                 return false;
             }
             await LogChannelHelper.LogMessageAsync("mod", new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Unbanned} Successfully unbanned {target.Mention}!\nReason: **{reason}**").WithAllowedMentions(Mentions.None));
-            await Program.db.HashDeleteAsync("bans", target.Id.ToString());
+            await Program.redis.HashDeleteAsync("bans", target.Id.ToString());
             return true;
         }
 
@@ -206,10 +206,10 @@
                 await targetGuild.BanMemberAsync(targetUserId, TimeSpan.FromDays(7), reason);
 
                 // Remove user message tracking
-                if (await Program.db.SetContainsAsync("trackedUsers", targetUserId))
+                if (await Program.redis.SetContainsAsync("trackedUsers", targetUserId))
                 {
-                    await Program.db.SetRemoveAsync("trackedUsers", targetUserId);
-                    var channelId = Program.db.HashGet("trackingThreads", targetUserId);
+                    await Program.redis.SetRemoveAsync("trackedUsers", targetUserId);
+                    var channelId = Program.redis.HashGet("trackingThreads", targetUserId);
                     DiscordThreadChannel thread = (DiscordThreadChannel)await Program.discord.GetChannelAsync((ulong)channelId);
                     await thread.ModifyAsync(thread =>
                     {
@@ -243,9 +243,9 @@
                     await LykosAvatarMethods.UserOrMemberAvatarURL(user, Program.homeGuild, "png")
                 );
 
-            if (await Program.db.HashExistsAsync("bans", user.Id))
+            if (await Program.redis.HashExistsAsync("bans", user.Id))
             {
-                MemberPunishment ban = JsonConvert.DeserializeObject<MemberPunishment>(Program.db.HashGet("bans", user.Id));
+                MemberPunishment ban = JsonConvert.DeserializeObject<MemberPunishment>(Program.redis.HashGet("bans", user.Id));
 
                 embedBuilder.WithDescription("User is banned.")
                     .AddField("Banned", ban.ActionTime is null ? "Unknown time (Ban is too old)" : $"<t:{TimeHelpers.ToUnixTimestamp(ban.ActionTime)}:R>", true)

@@ -326,18 +326,18 @@
 
                 foreach (var pin in pins)
                 {
-                    if (await Program.db.SetContainsAsync("insiderPins", pin.Id))
+                    if (await Program.redis.SetContainsAsync("insiderPins", pin.Id))
                     {
                         if (pins.Count > (Program.cfgjson.InsiderThreadKeepLastPins - 1))
                         {
                             await pin.UnpinAsync();
-                            await Program.db.SetRemoveAsync("insiderPins", pin.Id);
+                            await Program.redis.SetRemoveAsync("insiderPins", pin.Id);
                         }
                     }
                 }
 
                 await message.PinAsync();
-                await Program.db.SetAddAsync("insiderPins", message.Id);
+                await Program.redis.SetAddAsync("insiderPins", message.Id);
             }
             catch (Exception e)
             {

@@ -38,7 +38,7 @@
             if (message.Author.IsBot) return;
 
             // Don't relay message if user is blocked
-            if (await Program.db.SetContainsAsync("dmRelayBlocklist", message.Author.Id)) return;
+            if (await Program.redis.SetContainsAsync("dmRelayBlocklist", message.Author.Id)) return;
 
             // Log DMs to DM log channel, include note about auto-response if applicable
             await LogChannelHelper.LogMessageAsync("dms", await DiscordHelpers.GenerateMessageRelay(message, sentAutoresponse: sentAutoresponse));

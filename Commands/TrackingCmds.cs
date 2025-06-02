@@ -48,16 +48,16 @@
                 // If we were passed nothing, filterChannels remains an empty List. Otherwise, it is populated with the parsed channel IDs
 
                 // Compare to db; if there is a mismatch, replace whatever is already in the db with what was passed to this command
-                if (Program.db.HashExists("trackingChannels", discordUser.Id))
+                if (Program.redis.HashExists("trackingChannels", discordUser.Id))
                 {
-                    var dbChannels = Program.db.HashGet("trackingChannels", discordUser.Id).ToString();
+                    var dbChannels = Program.redis.HashGet("trackingChannels", discordUser.Id).ToString();
                     string cmdChannels;
                     if (filterChannels.Count < 1)
                     {
                         // No channels were passed. If there are any in the db, remove them
-                        if (await Program.db.HashExistsAsync("trackingChannels", discordUser.Id))
+                        if (await Program.redis.HashExistsAsync("trackingChannels", discordUser.Id))
                         {
-                            await Program.db.HashDeleteAsync("trackingChannels", discordUser.Id);
+                            await Program.redis.HashDeleteAsync("trackingChannels", discordUser.Id);
                             channelsUpdated = true;
                         }
                     }
@@ -68,7 +68,7 @@
                         {
                             // Passed channels do not match db channels, update db
                             var newChannels = JsonConvert.SerializeObject(filterChannels);
-                            await Program.db.HashSetAsync("trackingChannels", discordUser.Id, newChannels);
+                            await Program.redis.HashSetAsync("trackingChannels", discordUser.Id, newChannels);
                             channelsUpdated = true;
                         }
                     }
@@ -80,12 +80,12 @@
                     if (filterChannels.Count > 0)
                     {
                         var newChannels = JsonConvert.SerializeObject(filterChannels);
-                        await Program.db.HashSetAsync("trackingChannels", discordUser.Id, newChannels);
+                        await Program.redis.HashSetAsync("trackingChannels", discordUser.Id, newChannels);
                         channelsUpdated = true;
                     }
                 }
 
-                if (Program.db.SetContains("trackedUsers", discordUser.Id))
+                if (Program.redis.SetContains("trackedUsers", discordUser.Id))
                 {
                     if (channelsUpdated)
                     {
@@ -97,7 +97,7 @@
                     return;
                 }
 
-                await Program.db.SetAddAsync("trackedUsers", discordUser.Id);
+                await Program.redis.SetAddAsync("trackedUsers", discordUser.Id);
 
                 string response = $"{Program.cfgjson.Emoji.On} Now tracking {discordUser.Mention} in this thread! :eyes:";
                 if (filterChannels.Count > 0)
@@ -111,9 +111,9 @@
                     response += $"\nTracking in: {channelList}";
                 }
 
-                if (Program.db.HashExists("trackingThreads", discordUser.Id))
+                if (Program.redis.HashExists("trackingThreads", discordUser.Id))
                 {
-                    var channelId = Program.db.HashGet("trackingThreads", discordUser.Id);
+                    var channelId = Program.redis.HashGet("trackingThreads", discordUser.Id);
                     DiscordThreadChannel thread = (DiscordThreadChannel)await ctx.Client.GetChannelAsync((ulong)channelId);
 
                     await thread.SendMessageAsync(response);
@@ -124,7 +124,7 @@
                 else
                 {
                     var thread = await LogChannelHelper.ChannelCache["investigations"].CreateThreadAsync(DiscordHelpers.UniqueUsername(discordUser), DiscordAutoArchiveDuration.Week, DiscordChannelType.PublicThread);
-                    await Program.db.HashSetAsync("trackingThreads", discordUser.Id, thread.Id);
+                    await Program.redis.HashSetAsync("trackingThreads", discordUser.Id, thread.Id);
                     await thread.SendMessageAsync(response);
                     await thread.AddThreadMemberAsync(ctx.Member);
                     await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.On} Now tracking {discordUser.Mention} in {thread.Mention}!"));
@@ -137,16 +137,16 @@
             {
                 await ctx.DeferResponseAsync(ephemeral: false);
 
-                if (!Program.db.SetContains("trackedUsers", discordUser.Id))
+                if (!Program.redis.SetContains("trackedUsers", discordUser.Id))
                 {
                     await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} This user is not being tracked."));
                     return;
                 }
 
-                await Program.db.SetRemoveAsync("trackedUsers", discordUser.Id);
-                await Program.db.HashDeleteAsync("trackingChannels", discordUser.Id);
+                await Program.redis.SetRemoveAsync("trackedUsers", discordUser.Id);
+                await Program.redis.HashDeleteAsync("trackingChannels", discordUser.Id);
 
-                var channelId = Program.db.HashGet("trackingThreads", discordUser.Id);
+                var channelId = Program.redis.HashGet("trackingThreads", discordUser.Id);
                 DiscordThreadChannel thread = (DiscordThreadChannel)await ctx.Client.GetChannelAsync((ulong)channelId);
 
                 await thread.SendMessageAsync($"{Program.cfgjson.Emoji.Off} {discordUser.Mention} is no longer being tracked! Archiving for now.");

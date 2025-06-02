@@ -7,11 +7,11 @@ namespace Cliptok.Migrations
         public static async Task MigrateJoinwatchesToNotesAsync()
         {
             // Migration from joinwatch to user notes
-            if (!await db.KeyExistsAsync("joinWatchedUsers"))
+            if (!await redis.KeyExistsAsync("joinWatchedUsers"))
                 return;
 
-            var joinWatchedUsersList = await Program.db.ListRangeAsync("joinWatchedUsers");
-            var joinWatchNotesList = await Program.db.HashGetAllAsync("joinWatchedUsersNotes");
+            var joinWatchedUsersList = await Program.redis.ListRangeAsync("joinWatchedUsers");
+            var joinWatchNotesList = await Program.redis.HashGetAllAsync("joinWatchedUsersNotes");
             int successfulMigrations = 0;
             int numJoinWatches = joinWatchedUsersList.Length;
             foreach (var user in joinWatchedUsersList)
@@ -34,15 +34,15 @@ namespace Cliptok.Migrations
                     ShowAllMods = false,
                     ShowOnce = false,
                     ShowOnJoinAndLeave = true,
-                    NoteId = db.StringIncrement("totalWarnings"),
+                    NoteId = redis.StringIncrement("totalWarnings"),
                     Timestamp = DateTime.Now,
                     Type = WarningType.Note
                 };
 
                 // Save note & remove joinwatch
-                await db.HashSetAsync(note.TargetUserId.ToString(), note.NoteId, JsonConvert.SerializeObject(note));
-                await db.ListRemoveAsync("joinWatchedUsers", note.TargetUserId);
-                await db.HashDeleteAsync("joinWatchedUsersNotes", note.TargetUserId);
+                await redis.HashSetAsync(note.TargetUserId.ToString(), note.NoteId, JsonConvert.SerializeObject(note));
+                await redis.ListRemoveAsync("joinWatchedUsers", note.TargetUserId);
+                await redis.HashDeleteAsync("joinWatchedUsersNotes", note.TargetUserId);
                 successfulMigrations++;
             }
 

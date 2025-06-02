@@ -27,6 +27,7 @@ services:
       - REDIS_DOCKER_OVERRIDE=true
     # uncomment this for bespoke setups
     network_mode: service:tailscale
+    command: 'sh -c "dotnet ef database update && dotnet Cliptok.dll"''
   redis:
     image: 'mirror.gcr.io/redis:7.2-alpine'
     restart: always
