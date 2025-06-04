@@ -72,7 +72,10 @@ namespace Cliptok.Commands
 
             try
             {
-                await channelObj.SendMessageAsync(new DiscordMessageBuilder().WithContent(input).WithReply(Convert.ToUInt64(replyID), pingreply, false));
+                if (replyID == "0")
+                    await channelObj.SendMessageAsync(new DiscordMessageBuilder().WithContent(input));
+                else
+                    await channelObj.SendMessageAsync(new DiscordMessageBuilder().WithContent(input).WithReply(Convert.ToUInt64(replyID), pingreply, false));
             }
             catch (Exception e)
             {
