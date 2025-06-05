@@ -483,7 +483,7 @@ namespace Cliptok.Commands
                             $"{Program.cfgjson.Emoji.ShieldHelp} Just to confirm, you want to add the following override for {user.Mention} to {channel.Mention}?\n" +
                             $"**Allowed:** {allowedPermsStr}\n" +
                             $"**Denied:** {deniedPermsStr}\n")
-                        .AddComponents([confirmButton, cancelButton]));
+                        .AddActionRowComponent([confirmButton, cancelButton]));
                     var confirmationMessage = await ctx.GetResponseAsync();
 
                     OverridesPendingAddition.Add(confirmationMessage.Id, new PendingUserOverride
