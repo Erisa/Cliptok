@@ -256,7 +256,39 @@ namespace Cliptok.Commands
             [RemainingText, Description("The text to send when the reminder triggers.")] string reminder
         )
         {
-            DateTime t = HumanDateParser.HumanDateParser.Parse(timetoParse);
+            DateTime t;
+
+            // Define REGEX patterns for checking if its a UNIX millisecond or second timestamp
+            string patternSec = @"^\d{10}$";
+            string patternMillisec = @"^\d{13}$";
+
+            // check if its a second timestamp
+            if (Regex.IsMatch(timetoParse, patternSec))
+            {
+                // parse the string into a long
+                long ts = long.Parse(timetoParse);
+                // use helper func to turn it into a datetime
+                t = ReminderHelpers.UnixTimeStampToDateTime(ts);
+            }
+            else if (Regex.IsMatch(timetoParse, patternMillisec))
+            {
+                // parse the string into a long
+                long ts = long.Parse(timetoParse);
+                // use helper func to turn it into a datetime
+                t = ReminderHelpers.UnixTimeStampMsToDateTime(ts);
+            }
+            // else try inside the condition of this elseif to parse it as a simple datetime (example: 2025-06-09 14:25:36)
+            else if (!DateTime.TryParse(timetoParse, out t))
+            {
+                // if it couldnt parse it as that, finally try humandateparser
+                t = HumanDateParser.HumanDateParser.Parse(timetoParse);
+            }
+            
+            #if DEBUG
+                // send exactly what it parsed to chcek if it worked (debug thing)
+                await ctx.RespondAsync($"**DEBUG:**\nTimedate: `{timetoParse}`\nReason: `{reminder}`\nParsed time **(LOCAL TIME OF SERVER)**: {t}");
+            #endif
+            
             if (t <= DateTime.Now)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time can't be in the past!");
