@@ -38,8 +38,14 @@
         {
             return ((DateTimeOffset)dateTime).ToUnixTimeSeconds();
         }
+        
         public static DateTime ToDateTime(long unixTime, bool milliseconds = false)
         {
+            /* This function creates a DateTime from a long thats a UNIX timestamp.
+             It will parse both second and millisecond timestamps depending on the second argument (true = milliseconds, false = seconds).
+             Works by creating a datetime object in 1970-1-1 00:00:00, and then just adding the timestamp, lol.
+             This is then returned !IN LOCAL TIME!, **NOT** utc.
+            */
             DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             if (milliseconds)
             {
@@ -53,6 +59,13 @@
 
         public static DateTime ParseAnyDateFormat(string inputString)
         {
+            /*
+             This function parses any date format from a simple string.
+             It can parse: UNIX timestamps using the functiona above (TimeHelpers.ToDateTime),
+             or simple DateTimes (like 2025-06-10 02:00:00) or relative timestamps
+             with HumanDateParser such as 5d, 2y, etc.
+             Returns a datetime. Made for the remindme command but can of course be used elsewhere too.
+             */
             DateTime t;
 
             // Define REGEX patterns for checking if its a UNIX millisecond or second timestamp
