@@ -284,11 +284,6 @@ namespace Cliptok.Commands
                 t = HumanDateParser.HumanDateParser.Parse(timetoParse);
             }
             
-            #if DEBUG
-                // send exactly what it parsed to chcek if it worked (debug thing)
-                await ctx.RespondAsync($"**DEBUG:**\nTimedate: `{timetoParse}`\nReason: `{reminder}`\nParsed time **(LOCAL TIME OF SERVER)**: {t}");
-            #endif
-            
             if (t <= DateTime.Now)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time can't be in the past!");
