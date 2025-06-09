@@ -252,7 +252,7 @@ namespace Cliptok.Commands
         [RequireHomeserverPerm(ServerPermLevel.Tier4, WorkOutside = true)]
         public async Task RemindMe(
             TextCommandContext ctx,
-            [Description("The time of the reminder. This can be relative (such as 2d, 10m, 4w, 5h), a simple \"DateTime\" (such as 2025-12-18 20:00:00 only in this format), or even a UNIX timestamp in seconds or milliseconds.")] string timetoParse,
+            [Description("When to trigger the reminder. Accepts many formats. Surround with quotes if you need to use spaces.")] string timetoParse,
             [RemainingText, Description("The text to send when the reminder triggers.")] string reminder
         )
         {
