@@ -11,8 +11,8 @@
             if (!Program.cfgjson.EnableTextInVoice)
                 return;
             
-            var channelBefore = e.Before is null ? null : await e.Before.GetChannelAsync();
-            var channelAfter = e.After is null ? null : await e.After.GetChannelAsync();
+            var channelBefore = e.Before?.ChannelId is null ? null : await Program.discord.GetChannelAsync(e.Before.ChannelId.Value);
+            var channelAfter = e.After?.ChannelId is null ? null : await Program.discord.GetChannelAsync(e.After.ChannelId.Value);
             var user = await e.GetUserAsync();
             var guild = await e.GetGuildAsync();
 
@@ -111,7 +111,7 @@
 
         public static async Task UserJoined(DiscordClient client, VoiceStateUpdatedEventArgs e)
         {
-            var channelAfter = e.After is null ? null : await e.After.GetChannelAsync();
+            var channelAfter = e.After?.ChannelId is null ? null : await Program.discord.GetChannelAsync(e.After.ChannelId.Value);
             var user = await e.GetUserAsync();
             var guild = await e.GetGuildAsync();
             var member = await guild.GetMemberAsync(user.Id);
@@ -169,7 +169,7 @@
 
         public static async Task UserLeft(DiscordClient client, VoiceStateUpdatedEventArgs e)
         {
-            var channelBefore = e.Before is null ? null : await e.Before.GetChannelAsync();
+            var channelBefore = e.Before?.ChannelId is null ? null : await Program.discord.GetChannelAsync(e.Before.ChannelId.Value);
             var user = await e.GetUserAsync();
             var guild = await e.GetGuildAsync();
             var member = await guild.GetMemberAsync(user.Id);
