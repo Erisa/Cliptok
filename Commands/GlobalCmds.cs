@@ -252,11 +252,12 @@ namespace Cliptok.Commands
         [RequireHomeserverPerm(ServerPermLevel.Tier4, WorkOutside = true)]
         public async Task RemindMe(
             TextCommandContext ctx,
-            [Description("The amount of time to wait before reminding you. For example: 2s, 5m, 1h, 1d")] string timetoParse,
+            [Description("When to trigger the reminder. Accepts many formats. Surround with quotes if you need to use spaces.")] string timetoParse,
             [RemainingText, Description("The text to send when the reminder triggers.")] string reminder
         )
         {
-            DateTime t = HumanDateParser.HumanDateParser.Parse(timetoParse);
+            DateTime t = TimeHelpers.ParseAnyDateFormat(timetoParse);
+            
             if (t <= DateTime.Now)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time can't be in the past!");
