@@ -40,6 +40,9 @@
                 foreach (string key in keys)
                 {
                     UserWarning warning = warningsOutput[key];
+                    if (warning.IsPardoned)
+                        continue;
+
                     TimeSpan span = DateTime.Now - warning.WarnTimestamp;
                     if (span <= timeToCheck)
                     {
@@ -69,6 +72,14 @@
 
                 }
 
+                var pardonedWarningList = warningsOutput.Values.Where(x => x.IsPardoned)
+                    .GroupBy(x => x.WarnReason)
+                    .Select(x => new { Reason = x.Key, Count = x.Count() })
+                    .OrderByDescending(x => x.Count)
+                    .ThenBy(x => x.Reason);
+                
+                str += string.Join("\n", pardonedWarningList.Select(x => $"(Pardoned) {(x.Count > 1 ? $"{x.Count}x " : "")}**{x.Reason}**"));
+
                 if (Program.cfgjson.RecentWarningsPeriodHours != 0)
                 {
                     var hourRecentMatches = keys.Where(key =>
@@ -90,7 +101,7 @@
             return embed;
         }
 
-        public static async Task<DiscordEmbed> FancyWarnEmbedAsync(UserWarning warning, bool detailed = false, int colour = 0xFEC13D, bool showTime = true, ulong userID = default)
+        public static async Task<DiscordEmbed> FancyWarnEmbedAsync(UserWarning warning, bool detailed = false, int colour = 0xFEC13D, bool showTime = true, ulong userID = default, bool showPardoned = false)
         {
             if (userID == default)
                 userID = warning.TargetUserId;
@@ -121,6 +132,8 @@
             }
             if (showTime)
                 embed.AddField("Time", detailed ? $"<t:{TimeHelpers.ToUnixTimestamp(warning.WarnTimestamp)}:f>" : $"<t:{TimeHelpers.ToUnixTimestamp(warning.WarnTimestamp)}:R>", true);
+            if (showPardoned)
+                embed.AddField("Pardoned", warning.IsPardoned ? "Yes" : "No", true);
 
             return embed;
         }
@@ -223,7 +236,8 @@
                     MessageId = contextMessage.Id,
                     ChannelId = contextMessage.ChannelId
                 },
-                Type = WarningType.Warning
+                Type = WarningType.Warning,
+                IsPardoned = false
             };
 
             if (dmMessage is not null)

@@ -31,6 +31,9 @@
 
         [JsonProperty("stub")]
         public bool Stub { get; set; } = false;
+        
+        [JsonProperty("isPardoned")]
+        public bool IsPardoned { get; set; } = false;
     }
 
     public class MessageReference
