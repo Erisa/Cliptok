@@ -137,7 +137,7 @@
                     {
                         if (overwrite.Type == DiscordOverwriteType.Member && overwrite.Id == member.Id)
                         {
-                            await channelAfter.AddOverwriteAsync(member, overwrite.Allowed.Add(DiscordPermission.SendMessages), overwrite.Denied, "User joined voice channel.");
+                            await channelAfter.AddOverwriteAsync(member, overwrite.Allowed + DiscordPermission.SendMessages, overwrite.Denied, "User joined voice channel.");
                             userOverrideSet = true;
                             break;
                         }
@@ -203,7 +203,7 @@
                             // User has other overrides set, so we should only remove the Send Messages override
                             if (overwrite.Allowed.HasPermission(DiscordPermission.SendMessages))
                             {
-                                await channelBefore.AddOverwriteAsync(member, overwrite.Allowed.Remove(DiscordPermission.SendMessages), overwrite.Denied, "User left voice channel.");
+                                await channelBefore.AddOverwriteAsync(member, overwrite.Allowed - DiscordPermission.SendMessages, overwrite.Denied, "User left voice channel.");
                             }
                             else
                             {

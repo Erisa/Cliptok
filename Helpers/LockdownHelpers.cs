@@ -41,12 +41,12 @@
             // Construct failsafe permission sets
             // Grant Send Messages to Cliptok and Moderator in addition to any permissions they might already have,
             // and Send Messages in Threads if 'lockThreads' is set
-            var cliptokAllowedPermissions = cliptokAllowedPermissionsBeforeLockdown.Add(DiscordPermission.SendMessages);
+            var cliptokAllowedPermissions = cliptokAllowedPermissionsBeforeLockdown + DiscordPermission.SendMessages;
             if (lockThreads)
-                cliptokAllowedPermissions = cliptokAllowedPermissions.Add(DiscordPermission.SendThreadMessages);
-            var moderatorAllowedPermissions = moderatorAllowedPermissionsBeforeLockdown.Add(DiscordPermission.SendMessages);
+                cliptokAllowedPermissions = cliptokAllowedPermissions + DiscordPermission.SendThreadMessages;
+            var moderatorAllowedPermissions = moderatorAllowedPermissionsBeforeLockdown + DiscordPermission.SendMessages;
             if (lockThreads)
-                moderatorAllowedPermissions = moderatorAllowedPermissions.Add(DiscordPermission.SendThreadMessages);
+                moderatorAllowedPermissions = moderatorAllowedPermissions + DiscordPermission.SendThreadMessages;
 
             // Apply failsafes for lockdown
             await channel.AddOverwriteAsync(channel.Guild.CurrentMember, cliptokAllowedPermissions, cliptokDeniedPermissionsBeforeLockdown, "Failsafe 1 for Lockdown");
@@ -66,9 +66,9 @@
                 everyoneDeniedPermissionsBeforeLockdown = everyoneOverwritesBeforeLockdown.Denied;
 
             // Construct new @everyone permission set
-            var everyoneDeniedPermissions = everyoneDeniedPermissionsBeforeLockdown.Add(DiscordPermission.SendMessages);
+            var everyoneDeniedPermissions = everyoneDeniedPermissionsBeforeLockdown + DiscordPermission.SendMessages;
             if (lockThreads)
-                everyoneDeniedPermissions = everyoneDeniedPermissions.Add(DiscordPermission.SendThreadMessages);
+                everyoneDeniedPermissions = everyoneDeniedPermissions + DiscordPermission.SendThreadMessages;
 
             // Lock the channel
             await channel.AddOverwriteAsync(channel.Guild.EveryoneRole, everyoneAllowedPermissionsBeforeLockdown, everyoneDeniedPermissions, $"[Lockdown by {DiscordHelpers.UniqueUsername(user)}]: {reason}");
@@ -126,8 +126,8 @@
 
             // Construct new permission sets for Cliptok and Moderator
             // Resets Send Messages and Send Messages in Threads for Cliptok and Moderator, while preserving other permissions
-            var cliptokAllowedPermissions = cliptokAllowedPermissionsBeforeUnlock.Remove(DiscordPermission.SendMessages).Remove(DiscordPermission.SendThreadMessages);
-            var moderatorAllowedPermissions = moderatorAllowedPermissionsBeforeUnlock.Remove(DiscordPermission.SendMessages).Remove(DiscordPermission.SendThreadMessages);
+            var cliptokAllowedPermissions = cliptokAllowedPermissionsBeforeUnlock - DiscordPermission.SendMessages - DiscordPermission.SendThreadMessages;
+            var moderatorAllowedPermissions = moderatorAllowedPermissionsBeforeUnlock - DiscordPermission.SendMessages - DiscordPermission.SendThreadMessages;
 
             // Get the @everyone role's permission set from before the unlock
             var everyoneOverwritesBeforeUnlock = permissions.Where(x => x.Id == discordChannel.Guild.EveryoneRole.Id).FirstOrDefault();
@@ -144,7 +144,7 @@
 
             // Construct new permission set for @everyone
             // Resets Send Messages and Send Messages in Threads while preserving other permissions
-            var everyoneDeniedPermissions = everyoneDeniedPermissionsBeforeUnlock.Remove(DiscordPermission.SendMessages).Remove(DiscordPermission.SendThreadMessages);
+            var everyoneDeniedPermissions = everyoneDeniedPermissionsBeforeUnlock - DiscordPermission.SendMessages - DiscordPermission.SendThreadMessages;
 
             // Unlock the channel
             await discordChannel.AddOverwriteAsync(discordChannel.Guild.EveryoneRole, everyoneAllowedPermissionsBeforeUnlock, everyoneDeniedPermissions, $"[Unlock by {DiscordHelpers.UniqueUsername(discordMember)}]: {reason}");
