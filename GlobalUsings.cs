@@ -1,4 +1,5 @@
-﻿global using Cliptok.CommandChecks;
+﻿global using Cliptok.Attributes;
+global using Cliptok.CommandChecks;
 global using Cliptok.Enums;
 global using Cliptok.Events;
 global using Cliptok.Helpers;
