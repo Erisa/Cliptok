@@ -177,57 +177,6 @@ namespace Cliptok.Commands
             await ctx.RespondAsync(embed: await BanHelpers.BanStatusEmbed(targetUser, ctx.Guild), ephemeral: !isPublic);
         }
 
-        [Command("massbantextcmd")]
-        [TextAlias("massban", "bigbonk")]
-        [Description("Ban multiple users from the server at once.")]
-        [AllowedProcessors(typeof(TextCommandProcessor))]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task MassBanCmd(TextCommandContext ctx, [Description("The list of users to ban, separated by newlines or spaces, optionally followed by a reason."), RemainingText] string input)
-        {
-            List<string> inputString = input.Replace("\n", " ").Replace("\r", "").Split(' ').ToList();
-            List<ulong> users = new();
-            string reason = "";
-            foreach (var word in inputString)
-            {
-                if (ulong.TryParse(word, out var id))
-                    users.Add(id);
-                else
-                    reason += $"{word} ";
-            }
-            reason = reason.Trim();
-
-            if (users.Count == 1 || users.Count == 0)
-            {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Not accepting a massban with a single user. Please use `!ban`.");
-                return;
-            }
-
-            List<Task<bool>> taskList = new();
-            int successes = 0;
-
-            await ctx.RespondAsync("Processing, please wait.");
-            var loading = await ctx.GetResponseAsync();
-
-            foreach (ulong user in users)
-            {
-                if (string.IsNullOrWhiteSpace(reason))
-                    taskList.Add(BanSilently(ctx.Guild, user));
-                else
-                    taskList.Add(BanSilently(ctx.Guild, user, $"Mass ban: {reason}"));
-            }
-
-            var tasks = await Task.WhenAll(taskList);
-
-            foreach (var task in taskList)
-            {
-                if (task.Result)
-                    successes += 1;
-            }
-
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Banned} **{successes}**/{users.Count} users were banned successfully.");
-            await loading.DeleteAsync();
-        }
-
         [Command("bantextcmd")]
         [TextAlias("ban", "tempban", "bonk", "isekaitruck")]
         [Description("Bans a user that you have permission to ban, deleting all their messages in the process. See also: bankeep.")]

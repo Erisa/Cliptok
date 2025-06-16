@@ -35,7 +35,7 @@ namespace Cliptok.Commands
             {
                 if (DiscordHelpers.AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
                 {
-                    await KickAndLogAsync(member, reason, ctx.Member);
+                    await KickHelpers.KickAndLogAsync(member, reason, ctx.Member);
                     await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Ejected} {target.Mention} has been kicked: **{reason}**");
                     if (ctx is SlashCommandContext)
                         await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Done!", ephemeral: true);
@@ -51,96 +51,6 @@ namespace Cliptok.Commands
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} You aren't allowed to kick **{DiscordHelpers.UniqueUsername(target)}**!", ephemeral: true);
                 return;
-            }
-        }
-
-        [Command("masskicktextcmd")]
-        [TextAlias("masskick")]
-        [Description("Kick multiple users from the server at once.")]
-        [AllowedProcessors(typeof(TextCommandProcessor))]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task MassKickCmd(TextCommandContext ctx, [Description("The list of users to kick, separated by newlines or spaces, optionally followed by a reason."), RemainingText] string input)
-        {
-
-            List<string> inputString = input.Replace("\n", " ").Replace("\r", "").Split(' ').ToList();
-            List<ulong> users = new();
-            string reason = "";
-            foreach (var word in inputString)
-            {
-                if (ulong.TryParse(word, out var id))
-                    users.Add(id);
-                else
-                    reason += $"{word} ";
-            }
-            reason = reason.Trim();
-
-            if (users.Count == 1 || users.Count == 0)
-            {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Not accepting a masskick with a single user. Please use `!kick`.");
-                return;
-            }
-
-            List<Task<bool>> taskList = new();
-            int successes = 0;
-
-            await ctx.RespondAsync("Processing, please wait.");
-            var loading = await ctx.GetResponseAsync();
-
-            foreach (ulong user in users)
-            {
-                try
-                {
-                    var member = await ctx.Guild.GetMemberAsync(user);
-                    if (member is not null)
-                    {
-
-                        taskList.Add(SafeKickAndLogAsync(member, $"Mass kick{(string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}")}", ctx.Member));
-                    }
-                }
-                catch
-                {
-                    // not successful, move on
-                }
-            }
-
-            var tasks = await Task.WhenAll(taskList);
-
-            foreach (var task in taskList)
-            {
-                if (task.Result)
-                    successes += 1;
-            }
-
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Deleted} **{successes}**/{users.Count} users were kicked successfully.");
-            await loading.DeleteAsync();
-        }
-
-
-        public async static Task KickAndLogAsync(DiscordMember target, string reason, DiscordMember moderator)
-        {
-            await target.RemoveAsync(reason);
-            await LogChannelHelper.LogMessageAsync("mod",
-                new DiscordMessageBuilder()
-                    .WithContent($"{Program.cfgjson.Emoji.Ejected} {target.Mention} was kicked by {moderator.Mention}.\nReason: **{reason}**")
-                    .WithAllowedMentions(Mentions.None)
-           );
-        }
-
-        public async static Task<bool> SafeKickAndLogAsync(DiscordMember target, string reason, DiscordMember moderator)
-        {
-            try
-            {
-                await target.RemoveAsync(reason);
-                await LogChannelHelper.LogMessageAsync("mod",
-                    new DiscordMessageBuilder()
-                        .WithContent($"{Program.cfgjson.Emoji.Ejected} {target.Mention} was kicked by {moderator.Mention}.\nReason: **{reason}**")
-                        .WithAllowedMentions(Mentions.None)
-               );
-                return true;
-            }
-            catch
-            {
-                return false;
             }
         }
     }

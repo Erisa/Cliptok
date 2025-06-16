@@ -199,11 +199,23 @@
             return true;
         }
 
-        public static async Task<bool> BanSilently(DiscordGuild targetGuild, ulong targetUserId, string reason = "Mass ban")
+        public static async Task<bool> BanSilently(DiscordGuild targetGuild, ulong targetUserId, ulong moderatorId, string reason = "Mass ban")
         {
             try
             {
                 await targetGuild.BanMemberAsync(targetUserId, TimeSpan.FromDays(7), reason);
+                
+                MemberPunishment newBan = new()
+                {
+                    MemberId = targetUserId,
+                    ModId = moderatorId,
+                    ServerId = targetGuild.Id,
+                    ExpireTime = null,
+                    ActionTime = DateTime.Now,
+                    Reason = reason
+                };
+
+                await Program.db.HashSetAsync("bans", targetUserId, JsonConvert.SerializeObject(newBan));
 
                 // Remove user message tracking
                 if (await Program.db.SetContainsAsync("trackedUsers", targetUserId))

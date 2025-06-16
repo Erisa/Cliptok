@@ -318,6 +318,54 @@
 
             return output;
         }
+        
+        public static async Task<bool> MuteSilently(DiscordGuild targetGuild, ulong targetUserId, ulong moderatorId, string reason = "Mass mute")
+        {
+            try
+            {
+                // this should pull from cache most of the time!
+                var mutedRole = await targetGuild.GetRoleAsync(Program.cfgjson.MutedRole);
+                var member = await targetGuild.GetMemberAsync(targetUserId);
+                await member.GrantRoleAsync(mutedRole, reason);
+                
+                MemberPunishment newMute = new()
+                {
+                    MemberId = targetUserId,
+                    ModId = moderatorId,
+                    ServerId = targetGuild.Id,
+                    ExpireTime = null,
+                    ActionTime = DateTime.Now,
+                    Reason = reason
+                };
+
+                await Program.db.HashSetAsync("mutes", targetUserId, JsonConvert.SerializeObject(newMute));
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        
+        public static async Task<bool> UnmuteSilently(DiscordGuild targetGuild, ulong targetUserId, string reason = "Mass unmute")
+        {
+            try
+            {
+                // this should pull from cache most of the time!
+                var mutedRole = await targetGuild.GetRoleAsync(Program.cfgjson.MutedRole);
+                var member = await targetGuild.GetMemberAsync(targetUserId);
+                await member.RevokeRoleAsync(mutedRole, reason);
+                
+                await Program.db.HashDeleteAsync("mutes", targetUserId);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         public static async Task<bool> UnmuteUserAsync(DiscordUser targetUser, string reason = "", bool manual = true, DiscordUser modUser = default, bool isTqsUnmute = false)
         {
