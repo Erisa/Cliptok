@@ -72,6 +72,18 @@ namespace Cliptok.Events
             {
                 client.Logger.LogDebug("Got a message delete event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
             }
+            
+            foreach (var warning in await Program.db.HashGetAllAsync("automaticWarnings"))
+            {
+                if (JsonConvert.DeserializeObject<UserWarning>(warning.Value).ContextMessageReference.MessageId == e.Message.Id)
+                    await Program.db.HashDeleteAsync("automaticWarnings", warning.Name);
+            }
+            
+            foreach (var ban in await Program.db.HashGetAllAsync("compromisedAccountBans"))
+            {
+                if (JsonConvert.DeserializeObject<MemberPunishment>(ban.Value).ContextMessageReference.MessageId == e.Message.Id)
+                    await Program.db.HashDeleteAsync("compromisedAccountBans", ban.Name);
+            }
 
             var cachedMessage = await Program.dbContext.Messages.Include(m => m.User).FirstOrDefaultAsync(m => m.Id == e.Message.Id);
 
@@ -82,6 +94,26 @@ namespace Cliptok.Events
             }
 
             await DiscordHelpers.DoEmptyThreadCleanupAsync(e.Channel, e.Message);
+        }
+        
+        public static async Task MessagesBulkDeleted(DiscordClient client, MessagesBulkDeletedEventArgs e)
+        {
+            client.Logger.LogDebug("Got a bulk message delete event for {messagesCount} messages", e.Messages.Count);
+            
+            foreach (var message in e.Messages)
+            {
+                foreach (var warning in await Program.db.HashGetAllAsync("automaticWarnings"))
+                {
+                    if (JsonConvert.DeserializeObject<UserWarning>(warning.Value).ContextMessageReference.MessageId == message.Id)
+                        await Program.db.HashDeleteAsync("automaticWarnings", warning.Name);
+                }
+            
+                foreach (var ban in await Program.db.HashGetAllAsync("compromisedAccountBans"))
+                {
+                    if (JsonConvert.DeserializeObject<MemberPunishment>(ban.Value).ContextMessageReference.MessageId == message.Id)
+                        await Program.db.HashDeleteAsync("compromisedAccountBans", ban.Name);
+                }
+            }
         }
 
         static async Task DeleteAndWarnAsync(DiscordMessage message, string reason, DiscordClient client, string messageContentOverride = default)
@@ -991,7 +1023,7 @@ namespace Cliptok.Events
                             DiscordMessage msg;
                             if (!wasAutoModBlock)
                             {
-                                messageBuilder.AddComponents(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
+                                messageBuilder.AddActionRowComponent(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
                                 msg = await channel.SendMessageAsync(messageBuilder);
                                 await Program.redis.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
                             }
@@ -1011,7 +1043,7 @@ namespace Cliptok.Events
                             DiscordMessage msg;
                             if (!wasAutoModBlock)
                             {
-                                messageBuilder.AddComponents(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
+                                messageBuilder.AddActionRowComponent(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
                                 msg = await channel.SendMessageAsync(messageBuilder);
                                 await Program.redis.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
                             }

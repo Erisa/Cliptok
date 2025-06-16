@@ -4,6 +4,7 @@ using DSharpPlus.Net.Gateway;
 using Serilog.Sinks.Grafana.Loki;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Serilog.Events;
 
 namespace Cliptok
 {
@@ -95,7 +96,8 @@ namespace Cliptok
                     lc.Filter.ByExcluding("EventId.Id = 1001")
                 .WriteTo.DiscordSink(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information, outputTemplate: logFormat)
                 )
-                .WriteTo.Console(outputTemplate: logFormat, theme: AnsiConsoleTheme.Literate);
+                .WriteTo.Console(outputTemplate: logFormat, theme: AnsiConsoleTheme.Literate)
+                .MinimumLevel.Override("System.Net.Http", LogEventLevel.Error);
 
             string token;
             var json = "";
@@ -233,6 +235,7 @@ namespace Cliptok
                                   .HandleMessageCreated(MessageEvent.MessageCreated)
                                   .HandleMessageUpdated(MessageEvent.MessageUpdated)
                                   .HandleMessageDeleted(MessageEvent.MessageDeleted)
+                                  .HandleMessagesBulkDeleted(MessageEvent.MessagesBulkDeleted)
                                   .HandleGuildMemberAdded(MemberEvents.GuildMemberAdded)
                                   .HandleGuildMemberRemoved(MemberEvents.GuildMemberRemoved)
                                   .HandleMessageReactionAdded(ReactionEvent.OnReaction)

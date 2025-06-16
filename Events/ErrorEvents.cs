@@ -1,4 +1,5 @@
-﻿using static Cliptok.Program;
+﻿using DSharpPlus.Commands.Converters.Results;
+using static Cliptok.Program;
 
 namespace Cliptok.Events
 {
@@ -32,6 +33,12 @@ namespace Cliptok.Events
 
             if (e.Exception is CommandNotFoundException && (e.Context.Command is null || commandName != "help"))
                 return;
+            
+            if (e.Exception is ArgumentParseException && e.Context.Arguments.All(x => x.Value is null or ArgumentNotParsedResult or Optional<ArgumentNotParsedResult>))
+            {
+                await Commands.GlobalCmds.Help(e.Context, e.Context.Command.Name);
+                return;
+            }
 
             // avoid conflicts with modmail
             if (commandName == "edit" || commandName.Contains("timestamp"))

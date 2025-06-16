@@ -1,4 +1,5 @@
 ﻿using Cliptok.Constants;
+using DSharpPlus.Exceptions;
 
 namespace Cliptok.Commands
 {
@@ -143,11 +144,34 @@ namespace Cliptok.Commands
                 return;
             }
             tags.Add(solvedTagId);
-            await channel.ModifyAsync(t => t.AppliedTags = tags);
+            
+            try
+            {
+                await channel.ModifyAsync(t => t.AppliedTags = tags);
+            }
+            catch (BadRequestException bre)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't add the Solved tag to this post! If it has 5 tags, please remove one and try again. Otherwise, please contact the bot maintainers.");
+                Program.discord.Logger.LogError(bre, "A BadRequestException occurred while attempting to mark this post as solved: {threadLink}:", $"https://discord.com/channels/{ctx.Guild.Id}/{ctx.Channel.Id}");
+                return;
+            }
+            catch (Exception ex)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't add the Solved tag to this post! Please report this to the bot maintainers.");
+                Program.discord.Logger.LogError(ex, "An error occurred while attempting to mark this post as solved: {threadLink}:", $"https://discord.com/channels/{ctx.Guild.Id}/{ctx.Channel.Id}");
+            }
             
             await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Success} This post is solved and has been closed!\n**Unless you are the original poster, please do not reopen this post.** If you have a similar issue, please create your own post.");
             
-            await channel.ModifyAsync(t => t.IsArchived = true);
+            try
+            {
+                await channel.ModifyAsync(t => t.IsArchived = true);
+            }
+            catch (Exception ex)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't close this post! Please report this to the bot maintainers.");
+                Program.discord.Logger.LogError(ex, "An error occurred while attempting to close this post: {threadLink}:", $"https://discord.com/channels/{ctx.Guild.Id}/{ctx.Channel.Id}");
+            }
             
             // Try to DM the OP a link to their post so they can find it again
             try
