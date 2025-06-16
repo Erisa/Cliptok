@@ -357,6 +357,9 @@
         
         [JsonProperty("warningLogReactionTimeMinutes")]
         public int WarningLogReactionTimeMinutes { get; private set; }
+        
+        [JsonProperty("compromisedAccountBanAutoPardonHours")]
+        public int CompromisedAccountBanAutoPardonHours { get; private set; }
     }
 
     public enum Level { Information, Warning, Error, Debug, Verbose }
