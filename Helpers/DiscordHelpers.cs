@@ -33,6 +33,11 @@
             return $"https://discord.com/channels/{(msg.Channel.IsPrivate ? "@me" : msg.Channel.Guild.Id)}/{msg.Channel.Id}/{msg.Id}";
         }
 
+        public static string MessageLink(Models.CachedDiscordMessage msg)
+        {
+            return $"https://discord.com/channels/{Program.homeGuild.Id}/{msg.ChannelId}/{msg.Id}";
+        }
+
         // If invoker is allowed to mod target.
         public static bool AllowedToMod(DiscordMember invoker, DiscordMember target)
         {
@@ -242,6 +247,52 @@
 
             return new DiscordMessageBuilder().AddEmbeds(embeds.AsEnumerable());
         }
+
+        public static async Task<DiscordMessageBuilder> GenerateMessageRelay(Models.CachedDiscordMessage message, string type, bool channelRef = true, bool showChannelId = true)
+        {
+            var channel = await Program.homeGuild.GetChannelAsync(message.ChannelId);
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                .WithAuthor($"Message by {message.User.DisplayName}{(channelRef ? $" was {type} in #{channel.Name}" : "")}", null, message.User.AvatarUrl)
+                .WithDescription(message.Content)
+                .WithFooter($"{(showChannelId ? $"Channel ID: {message.ChannelId} | " : "")}User ID: {message.User.Id}");
+
+
+            if (message.AttachmentURLs.Count > 0)
+                embed.WithImageUrl(message.AttachmentURLs[0])
+                    .AddField($"Attachment", message.AttachmentURLs[0]);
+
+            if (type == "edited")
+                embed.AddField("Message Link", $"{MessageLink(message)}");
+
+
+            if (type == "edited")
+            {
+                embed.Color = DiscordColor.Yellow;
+            }
+            else if (type == "deleted")
+            {
+                embed.Color = DiscordColor.Red;
+            }
+
+            List<DiscordEmbed> embeds =
+            [
+                embed
+            ];
+
+            if (message.AttachmentURLs.Count > 1)
+            {
+                foreach (var attachment in message.AttachmentURLs.Skip(1))
+                {
+                    embeds.Add(new DiscordEmbedBuilder()
+                        .WithAuthor($"{message.User.DisplayName}", null, message.User.AvatarUrl)
+                        .AddField("Additional attachment", attachment)
+                        .WithImageUrl(attachment));
+                }
+            }
+
+            return new DiscordMessageBuilder().AddEmbeds(embeds.AsEnumerable());
+        }
+
 
         public static async Task<bool> DoEmptyThreadCleanupAsync(DiscordChannel channel, DiscordMessage message, int minMessages = 0)
         {

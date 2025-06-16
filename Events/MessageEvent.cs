@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using static Cliptok.Constants.RegexConstants;
 
 namespace Cliptok.Events
@@ -70,6 +71,12 @@ namespace Cliptok.Events
                 client.Logger.LogDebug("Got a message delete event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
             }
 
+            var cachedMessage = await Program.dbContext.Messages.Include(m => m.User).FirstOrDefaultAsync(m => m.Id == e.Message.Id);
+            if (cachedMessage is not null)
+            {
+                await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(cachedMessage, "deleted", true, true));
+            }
+
             await DiscordHelpers.DoEmptyThreadCleanupAsync(e.Channel, e.Message);
         }
 
@@ -112,17 +119,62 @@ namespace Cliptok.Events
             await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
         }
 
+        public static async Task CacheAndAddMessage(MockDiscordMessage message)
+        {
+            var cachedMessage = new Models.CachedDiscordMessage
+            {
+                Id = message.Id,
+                ChannelId = message.Channel.Id,
+                Content = message.Content,
+                Timestamp = message.Timestamp.HasValue ? message.Timestamp.Value.UtcDateTime : DateTime.UtcNow,
+                AttachmentURLs = message.Attachments?.Select(a => a.Url).ToList(),
+            };
+
+            var existingUser = await(Program.dbContext.Users.FirstOrDefaultAsync(u => u.Id == message.Author.Id));
+
+            if (existingUser is null)
+            {
+                cachedMessage.User = new Models.CachedDiscordUser
+                {
+                    Id = message.Author.Id,
+                    Username = message.Author.Username,
+                    DisplayName = message.Author.GlobalName ?? message.Author.Username,
+                    AvatarUrl = message.Author.AvatarUrl ?? message.Author.DefaultAvatarUrl,
+                    IsBot = message.Author.IsBot
+                };
+            }
+            else
+            {
+                cachedMessage.User = existingUser;
+            }
+
+            await Program.dbContext.AddAsync(cachedMessage);
+            await Program.dbContext.SaveChangesAsync();
+        }
+
         public static async Task MessageHandlerAsync(DiscordClient client, DiscordMessage message, DiscordChannel channel, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
             await MessageHandlerAsync(client, new MockDiscordMessage(message), channel, isAnEdit, limitFilters, wasAutoModBlock);
         }
         public static async Task MessageHandlerAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
-            #region combine all message text
-            // Get forwarded msg & embeds, if any, and combine with content to evaluate
-            // Combined as a single long string
+            #region message logging fill to db
 
-            string msgContentWithEmbedData = message.Content;
+            if (isAnEdit) {
+                // not implemented yet
+            } else
+            {
+                // cache in the background to not impede execution of the message handler
+                _ = CacheAndAddMessage(message);
+            }
+
+                #endregion
+
+                #region combine all message text
+                // Get forwarded msg & embeds, if any, and combine with content to evaluate
+                // Combined as a single long string
+
+                string msgContentWithEmbedData = message.Content;
             var embeds = new List<DiscordEmbed>();
 
             if (message.MessageSnapshots is not null)

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Cliptok.Migrations
 {
     [DbContext(typeof(CliptokDbContext))]
-    [Migration("20250602002354_init")]
+    [Migration("20250616220856_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -22,7 +22,7 @@ namespace Cliptok.Migrations
 
             modelBuilder.Entity("Cliptok.Types.Models+CachedDiscordMessage", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<ulong>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 

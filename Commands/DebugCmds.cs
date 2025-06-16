@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace Cliptok.Commands
 {
     public class DebugCmds
@@ -11,6 +13,15 @@ namespace Cliptok.Commands
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         class DebugCmd
         {
+            [Command("logprint")]
+            public async Task LogPrint(TextCommandContext ctx)
+            {
+                var records = (await Program.dbContext.Messages.Include(m => m.User).ToListAsync());
+                var json = JsonConvert.SerializeObject(records, Formatting.Indented);
+                await ctx.RespondAsync(new DiscordMessageBuilder()
+                    .WithContent($"Recent message logs:\n{await StringHelpers.CodeOrHasteBinAsync(json, "json", plain: true)}"));
+            }
+
             [Command("mutestatus")]
             public async Task MuteStatus(TextCommandContext ctx, DiscordUser targetUser = default)
             {

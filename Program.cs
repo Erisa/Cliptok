@@ -65,6 +65,8 @@ namespace Cliptok
 
         public static DiscordChannel ForumChannelAutoWarnFallbackChannel;
 
+        public static CliptokDbContext dbContext;
+
         public static void UpdateLists()
         {
             foreach (var list in cfgjson.WordListList)
@@ -172,8 +174,8 @@ namespace Cliptok
             redis.KeyDelete("messages");
 
             // create db context that we can use
-            var dbContext = new CliptokDbContext();
-            dbContext.Database.EnsureCreated();
+            dbContext = new CliptokDbContext();
+            dbContext.Database.Migrate();
 
             DiscordClientBuilder discordBuilder = DiscordClientBuilder.CreateDefault(token, DiscordIntents.All);
 

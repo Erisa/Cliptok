@@ -20,13 +20,20 @@ namespace Cliptok
         {
             if (!optionsBuilder.IsConfigured)
             {
+#if DEBUG
+                optionsBuilder.EnableSensitiveDataLogging(true);
+                optionsBuilder.EnableDetailedErrors(true);
+#endif
+
                 bool usePostgres = Environment.GetEnvironmentVariable("CLIPTOK_POSTGRES") is not null;
                 if (usePostgres)
                     optionsBuilder.UseNpgsql(Environment.GetEnvironmentVariable("CLIPTOK_POSTGRES"));
                 else
                 {
-                    Console.WriteLine("WARNING: Falling back to Sqlite DB for efcore. You probably don't want this, make sure db/ is persisted or configure Postgres");
-                    optionsBuilder.UseSqlite("Data Source=db/Cliptok.db;Cache=Shared;Pooling=true;");
+                    Console.WriteLine("WARNING: Falling back to Sqlite DB for efcore. You probably don't want this, make sure $HOME/.cliptok/ is persisted or configure Postgres");
+                    Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/.cliptok");
+                    string path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/.cliptok/Cliptok.db";
+                    optionsBuilder.UseSqlite($"Data Source={path};Cache=Shared;Pooling=true;");
                 }
             }
         }

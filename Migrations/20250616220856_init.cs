@@ -31,7 +31,7 @@ namespace Cliptok.Migrations
                 name: "Messages",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    Id = table.Column<ulong>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     ChannelId = table.Column<ulong>(type: "INTEGER", nullable: false),
                     Content = table.Column<string>(type: "TEXT", nullable: true),

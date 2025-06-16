@@ -1,15 +1,17 @@
-﻿namespace Cliptok.Types
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Cliptok.Types
 {
     public class Models
     {
         public class CachedDiscordMessage
         {
-            public int Id { get; set; }
+            public ulong Id { get; set; }
             public ulong ChannelId { get; set; }
             public string Content { get; set; }
             public DateTime Timestamp { get; set; }
 
-            public List<string> AttachmentURLs { get; set; }
+            public List<string>? AttachmentURLs { get; set; }
 
             public CachedDiscordUser User { get; set; }
         }

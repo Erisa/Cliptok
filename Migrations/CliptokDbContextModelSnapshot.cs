@@ -19,7 +19,7 @@ namespace Cliptok.Migrations
 
             modelBuilder.Entity("Cliptok.Types.Models+CachedDiscordMessage", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<ulong>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 

@@ -17,6 +17,10 @@ services:
       - type: bind
         source: ./ssh_key
         target: /root/.ssh/id_ed25519
+      # Only used when using the sqlite fallback for efcore
+      - type: bind
+        source: ./data
+        target: /root/.cliptok
       # Uncomment the below lines to use your own config file.
       #- type: bind
       #  source: ./config.dev.json
@@ -27,9 +31,8 @@ services:
       - REDIS_DOCKER_OVERRIDE=true
     # uncomment this for bespoke setups
     network_mode: service:tailscale
-    command: 'sh -c "dotnet ef database update && dotnet Cliptok.dll"''
   redis:
-    image: 'mirror.gcr.io/redis:7.2-alpine'
+    image: mirror.gcr.io/redis:7.2-alpine
     restart: always
     volumes:
       - type: bind
