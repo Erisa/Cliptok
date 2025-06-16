@@ -85,7 +85,7 @@
                     var hourRecentMatches = keys.Where(key =>
                     {
                         TimeSpan span = DateTime.Now - warningsOutput[key].WarnTimestamp;
-                        return (span.TotalHours < Program.cfgjson.RecentWarningsPeriodHours);
+                        return (span.TotalHours < Program.cfgjson.RecentWarningsPeriodHours && !warningsOutput[key].IsPardoned);
                     }
                     );
 
