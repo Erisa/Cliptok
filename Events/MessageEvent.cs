@@ -52,6 +52,8 @@ namespace Cliptok.Events
                 client.Logger.LogDebug("Got a message update event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
             }
 
+            var cachedMessage = await Program.dbContext.Messages.Include(m => m.User).FirstOrDefaultAsync(m => m.Id == e.Message.Id);
+
             await MessageHandlerAsync(client, e.Message, e.Channel, true);
         }
 
@@ -72,7 +74,9 @@ namespace Cliptok.Events
             }
 
             var cachedMessage = await Program.dbContext.Messages.Include(m => m.User).FirstOrDefaultAsync(m => m.Id == e.Message.Id);
-            if (cachedMessage is not null)
+
+            // we store bot messages but don't log them right now
+            if (cachedMessage is not null && !cachedMessage.User.IsBot)
             {
                 await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(cachedMessage, "deleted", true, true));
             }
@@ -119,7 +123,14 @@ namespace Cliptok.Events
             await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
         }
 
-        public static async Task CacheAndAddMessage(MockDiscordMessage message)
+        public static async Task<Models.CachedDiscordMessage> CacheAndAddMessageAsync(MockDiscordMessage message)
+        {
+            var cachedMessage = await CacheMessageAsync(message);
+            await AddMessageToCacheAsync(cachedMessage);
+            return cachedMessage;
+        }
+
+        public static async Task<Models.CachedDiscordMessage> CacheMessageAsync(MockDiscordMessage message)
         {
             var cachedMessage = new Models.CachedDiscordMessage
             {
@@ -130,7 +141,7 @@ namespace Cliptok.Events
                 AttachmentURLs = message.Attachments?.Select(a => a.Url).ToList(),
             };
 
-            var existingUser = await(Program.dbContext.Users.FirstOrDefaultAsync(u => u.Id == message.Author.Id));
+            var existingUser = await (Program.dbContext.Users.FirstOrDefaultAsync(u => u.Id == message.Author.Id));
 
             if (existingUser is null)
             {
@@ -148,6 +159,17 @@ namespace Cliptok.Events
                 cachedMessage.User = existingUser;
             }
 
+            return cachedMessage;
+        }
+
+        public static async Task UpdateMessageAsync(Models.CachedDiscordMessage cachedMessage)
+        {
+            Program.dbContext.Messages.Update(cachedMessage);
+            await Program.dbContext.SaveChangesAsync();
+        }
+
+        public static async Task AddMessageToCacheAsync(Models.CachedDiscordMessage cachedMessage)
+        {
             await Program.dbContext.AddAsync(cachedMessage);
             await Program.dbContext.SaveChangesAsync();
         }
@@ -161,20 +183,34 @@ namespace Cliptok.Events
             #region message logging fill to db
 
             if (isAnEdit) {
-                // not implemented yet
-            } else
+                var cachedMessage = Program.dbContext.Messages.Include(m => m.User).FirstOrDefault(m => m.Id == message.Id);
+                if (cachedMessage is not null)
+                {
+                    var newMessage = await CacheMessageAsync(message);
+                    // we store bot messages but don't log them right now
+                    if (cachedMessage is not null && !cachedMessage.User.IsBot)
+                    {
+                        await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(newMessage, "edited", true, true, cachedMessage));
+                    }
+
+                    cachedMessage.Content = newMessage.Content;
+                    cachedMessage.AttachmentURLs = newMessage.AttachmentURLs;
+                    await UpdateMessageAsync(cachedMessage);
+                }
+            }
+            else
             {
                 // cache in the background to not impede execution of the message handler
-                _ = CacheAndAddMessage(message);
+                _ = CacheAndAddMessageAsync(message);
             }
 
-                #endregion
+            #endregion
 
-                #region combine all message text
-                // Get forwarded msg & embeds, if any, and combine with content to evaluate
-                // Combined as a single long string
+            #region combine all message text
+            // Get forwarded msg & embeds, if any, and combine with content to evaluate
+            // Combined as a single long string
 
-                string msgContentWithEmbedData = message.Content;
+            string msgContentWithEmbedData = message.Content;
             var embeds = new List<DiscordEmbed>();
 
             if (message.MessageSnapshots is not null)

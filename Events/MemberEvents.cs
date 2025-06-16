@@ -251,6 +251,8 @@ namespace Cliptok.Events
         {
             client.Logger.LogDebug("Got a user updated event for {member}", e.UserAfter.Id);
 
+            // 
+
             // dont check bots
             if (e.UserAfter.IsBot)
                 return;
@@ -277,7 +279,7 @@ namespace Cliptok.Events
             }
 
             DehoistHelpers.CheckAndDehoistMemberAsync(member);
-            ScamHelpers.UsernameCheckAsync(member); ;
+            ScamHelpers.UsernameCheckAsync(member);
         }
 
     }

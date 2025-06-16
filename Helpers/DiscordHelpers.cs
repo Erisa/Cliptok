@@ -248,36 +248,43 @@
             return new DiscordMessageBuilder().AddEmbeds(embeds.AsEnumerable());
         }
 
-        public static async Task<DiscordMessageBuilder> GenerateMessageRelay(Models.CachedDiscordMessage message, string type, bool channelRef = true, bool showChannelId = true)
+        public static async Task<DiscordMessageBuilder> GenerateMessageRelay(Models.CachedDiscordMessage message, string type, bool channelRef = true, bool showChannelId = true, Models.CachedDiscordMessage oldMessage = null)
         {
             var channel = await Program.homeGuild.GetChannelAsync(message.ChannelId);
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithAuthor($"Message by {message.User.DisplayName}{(channelRef ? $" was {type} in #{channel.Name}" : "")}", null, message.User.AvatarUrl)
-                .WithDescription(message.Content)
                 .WithFooter($"{(showChannelId ? $"Channel ID: {message.ChannelId} | " : "")}User ID: {message.User.Id}");
-
 
             if (message.AttachmentURLs.Count > 0)
                 embed.WithImageUrl(message.AttachmentURLs[0])
                     .AddField($"Attachment", message.AttachmentURLs[0]);
 
             if (type == "edited")
-                embed.AddField("Message Link", $"{MessageLink(message)}");
-
-
-            if (type == "edited")
             {
+                embed.AddField("Message Link", $"{MessageLink(message)}");
+                if (oldMessage is not null)
+                {
+                    embed.AddField("Old content", await StringHelpers.CodeOrHasteBinAsync(oldMessage.Content, plain: true, noCode: true));
+                }
+                embed.AddField("New content", await StringHelpers.CodeOrHasteBinAsync(message.Content, plain: true, noCode: true));
                 embed.Color = DiscordColor.Yellow;
+
             }
             else if (type == "deleted")
             {
                 embed.Color = DiscordColor.Red;
+                embed.WithDescription(message.Content);
+            }
+            else
+            {
+                embed.WithDescription(message.Content);
             }
 
-            List<DiscordEmbed> embeds =
-            [
+
+            List<DiscordEmbed> embeds = new()
+            {
                 embed
-            ];
+            };
 
             if (message.AttachmentURLs.Count > 1)
             {
