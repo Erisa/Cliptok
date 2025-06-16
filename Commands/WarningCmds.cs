@@ -494,12 +494,12 @@ namespace Cliptok.Commands
 
                 await LogChannelHelper.LogMessageAsync("mod",
                     new DiscordMessageBuilder()
-                        .WithContent($"{Program.cfgjson.Emoji.Information} Warning pardoned:" +
+                        .WithContent($"{Program.cfgjson.Emoji.Information} Warning unpardoned:" +
                         $"`{StringHelpers.Pad(warnId)}` (belonging to {user.Mention})")
                         .AddEmbed(await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), true, userID: user.Id))
                 );
 
-                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Successfully pardoned warning `{StringHelpers.Pad(warnId)}` (belonging to {user.Mention})")
+                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Successfully unpardoned warning `{StringHelpers.Pad(warnId)}` (belonging to {user.Mention})")
                     .AddEmbed(await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), userID: user.Id, showPardoned: true)));
             }
         }
