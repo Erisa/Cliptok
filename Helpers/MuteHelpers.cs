@@ -81,7 +81,7 @@
             {
                 UserWarning entryWarning = entry.Value;
                 TimeSpan span = DateTime.Now - entryWarning.WarnTimestamp;
-                if (span <= timeToCheck)
+                if (span <= timeToCheck && !entryWarning.IsPardoned)
                     warnsSinceThreshold += 1;
             }
 

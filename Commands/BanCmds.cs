@@ -469,6 +469,25 @@ namespace Cliptok.Commands
                 ban.ExpireTime = ban.ActionTime + banDuration;
             ban.Reason = reason;
             
+            // If ban is for a compromised account, add to list so the context message can be more-easily deleted later
+            // and pardon any automatic warnings issued within the last 12 hours
+            if (ban.Reason.ToLower().Contains("compromised"))
+            {
+                Program.db.HashSet("compromisedAccountBans", targetUser.Id, JsonConvert.SerializeObject(ban));
+                
+                var warnings = (await Program.db.HashGetAllAsync(targetUser.Id.ToString())).Select(x => JsonConvert.DeserializeObject<UserWarning>(x.Value)).ToList();
+                foreach (var warning in warnings)
+                {
+                    if (warning.Type == WarningType.Warning
+                        && (warning.ModUserId == Program.discord.CurrentUser.Id || (await Program.discord.GetUserAsync(warning.ModUserId)).IsBot)
+                        && (DateTime.Now - warning.WarnTimestamp).TotalHours < Program.cfgjson.CompromisedAccountBanAutoPardonHours)
+                    {
+                        warning.IsPardoned = true;
+                        await Program.db.HashSetAsync(warning.TargetUserId.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
+                    }
+                }
+            }
+            
             var guild = await Program.discord.GetGuildAsync(ban.ServerId);
             
             var contextMessage = await DiscordHelpers.GetMessageFromReferenceAsync(ban.ContextMessageReference);

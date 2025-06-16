@@ -367,5 +367,6 @@
   "duplicateMessageThreshold": 4,
   "duplicateMessageSeconds": 60,
   "insiderThreadKeepLastPins": 3,
-  "warningLogReactionTimeMinutes": 5
+  "warningLogReactionTimeMinutes": 5,
+  "compromisedAccountBanAutoPardonHours": 12
 }
