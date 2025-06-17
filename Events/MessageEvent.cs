@@ -73,16 +73,16 @@ namespace Cliptok.Events
                 client.Logger.LogDebug("Got a message delete event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
             }
             
-            foreach (var warning in await Program.db.HashGetAllAsync("automaticWarnings"))
+            foreach (var warning in await Program.redis.HashGetAllAsync("automaticWarnings"))
             {
                 if (JsonConvert.DeserializeObject<UserWarning>(warning.Value).ContextMessageReference.MessageId == e.Message.Id)
-                    await Program.db.HashDeleteAsync("automaticWarnings", warning.Name);
+                    await Program.redis.HashDeleteAsync("automaticWarnings", warning.Name);
             }
             
-            foreach (var ban in await Program.db.HashGetAllAsync("compromisedAccountBans"))
+            foreach (var ban in await Program.redis.HashGetAllAsync("compromisedAccountBans"))
             {
                 if (JsonConvert.DeserializeObject<MemberPunishment>(ban.Value).ContextMessageReference.MessageId == e.Message.Id)
-                    await Program.db.HashDeleteAsync("compromisedAccountBans", ban.Name);
+                    await Program.redis.HashDeleteAsync("compromisedAccountBans", ban.Name);
             }
 
             var cachedMessage = await Program.dbContext.Messages.Include(m => m.User).FirstOrDefaultAsync(m => m.Id == e.Message.Id);
@@ -102,16 +102,16 @@ namespace Cliptok.Events
             
             foreach (var message in e.Messages)
             {
-                foreach (var warning in await Program.db.HashGetAllAsync("automaticWarnings"))
+                foreach (var warning in await Program.redis.HashGetAllAsync("automaticWarnings"))
                 {
                     if (JsonConvert.DeserializeObject<UserWarning>(warning.Value).ContextMessageReference.MessageId == message.Id)
-                        await Program.db.HashDeleteAsync("automaticWarnings", warning.Name);
+                        await Program.redis.HashDeleteAsync("automaticWarnings", warning.Name);
                 }
             
-                foreach (var ban in await Program.db.HashGetAllAsync("compromisedAccountBans"))
+                foreach (var ban in await Program.redis.HashGetAllAsync("compromisedAccountBans"))
                 {
                     if (JsonConvert.DeserializeObject<MemberPunishment>(ban.Value).ContextMessageReference.MessageId == message.Id)
-                        await Program.db.HashDeleteAsync("compromisedAccountBans", ban.Name);
+                        await Program.redis.HashDeleteAsync("compromisedAccountBans", ban.Name);
                 }
             }
         }
