@@ -98,8 +98,6 @@ namespace Cliptok.Events
         
         public static async Task MessagesBulkDeleted(DiscordClient client, MessagesBulkDeletedEventArgs e)
         {
-            client.Logger.LogDebug("Got a bulk message delete event for {messagesCount} messages", e.Messages.Count);
-            
             foreach (var message in e.Messages)
             {
                 foreach (var warning in await Program.redis.HashGetAllAsync("automaticWarnings"))
@@ -114,6 +112,26 @@ namespace Cliptok.Events
                         await Program.redis.HashDeleteAsync("compromisedAccountBans", ban.Name);
                 }
             }
+
+            // log the bulk deleted messages
+            client.Logger.LogDebug("Got a bulk message delete event for {messagesCount} messages", e.Messages.Count);
+
+            var messageIds = e.Messages.Select(m => m.Id).ToList();
+
+            var cachedMessages = Program.dbContext.Messages.Include(m => m.User).Where(m => messageIds.Contains(m.Id));
+
+            var messageLog = await DiscordHelpers.CompileMessagesAsync(cachedMessages.ToList(), e.Channel);
+
+            var stream = new MemoryStream(Encoding.UTF8.GetBytes(messageLog));
+            var msg = new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Deleted} {e.Messages.Count} messages were deleted from {e.Channel.Mention}, {cachedMessages.ToList().Count} were logged:").AddFile("messages.txt", stream);
+
+            var hasteResult = await Program.hasteUploader.Post(messageLog);
+
+            if (hasteResult.IsSuccess)
+            {
+                msg.AddEmbed(new DiscordEmbedBuilder().WithDescription($"[`📄 View online`]({Program.cfgjson.HastebinEndpoint}/raw/{hasteResult.Key})"));
+            }
+            await LogChannelHelper.LogMessageAsync("messages", msg);
         }
 
         static async Task DeleteAndWarnAsync(DiscordMessage message, string reason, DiscordClient client, string messageContentOverride = default)

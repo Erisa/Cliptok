@@ -114,6 +114,33 @@
             return output.ToString();
         }
 
+        public static async Task<string> CompileMessagesAsync(List<Models.CachedDiscordMessage> messages, DiscordChannel channel)
+        {
+            var output = new StringBuilder().Append($"-- Messages in #{channel.Name} ({channel.Id}) -- {channel.Guild.Name} ({channel.Guild.Id}) --\n");
+
+            foreach (Models.CachedDiscordMessage message in messages)
+            {
+                output.AppendLine();
+                output.AppendLine($"{message.User.DisplayName} [{message.Timestamp.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss zzz")}] (User: {message.User.Id}) (Message: {message.Id})");
+
+                if (message.Content is not null && message.Content != "")
+                {
+                    output.AppendLine($"{message.Content}");
+                }
+
+                if (message.AttachmentURLs.Count != 0)
+                {
+                    foreach (string attachment in message.AttachmentURLs)
+                    {
+                        output.AppendLine($"{attachment}");
+                    }
+                }
+            }
+
+            return output.ToString();
+        }
+
+
         public static async Task<DiscordEmbed> GenerateUserEmbed(DiscordUser user, DiscordGuild? guild)
         {
             DiscordMember member = default;
