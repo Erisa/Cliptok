@@ -94,8 +94,24 @@
             MostRecentBan = newBan;
 
             // If ban is for a compromised account, add to list so the context message can be more-easily deleted later
+            // and pardon any automatic warnings issued within the last 12 hours
             if (compromisedAccount)
+            {
                 Program.db.HashSet("compromisedAccountBans", targetUserId, JsonConvert.SerializeObject(newBan));
+                
+                var warnings = (await Program.db.HashGetAllAsync(targetUserId.ToString())).Select(x => JsonConvert.DeserializeObject<UserWarning>(x.Value)).ToList();
+                foreach (var warning in warnings)
+                {
+                    if (warning.Type == WarningType.Warning
+                        && (warning.ModUserId == Program.discord.CurrentUser.Id || (await Program.discord.GetUserAsync(warning.ModUserId)).IsBot)
+                        && (DateTime.Now - warning.WarnTimestamp).TotalHours < Program.cfgjson.CompromisedAccountBanAutoPardonHours
+                        && !warning.IsPardoned)
+                    {
+                        warning.IsPardoned = true;
+                        await Program.db.HashSetAsync(warning.TargetUserId.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
+                    }
+                }
+            }
 
             try
             {
