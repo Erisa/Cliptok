@@ -34,7 +34,7 @@ namespace Cliptok
                     Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/.cliptok");
                     string path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/.cliptok/Cliptok.db";
                     optionsBuilder.UseSqlite($"Data Source={path};Cache=Shared;Pooling=true;");
-                }
+                } 
             }
         }
     }
