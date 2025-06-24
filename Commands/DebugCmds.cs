@@ -16,7 +16,8 @@ namespace Cliptok.Commands
             [Command("logprint")]
             public async Task LogPrint(TextCommandContext ctx)
             {
-                var records = (await Program.dbContext.Messages.Include(m => m.User).ToListAsync());
+                var dbContext = new CliptokDbContext();
+                var records = (await dbContext.Messages.Include(m => m.User).ToListAsync());
                 var json = JsonConvert.SerializeObject(records, Formatting.Indented);
                 await ctx.RespondAsync(new DiscordMessageBuilder()
                     .WithContent($"Recent message logs:\n{await StringHelpers.CodeOrHasteBinAsync(json, "json", plain: true)}"));
