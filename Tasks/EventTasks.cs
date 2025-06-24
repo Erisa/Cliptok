@@ -20,7 +20,7 @@ namespace Cliptok.Tasks
             // populate CurrentBans list
             try
             {
-                Dictionary<string, MemberPunishment> bans = (await Program.db.HashGetAllAsync("bans")).ToDictionary(
+                Dictionary<string, MemberPunishment> bans = (await Program.redis.HashGetAllAsync("bans")).ToDictionary(
                     x => x.Name.ToString(),
                     x => JsonConvert.DeserializeObject<MemberPunishment>(x.Value)
                 );
@@ -57,7 +57,7 @@ namespace Cliptok.Tasks
                         var currentChannelOverwrites = e.Channel.PermissionOverwrites;
 
                         // Get the db overwrites
-                        var dbOverwrites = await Program.db.HashGetAllAsync("overrides");
+                        var dbOverwrites = await Program.redis.HashGetAllAsync("overrides");
 
                         // Compare the two and sync them, prioritizing overwrites on channel over stored overwrites
 
@@ -91,16 +91,16 @@ namespace Cliptok.Tasks
                                 // User could be fetched, so they are in the server and their override was removed. Remove from db.
                                 // (or user could not be fetched & this is a voice channel; remove)
 
-                                var overrides = await Program.db.HashGetAsync("overrides", userOverwrites.Name);
+                                var overrides = await Program.redis.HashGetAsync("overrides", userOverwrites.Name);
                                 var dict = JsonConvert
                                     .DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(overrides);
                                 dict.Remove(e.Channel.Id);
                                 if (dict.Count > 0)
-                                    await Program.db.HashSetAsync("overrides", userOverwrites.Name,
+                                    await Program.redis.HashSetAsync("overrides", userOverwrites.Name,
                                         JsonConvert.SerializeObject(dict));
                                 else
                                 {
-                                    await Program.db.HashDeleteAsync("overrides", userOverwrites.Name);
+                                    await Program.redis.HashDeleteAsync("overrides", userOverwrites.Name);
                                 }
                             }
                         }
@@ -114,7 +114,7 @@ namespace Cliptok.Tasks
 
                             // Pull out db overwrites into list
 
-                            var dbOverwriteRaw = await Program.db.HashGetAllAsync("overrides");
+                            var dbOverwriteRaw = await Program.redis.HashGetAllAsync("overrides");
                             var dbOverwriteList = new List<Dictionary<ulong, DiscordOverwrite>>();
 
                             foreach (var dbOverwrite in dbOverwriteRaw)
@@ -127,12 +127,12 @@ namespace Cliptok.Tasks
                             if (dbOverwriteList.Any(dbOverwriteSet => dbOverwriteSet.ContainsKey(e.Channel.Id) && CompareOverwrites(dbOverwriteSet[e.Channel.Id], overwrite)))
                                 continue;
 
-                            if ((await Program.db.HashKeysAsync("overrides")).Any(a => a == overwrite.Id.ToString()))
+                            if ((await Program.redis.HashKeysAsync("overrides")).Any(a => a == overwrite.Id.ToString()))
                             {
                                 // User has an overwrite in the db; add this one to their list of overrides without
                                 // touching existing ones
 
-                                var overwrites = await Program.db.HashGetAsync("overrides", overwrite.Id);
+                                var overwrites = await Program.redis.HashGetAsync("overrides", overwrite.Id);
 
                                 if (!string.IsNullOrWhiteSpace(overwrites))
                                 {
@@ -144,10 +144,10 @@ namespace Cliptok.Tasks
                                         dict.Add(e.Channel.Id, overwrite);
 
                                         if (dict.Count > 0)
-                                            await Program.db.HashSetAsync("overrides", overwrite.Id,
+                                            await Program.redis.HashSetAsync("overrides", overwrite.Id,
                                                 JsonConvert.SerializeObject(dict));
                                         else
-                                            await Program.db.HashDeleteAsync("overrides", overwrite.Id);
+                                            await Program.redis.HashDeleteAsync("overrides", overwrite.Id);
                                     }
                                 }
                             }
@@ -155,7 +155,7 @@ namespace Cliptok.Tasks
                             {
                                 // User doesn't have any overrides in db, so store new dictionary
 
-                                await Program.db.HashSetAsync("overrides",
+                                await Program.redis.HashSetAsync("overrides",
                                     overwrite.Id, JsonConvert.SerializeObject(new Dictionary<ulong, DiscordOverwrite>
                                         { { e.Channel.Id, overwrite } }));
                             }
@@ -195,7 +195,7 @@ namespace Cliptok.Tasks
             // populate CurrentBans list
             try
             {
-                Dictionary<string, MemberPunishment> bans = (await Program.db.HashGetAllAsync("bans")).ToDictionary(
+                Dictionary<string, MemberPunishment> bans = (await Program.redis.HashGetAllAsync("bans")).ToDictionary(
                     x => x.Name.ToString(),
                     x => JsonConvert.DeserializeObject<MemberPunishment>(x.Value)
                 );
@@ -232,7 +232,7 @@ namespace Cliptok.Tasks
                         var currentChannelOverwrites = e.ChannelAfter.PermissionOverwrites;
 
                         // Get the db overwrites
-                        var dbOverwrites = await Program.db.HashGetAllAsync("overrides");
+                        var dbOverwrites = await Program.redis.HashGetAllAsync("overrides");
 
                         // Compare the two and sync them, prioritizing overwrites on channel over stored overwrites
 
@@ -266,16 +266,16 @@ namespace Cliptok.Tasks
                                 // User could be fetched, so they are in the server and their override was removed. Remove from db.
                                 // (or user could not be fetched & this is a voice channel; remove)
 
-                                var overrides = await Program.db.HashGetAsync("overrides", userOverwrites.Name);
+                                var overrides = await Program.redis.HashGetAsync("overrides", userOverwrites.Name);
                                 var dict = JsonConvert
                                     .DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(overrides);
                                 dict.Remove(e.ChannelAfter.Id);
                                 if (dict.Count > 0)
-                                    await Program.db.HashSetAsync("overrides", userOverwrites.Name,
+                                    await Program.redis.HashSetAsync("overrides", userOverwrites.Name,
                                         JsonConvert.SerializeObject(dict));
                                 else
                                 {
-                                    await Program.db.HashDeleteAsync("overrides", userOverwrites.Name);
+                                    await Program.redis.HashDeleteAsync("overrides", userOverwrites.Name);
                                 }
                             }
                         }
@@ -289,7 +289,7 @@ namespace Cliptok.Tasks
 
                             // Pull out db overwrites into list
 
-                            var dbOverwriteRaw = await Program.db.HashGetAllAsync("overrides");
+                            var dbOverwriteRaw = await Program.redis.HashGetAllAsync("overrides");
                             var dbOverwriteList = new List<Dictionary<ulong, DiscordOverwrite>>();
 
                             foreach (var dbOverwrite in dbOverwriteRaw)
@@ -302,12 +302,12 @@ namespace Cliptok.Tasks
                             if (dbOverwriteList.Any(dbOverwriteSet => dbOverwriteSet.ContainsKey(e.ChannelAfter.Id) && CompareOverwrites(dbOverwriteSet[e.ChannelAfter.Id], overwrite)))
                                 continue;
 
-                            if ((await Program.db.HashKeysAsync("overrides")).Any(a => a == overwrite.Id.ToString()))
+                            if ((await Program.redis.HashKeysAsync("overrides")).Any(a => a == overwrite.Id.ToString()))
                             {
                                 // User has an overwrite in the db; add this one to their list of overrides without
                                 // touching existing ones
 
-                                var overwrites = await Program.db.HashGetAsync("overrides", overwrite.Id);
+                                var overwrites = await Program.redis.HashGetAsync("overrides", overwrite.Id);
 
                                 if (!string.IsNullOrWhiteSpace(overwrites))
                                 {
@@ -319,10 +319,10 @@ namespace Cliptok.Tasks
                                         dict.Add(e.ChannelAfter.Id, overwrite);
 
                                         if (dict.Count > 0)
-                                            await Program.db.HashSetAsync("overrides", overwrite.Id,
+                                            await Program.redis.HashSetAsync("overrides", overwrite.Id,
                                                 JsonConvert.SerializeObject(dict));
                                         else
-                                            await Program.db.HashDeleteAsync("overrides", overwrite.Id);
+                                            await Program.redis.HashDeleteAsync("overrides", overwrite.Id);
                                     }
                                 }
                             }
@@ -330,7 +330,7 @@ namespace Cliptok.Tasks
                             {
                                 // User doesn't have any overrides in db, so store new dictionary
 
-                                await Program.db.HashSetAsync("overrides",
+                                await Program.redis.HashSetAsync("overrides",
                                     overwrite.Id, JsonConvert.SerializeObject(new Dictionary<ulong, DiscordOverwrite>
                                         { { e.ChannelAfter.Id, overwrite } }));
                             }
@@ -382,7 +382,7 @@ namespace Cliptok.Tasks
                         // Purge all overwrites from db for this channel
 
                         // Get all overwrites
-                        var dbOverwrites = await Program.db.HashGetAllAsync("overrides");
+                        var dbOverwrites = await Program.redis.HashGetAllAsync("overrides");
 
                         // Overwrites are stored by user ID, then as a dict with channel ID as key & overwrite as value, so we can't just delete by channel ID.
                         // We need to loop through all overwrites and delete the ones that match the channel ID, then put everything back together.
@@ -408,12 +408,12 @@ namespace Cliptok.Tasks
                             // If the user now has no overrides, remove them from the db entirely
                             if (overwriteDict.Count == 0)
                             {
-                                await Program.db.HashDeleteAsync("overrides", userOverwrites.Name);
+                                await Program.redis.HashDeleteAsync("overrides", userOverwrites.Name);
                             }
                             else
                             {
                                 // Otherwise, update the user's overrides in the db
-                                await Program.db.HashSetAsync("overrides", userOverwrites.Name, JsonConvert.SerializeObject(overwriteDict));
+                                await Program.redis.HashSetAsync("overrides", userOverwrites.Name, JsonConvert.SerializeObject(overwriteDict));
                             }
                         }
 

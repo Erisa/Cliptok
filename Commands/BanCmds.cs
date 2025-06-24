@@ -147,7 +147,7 @@ namespace Cliptok.Commands
             if (reason != "No reason specified.")
                 unbanMsg += $": **{reason}**";
 
-            if (await Program.db.HashExistsAsync("bans", targetUser.Id))
+            if (await Program.redis.HashExistsAsync("bans", targetUser.Id))
             {
                 await UnbanUserAsync(ctx.Guild, targetUser, $"[Unban by {DiscordHelpers.UniqueUsername(ctx.User)}]: {reason}");
                 await ctx.RespondAsync(unbanMsg);
@@ -452,7 +452,7 @@ namespace Cliptok.Commands
             [RemainingText, Description("The time and reason for the ban. e.g. '14d trolling' NOTE: Add 'appeal' to the start of the reason to include an appeal link")] string timeAndReason = "No reason specified."
         )
         {
-            if (!await Program.db.HashExistsAsync("bans", targetUser.Id))
+            if (!await Program.redis.HashExistsAsync("bans", targetUser.Id))
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} There's no record of a ban for that user! Please make sure they're banned or you got the right user.");
                 return;
@@ -460,7 +460,7 @@ namespace Cliptok.Commands
             
             (TimeSpan banDuration, string reason, bool appealable) = PunishmentHelpers.UnpackTimeAndReason(timeAndReason, ctx.Message.Timestamp.DateTime);
 
-            var ban = JsonConvert.DeserializeObject<MemberPunishment>(await Program.db.HashGetAsync("bans", targetUser.Id));
+            var ban = JsonConvert.DeserializeObject<MemberPunishment>(await Program.redis.HashGetAsync("bans", targetUser.Id));
             
             ban.ModId = ctx.User.Id;
             if (banDuration == default)
@@ -506,7 +506,7 @@ namespace Cliptok.Commands
                 }
             }
             
-            await Program.db.HashSetAsync("bans", targetUser.Id.ToString(), JsonConvert.SerializeObject(ban));
+            await Program.redis.HashSetAsync("bans", targetUser.Id.ToString(), JsonConvert.SerializeObject(ban));
             
             // Construct log message
             string logOut = $"{Program.cfgjson.Emoji.MessageEdit} The ban for {targetUser.Mention} was edited by {ctx.User.Mention}!\nReason: **{reason}**";

@@ -39,3 +39,4 @@ global using System.Threading.Tasks;
 global using System.Web;
 global using static Cliptok.CommandChecks.ServerPerms;
 global using static Cliptok.Helpers.ShellCommand;
+global using Cliptok.Types;

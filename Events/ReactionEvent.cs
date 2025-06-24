@@ -117,7 +117,7 @@ namespace Cliptok.Events
                     // probably reacted to invalid msg, ignore
                     return;
                 }
-                var userWarnings = (await Program.db.HashGetAllAsync(userId));
+                var userWarnings = (await Program.redis.HashGetAllAsync(userId));
                 
                 // Try to match against user warnings;
                 // match warnings that have a reason that exactly matches the reason in the msg,

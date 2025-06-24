@@ -5,7 +5,7 @@
         public static async Task<bool> CheckRemindersAsync()
         {
             bool success = false;
-            foreach (var reminder in Program.db.ListRange("reminders", 0, -1))
+            foreach (var reminder in Program.redis.ListRange("reminders", 0, -1))
             {
                 bool DmFallback = false;
                 var reminderObject = JsonConvert.DeserializeObject<Commands.GlobalCmds.Reminder>(reminder);
@@ -37,7 +37,7 @@
                         }
                     }
 
-                    await Program.db.ListRemoveAsync("reminders", reminder);
+                    await Program.redis.ListRemoveAsync("reminders", reminder);
                     success = true;
 
                     var embed = new DiscordEmbedBuilder()

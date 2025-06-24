@@ -33,7 +33,7 @@ namespace Cliptok.Commands
                 await ctx.DeferResponseAsync();
 
                 // Assemble new note
-                long noteId = Program.db.StringIncrement("totalWarnings");
+                long noteId = Program.redis.StringIncrement("totalWarnings");
                 UserNote note = new()
                 {
                     TargetUserId = user.Id,
@@ -49,7 +49,7 @@ namespace Cliptok.Commands
                     Type = WarningType.Note
                 };
 
-                await Program.db.HashSetAsync(user.Id.ToString(), note.NoteId, JsonConvert.SerializeObject(note));
+                await Program.redis.HashSetAsync(user.Id.ToString(), note.NoteId, JsonConvert.SerializeObject(note));
 
                 // Log to mod-logs
                 var embed = await GenerateUserNoteDetailEmbedAsync(note, user);
@@ -69,7 +69,7 @@ namespace Cliptok.Commands
                 UserNote note;
                 try
                 {
-                    note = JsonConvert.DeserializeObject<UserNote>(await Program.db.HashGetAsync(user.Id.ToString(), Convert.ToInt64(targetNote)));
+                    note = JsonConvert.DeserializeObject<UserNote>(await Program.redis.HashGetAsync(user.Id.ToString(), Convert.ToInt64(targetNote)));
                 }
                 catch
                 {
@@ -85,7 +85,7 @@ namespace Cliptok.Commands
                 }
 
                 // Delete note
-                await Program.db.HashDeleteAsync(user.Id.ToString(), note.NoteId);
+                await Program.redis.HashDeleteAsync(user.Id.ToString(), note.NoteId);
 
                 // Log to mod-logs
                 var embed = new DiscordEmbedBuilder(await GenerateUserNoteDetailEmbedAsync(note, user)).WithColor(0xf03916);
@@ -111,7 +111,7 @@ namespace Cliptok.Commands
                 UserNote note;
                 try
                 {
-                    note = JsonConvert.DeserializeObject<UserNote>(await Program.db.HashGetAsync(user.Id.ToString(), Convert.ToInt64(targetNote)));
+                    note = JsonConvert.DeserializeObject<UserNote>(await Program.redis.HashGetAsync(user.Id.ToString(), Convert.ToInt64(targetNote)));
                 }
                 catch
                 {
@@ -159,7 +159,7 @@ namespace Cliptok.Commands
                 note.ShowOnJoinAndLeave = (bool)showOnJoinAndLeave;
                 note.Type = WarningType.Note;
 
-                await Program.db.HashSetAsync(user.Id.ToString(), note.NoteId, JsonConvert.SerializeObject(note));
+                await Program.redis.HashSetAsync(user.Id.ToString(), note.NoteId, JsonConvert.SerializeObject(note));
 
                 // Log to mod-logs
                 var embed = await GenerateUserNoteDetailEmbedAsync(note, user);
@@ -189,7 +189,7 @@ namespace Cliptok.Commands
                 UserNote note;
                 try
                 {
-                    note = JsonConvert.DeserializeObject<UserNote>(await Program.db.HashGetAsync(user.Id.ToString(), Convert.ToInt64(targetNote)));
+                    note = JsonConvert.DeserializeObject<UserNote>(await Program.redis.HashGetAsync(user.Id.ToString(), Convert.ToInt64(targetNote)));
                 }
                 catch
                 {
@@ -222,7 +222,7 @@ namespace Cliptok.Commands
 
                     var user = await ctx.Client.GetUserAsync((ulong)useroption.Value);
 
-                    var notes = (await Program.db.HashGetAllAsync(user.Id.ToString()))
+                    var notes = (await Program.redis.HashGetAllAsync(user.Id.ToString()))
                         .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note).ToDictionary(
                             x => x.Name.ToString(),
                             x => JsonConvert.DeserializeObject<UserNote>(x.Value)

@@ -131,7 +131,7 @@ namespace Cliptok.Commands
                 // blah
             }
 
-            if (await Program.db.HashExistsAsync("mutes", targetUser.Id) || (targetMember is not null && (targetMember.Roles.Contains(mutedRole) || targetMember.Roles.Contains(tqsMutedRole))))
+            if (await Program.redis.HashExistsAsync("mutes", targetUser.Id) || (targetMember is not null && (targetMember.Roles.Contains(mutedRole) || targetMember.Roles.Contains(tqsMutedRole))))
             {
                 if (ctx is SlashCommandContext)
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, that user is already muted."));
@@ -212,7 +212,7 @@ namespace Cliptok.Commands
                 return;
             }
 
-            if (await Program.db.HashExistsAsync("mutes", targetUser.Id) && targetMember is not null && targetMember.Roles.Contains(tqsMutedRole))
+            if (await Program.redis.HashExistsAsync("mutes", targetUser.Id) && targetMember is not null && targetMember.Roles.Contains(tqsMutedRole))
             {
                 // If the member has a regular mute, leave the TQS mute alone (it's only a role now & it has no effect if they also have Muted); it will be removed when they are unmuted
                 if (targetMember.Roles.Contains(mutedRole))
@@ -281,7 +281,7 @@ namespace Cliptok.Commands
                 Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, exception: ex, message: "Failed to unmute {user} in {server} because they weren't in the server.", $"{DiscordHelpers.UniqueUsername(targetUser)}", ctx.Guild.Name);
             }
 
-            if ((await Program.db.HashExistsAsync("mutes", targetUser.Id)) || (member != default && (member.Roles.Contains(mutedRole) || member.Roles.Contains(tqsMutedRole))))
+            if ((await Program.redis.HashExistsAsync("mutes", targetUser.Id)) || (member != default && (member.Roles.Contains(mutedRole) || member.Roles.Contains(tqsMutedRole))))
             {
                 await MuteHelpers.UnmuteUserAsync(targetUser, reason, true, ctx.User);
                 var unmuteMsg = $"{Program.cfgjson.Emoji.Information} Successfully unmuted **{DiscordHelpers.UniqueUsername(targetUser)}**";
@@ -398,7 +398,7 @@ namespace Cliptok.Commands
             [RemainingText, Description("Combined argument for the time and reason for the mute. For example '1h rule 7' or 'rule 10'")] string timeAndReason = "No reason specified."
         )
         {
-            if (!await Program.db.HashExistsAsync("mutes", targetUser.Id))
+            if (!await Program.redis.HashExistsAsync("mutes", targetUser.Id))
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} There's no record of a mute for that user! Please make sure they're muted or you got the right user.");
                 return;
@@ -406,7 +406,7 @@ namespace Cliptok.Commands
             
             (TimeSpan muteDuration, string reason, bool _) = PunishmentHelpers.UnpackTimeAndReason(timeAndReason, ctx.Message.Timestamp.DateTime);
 
-            var mute = JsonConvert.DeserializeObject<MemberPunishment>(await Program.db.HashGetAsync("mutes", targetUser.Id));
+            var mute = JsonConvert.DeserializeObject<MemberPunishment>(await Program.redis.HashGetAsync("mutes", targetUser.Id));
             
             mute.ModId = ctx.User.Id;
             if (muteDuration == default)
@@ -464,7 +464,7 @@ namespace Cliptok.Commands
                 Program.discord.Logger.LogError(e, "Failed to issue timeout to {user}", targetUser.Id);
             }
             
-            await Program.db.HashSetAsync("mutes", targetUser.Id.ToString(), JsonConvert.SerializeObject(mute));
+            await Program.redis.HashSetAsync("mutes", targetUser.Id.ToString(), JsonConvert.SerializeObject(mute));
             
             // Construct log message
             string logOut = $"{Program.cfgjson.Emoji.MessageEdit} The mute for {targetUser.Mention} was edited by {ctx.User.Mention}!\nReason: **{reason}**";

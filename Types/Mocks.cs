@@ -1,5 +1,20 @@
-namespace Cliptok.Events
+﻿namespace Cliptok.Types
 {
+    public class MockUserOverwrite
+    {
+        [JsonProperty("type")]
+        public int Type { get; } = 1;
+
+        [JsonProperty("allow")]
+        public DiscordPermissions Allowed { get; set; }
+
+        [JsonProperty("deny")]
+        public DiscordPermissions Denied { get; set; }
+
+        [JsonProperty("id")]
+        public ulong Id { get; set; }
+    }
+
     public class MockDiscordMessage
     {
         public MockDiscordMessage() { }
@@ -76,4 +91,5 @@ namespace Cliptok.Events
             }
         }
     }
+
 }

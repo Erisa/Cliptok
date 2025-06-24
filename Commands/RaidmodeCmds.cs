@@ -21,14 +21,14 @@ namespace Cliptok.Commands
                     && !ctx.As<TextCommandContext>().Message.Content.Contains("c!raidmode"))
                     return;
 
-                if (Program.db.HashExists("raidmode", ctx.Guild.Id))
+                if (Program.redis.HashExists("raidmode", ctx.Guild.Id))
                 {
                     string output = $"Raidmode is currently **enabled**.";
 
-                    ulong expirationTimeUnix = (ulong)Program.db.HashGet("raidmode", ctx.Guild.Id);
+                    ulong expirationTimeUnix = (ulong)Program.redis.HashGet("raidmode", ctx.Guild.Id);
                     output += $"\nRaidmode ends <t:{expirationTimeUnix}>";
 
-                    var newAccountAgeKey = Program.db.StringGet("raidmode-accountage");
+                    var newAccountAgeKey = Program.redis.StringGet("raidmode-accountage");
                     if (newAccountAgeKey.HasValue)
                         output += $"\nAccounts created before <t:{newAccountAgeKey}> are still allowed to join.";
 
@@ -54,14 +54,14 @@ namespace Cliptok.Commands
                     && !ctx.As<TextCommandContext>().Message.Content.Contains("c!raidmode"))
                     return;
 
-                if (Program.db.HashExists("raidmode", ctx.Guild.Id))
+                if (Program.redis.HashExists("raidmode", ctx.Guild.Id))
                 {
                     string output = $"Raidmode is already **enabled**.";
 
-                    ulong expirationTimeUnix = (ulong)Program.db.HashGet("raidmode", ctx.Guild.Id);
+                    ulong expirationTimeUnix = (ulong)Program.redis.HashGet("raidmode", ctx.Guild.Id);
                     output += $"\nRaidmode ends <t:{expirationTimeUnix}>";
 
-                    var newAccountAgeKey = Program.db.StringGet("raidmode-accountage");
+                    var newAccountAgeKey = Program.redis.StringGet("raidmode-accountage");
                     if (newAccountAgeKey.HasValue)
                         output += $"\nAccounts created before <t:{newAccountAgeKey}> are still allowed to join.";
 
@@ -77,26 +77,26 @@ namespace Cliptok.Commands
                         parsedExpiration = HumanDateParser.HumanDateParser.Parse(duration);
 
                     long unixExpiration = TimeHelpers.ToUnixTimestamp(parsedExpiration);
-                    Program.db.HashSet("raidmode", ctx.Guild.Id, unixExpiration);
+                    Program.redis.HashSet("raidmode", ctx.Guild.Id, unixExpiration);
 
                     DateTime allowedAgeTime;
 
                     if (allowedAccountAge == "")
-                        Program.db.KeyDelete("raidmode-accountage");
+                        Program.redis.KeyDelete("raidmode-accountage");
                     else
                     {
                         DateTime anchorTime = DateTime.Now;
                         DateTime parseResult = HumanDateParser.HumanDateParser.Parse(allowedAccountAge, anchorTime);
                         TimeSpan timeSpan = parseResult - anchorTime;
                         allowedAgeTime = anchorTime - timeSpan;
-                        Program.db.StringSet("raidmode-accountage", TimeHelpers.ToUnixTimestamp(allowedAgeTime));
+                        Program.redis.StringSet("raidmode-accountage", TimeHelpers.ToUnixTimestamp(allowedAgeTime));
                     }
 
                     string userContent = $"Raidmode is now **enabled** and will end <t:{unixExpiration}:R>.";
                     string logContent = $"{Program.cfgjson.Emoji.On} Raidmode was **enabled** by {ctx.User.Mention} and ends <t:{unixExpiration}:R>.";
 
                     // i dont know why im fetching it back but honestly i get so many weird conditions i just want to be informed on the current state
-                    var newAccountAgeKey = Program.db.StringGet("raidmode-accountage");
+                    var newAccountAgeKey = Program.redis.StringGet("raidmode-accountage");
 
                     if (newAccountAgeKey.HasValue)
                     {
@@ -124,15 +124,15 @@ namespace Cliptok.Commands
                     && !ctx.As<TextCommandContext>().Message.Content.Contains("c!raidmode"))
                     return;
 
-                if (Program.db.HashExists("raidmode", ctx.Guild.Id))
+                if (Program.redis.HashExists("raidmode", ctx.Guild.Id))
                 {
-                    long expirationTimeUnix = (long)Program.db.HashGet("raidmode", ctx.Guild.Id);
-                    Program.db.HashDelete("raidmode", ctx.Guild.Id);
-                    Program.db.KeyDelete("raidmode-accountage");
+                    long expirationTimeUnix = (long)Program.redis.HashGet("raidmode", ctx.Guild.Id);
+                    Program.redis.HashDelete("raidmode", ctx.Guild.Id);
+                    Program.redis.KeyDelete("raidmode-accountage");
 
                     string resp = $"Raidmode is now **disabled**.\nIt was supposed to end <t:{expirationTimeUnix}:R>.";
 
-                    var newAccountAgeKey = Program.db.StringGet("raidmode-accountage");
+                    var newAccountAgeKey = Program.redis.StringGet("raidmode-accountage");
                     if (newAccountAgeKey.HasValue)
                         resp += $"\nAccounts created before <t:{newAccountAgeKey}> were still allowed to join.";
 

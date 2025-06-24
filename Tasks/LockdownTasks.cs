@@ -4,7 +4,7 @@
     {
         public static async Task<bool> CheckUnlocksAsync()
         {
-            var channelUnlocks = await Program.db.HashGetAllAsync("unlocks");
+            var channelUnlocks = await Program.redis.HashGetAllAsync("unlocks");
             var success = false;
 
             foreach (var channelUnlock in channelUnlocks)

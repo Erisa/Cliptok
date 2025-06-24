@@ -4,7 +4,7 @@
     {
         public static async Task<bool> CheckAndMassDehoistTask()
         {
-            var dbResult = await Program.db.StringGetAsync("lastMassDehoistRun");
+            var dbResult = await Program.redis.StringGetAsync("lastMassDehoistRun");
 
             if (dbResult.IsNull)
             {
@@ -28,7 +28,7 @@
 
         public static async Task<bool> MassDehoistAndUpdateTimeAsync()
         {
-            await Program.db.StringSetAsync("lastMassDehoistRun", TimeHelpers.ToUnixTimestamp(DateTime.Now));
+            await Program.redis.StringSetAsync("lastMassDehoistRun", TimeHelpers.ToUnixTimestamp(DateTime.Now));
             var (totalMembers, failedMembers) = await DehoistHelpers.MassDehoistAsync(Program.homeGuild);
             if (totalMembers != failedMembers)
             {

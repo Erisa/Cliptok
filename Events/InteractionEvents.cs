@@ -13,7 +13,7 @@ namespace Cliptok.Events
             {
                 await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-                var text = await db.HashGetAsync("deletedMessageReferences", e.Message.Id);
+                var text = await redis.HashGetAsync("deletedMessageReferences", e.Message.Id);
                 if (text.IsNullOrEmpty)
                 {
                     discord.Logger.LogError("Failed to find deleted message content for {id}", e.Message.Id);
@@ -93,13 +93,13 @@ namespace Cliptok.Events
                 var newOverwrite = JsonConvert.DeserializeObject<DiscordOverwrite>(JsonConvert.SerializeObject(mockOverwrite));
 
                 // Get current overrides for user in db
-                var userOverwrites = await db.HashGetAsync("overrides", mockOverwrite.Id);
+                var userOverwrites = await redis.HashGetAsync("overrides", mockOverwrite.Id);
                 if (userOverwrites.IsNullOrEmpty)
                 {
                     // No overwrites for this user yet, create a list and add to it
 
                     var overwrites = new Dictionary<string, DiscordOverwrite> { { channelId.ToString(), newOverwrite } };
-                    await db.HashSetAsync("overrides", mockOverwrite.Id, JsonConvert.SerializeObject(overwrites));
+                    await redis.HashSetAsync("overrides", mockOverwrite.Id, JsonConvert.SerializeObject(overwrites));
                 }
                 else
                 {
@@ -129,7 +129,7 @@ namespace Cliptok.Events
                         overwrites.Add(channelId.ToString(), newOverwrite);
                     }
                     // Update db
-                    await db.HashSetAsync("overrides", mockOverwrite.Id, JsonConvert.SerializeObject(overwrites));
+                    await redis.HashSetAsync("overrides", mockOverwrite.Id, JsonConvert.SerializeObject(overwrites));
                 }
 
                 // Remove from db so the override is not added again
@@ -193,7 +193,7 @@ namespace Cliptok.Events
                 var newOverwrite = JsonConvert.DeserializeObject<DiscordOverwrite>(JsonConvert.SerializeObject(mockOverwrite));
 
                 // Existing override data
-                var userOverwrites = await db.HashGetAsync("overrides", mockOverwrite.Id);
+                var userOverwrites = await redis.HashGetAsync("overrides", mockOverwrite.Id);
                 var overwrites = JsonConvert.DeserializeObject<Dictionary<string, DiscordOverwrite>>(userOverwrites);
 
                 // Merge permissions
@@ -211,7 +211,7 @@ namespace Cliptok.Events
                 overwrites[channelId.ToString()] = newOverwrite;
 
                 // Update db
-                await db.HashSetAsync("overrides", mockOverwrite.Id, JsonConvert.SerializeObject(overwrites));
+                await redis.HashSetAsync("overrides", mockOverwrite.Id, JsonConvert.SerializeObject(overwrites));
 
                 // Respond
                 var allowedPermsStr = newOverwrite.Allowed.ToString("name");

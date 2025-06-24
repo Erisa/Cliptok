@@ -27,7 +27,7 @@ namespace Cliptok.Events
             LogChannelHelper.LogMessageAsync("users", $"{cfgjson.Emoji.UserJoin} **Member joined the server!** - {e.Member.Id}", userLogEmbed);
 
             // Get this user's notes that are set to show on join/leave
-            var userNotes = (await db.HashGetAllAsync(e.Member.Id.ToString()))
+            var userNotes = (await redis.HashGetAllAsync(e.Member.Id.ToString()))
                 .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note
                         && JsonConvert.DeserializeObject<UserNote>(x.Value).ShowOnJoinAndLeave).ToDictionary(
                     x => x.Name.ToString(),
@@ -40,9 +40,9 @@ namespace Cliptok.Events
                 LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.UserJoin} {e.Member.Mention} just joined the server with {(userNotes.Count == 1 ? "a note" : "notes")} set to show on join!", notesEmbed);
             }
 
-            if (db.HashExists("raidmode", e.Guild.Id))
+            if (redis.HashExists("raidmode", e.Guild.Id))
             {
-                if (!db.KeyExists("raidmode-accountage") || (TimeHelpers.ToUnixTimestamp(e.Member.CreationTimestamp.DateTime) > (long)db.StringGet("raidmode-accountage")))
+                if (!redis.KeyExists("raidmode-accountage") || (TimeHelpers.ToUnixTimestamp(e.Member.CreationTimestamp.DateTime) > (long)redis.StringGet("raidmode-accountage")))
                 {
                     try
                     {
@@ -56,7 +56,7 @@ namespace Cliptok.Events
                 }
             }
 
-            if (await db.HashExistsAsync("mutes", e.Member.Id))
+            if (await redis.HashExistsAsync("mutes", e.Member.Id))
             {
                 // todo: store per-guild
                 DiscordRole mutedRole = await e.Guild.GetRoleAsync(cfgjson.MutedRole);
@@ -67,7 +67,7 @@ namespace Cliptok.Events
                 await e.Member.TimeoutAsync(null, "Removing timeout since member was presumably unmuted while left");
             }
 
-            if (!db.HashExists("unbanned", e.Member.Id))
+            if (!redis.HashExists("unbanned", e.Member.Id))
             {
                 if (avatars.Contains(e.Member.AvatarHash))
                 {
@@ -78,7 +78,7 @@ namespace Cliptok.Events
 
             // Restore user overrides stored in db (if there are any)
 
-            var userOverwrites = await db.HashGetAsync("overrides", e.Member.Id.ToString());
+            var userOverwrites = await redis.HashGetAsync("overrides", e.Member.Id.ToString());
             if (string.IsNullOrWhiteSpace(userOverwrites)) return; // user has no overrides saved
             var dictionary = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(userOverwrites);
             if (dictionary is null) return;
@@ -122,10 +122,10 @@ namespace Cliptok.Events
                 if (cfgjson.TqsMutedRole != 0)
                     tqsMuteRole = await e.Guild.GetRoleAsync(cfgjson.TqsMutedRole);
 
-                var userMute = await db.HashGetAsync("mutes", e.Member.Id);
+                var userMute = await redis.HashGetAsync("mutes", e.Member.Id);
 
                 if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole) & !e.Member.Roles.Contains(tqsMuteRole))
-                    db.HashDeleteAsync("mutes", e.Member.Id);
+                    redis.HashDeleteAsync("mutes", e.Member.Id);
 
                 if ((e.Member.Roles.Contains(muteRole) || e.Member.Roles.Contains(tqsMuteRole)) && userMute.IsNull)
                 {
@@ -138,11 +138,11 @@ namespace Cliptok.Events
                         ActionTime = DateTime.Now
                     };
 
-                    db.HashSetAsync("mutes", e.Member.Id, JsonConvert.SerializeObject(newMute));
+                    redis.HashSetAsync("mutes", e.Member.Id, JsonConvert.SerializeObject(newMute));
                 }
 
                 if (!userMute.IsNull && !e.Member.Roles.Contains(muteRole) && !e.Member.Roles.Contains(tqsMuteRole))
-                    db.HashDeleteAsync("mutes", e.Member.Id);
+                    redis.HashDeleteAsync("mutes", e.Member.Id);
             }
 
             string rolesStr = "None";
@@ -174,7 +174,7 @@ namespace Cliptok.Events
             LogChannelHelper.LogMessageAsync("users", $"{cfgjson.Emoji.UserLeave} **Member left the server!** - {e.Member.Id}", userLogEmbed);
 
             // Get this user's notes that are set to show on join/leave
-            var userNotes = (await db.HashGetAllAsync(e.Member.Id.ToString()))
+            var userNotes = (await redis.HashGetAllAsync(e.Member.Id.ToString()))
                 .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note
                             && JsonConvert.DeserializeObject<UserNote>(x.Value).ShowOnJoinAndLeave).ToDictionary(
                     x => x.Name.ToString(),
@@ -205,7 +205,7 @@ namespace Cliptok.Events
                 return;
 
             var muteRole = await e.Guild.GetRoleAsync(cfgjson.MutedRole);
-            var userMute = await db.HashGetAsync("mutes", e.Member.Id);
+            var userMute = await redis.HashGetAsync("mutes", e.Member.Id);
 
             // If they're externally unmuted, untrack it?
             // But not if they just joined.
@@ -213,10 +213,10 @@ namespace Cliptok.Events
             var joinTime = e.Member.JoinedAt.DateTime;
             var differrence = currentTime.Subtract(joinTime).TotalSeconds;
             if (differrence > 10 && !userMute.IsNull && !e.Member.Roles.Contains(muteRole))
-                db.HashDeleteAsync("mutes", e.Member.Id);
+                redis.HashDeleteAsync("mutes", e.Member.Id);
 
             // Nickname lock check
-            var nicknamelock = await db.HashGetAsync("nicknamelock", e.Member.Id);
+            var nicknamelock = await redis.HashGetAsync("nicknamelock", e.Member.Id);
 
             if (nicknamelock.HasValue)
             {
@@ -237,7 +237,7 @@ namespace Cliptok.Events
             DehoistHelpers.CheckAndDehoistMemberAsync(e.Member);
 
             // Persist permadehoists
-            if (await db.SetContainsAsync("permadehoists", e.Member.Id))
+            if (await redis.SetContainsAsync("permadehoists", e.Member.Id))
                 if (e.Member.DisplayName[0] != DehoistHelpers.dehoistCharacter && !e.Member.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername))
                     // Member is in permadehoist list. Dehoist.
                     e.Member.ModifyAsync(a =>
@@ -245,6 +245,51 @@ namespace Cliptok.Events
                         a.Nickname = DehoistHelpers.DehoistName(e.Member.DisplayName);
                         a.AuditLogReason = "[Automatic dehoist; user is permadehoisted]";
                     });
+
+            // cache user
+            await LogAndCacheUserUpdateAsync(client, e.Member);
+        }
+
+        public static async Task LogAndCacheUserUpdateAsync(DiscordClient client, DiscordUser user)
+        {
+            var dbContext = new CliptokDbContext();
+            var cachedUser = await dbContext.Users.FindAsync(user.Id);
+            if (cachedUser is null)
+            {
+                var newUser = new Models.CachedDiscordUser
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                    DisplayName = user.GlobalName ?? user.Username,
+                    AvatarUrl = user.AvatarUrl ?? user.DefaultAvatarUrl,
+                    IsBot = user.IsBot
+                };
+                await dbContext.Users.AddAsync(newUser);
+            }
+            else
+            {
+                if (cachedUser.Username != user.Username)
+                {
+                    await LogChannelHelper.LogMessageAsync("users", new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.UserUpdate} **Member username updated!** - {user.Mention}")
+                        .AddEmbed(new DiscordEmbedBuilder()
+                            .WithColor(new DiscordColor(0x3E9D28))
+                            .WithTimestamp(DateTimeOffset.Now)
+                            .WithThumbnail(user.AvatarUrl)
+                            .AddField("Old username", cachedUser.Username)
+                            .AddField("New username", user.Username)
+                            .WithFooter($"User ID: {user.Id}\n{client.CurrentUser.Username}UserUpdate")));
+                }
+
+                if (cachedUser.Username != user.Username || cachedUser.DisplayName != (user.GlobalName ?? user.Username) || cachedUser.AvatarUrl != (user.AvatarUrl ?? user.DefaultAvatarUrl))
+                {
+                    cachedUser.Username = user.Username;
+                    cachedUser.DisplayName = user.GlobalName ?? user.Username;
+                    cachedUser.AvatarUrl = user.AvatarUrl ?? user.DefaultAvatarUrl;
+                    dbContext.Update(cachedUser);
+                    await dbContext.SaveChangesAsync();
+                }
+            }
+            await dbContext.DisposeAsync();
         }
 
         public static async Task UserUpdated(DiscordClient client, UserUpdatedEventArgs e)
@@ -258,7 +303,7 @@ namespace Cliptok.Events
             var member = await homeGuild.GetMemberAsync(e.UserAfter.Id);
 
             // Nickname lock check
-            var nicknamelock = await db.HashGetAsync("nicknamelock", member.Id);
+            var nicknamelock = await redis.HashGetAsync("nicknamelock", member.Id);
 
             if (nicknamelock.HasValue)
             {
@@ -277,7 +322,10 @@ namespace Cliptok.Events
             }
 
             DehoistHelpers.CheckAndDehoistMemberAsync(member);
-            ScamHelpers.UsernameCheckAsync(member); ;
+            ScamHelpers.UsernameCheckAsync(member);
+
+            // cache user or log change
+            await LogAndCacheUserUpdateAsync(client, e.UserAfter);
         }
 
     }

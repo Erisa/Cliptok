@@ -24,8 +24,8 @@
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Status messages must be less than 128 characters.");
                 }
 
-                await Program.db.StringSetAsync("config:status", statusText);
-                await Program.db.StringSetAsync("config:status_type", (long)statusType);
+                await Program.redis.StringSetAsync("config:status", statusText);
+                await Program.redis.StringSetAsync("config:status_type", (long)statusType);
 
                 await ctx.Client.UpdateStatusAsync(new DiscordActivity(statusText, statusType));
 
@@ -37,8 +37,8 @@
             [AllowedProcessors(typeof(SlashCommandProcessor))]
             public async Task StatusClearCommand(SlashCommandContext ctx)
             {
-                await Program.db.KeyDeleteAsync("config:status");
-                await Program.db.KeyDeleteAsync("config:status_type");
+                await Program.redis.KeyDeleteAsync("config:status");
+                await Program.redis.KeyDeleteAsync("config:status_type");
 
                 await ctx.Client.UpdateStatusAsync(new DiscordActivity());
 

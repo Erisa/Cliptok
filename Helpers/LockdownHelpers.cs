@@ -81,7 +81,7 @@
 
             if (duration is not null)
             {
-                await Program.db.HashSetAsync("unlocks", channel.Id, TimeHelpers.ToUnixTimestamp(DateTime.Now + duration));
+                await Program.redis.HashSetAsync("unlocks", channel.Id, TimeHelpers.ToUnixTimestamp(DateTime.Now + duration));
                 msg += $"\nChannel unlocks: <t:{TimeHelpers.ToUnixTimestamp(DateTime.Now + duration)}:R>";
             }
 
@@ -162,7 +162,7 @@
             else
                 await discordChannel.AddOverwriteAsync(await discordChannel.Guild.GetRoleAsync(Program.cfgjson.ModRole), moderatorAllowedPermissions, moderatorDeniedPermissionsBeforeUnlock, "Resetting Lockdown failsafe 2 for unlock");
 
-            await Program.db.HashDeleteAsync("unlocks", discordChannel.Id);
+            await Program.redis.HashDeleteAsync("unlocks", discordChannel.Id);
             await discordChannel.SendMessageAsync($"{Program.cfgjson.Emoji.Unlock} This channel has been unlocked!");
         }
 

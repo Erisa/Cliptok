@@ -6,7 +6,7 @@
 
         public static async Task<DiscordEmbed> GenerateWarningsEmbedAsync(DiscordUser targetUser)
         {
-            var warningsOutput = (await Program.db.HashGetAllAsync(targetUser.Id.ToString()))
+            var warningsOutput = (await Program.redis.HashGetAllAsync(targetUser.Id.ToString()))
                 .Where(x => JsonConvert.DeserializeObject<UserWarning>(x.Value).Type == WarningType.Warning).ToDictionary(
                 x => x.Name.ToString(),
                 x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
@@ -188,7 +188,7 @@
         public static async Task<UserWarning> GiveWarningAsync(DiscordUser targetUser, DiscordUser modUser, string reason, DiscordMessage contextMessage, DiscordChannel channel, string extraWord = " ")
         {
             DiscordGuild guild = channel.Guild;
-            long warningId = Program.db.StringIncrement("totalWarnings");
+            long warningId = Program.redis.StringIncrement("totalWarnings");
 
             DiscordMessage? dmMessage = null;
             try
@@ -233,7 +233,7 @@
                     ChannelId = dmMessage.ChannelId
                 };
 
-            Program.db.HashSet(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
+            Program.redis.HashSet(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
 
             // Now that the warning is in DM, prevent future collisions by caching it.
             if (!modUser.IsBot)
@@ -243,7 +243,7 @@
             }
             else
             {
-                Program.db.HashSet("automaticWarnings", warningId, JsonConvert.SerializeObject(warning));
+                Program.redis.HashSet("automaticWarnings", warningId, JsonConvert.SerializeObject(warning));
             }
 
             var logMsg = await LogChannelHelper.LogMessageAsync("mod",
@@ -268,7 +268,7 @@
             }
 
             // automute handling
-            var warningsOutput = (await Program.db.HashGetAllAsync(targetUser.Id.ToString())).ToDictionary(
+            var warningsOutput = (await Program.redis.HashGetAllAsync(targetUser.Id.ToString())).ToDictionary(
                 x => x.Name.ToString(),
                 x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
             );
@@ -306,7 +306,7 @@
             if (!modUser.IsBot)
             {
                 // Get notes
-                var notes = (await Program.db.HashGetAllAsync(targetUser.Id.ToString()))
+                var notes = (await Program.redis.HashGetAllAsync(targetUser.Id.ToString()))
                     .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note).ToDictionary(
                         x => x.Name.ToString(),
                         x => JsonConvert.DeserializeObject<UserNote>(x.Value)
@@ -336,7 +336,7 @@
                 foreach (var note in notesToNotifyFor.Where(note => note.Value.ShowOnce))
                 {
                     // Delete note
-                    await Program.db.HashDeleteAsync(targetUser.Id.ToString(), note.Key);
+                    await Program.redis.HashDeleteAsync(targetUser.Id.ToString(), note.Key);
 
                     // Log deletion to mod-logs channel
                     var embed = new DiscordEmbedBuilder(await UserNoteHelpers.GenerateUserNoteDetailEmbedAsync(note.Value, targetUser)).WithColor(0xf03916);
@@ -350,7 +350,7 @@
         public static async Task<bool> EditWarning(DiscordUser targetUser, long warnId, DiscordUser modUser, string reason)
         {
 
-            if (Program.db.HashExists(targetUser.Id.ToString(), warnId))
+            if (Program.redis.HashExists(targetUser.Id.ToString(), warnId))
             {
                 UserWarning warning = GetWarning(targetUser.Id, warnId);
 
@@ -370,7 +370,7 @@
                     await dmMessage.ModifyAsync(await GenerateWarningDM(reason, guild));
                 }
 
-                await Program.db.HashSetAsync(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
+                await Program.redis.HashSetAsync(targetUser.Id.ToString(), warning.WarningId, JsonConvert.SerializeObject(warning));
                 return true;
             }
             else
@@ -384,10 +384,10 @@
             if (userID == default)
                 userID = warning.TargetUserId;
 
-            if (Program.db.HashExists("automaticWarnings", warning.WarningId))
-                await Program.db.HashDeleteAsync("automaticWarnings", warning.WarningId);
+            if (Program.redis.HashExists("automaticWarnings", warning.WarningId))
+                await Program.redis.HashDeleteAsync("automaticWarnings", warning.WarningId);
 
-            if (Program.db.HashExists(userID.ToString(), warning.WarningId))
+            if (Program.redis.HashExists(userID.ToString(), warning.WarningId))
             {
                 var contextMessage = await DiscordHelpers.GetMessageFromReferenceAsync(warning.ContextMessageReference);
                 if (contextMessage is not null)
@@ -400,7 +400,7 @@
                     await dmMessage.ModifyAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} You were warned in **{guild.Name}**, but the warning was revoked by a Moderator."), suppressEmbeds: true);
                 }
 
-                Program.db.HashDelete(userID.ToString(), warning.WarningId);
+                Program.redis.HashDelete(userID.ToString(), warning.WarningId);
                 return true;
             }
             else
@@ -413,7 +413,7 @@
         {
             try
             {
-                return JsonConvert.DeserializeObject<UserWarning>(Program.db.HashGet(targetUserId.ToString(), warnId));
+                return JsonConvert.DeserializeObject<UserWarning>(Program.redis.HashGet(targetUserId.ToString(), warnId));
             }
             catch (ArgumentNullException)
             {
