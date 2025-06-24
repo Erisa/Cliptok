@@ -163,16 +163,17 @@ namespace Cliptok.Events
             await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
         }
 
-        public static async Task<Models.CachedDiscordMessage> CacheAndAddMessageAsync(MockDiscordMessage message)
+        public static async Task<Models.CachedDiscordMessage> CacheAndAddMessageAsync(MockDiscordMessage message, CliptokDbContext ctx, bool disposeContext)
         {
-            var cachedMessage = await CacheMessageAsync(message);
-            await AddMessageToCacheAsync(cachedMessage);
+            var cachedMessage = await CacheMessageAsync(message, ctx);
+            await AddMessageToCacheAsync(cachedMessage, ctx);
+            if (disposeContext)
+                await ctx.DisposeAsync();
             return cachedMessage;
         }
 
-        public static async Task<Models.CachedDiscordMessage> CacheMessageAsync(MockDiscordMessage message)
+        public static async Task<Models.CachedDiscordMessage> CacheMessageAsync(MockDiscordMessage message, CliptokDbContext ctx)
         {
-            var dbContext = new CliptokDbContext();
             var cachedMessage = new Models.CachedDiscordMessage
             {
                 Id = message.Id,
@@ -182,7 +183,7 @@ namespace Cliptok.Events
                 AttachmentURLs = message.Attachments?.Select(a => a.Url).ToList(),
             };
 
-            var existingUser = await (dbContext.Users.FirstOrDefaultAsync(u => u.Id == message.Author.Id));
+            var existingUser = await (ctx.Users.FirstOrDefaultAsync(u => u.Id == message.Author.Id));
 
             if (existingUser is null)
             {
@@ -200,7 +201,6 @@ namespace Cliptok.Events
                 cachedMessage.User = existingUser;
             }
 
-            _ = dbContext.DisposeAsync();
             return cachedMessage;
         }
 
@@ -211,13 +211,11 @@ namespace Cliptok.Events
             await ctx.SaveChangesAsync();
         }
 
-        public static async Task AddMessageToCacheAsync(Models.CachedDiscordMessage cachedMessage)
+        public static async Task AddMessageToCacheAsync(Models.CachedDiscordMessage cachedMessage, CliptokDbContext ctx)
         {
-            var dbContext = new CliptokDbContext();
-            dbContext.Attach(cachedMessage.User);
-            await dbContext.AddAsync(cachedMessage);
-            await dbContext.SaveChangesAsync();
-            _ = dbContext.DisposeAsync();
+            ctx.Attach(cachedMessage.User);
+            await ctx.AddAsync(cachedMessage);
+            await ctx.SaveChangesAsync();
         }
 
         public static async Task MessageHandlerAsync(DiscordClient client, DiscordMessage message, DiscordChannel channel, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
@@ -233,7 +231,7 @@ namespace Cliptok.Events
                 var cachedMessage = dbContext.Messages.Include(m => m.User).FirstOrDefault(m => m.Id == message.Id);
                 if (cachedMessage is not null && cachedMessage.Content != message.Content)
                 {
-                    var newMessage = await CacheMessageAsync(message);
+                    var newMessage = await CacheMessageAsync(message, dbContext);
                     // we store bot messages but don't log them right now
                     if (cachedMessage is not null && !cachedMessage.User.IsBot)
                     {
@@ -249,7 +247,7 @@ namespace Cliptok.Events
             else
             {
                 // cache in the background to not impede execution of the message handler
-                _ = CacheAndAddMessageAsync(message);
+                _ = CacheAndAddMessageAsync(message, new CliptokDbContext(), true);
             }
 
             #endregion
