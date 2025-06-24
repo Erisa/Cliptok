@@ -195,6 +195,8 @@ namespace Cliptok.Events
                     AvatarUrl = message.Author.AvatarUrl ?? message.Author.DefaultAvatarUrl,
                     IsBot = message.Author.IsBot
                 };
+                await ctx.Users.AddAsync(cachedMessage.User);
+                await ctx.SaveChangesAsync();
             }
             else
             {

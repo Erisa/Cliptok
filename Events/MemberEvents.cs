@@ -245,13 +245,56 @@ namespace Cliptok.Events
                         a.Nickname = DehoistHelpers.DehoistName(e.Member.DisplayName);
                         a.AuditLogReason = "[Automatic dehoist; user is permadehoisted]";
                     });
+
+            // cache user
+            await LogAndCacheUserUpdateAsync(client, e.Member);
+        }
+
+        public static async Task LogAndCacheUserUpdateAsync(DiscordClient client, DiscordUser user)
+        {
+            var dbContext = new CliptokDbContext();
+            var cachedUser = await dbContext.Users.FindAsync(user.Id);
+            if (cachedUser is null)
+            {
+                var newUser = new Models.CachedDiscordUser
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                    DisplayName = user.GlobalName ?? user.Username,
+                    AvatarUrl = user.AvatarUrl ?? user.DefaultAvatarUrl,
+                    IsBot = user.IsBot
+                };
+                await dbContext.Users.AddAsync(newUser);
+            }
+            else
+            {
+                if (cachedUser.Username != user.Username)
+                {
+                    await LogChannelHelper.LogMessageAsync("users", new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.UserUpdate} **Member username updated!** - {user.Mention}")
+                        .AddEmbed(new DiscordEmbedBuilder()
+                            .WithColor(new DiscordColor(0x3E9D28))
+                            .WithTimestamp(DateTimeOffset.Now)
+                            .WithThumbnail(user.AvatarUrl)
+                            .AddField("Old username", cachedUser.Username)
+                            .AddField("New username", user.Username)
+                            .WithFooter($"User ID: {user.Id}\n{client.CurrentUser.Username}UserUpdate")));
+                }
+
+                if (cachedUser.Username != user.Username || cachedUser.DisplayName != (user.GlobalName ?? user.Username) || cachedUser.AvatarUrl != (user.AvatarUrl ?? user.DefaultAvatarUrl))
+                {
+                    cachedUser.Username = user.Username;
+                    cachedUser.DisplayName = user.GlobalName ?? user.Username;
+                    cachedUser.AvatarUrl = user.AvatarUrl ?? user.DefaultAvatarUrl;
+                    dbContext.Update(cachedUser);
+                    await dbContext.SaveChangesAsync();
+                }
+            }
+            await dbContext.DisposeAsync();
         }
 
         public static async Task UserUpdated(DiscordClient client, UserUpdatedEventArgs e)
         {
             client.Logger.LogDebug("Got a user updated event for {member}", e.UserAfter.Id);
-
-            // 
 
             // dont check bots
             if (e.UserAfter.IsBot)
@@ -280,6 +323,9 @@ namespace Cliptok.Events
 
             DehoistHelpers.CheckAndDehoistMemberAsync(member);
             ScamHelpers.UsernameCheckAsync(member);
+
+            // cache user or log change
+            await LogAndCacheUserUpdateAsync(client, e.UserAfter);
         }
 
     }
