@@ -30,10 +30,7 @@ namespace Cliptok
                     optionsBuilder.UseNpgsql(Environment.GetEnvironmentVariable("CLIPTOK_POSTGRES"));
                 else
                 {
-                    Console.WriteLine("WARNING: Falling back to Sqlite DB for efcore. You probably don't want this, make sure $HOME/.cliptok/ is persisted or configure Postgres");
-                    Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/.cliptok");
-                    string path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/.cliptok/Cliptok.db";
-                    optionsBuilder.UseSqlite($"Data Source={path};Cache=Shared;Pooling=true;");
+                    throw new ArgumentException("Persistent database enabled but no database connection string provided. Set CLIPTOK_POSTGRES environment variable.");
                 } 
             }
         }
