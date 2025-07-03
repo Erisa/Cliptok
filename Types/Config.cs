@@ -282,6 +282,9 @@
 
         [JsonProperty("warningLogReactionTimeMinutes")]
         public int WarningLogReactionTimeMinutes { get; private set; }
+
+        [JsonProperty("enablePersistentDb")]
+        public bool EnablePersistentDb { get; set; } = false;
     }
 
     public class WorkflowConfig

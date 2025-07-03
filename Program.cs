@@ -175,9 +175,12 @@ namespace Cliptok
             // Migration away from a broken attempt at a key in the past.
             redis.KeyDelete("messages");
 
-            // create db context that we can use
-            dbContext = new CliptokDbContext();
-            dbContext.Database.Migrate();
+            if (cfgjson.EnablePersistentDb)
+            {
+                // create db context that we can use
+                dbContext = new CliptokDbContext();
+                dbContext.Database.Migrate();
+            }
 
             DiscordClientBuilder discordBuilder = DiscordClientBuilder.CreateDefault(token, DiscordIntents.All);
 

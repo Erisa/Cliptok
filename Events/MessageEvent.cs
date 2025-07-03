@@ -82,18 +82,21 @@ namespace Cliptok.Events
                     await Program.redis.HashDeleteAsync("compromisedAccountBans", ban.Name);
             }
 
-            var dbContext = new CliptokDbContext();
-            var cachedMessage = await dbContext.Messages.Include(m => m.User).FirstOrDefaultAsync(m => m.Id == e.Message.Id);
-
-            // we store bot messages but don't log them right now
-            if (cachedMessage is not null && !cachedMessage.User.IsBot)
+            if (Program.cfgjson.EnablePersistentDb)
             {
-                await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(cachedMessage, "deleted", true, true));
+                var dbContext = new CliptokDbContext();
+                var cachedMessage = await dbContext.Messages.Include(m => m.User).FirstOrDefaultAsync(m => m.Id == e.Message.Id);
+
+                // we store bot messages but don't log them right now
+                if (cachedMessage is not null && !cachedMessage.User.IsBot)
+                {
+                    await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(cachedMessage, "deleted", true, true));
+                }
+
+                _ = dbContext.DisposeAsync();
+
+                await DiscordHelpers.DoEmptyThreadCleanupAsync(e.Channel, e.Message);
             }
-
-            _ = dbContext.DisposeAsync();
-
-            await DiscordHelpers.DoEmptyThreadCleanupAsync(e.Channel, e.Message);
         }
         
         public static async Task MessagesBulkDeleted(DiscordClient client, MessagesBulkDeletedEventArgs e)
@@ -113,15 +116,18 @@ namespace Cliptok.Events
                 }
             }
 
-            // log the bulk deleted messages
-            client.Logger.LogDebug("Got a bulk message delete event for {messagesCount} messages", e.Messages.Count);
+            if (Program.cfgjson.EnablePersistentDb)
+            {
+                // log the bulk deleted messages
+                client.Logger.LogDebug("Got a bulk message delete event for {messagesCount} messages", e.Messages.Count);
 
-            var messageIds = e.Messages.Select(m => m.Id).ToList();
+                var messageIds = e.Messages.Select(m => m.Id).ToList();
 
-            var dbContext = new CliptokDbContext();
-            var cachedMessages = dbContext.Messages.Include(m => m.User).Where(m => messageIds.Contains(m.Id));
-            await LogChannelHelper.LogMessageAsync("messages", await LogChannelHelper.CreateDumpMessageAsync($"{Program.cfgjson.Emoji.Deleted} {e.Messages.Count} messages were deleted from {e.Channel.Mention}, {cachedMessages.ToList().Count} were logged:", cachedMessages.ToList(), e.Channel));
-            _ = dbContext.DisposeAsync();
+                var dbContext = new CliptokDbContext();
+                var cachedMessages = dbContext.Messages.Include(m => m.User).Where(m => messageIds.Contains(m.Id));
+                await LogChannelHelper.LogMessageAsync("messages", await LogChannelHelper.CreateDumpMessageAsync($"{Program.cfgjson.Emoji.Deleted} {e.Messages.Count} messages were deleted from {e.Channel.Mention}, {cachedMessages.ToList().Count} were logged:", cachedMessages.ToList(), e.Channel));
+                _ = dbContext.DisposeAsync();
+            }
         }
 
         static async Task DeleteAndWarnAsync(DiscordMessage message, string reason, DiscordClient client, string messageContentOverride = default)
@@ -228,30 +234,33 @@ namespace Cliptok.Events
         {
             #region message logging fill to db
 
-            if (isAnEdit) {
-                var dbContext = new CliptokDbContext();
-                var cachedMessage = dbContext.Messages.Include(m => m.User).FirstOrDefault(m => m.Id == message.Id);
-                if (cachedMessage is not null && cachedMessage.Content != message.Content)
-                {
-                    var newMessage = await CacheMessageAsync(message, dbContext);
-                    // we store bot messages but don't log them right now
-                    if (cachedMessage is not null && !cachedMessage.User.IsBot)
-                    {
-                        await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(newMessage, "edited", true, true, cachedMessage));
-                    }
-
-                    cachedMessage.Content = newMessage.Content;
-                    cachedMessage.AttachmentURLs = newMessage.AttachmentURLs;
-                    await UpdateMessageAsync(cachedMessage, dbContext);
-                }
-                _ = dbContext.DisposeAsync();
-            }
-            else
+            if (Program.cfgjson.EnablePersistentDb)
             {
-                // cache in the background to not impede execution of the message handler
-                _ = CacheAndAddMessageAsync(message, new CliptokDbContext(), true);
-            }
+                if (isAnEdit)
+                {
+                    var dbContext = new CliptokDbContext();
+                    var cachedMessage = dbContext.Messages.Include(m => m.User).FirstOrDefault(m => m.Id == message.Id);
+                    if (cachedMessage is not null && cachedMessage.Content != message.Content)
+                    {
+                        var newMessage = await CacheMessageAsync(message, dbContext);
+                        // we store bot messages but don't log them right now
+                        if (cachedMessage is not null && !cachedMessage.User.IsBot)
+                        {
+                            await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(newMessage, "edited", true, true, cachedMessage));
+                        }
 
+                        cachedMessage.Content = newMessage.Content;
+                        cachedMessage.AttachmentURLs = newMessage.AttachmentURLs;
+                        await UpdateMessageAsync(cachedMessage, dbContext);
+                    }
+                    _ = dbContext.DisposeAsync();
+                }
+                else
+                {
+                    // cache in the background to not impede execution of the message handler
+                    _ = CacheAndAddMessageAsync(message, new CliptokDbContext(), true);
+                }
+            }
             #endregion
 
             #region combine all message text

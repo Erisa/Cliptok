@@ -17,10 +17,6 @@ services:
       - type: bind
         source: ./ssh_key
         target: /root/.ssh/id_ed25519
-      # Only used when using the sqlite fallback for efcore
-      - type: bind
-        source: ./data
-        target: /root/.cliptok
       # Uncomment the below lines to use your own config file.
       #- type: bind
       #  source: ./config.dev.json
@@ -39,15 +35,16 @@ services:
         source: ./data
         target: /data
     command: --appendonly yes
-  postgres:
-    image: postgres:17-alpine
-    restart: always
-    environment:
-      POSTGRES_USER: cliptok
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: cliptok
-    volumes:
-      - ./pgdata:/var/lib/postgresql/data
+# Use only if enablePersistentDb is enabled in config.json
+#  postgres:
+#    image: postgres:17-alpine
+#    restart: always
+#    environment:
+#      POSTGRES_USER: cliptok
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#      POSTGRES_DB: cliptok
+#    volumes:
+#      - ./pgdata:/var/lib/postgresql/data
 
 # You may want to comment out everything below if you're not Erisa.
   redis-exposer:

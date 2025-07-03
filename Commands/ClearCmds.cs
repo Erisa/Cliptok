@@ -297,6 +297,16 @@
                 }
 
                 // logging is now handled in the bulk delete event
+
+                if (!Program.cfgjson.EnablePersistentDb)
+                {
+                    await LogChannelHelper.LogDeletedMessagesAsync(
+                        "messages",
+                        $"{Program.cfgjson.Emoji.Deleted} **{messagesToClear.Count}** messages were cleared from {channel.Mention} by {ctx.User.Mention}.",
+                        messagesToClear,
+                        channel
+                    );
+                }
             }
         }
     }
