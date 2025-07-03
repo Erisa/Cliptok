@@ -247,7 +247,8 @@ namespace Cliptok.Events
                     });
 
             // cache user
-            await LogAndCacheUserUpdateAsync(client, e.Member);
+            if (Program.cfgjson.EnablePersistentDb)
+                await LogAndCacheUserUpdateAsync(client, e.Member);
         }
 
         public static async Task LogAndCacheUserUpdateAsync(DiscordClient client, DiscordUser user)
@@ -325,7 +326,8 @@ namespace Cliptok.Events
             ScamHelpers.UsernameCheckAsync(member);
 
             // cache user or log change
-            await LogAndCacheUserUpdateAsync(client, e.UserAfter);
+            if (Program.cfgjson.EnablePersistentDb)
+                await LogAndCacheUserUpdateAsync(client, e.UserAfter);
         }
 
     }
