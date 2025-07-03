@@ -26,7 +26,7 @@ namespace Cliptok.Commands
 
                 await ctx.DeferResponseAsync();
 
-                var currentValue = await Program.db.HashGetAsync($"nicknamelock", discordUser.Id);
+                var currentValue = await Program.redis.HashGetAsync($"nicknamelock", discordUser.Id);
 
                 if (currentValue.HasValue && (nickname == "" || nickname == member.Nickname))
                 {
@@ -52,7 +52,7 @@ namespace Cliptok.Commands
                     nickname = DehoistHelpers.DehoistName(nickname);
                 }
 
-                await Program.db.HashSetAsync("nicknamelock", discordUser.Id, nickname);
+                await Program.redis.HashSetAsync("nicknamelock", discordUser.Id, nickname);
                 await member.ModifyAsync(m => m.Nickname = nickname);
                 var msg = $"{Program.cfgjson.Emoji.On} Nickname locked {discordUser.Mention} as `{nickname}`!";
                 if (dehoistable)
@@ -77,11 +77,11 @@ namespace Cliptok.Commands
                     return;
                 }
 
-                var currentValue = await Program.db.HashGetAsync($"nicknamelock", discordUser.Id);
+                var currentValue = await Program.redis.HashGetAsync($"nicknamelock", discordUser.Id);
 
                 if (currentValue.HasValue)
                 {
-                    await Program.db.HashDeleteAsync("nicknamelock", discordUser.Id);
+                    await Program.redis.HashDeleteAsync("nicknamelock", discordUser.Id);
                     var msg = $"{Program.cfgjson.Emoji.Off} Removed nickname lock for {discordUser.Mention}!";
                     await ctx.RespondAsync(msg, mentions: false);
                     await LogChannelHelper.LogMessageAsync("nicknames", msg);
@@ -96,7 +96,7 @@ namespace Cliptok.Commands
             [Description("Check the status of nickname lock for a member.")]
             public async Task NicknameLockStatusSlashCmd(SlashCommandContext ctx, [Parameter("member"), Description("The member whose nickname lock status to check.")] DiscordUser discordUser)
             {
-                if ((await Program.db.HashGetAsync("nicknamelock", discordUser.Id)).HasValue)
+                if ((await Program.redis.HashGetAsync("nicknamelock", discordUser.Id)).HasValue)
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.On} {discordUser.Mention} is nickname locked.", mentions: false);
                 else
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Off} {discordUser.Mention} is not nickname locked.", mentions: false);

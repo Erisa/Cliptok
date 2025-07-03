@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using static Cliptok.Constants.RegexConstants;
 
 namespace Cliptok.Events
@@ -50,7 +51,6 @@ namespace Cliptok.Events
             {
                 client.Logger.LogDebug("Got a message update event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
             }
-
             await MessageHandlerAsync(client, e.Message, e.Channel, true);
         }
 
@@ -70,38 +70,63 @@ namespace Cliptok.Events
                 client.Logger.LogDebug("Got a message delete event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
             }
             
-            foreach (var warning in await Program.db.HashGetAllAsync("automaticWarnings"))
+            foreach (var warning in await Program.redis.HashGetAllAsync("automaticWarnings"))
             {
                 if (JsonConvert.DeserializeObject<UserWarning>(warning.Value).ContextMessageReference.MessageId == e.Message.Id)
-                    await Program.db.HashDeleteAsync("automaticWarnings", warning.Name);
+                    await Program.redis.HashDeleteAsync("automaticWarnings", warning.Name);
             }
             
-            foreach (var ban in await Program.db.HashGetAllAsync("compromisedAccountBans"))
+            foreach (var ban in await Program.redis.HashGetAllAsync("compromisedAccountBans"))
             {
                 if (JsonConvert.DeserializeObject<MemberPunishment>(ban.Value).ContextMessageReference.MessageId == e.Message.Id)
-                    await Program.db.HashDeleteAsync("compromisedAccountBans", ban.Name);
+                    await Program.redis.HashDeleteAsync("compromisedAccountBans", ban.Name);
             }
 
-            await DiscordHelpers.DoEmptyThreadCleanupAsync(e.Channel, e.Message);
+            if (Program.cfgjson.EnablePersistentDb)
+            {
+                var dbContext = new CliptokDbContext();
+                var cachedMessage = await dbContext.Messages.Include(m => m.User).FirstOrDefaultAsync(m => m.Id == e.Message.Id);
+
+                // we store bot messages but don't log them right now
+                if (cachedMessage is not null && !cachedMessage.User.IsBot)
+                {
+                    await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(cachedMessage, "deleted", true, true));
+                }
+
+                _ = dbContext.DisposeAsync();
+
+                await DiscordHelpers.DoEmptyThreadCleanupAsync(e.Channel, e.Message);
+            }
         }
         
         public static async Task MessagesBulkDeleted(DiscordClient client, MessagesBulkDeletedEventArgs e)
         {
-            client.Logger.LogDebug("Got a bulk message delete event for {messagesCount} messages", e.Messages.Count);
-            
             foreach (var message in e.Messages)
             {
-                foreach (var warning in await Program.db.HashGetAllAsync("automaticWarnings"))
+                foreach (var warning in await Program.redis.HashGetAllAsync("automaticWarnings"))
                 {
                     if (JsonConvert.DeserializeObject<UserWarning>(warning.Value).ContextMessageReference.MessageId == message.Id)
-                        await Program.db.HashDeleteAsync("automaticWarnings", warning.Name);
+                        await Program.redis.HashDeleteAsync("automaticWarnings", warning.Name);
                 }
             
-                foreach (var ban in await Program.db.HashGetAllAsync("compromisedAccountBans"))
+                foreach (var ban in await Program.redis.HashGetAllAsync("compromisedAccountBans"))
                 {
                     if (JsonConvert.DeserializeObject<MemberPunishment>(ban.Value).ContextMessageReference.MessageId == message.Id)
-                        await Program.db.HashDeleteAsync("compromisedAccountBans", ban.Name);
+                        await Program.redis.HashDeleteAsync("compromisedAccountBans", ban.Name);
                 }
+            }
+
+            if (Program.cfgjson.EnablePersistentDb)
+            {
+                // log the bulk deleted messages
+                client.Logger.LogDebug("Got a bulk message delete event for {messagesCount} messages", e.Messages.Count);
+
+                var messageIds = e.Messages.Select(m => m.Id).ToList();
+
+                var dbContext = new CliptokDbContext();
+                var cachedMessages = dbContext.Messages.Include(m => m.User).Where(m => messageIds.Contains(m.Id));
+                await LogChannelHelper.LogMessageAsync("messages", await LogChannelHelper.CreateDumpMessageAsync($"{Program.cfgjson.Emoji.Deleted} {e.Messages.Count} messages were deleted from {e.Channel.Mention}, {cachedMessages.ToList().Count} were logged:", cachedMessages.ToList(), e.Channel));
+                _ = dbContext.DisposeAsync();
             }
         }
 
@@ -144,12 +169,100 @@ namespace Cliptok.Events
             await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
         }
 
+        public static async Task<Models.CachedDiscordMessage> CacheAndAddMessageAsync(MockDiscordMessage message, CliptokDbContext ctx, bool disposeContext)
+        {
+            var cachedMessage = await CacheMessageAsync(message, ctx);
+            await AddMessageToCacheAsync(cachedMessage, ctx);
+            if (disposeContext)
+                await ctx.DisposeAsync();
+            return cachedMessage;
+        }
+
+        public static async Task<Models.CachedDiscordMessage> CacheMessageAsync(MockDiscordMessage message, CliptokDbContext ctx)
+        {
+            var cachedMessage = new Models.CachedDiscordMessage
+            {
+                Id = message.Id,
+                ChannelId = message.Channel.Id,
+                Content = message.Content,
+                Timestamp = message.Timestamp.HasValue ? message.Timestamp.Value.UtcDateTime : DateTime.UtcNow,
+                AttachmentURLs = message.Attachments?.Select(a => a.Url).ToList(),
+            };
+
+            var existingUser = await (ctx.Users.FirstOrDefaultAsync(u => u.Id == message.Author.Id));
+
+            if (existingUser is null)
+            {
+                cachedMessage.User = new Models.CachedDiscordUser
+                {
+                    Id = message.Author.Id,
+                    Username = message.Author.Username,
+                    DisplayName = message.Author.GlobalName ?? message.Author.Username,
+                    AvatarUrl = message.Author.AvatarUrl ?? message.Author.DefaultAvatarUrl,
+                    IsBot = message.Author.IsBot
+                };
+                await ctx.Users.AddAsync(cachedMessage.User);
+                await ctx.SaveChangesAsync();
+            }
+            else
+            {
+                cachedMessage.User = existingUser;
+            }
+
+            return cachedMessage;
+        }
+
+        public static async Task UpdateMessageAsync(Models.CachedDiscordMessage cachedMessage, CliptokDbContext ctx)
+        {
+            ctx.Users.Attach(cachedMessage.User);
+            ctx.Messages.Update(cachedMessage);
+            await ctx.SaveChangesAsync();
+        }
+
+        public static async Task AddMessageToCacheAsync(Models.CachedDiscordMessage cachedMessage, CliptokDbContext ctx)
+        {
+            ctx.Attach(cachedMessage.User);
+            await ctx.AddAsync(cachedMessage);
+            await ctx.SaveChangesAsync();
+        }
+
         public static async Task MessageHandlerAsync(DiscordClient client, DiscordMessage message, DiscordChannel channel, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
             await MessageHandlerAsync(client, new MockDiscordMessage(message), channel, isAnEdit, limitFilters, wasAutoModBlock);
         }
         public static async Task MessageHandlerAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
+            #region message logging fill to db
+
+            if (Program.cfgjson.EnablePersistentDb)
+            {
+                if (isAnEdit)
+                {
+                    var dbContext = new CliptokDbContext();
+                    var cachedMessage = dbContext.Messages.Include(m => m.User).FirstOrDefault(m => m.Id == message.Id);
+                    if (cachedMessage is not null && cachedMessage.Content != message.Content)
+                    {
+                        var newMessage = await CacheMessageAsync(message, dbContext);
+                        // we store bot messages but don't log them right now
+                        if (cachedMessage is not null && !cachedMessage.User.IsBot)
+                        {
+                            await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(newMessage, "edited", true, true, cachedMessage));
+                        }
+
+                        cachedMessage.Content = newMessage.Content;
+                        cachedMessage.AttachmentURLs = newMessage.AttachmentURLs;
+                        await UpdateMessageAsync(cachedMessage, dbContext);
+                    }
+                    _ = dbContext.DisposeAsync();
+                }
+                else
+                {
+                    // cache in the background to not impede execution of the message handler
+                    _ = CacheAndAddMessageAsync(message, new CliptokDbContext(), true);
+                }
+            }
+            #endregion
+
             #region combine all message text
             // Get forwarded msg & embeds, if any, and combine with content to evaluate
             // Combined as a single long string
@@ -243,10 +356,10 @@ namespace Cliptok.Events
                 if (!limitFilters)
                 {
                     #region tracked user relaying
-                    if (Program.db.SetContains("trackedUsers", message.Author.Id))
+                    if (Program.redis.SetContains("trackedUsers", message.Author.Id))
                     {
                         // Check current channel against tracking channels
-                        var trackingChannels = await Program.db.HashGetAsync("trackingChannels", message.Author.Id);
+                        var trackingChannels = await Program.redis.HashGetAsync("trackingChannels", message.Author.Id);
                         if (trackingChannels.HasValue)
                         {
                             var trackingChannelsList = JsonConvert.DeserializeObject<List<ulong>>(trackingChannels);
@@ -300,7 +413,7 @@ namespace Cliptok.Events
                         // Add notes to message if any exist & are set to show on modmail
 
                         // Get user notes
-                        var notes = (await Program.db.HashGetAllAsync(modmailMember.Id.ToString()))
+                        var notes = (await Program.redis.HashGetAllAsync(modmailMember.Id.ToString()))
                             .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note).ToDictionary(
                                 x => x.Name.ToString(),
                                 x => JsonConvert.DeserializeObject<UserNote>(x.Value)
@@ -329,7 +442,7 @@ namespace Cliptok.Events
                         foreach (var note in notesToNotify.Where(note => note.Value.ShowOnce))
                         {
                             // Delete note
-                            await Program.db.HashDeleteAsync(modmailMember.Id.ToString(), note.Key);
+                            await Program.redis.HashDeleteAsync(modmailMember.Id.ToString(), note.Key);
 
                             // Log deletion to mod-logs channel
                             var embed = new DiscordEmbedBuilder(await UserNoteHelpers.GenerateUserNoteDetailEmbedAsync(note.Value, modmailMember)).WithColor(0xf03916);
@@ -733,9 +846,9 @@ namespace Cliptok.Events
 
                             string reason = "Mass emoji";
 
-                            if ((await GetPermLevelAsync(member)) == ServerPermLevel.Nothing && !Program.db.HashExists("emojiPardoned", message.Author.Id.ToString()))
+                            if ((await GetPermLevelAsync(member)) == ServerPermLevel.Nothing && !Program.redis.HashExists("emojiPardoned", message.Author.Id.ToString()))
                             {
-                                await Program.db.HashSetAsync("emojiPardoned", member.Id.ToString(), false);
+                                await Program.redis.HashSetAsync("emojiPardoned", member.Id.ToString(), false);
                                 string pardonOutput;
                                 if (Program.cfgjson.UnrestrictedEmojiChannels.Count > 0)
                                     pardonOutput = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, if you want to play around with lots of emoji, please use <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.";
@@ -751,10 +864,10 @@ namespace Cliptok.Events
                             }
 
                             string output = $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**";
-                            if (Program.cfgjson.UnrestrictedEmojiChannels.Count > 0 && (!Program.db.HashExists("emojiPardoned", message.Author.Id.ToString()) || Program.db.HashGet("emojiPardoned", message.Author.Id.ToString()) == false))
+                            if (Program.cfgjson.UnrestrictedEmojiChannels.Count > 0 && (!Program.redis.HashExists("emojiPardoned", message.Author.Id.ToString()) || Program.redis.HashGet("emojiPardoned", message.Author.Id.ToString()) == false))
                             {
                                 output += $"\nIf you want to play around with lots of emoji, please use <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.";
-                                await Program.db.HashSetAsync("emojiPardoned", member.Id.ToString(), true);
+                                await Program.redis.HashSetAsync("emojiPardoned", member.Id.ToString(), true);
                             }
 
                             DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, output, wasAutoModBlock);
@@ -920,9 +1033,9 @@ namespace Cliptok.Events
 
                         string reason = "Too many lines in a single message";
 
-                        if (!Program.db.SetContains("linePardoned", message.Author.Id.ToString()))
+                        if (!Program.redis.SetContains("linePardoned", message.Author.Id.ToString()))
                         {
-                            await Program.db.SetAddAsync("linePardoned", member.Id.ToString());
+                            await Program.redis.SetAddAsync("linePardoned", member.Id.ToString());
                             string output;
                             if (wasAutoModBlock)
                                 output = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, your message contained too many lines.\n" +
@@ -937,7 +1050,7 @@ namespace Cliptok.Events
                             {
                                 messageBuilder.AddActionRowComponent(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
                                 msg = await channel.SendMessageAsync(messageBuilder);
-                                await Program.db.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
+                                await Program.redis.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
                             }
                             else
                             {
@@ -957,7 +1070,7 @@ namespace Cliptok.Events
                             {
                                 messageBuilder.AddActionRowComponent(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
                                 msg = await channel.SendMessageAsync(messageBuilder);
-                                await Program.db.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
+                                await Program.redis.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
                             }
                             else
                             {
@@ -978,10 +1091,10 @@ namespace Cliptok.Events
                 if (!limitFilters)
                 {
                     #region feedback hub forum validation
-                    if ((await GetPermLevelAsync(member)) < ServerPermLevel.TrialModerator && !isAnEdit && channel.IsThread && channel.ParentId == Program.cfgjson.FeedbackHubForum && !Program.db.SetContains("processedFeedbackHubThreads", channel.Id))
+                    if ((await GetPermLevelAsync(member)) < ServerPermLevel.TrialModerator && !isAnEdit && channel.IsThread && channel.ParentId == Program.cfgjson.FeedbackHubForum && !Program.redis.SetContains("processedFeedbackHubThreads", channel.Id))
                     {
                         var thread = (DiscordThreadChannel)channel;
-                        Program.db.SetAdd("processedFeedbackHubThreads", thread.Id);
+                        Program.redis.SetAdd("processedFeedbackHubThreads", thread.Id);
 
                         // we need to make sure this is the first message in the channel
                         if ((await thread.GetMessagesBeforeAsync(message.Id).ToListAsync()).Count == 0)
@@ -1170,7 +1283,7 @@ namespace Cliptok.Events
             else
             {
                 relayThread = (DiscordThreadChannel)await client.GetChannelAsync(
-                    (ulong)await Program.db.HashGetAsync("trackingThreads", message.Author.Id));
+                    (ulong)await Program.redis.HashGetAsync("trackingThreads", message.Author.Id));
                 trackingThreadCache.Add(message.Author.Id, relayThread);
             }
 

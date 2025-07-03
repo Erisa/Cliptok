@@ -1,77 +1,5 @@
-﻿namespace Cliptok
+﻿namespace Cliptok.Types
 {
-    public class UserWarning
-    {
-        [JsonProperty("targetUserId")]
-        public ulong TargetUserId { get; set; }
-
-        [JsonProperty("modUserId")]
-        public ulong ModUserId { get; set; }
-
-        [JsonProperty("warningId")]
-        public long WarningId { get; set; }
-
-        [JsonProperty("warnReason")]
-        public string WarnReason { get; set; }
-
-        [JsonProperty("warnTimestamp")]
-        public DateTime WarnTimestamp { get; set; }
-
-        [JsonProperty("contextLink")]
-        public string ContextLink { get; set; }
-
-        [JsonProperty("contextMessageReference")]
-        public MessageReference ContextMessageReference { get; set; } = default;
-
-        [JsonProperty("dmMessageReference")]
-        public MessageReference DmMessageReference { get; set; } = default;
-
-        [JsonProperty("type")]
-        public WarningType Type { get; set; }
-
-        [JsonProperty("stub")]
-        public bool Stub { get; set; } = false;
-    }
-
-    public class MessageReference
-    {
-        [JsonProperty("messageId")]
-        public ulong MessageId { get; set; } = 0;
-
-        [JsonProperty("channelId")]
-        public ulong ChannelId { get; set; } = 0;
-    }
-
-    public class MemberPunishment
-    {
-        [JsonProperty("memberId")]
-        public ulong MemberId { get; set; }
-
-        [JsonProperty("actionTime")]
-        public DateTime? ActionTime { get; set; }
-
-        [JsonProperty("expireTime")]
-        public DateTime? ExpireTime { get; set; }
-
-        [JsonProperty("modId")]
-        public ulong ModId { get; set; }
-
-        [JsonProperty("serverId")]
-        public ulong ServerId { get; set; }
-
-        [JsonProperty("reason")]
-        public string Reason { get; set; }
-
-        [JsonProperty("contextMessageReference")]
-        public MessageReference ContextMessageReference { get; set; }
-
-        [JsonProperty("dmMessageReference")]
-        public MessageReference DmMessageReference { get; set; }
-
-        [JsonProperty("stub")]
-        public bool Stub { get; set; } = false;
-    }
-
     public class ConfigJson
     {
         [JsonProperty("core")]
@@ -187,7 +115,7 @@
 
         [JsonProperty("announcementRoles")]
         public Dictionary<string, ulong> AnnouncementRoles { get; private set; }
-        
+
         [JsonProperty("announcementRolesFriendlyNames")]
         public Dictionary<string, string> AnnouncementRolesFriendlyNames { get; private set; }
 
@@ -297,7 +225,7 @@
 
         [JsonProperty("autoDeleteEmptyThreads")]
         public bool AutoDeleteEmptyThreads { get; private set; } = false;
-        
+
         [JsonProperty("insiderThreads")]
         public Dictionary<string, ulong> InsiderThreads { get; set; } = new();
 
@@ -339,7 +267,7 @@
 
         [JsonProperty("githubWorkflowSucessString")]
         public string GithubWorkflowSucessString { get; private set; } = "";
-        
+
         [JsonProperty("botCommandsChannel")]
         public ulong BotCommandsChannel { get; private set; }
 
@@ -351,23 +279,12 @@
 
         [JsonProperty("insiderThreadKeepLastPins")]
         public int InsiderThreadKeepLastPins { get; private set; } = 50; // 50 is the pin limit, so it would be silly to allow infinite
-        
+
         [JsonProperty("warningLogReactionTimeMinutes")]
         public int WarningLogReactionTimeMinutes { get; private set; }
-    }
 
-    public enum Level { Information, Warning, Error, Debug, Verbose }
-
-    public class LogChannelConfig
-    {
-        [JsonProperty("channelId")]
-        public ulong ChannelId { get; private set; } = 0;
-
-        [JsonProperty("webhookUrl")]
-        public string WebhookUrl { get; private set; } = "";
-
-        [JsonProperty("webhookEnvVar")]
-        public string WebhookEnvVar { get; private set; } = "";
+        [JsonProperty("enablePersistentDb")]
+        public bool EnablePersistentDb { get; set; } = false;
     }
 
     public class WorkflowConfig
@@ -544,144 +461,16 @@
         public ulong Giveaways { get; private set; }
     }
 
-    public class PhishingRequestBody
-    {
-        [JsonProperty("message")]
-        public string Message { get; set; }
-    }
-
-    public class PhishingResponseBody
-    {
-        [JsonProperty("match")]
-        public bool Match { get; set; }
-
-        [JsonProperty("matches")]
-        public List<PhishingMatch> Matches { get; set; }
-    }
-
-    public class PhishingMatch
-    {
-        [JsonProperty("followed")]
-        public bool Followed { get; set; }
-
-        [JsonProperty("domain")]
-        public string Domain { get; set; }
-
-        [JsonProperty("source")]
-        public string Source { get; set; }
-
-        [JsonProperty("type")]
-        public string Type { get; set; }
-
-        [JsonProperty("trust_rating")]
-        public float TrustRating { get; set; }
-    }
-
-    public class UsernameScamApiRequestJson
-    {
-        [JsonProperty("username")]
-        public string Username { get; set; }
-    }
-
-    public class UsernameScamApiResponseJson
-    {
-        [JsonProperty("match")]
-        public bool Match { get; set; }
-
-        [JsonProperty("reason")]
-        public string Reason { get; set; }
-    }
-
-    [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
-    public class ServerApiResponseJson
-    {
-        [JsonProperty("serverID")]
-        public string ServerID { get; set; }
-
-        [JsonProperty("match")]
-        public bool Match { get; set; } = true;
-
-        [JsonProperty("reason")]
-        public string Reason { get; set; }
-
-        [JsonProperty("key")]
-        public string Key { get; set; }
-
-        [JsonProperty("vanity")]
-        public string Vanity { get; set; }
-
-        [JsonProperty("name")]
-        public string Name { get; set; }
-
-        [JsonProperty("invite")]
-        public string Invite { get; set; }
-    }
-
-    public class UserNote
-    {
-        [JsonProperty("targetUserId")]
-        public ulong TargetUserId { get; set; }
-
-        [JsonProperty("modUserId")]
-        public ulong ModUserId { get; set; }
-
-        [JsonProperty("noteText")]
-        public string NoteText { get; set; }
-
-        [JsonProperty("showOnModmail")]
-        public bool ShowOnModmail { get; set; }
-
-        [JsonProperty("showOnWarn")]
-        public bool ShowOnWarn { get; set; }
-
-        [JsonProperty("showAllMods")]
-        public bool ShowAllMods { get; set; }
-
-        [JsonProperty("showOnce")]
-        public bool ShowOnce { get; set; }
-
-        [JsonProperty("showOnJoinAndLeave")]
-        public bool ShowOnJoinAndLeave { get; set; }
-
-        [JsonProperty("noteId")]
-        public long NoteId { get; set; }
-
-        [JsonProperty("timestamp")]
-        public DateTime Timestamp { get; set; }
-
-        [JsonProperty("type")]
-        public WarningType Type { get; set; }
-    }
-
-    public class PendingUserOverride
+    public class LogChannelConfig
     {
         [JsonProperty("channelId")]
-        public ulong ChannelId { get; set; }
+        public ulong ChannelId { get; private set; } = 0;
 
-        [JsonProperty("overwrite")]
-        public MockUserOverwrite Overwrite { get; set; }
-    }
+        [JsonProperty("webhookUrl")]
+        public string WebhookUrl { get; private set; } = "";
 
-    public class MockUserOverwrite
-    {
-        [JsonProperty("type")]
-        public int Type { get; } = 1;
-
-        [JsonProperty("allow")]
-        public DiscordPermissions Allowed { get; set; }
-
-        [JsonProperty("deny")]
-        public DiscordPermissions Denied { get; set; }
-
-        [JsonProperty("id")]
-        public ulong Id { get; set; }
-    }
-
-    public class RecentMessageInfo
-    {
-        public string Content { get; set; }
-        public List<MockDiscordMessage> Messages { get; set; }
-        public DateTime LastMessageTime { get; set; }
+        [JsonProperty("webhookEnvVar")]
+        public string WebhookEnvVar { get; private set; } = "";
     }
 
 }

@@ -158,7 +158,17 @@ namespace Cliptok.Helpers
         public static async Task<DiscordMessageBuilder> CreateDumpMessageAsync(string content, List<DiscordMessage> messages, DiscordChannel channel)
         {
             string messageLog = await DiscordHelpers.CompileMessagesAsync(messages.AsEnumerable().OrderBy(x => x.Id).ToList(), channel);
+            return await DumpMessageFromStringAsync(messageLog, content);
+        }
 
+        public static async Task<DiscordMessageBuilder> CreateDumpMessageAsync(string content, List<Models.CachedDiscordMessage> messages, DiscordChannel channel)
+        {
+            string messageLog = await DiscordHelpers.CompileMessagesAsync(messages.AsEnumerable().OrderBy(x => x.Id).ToList(), channel);
+            return await DumpMessageFromStringAsync(messageLog, content);
+        }
+
+        public static async Task<DiscordMessageBuilder> DumpMessageFromStringAsync(string messageLog, string content)
+        {
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(messageLog));
             var msg = new DiscordMessageBuilder().WithContent(content).AddFile("messages.txt", stream);
 
@@ -168,6 +178,7 @@ namespace Cliptok.Helpers
             {
                 msg.AddEmbed(new DiscordEmbedBuilder().WithDescription($"[`📄 View online`]({Program.cfgjson.HastebinEndpoint}/raw/{hasteResult.Key})"));
             }
+
             return msg;
         }
 

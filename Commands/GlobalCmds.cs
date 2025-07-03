@@ -288,7 +288,7 @@ namespace Cliptok.Commands
                 OriginalTime = DateTime.Now
             };
 
-            await Program.db.ListRightPushAsync("reminders", JsonConvert.SerializeObject(reminderObject));
+            await Program.redis.ListRightPushAsync("reminders", JsonConvert.SerializeObject(reminderObject));
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} I'll try my best to remind you about that on <t:{TimeHelpers.ToUnixTimestamp(t)}:f> (<t:{TimeHelpers.ToUnixTimestamp(t)}:R>)"); // (In roughly **{TimeHelpers.TimeToPrettyFormat(t.Subtract(ctx.Message.Timestamp.DateTime), false)}**)");
         }
 

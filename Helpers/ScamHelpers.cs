@@ -8,12 +8,12 @@ namespace Cliptok.Helpers
         public static async Task<bool> UsernameCheckAsync(DiscordMember member)
         {
             var guild = homeGuild;
-            if (db.HashExists("unbanned", member.Id))
+            if (redis.HashExists("unbanned", member.Id))
                 return false;
 
             if (cfgjson.UsernameAPILogChannel != 0 && Environment.GetEnvironmentVariable("USERNAME_CHECK_ENDPOINT") is not null)
             {
-                if (db.SetContains("safeusernamestore", member.Username))
+                if (redis.SetContains("safeusernamestore", member.Username))
                 {
                     discord.Logger.LogDebug("Unnecessary username check skipped for {member}", member.Username);
                 }
@@ -38,7 +38,7 @@ namespace Cliptok.Helpers
                         else
                         {
                             discord.Logger.LogDebug("Experimental Username check for {member}: {status} {response}", member.Username, apiResult.statusCode, apiResult.responseString);
-                            await db.SetAddAsync("safeusernamestore", member.Username);
+                            await redis.SetAddAsync("safeusernamestore", member.Username);
                         }
                     }
                     else if (apiResult.statusCode != HttpStatusCode.OK)

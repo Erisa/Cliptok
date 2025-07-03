@@ -239,16 +239,16 @@
             [Description("The user to block from ban appeals.")] DiscordUser user
         )
         {
-            if (Program.db.SetContains("appealBlocks", user.Id))
+            if (Program.redis.SetContains("appealBlocks", user.Id))
             {
                 // User is already blocked, unblock
-                Program.db.SetRemove("appealBlocks", user.Id);
+                Program.redis.SetRemove("appealBlocks", user.Id);
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully unblocked {user.Mention}, since they were already in the list.");
             }
             else
             {
                 // User is not blocked, block
-                Program.db.SetAdd("appealBlocks", user.Id);
+                Program.redis.SetAdd("appealBlocks", user.Id);
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {user.Mention} is now blocked from appealing bans.");
             }
         }

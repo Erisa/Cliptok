@@ -86,7 +86,7 @@
         public static async Task<(bool success, bool isPermissionError)> PermadehoistMember(DiscordUser discordUser, DiscordUser responsibleMod, DiscordGuild guild)
         {
             // If member is already in permadehoist list, fail
-            if (await Program.db.SetContainsAsync("permadehoists", discordUser.Id))
+            if (await Program.redis.SetContainsAsync("permadehoists", discordUser.Id))
                 return (false, false);
 
             DiscordMember discordMember;
@@ -97,7 +97,7 @@
             catch
             {
                 // Add member ID to permadehoist list
-                await Program.db.SetAddAsync("permadehoists", discordUser.Id);
+                await Program.redis.SetAddAsync("permadehoists", discordUser.Id);
 
                 return (true, false);
             }
@@ -124,14 +124,14 @@
                 catch
                 {
                     // On failure, add member ID to permadehoist list anyway
-                    await Program.db.SetAddAsync("permadehoists", discordUser.Id);
+                    await Program.redis.SetAddAsync("permadehoists", discordUser.Id);
 
                     return (false, false);
                 }
             }
 
             // On success or if member is already dehoisted, just add member ID to permadehoist list
-            await Program.db.SetAddAsync("permadehoists", discordUser.Id);
+            await Program.redis.SetAddAsync("permadehoists", discordUser.Id);
 
             return (true, false);
         }
@@ -139,11 +139,11 @@
         public static async Task<(bool success, bool isPermissionError)> UnpermadehoistMember(DiscordUser discordUser, DiscordUser responsibleMod, DiscordGuild guild)
         {
             // If member is not dehoisted and is not in permadehoist list, fail
-            if (!await Program.db.SetContainsAsync("permadehoists", discordUser.Id))
+            if (!await Program.redis.SetContainsAsync("permadehoists", discordUser.Id))
                 return (false, false);
 
             // Remove member ID from permadehoist list
-            await Program.db.SetRemoveAsync("permadehoists", discordUser.Id);
+            await Program.redis.SetRemoveAsync("permadehoists", discordUser.Id);
 
             if (guild is not null)
             {
@@ -181,7 +181,7 @@
 
         public static async Task<(bool success, bool isPermissionError, bool isDehoist)> TogglePermadehoist(DiscordUser discordUser, DiscordUser responsibleMod, DiscordGuild guild)
         {
-            if (await Program.db.SetContainsAsync("permadehoists", discordUser.Id))
+            if (await Program.redis.SetContainsAsync("permadehoists", discordUser.Id))
             {
                 // Member is dehoisted; un-permadehoist
                 var (success, isPermissionError) = await UnpermadehoistMember(discordUser, responsibleMod, guild);

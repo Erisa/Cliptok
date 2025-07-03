@@ -33,6 +33,11 @@
             return $"https://discord.com/channels/{(msg.Channel.IsPrivate ? "@me" : msg.Channel.Guild.Id)}/{msg.Channel.Id}/{msg.Id}";
         }
 
+        public static string MessageLink(Models.CachedDiscordMessage msg)
+        {
+            return $"https://discord.com/channels/{Program.homeGuild.Id}/{msg.ChannelId}/{msg.Id}";
+        }
+
         // If invoker is allowed to mod target.
         public static bool AllowedToMod(DiscordMember invoker, DiscordMember target)
         {
@@ -108,6 +113,33 @@
 
             return output.ToString();
         }
+
+        public static async Task<string> CompileMessagesAsync(List<Models.CachedDiscordMessage> messages, DiscordChannel channel)
+        {
+            var output = new StringBuilder().Append($"-- Messages in #{channel.Name} ({channel.Id}) -- {channel.Guild.Name} ({channel.Guild.Id}) --\n");
+
+            foreach (Models.CachedDiscordMessage message in messages)
+            {
+                output.AppendLine();
+                output.AppendLine($"{message.User.DisplayName} [{message.Timestamp.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss zzz")}] (User: {message.User.Id}) (Message: {message.Id})");
+
+                if (message.Content is not null && message.Content != "")
+                {
+                    output.AppendLine($"{message.Content}");
+                }
+
+                if (message.AttachmentURLs.Count != 0)
+                {
+                    foreach (string attachment in message.AttachmentURLs)
+                    {
+                        output.AppendLine($"{attachment}");
+                    }
+                }
+            }
+
+            return output.ToString();
+        }
+
 
         public static async Task<DiscordEmbed> GenerateUserEmbed(DiscordUser user, DiscordGuild? guild)
         {
@@ -243,6 +275,59 @@
             return new DiscordMessageBuilder().AddEmbeds(embeds.AsEnumerable());
         }
 
+        public static async Task<DiscordMessageBuilder> GenerateMessageRelay(Models.CachedDiscordMessage message, string type, bool channelRef = true, bool showChannelId = true, Models.CachedDiscordMessage oldMessage = null)
+        {
+            var channel = await Program.homeGuild.GetChannelAsync(message.ChannelId);
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
+                .WithAuthor($"Message by {message.User.DisplayName}{(channelRef ? $" was {type} in #{channel.Name}" : "")}", null, message.User.AvatarUrl)
+                .WithFooter($"{(showChannelId ? $"Channel ID: {message.ChannelId} | " : "")}User ID: {message.User.Id}");
+
+            if (message.AttachmentURLs.Count > 0)
+                embed.WithImageUrl(message.AttachmentURLs[0])
+                    .AddField($"Attachment", message.AttachmentURLs[0]);
+
+            if (type == "edited")
+            {
+                embed.AddField("Message Link", $"{MessageLink(message)}");
+                if (oldMessage is not null)
+                {
+                    embed.AddField("Old content", await StringHelpers.CodeOrHasteBinAsync(oldMessage.Content, plain: true, noCode: true));
+                }
+                embed.AddField("New content", await StringHelpers.CodeOrHasteBinAsync(message.Content, plain: true, noCode: true));
+                embed.Color = DiscordColor.Yellow;
+
+            }
+            else if (type == "deleted")
+            {
+                embed.Color = DiscordColor.Red;
+                embed.WithDescription(message.Content);
+            }
+            else
+            {
+                embed.WithDescription(message.Content);
+            }
+
+
+            List<DiscordEmbed> embeds = new()
+            {
+                embed
+            };
+
+            if (message.AttachmentURLs.Count > 1)
+            {
+                foreach (var attachment in message.AttachmentURLs.Skip(1))
+                {
+                    embeds.Add(new DiscordEmbedBuilder()
+                        .WithAuthor($"{message.User.DisplayName}", null, message.User.AvatarUrl)
+                        .AddField("Additional attachment", attachment)
+                        .WithImageUrl(attachment));
+                }
+            }
+
+            return new DiscordMessageBuilder().AddEmbeds(embeds.AsEnumerable());
+        }
+
+
         public static async Task<bool> DoEmptyThreadCleanupAsync(DiscordChannel channel, DiscordMessage message, int minMessages = 0)
         {
             return await DoEmptyThreadCleanupAsync(channel, new MockDiscordMessage(message), minMessages);
@@ -326,18 +411,18 @@
 
                 foreach (var pin in pins)
                 {
-                    if (await Program.db.SetContainsAsync("insiderPins", pin.Id))
+                    if (await Program.redis.SetContainsAsync("insiderPins", pin.Id))
                     {
                         if (pins.Count > (Program.cfgjson.InsiderThreadKeepLastPins - 1))
                         {
                             await pin.UnpinAsync();
-                            await Program.db.SetRemoveAsync("insiderPins", pin.Id);
+                            await Program.redis.SetRemoveAsync("insiderPins", pin.Id);
                         }
                     }
                 }
 
                 await message.PinAsync();
-                await Program.db.SetAddAsync("insiderPins", message.Id);
+                await Program.redis.SetAddAsync("insiderPins", message.Id);
             }
             catch (Exception e)
             {
