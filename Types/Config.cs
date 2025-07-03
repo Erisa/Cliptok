@@ -147,7 +147,7 @@
         public string GiveawayTriggerMessage { get; private set; }
 
         [JsonProperty("githubWorkflow")]
-        public WorkflowConfig GitHubWorkflow { get; private set; }
+        public WorkflowConfig GitHubWorkflow { get; private set; } = default;
 
         [JsonProperty("githubWorkflowPrivate")]
         public WorkflowConfig GitHubWorkflowPrivate { get; private set; }
@@ -285,6 +285,12 @@
 
         [JsonProperty("enablePersistentDb")]
         public bool EnablePersistentDb { get; set; } = false;
+
+        [JsonProperty("disableMicrosoftCommands")]
+        public bool DisableMicrosoftCommands { get; set; } = false;
+
+        [JsonProperty("noFun")]
+        public bool NoFun { get; set; } = false;
     }
 
     public class WorkflowConfig

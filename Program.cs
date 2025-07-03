@@ -67,6 +67,7 @@ namespace Cliptok
         public static DiscordChannel ForumChannelAutoWarnFallbackChannel;
 
         public static CliptokDbContext dbContext;
+        internal static readonly string[] microsoftCommandTypes = ["AnnouncementCmds", "TechSupportCmds", "RoleCmds"];
 
         public static void UpdateLists()
         {
@@ -201,10 +202,23 @@ namespace Cliptok
                 // Register commands
                 var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands");
                 foreach (var type in commandClasses)
+                {
+                    // config-disabled commands
+                    if (
+                        (cfgjson.DisableMicrosoftCommands && microsoftCommandTypes.Contains(type.Name))
+                        || (cfgjson.GitHubWorkflow == default && type.Name == "ListCmds")
+                        || (cfgjson.NoFun && type.Name == "FunCmds")
+                    )
+                    {
+                        continue;
+                    }
+
                     if (type.Name == "GlobalCmds")
                         builder.AddCommands(type);
                     else
                         builder.AddCommands(type, cfgjson.ServerID);
+
+                }
 
                 // Register command checks
                 builder.AddCheck<HomeServerCheck>();
