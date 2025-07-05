@@ -291,6 +291,10 @@
 
         [JsonProperty("noFun")]
         public bool NoFun { get; set; } = false;
+
+        [JsonProperty("hastebinType")]
+        public string HastebinType { get; set; } = "haste";
+
     }
 
     public class WorkflowConfig

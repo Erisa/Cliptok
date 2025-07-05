@@ -229,6 +229,7 @@
   "autoDehoistCharacters": " !\"#$%&'()*+,-./:;<=>?@[\\]^_`'",
   "secondaryAutoDehoistCharacters": "0123456789",
   "hastebinEndpoint": "https://haste.erisa.uk",
+  "hastebinType": "haste",
   "userRoles": {
     "insiderCanary": 434426594271166474,
     "insiderDev": 1082364328474329179,

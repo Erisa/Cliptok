@@ -143,7 +143,7 @@ namespace Cliptok
 
             Log.Logger = loggerConfig.CreateLogger();
 
-            hasteUploader = new HasteBinClient(cfgjson.HastebinEndpoint);
+            hasteUploader = new HasteBinClient(cfgjson.HastebinEndpoint, cfgjson.HastebinType);
 
             UpdateLists();
 
@@ -180,7 +180,11 @@ namespace Cliptok
             {
                 // create db context that we can use
                 dbContext = new CliptokDbContext();
-                dbContext.Database.Migrate();
+                var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+                if (pendingMigrations.Any())
+                {
+                    await dbContext.Database.MigrateAsync();
+                }
             }
 
             DiscordClientBuilder discordBuilder = DiscordClientBuilder.CreateDefault(token, DiscordIntents.All);

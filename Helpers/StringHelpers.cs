@@ -34,14 +34,10 @@
             bool inputHasCodeBlock = input.Contains("```");
             if (input.Length > charLimit || inputHasCodeBlock)
             {
-                HasteBinResult hasteResult = await Program.hasteUploader.Post(input);
+                HasteBinResult hasteResult = await Program.hasteUploader.PostAsync(input, language);
                 if (hasteResult.IsSuccess)
                 {
                     var hasteUrl = hasteResult.FullUrl;
-                    if (language != "")
-                    {
-                        hasteUrl = hasteUrl + "." + language;
-                    }
 
                     if (plain)
                         return hasteUrl;

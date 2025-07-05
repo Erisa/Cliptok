@@ -172,11 +172,11 @@ namespace Cliptok.Helpers
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(messageLog));
             var msg = new DiscordMessageBuilder().WithContent(content).AddFile("messages.txt", stream);
 
-            var hasteResult = await Program.hasteUploader.Post(messageLog);
+            var hasteResult = await Program.hasteUploader.PostAsync(messageLog);
 
             if (hasteResult.IsSuccess)
             {
-                msg.AddEmbed(new DiscordEmbedBuilder().WithDescription($"[`📄 View online`]({Program.cfgjson.HastebinEndpoint}/raw/{hasteResult.Key})"));
+                msg.AddEmbed(new DiscordEmbedBuilder().WithDescription($"[`📄 View online`]({hasteResult.RawUrl})"));
             }
 
             return msg;

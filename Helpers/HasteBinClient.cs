@@ -1,6 +1,4 @@
-﻿// https://gist.github.com/b5e14d0c36f5a972060655b1aa875dbf
-// CODE HERE COMES FROM ABOVE GIST. MAY BE MODIFIED.
-// All rights belong to original creator, and not the author of this software.
+﻿// Based on https://gist.github.com/b5e14d0c36f5a972060655b1aa875dbf
 
 namespace Cliptok.Helpers
 {
@@ -8,18 +6,33 @@ namespace Cliptok.Helpers
     {
         private static readonly HttpClient _httpClient;
         private readonly string _baseUrl;
+        public readonly string _hasteType = "haste";
 
         static HasteBinClient()
         {
             _httpClient = new HttpClient();
         }
 
-        public HasteBinClient(string baseUrl)
+        public HasteBinClient(string baseUrl, string hasteType = "haste")
         {
             _baseUrl = baseUrl;
+            _hasteType = hasteType;
         }
 
-        public async Task<HasteBinResult> Post(string content)
+        public async Task<HasteBinResult> PostAsync(string content, string language = default)
+        {
+            switch (_hasteType) 
+            {
+                case "haste":
+                    return await PostHastebinAsync(content, language);
+                case "tclip":
+                    return await PostTclipAsync(content, language);
+                default:
+                    throw new NotSupportedException($"Haste type '{_hasteType}' is not supported.");
+            }
+        }
+
+        public async Task<HasteBinResult> PostHastebinAsync(string content, string language)
         {
             string fullUrl = _baseUrl;
             if (!fullUrl.EndsWith("/"))
@@ -44,6 +57,12 @@ namespace Cliptok.Helpers
                     hasteBinResult.FullUrl = $"{fullUrl}{hasteBinResult.Key}";
                     hasteBinResult.IsSuccess = true;
                     hasteBinResult.StatusCode = 200;
+                    hasteBinResult.RawUrl = $"{fullUrl}raw/{hasteBinResult.Key}";
+
+                    if (language != default)
+                    {
+                        hasteBinResult.FullUrl = $"{hasteBinResult.FullUrl}.{language}";
+                    }
                     return hasteBinResult;
                 }
             }
@@ -55,13 +74,69 @@ namespace Cliptok.Helpers
                 StatusCode = (int)result.StatusCode
             };
         }
+
+        public async Task<HasteBinResult> PostTclipAsync(string content, string language)
+        {
+            string fullUrl = _baseUrl;
+            if (!fullUrl.EndsWith("/"))
+            {
+                fullUrl += "/";
+            }
+            string postUrl = $"{fullUrl}api/post";
+            if (language == default)
+                language = "txt";
+
+            var formdata = new MultipartFormDataContent
+            {
+                { new StringContent(content), "content"},
+                { new StringContent(Program.discord.CurrentUser.Username + "." + (language)), "filename" }
+            };
+            //formdata.Add(new StringContent(Program.discord.CurrentUser.Username) + "." + language), "filename")
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, new Uri(postUrl))
+            {
+                Content = formdata,
+                Headers = { { "Accept", "text/plain" } }
+            };
+
+            HttpResponseMessage result = await _httpClient.SendAsync(request);
+
+            if (result.StatusCode == HttpStatusCode.OK)
+            {
+                var responseText = await result.Content.ReadAsStringAsync();
+                HasteBinResult hasteBinResult = new HasteBinResult
+                {
+                    FullUrl = responseText,
+                    RawUrl = responseText + "/raw",
+                    IsSuccess = true,
+                    StatusCode = 200
+                };
+                return hasteBinResult;
+            }
+
+            return new HasteBinResult()
+            {
+                FullUrl = fullUrl,
+                IsSuccess = false,
+                StatusCode = (int)result.StatusCode
+            };
+        }
+
     }
 
-    // Define other methods and classes here
+    public class TclipRequest
+    {
+        [JsonProperty("content")]
+        public string Content { get; set; }
+        [JsonProperty("filename")]
+        public string Filename { get; set; }
+    }
+
     public class HasteBinResult
     {
-        public string Key { get; set; }
+        public string Key { get; set; } = null;
         public string FullUrl { get; set; }
+        public string RawUrl { get; set; }
         public bool IsSuccess { get; set; }
         public int StatusCode { get; set; }
     }
