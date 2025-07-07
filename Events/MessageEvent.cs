@@ -236,7 +236,10 @@ namespace Cliptok.Events
         {
             #region message logging fill to db
 
-            if (Program.cfgjson.EnablePersistentDb)
+            // If db support is enabled, and this message is not in an excluded channel, cache it
+            if (Program.cfgjson.EnablePersistentDb
+                && !Program.cfgjson.MessageLogExcludedChannels.Contains(message.ChannelId)
+                && (message.Channel.ParentId is null || !Program.cfgjson.MessageLogExcludedChannels.Contains((ulong)message.Channel.ParentId)))
             {
                 if (isAnEdit)
                 {
@@ -251,7 +254,6 @@ namespace Cliptok.Events
                             {
                                 await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(newMessage, "edited", true, true, cachedMessage));
                             }
-
                             cachedMessage.Content = newMessage.Content;
                             cachedMessage.AttachmentURLs = newMessage.AttachmentURLs;
                             await UpdateMessageAsync(cachedMessage, dbContext);

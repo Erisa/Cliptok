@@ -298,6 +298,9 @@
         [JsonProperty("messageCachePruneDays")]
         public int MessageCachePruneDays { get; set; } = 30;
 
+        [JsonProperty("messageLogExcludedChannels")]
+        public List<ulong> MessageLogExcludedChannels { get; set; } = new();
+
     }
 
     public class WorkflowConfig
