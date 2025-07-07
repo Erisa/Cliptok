@@ -83,13 +83,13 @@ namespace Cliptok.Helpers
                 fullUrl += "/";
             }
             string postUrl = $"{fullUrl}api/post";
-            if (language == default)
+            if (language == default || language == "")
                 language = "txt";
 
             var formdata = new MultipartFormDataContent
             {
                 { new StringContent(content), "content"},
-                { new StringContent(Program.discord.CurrentUser.Username + "." + (language)), "filename" }
+                { new StringContent(Program.discord.CurrentUser.Username + "." + language), "filename" }
             };
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, new Uri(postUrl))

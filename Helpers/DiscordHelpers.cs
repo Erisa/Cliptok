@@ -291,9 +291,9 @@
                 embed.AddField("Message Link", $"{MessageLink(message)}");
                 if (oldMessage is not null)
                 {
-                    embed.AddField("Old content", await StringHelpers.CodeOrHasteBinAsync(oldMessage.Content, plain: true, noCode: true));
+                    embed.AddField("Old content", await StringHelpers.CodeOrHasteBinAsync(oldMessage.Content, noCode: true, messageWrapper: true));
                 }
-                embed.AddField("New content", await StringHelpers.CodeOrHasteBinAsync(message.Content, plain: true, noCode: true));
+                embed.AddField("New content", await StringHelpers.CodeOrHasteBinAsync(message.Content, noCode: true, messageWrapper: true));
                 embed.Color = DiscordColor.Yellow;
 
             }
