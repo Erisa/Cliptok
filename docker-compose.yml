@@ -3,6 +3,8 @@ services:
     image: ghcr.io/erisa/cliptok
     depends_on:
       - redis
+      # comment out this if you don't use db support
+      - postgres
     env_file:
       - .env
     restart: on-failure
