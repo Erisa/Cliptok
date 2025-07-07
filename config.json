@@ -368,7 +368,7 @@
   "duplicateMessageSeconds": 60,
   "insiderThreadKeepLastPins": 3,
   "warningLogReactionTimeMinutes": 5,
-  "enablePersistentDb": false,
+  "enablePersistentDb": true,
   "disableMicrosoftCommands": false,
   "noFun": false,
   "messageCachePruneDays": 7
