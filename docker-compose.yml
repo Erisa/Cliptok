@@ -81,3 +81,5 @@ services:
       - net_admin
       - sys_module
     restart: always
+    extra_hosts:
+      - "paste.erisa.ts.net:100.104.163.12"
