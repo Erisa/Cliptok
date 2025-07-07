@@ -28,7 +28,7 @@
 
         public static async Task<bool> MassDehoistAndUpdateTimeAsync()
         {
-            await Program.redis.StringSetAsync("lastMassDehoistRun", TimeHelpers.ToUnixTimestamp(DateTime.Now));
+            await Program.redis.StringSetAsync("lastMassDehoistRun", TimeHelpers.ToUnixTimestamp(DateTime.UtcNow));
             var (totalMembers, failedMembers) = await DehoistHelpers.MassDehoistAsync(Program.homeGuild);
             if (totalMembers != failedMembers)
             {

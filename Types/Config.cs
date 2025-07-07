@@ -295,6 +295,9 @@
         [JsonProperty("hastebinType")]
         public string HastebinType { get; set; } = "haste";
 
+        [JsonProperty("messageCachePruneDays")]
+        public int MessageCachePruneDays { get; set; } = 30;
+
     }
 
     public class WorkflowConfig

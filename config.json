@@ -370,5 +370,6 @@
   "warningLogReactionTimeMinutes": 5,
   "enablePersistentDb": false,
   "disableMicrosoftCommands": false,
-  "noFun": false
+  "noFun": false,
+  "messageCachePruneDays": 7
 }
