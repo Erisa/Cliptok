@@ -91,7 +91,6 @@ namespace Cliptok.Helpers
                 { new StringContent(content), "content"},
                 { new StringContent(Program.discord.CurrentUser.Username + "." + (language)), "filename" }
             };
-            //formdata.Add(new StringContent(Program.discord.CurrentUser.Username) + "." + language), "filename")
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, new Uri(postUrl))
             {

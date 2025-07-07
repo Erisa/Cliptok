@@ -179,11 +179,13 @@ namespace Cliptok
             if (cfgjson.EnablePersistentDb)
             {
                 // create db context that we can use
-                dbContext = new CliptokDbContext();
-                var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
-                if (pendingMigrations.Any())
+                using (dbContext = new CliptokDbContext())
                 {
-                    await dbContext.Database.MigrateAsync();
+                    var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+                    if (pendingMigrations.Any())
+                    {
+                        await dbContext.Database.MigrateAsync();
+                    }
                 }
             }
 

@@ -253,44 +253,45 @@ namespace Cliptok.Events
 
         public static async Task LogAndCacheUserUpdateAsync(DiscordClient client, DiscordUser user)
         {
-            var dbContext = new CliptokDbContext();
-            var cachedUser = await dbContext.Users.FindAsync(user.Id);
-            if (cachedUser is null)
+            using (var dbContext = new CliptokDbContext())
             {
-                var newUser = new Models.CachedDiscordUser
+                var cachedUser = await dbContext.Users.FindAsync(user.Id);
+                if (cachedUser is null)
                 {
-                    Id = user.Id,
-                    Username = user.Username,
-                    DisplayName = user.GlobalName ?? user.Username,
-                    AvatarUrl = user.AvatarUrl ?? user.DefaultAvatarUrl,
-                    IsBot = user.IsBot
-                };
-                await dbContext.Users.AddAsync(newUser);
-            }
-            else
-            {
-                if (cachedUser.Username != user.Username)
-                {
-                    await LogChannelHelper.LogMessageAsync("users", new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.UserUpdate} **Member username updated!** - {user.Mention}")
-                        .AddEmbed(new DiscordEmbedBuilder()
-                            .WithColor(new DiscordColor(0x3E9D28))
-                            .WithTimestamp(DateTimeOffset.Now)
-                            .WithThumbnail(user.AvatarUrl)
-                            .AddField("Old username", cachedUser.Username)
-                            .AddField("New username", user.Username)
-                            .WithFooter($"User ID: {user.Id}\n{client.CurrentUser.Username}UserUpdate")));
+                    var newUser = new Models.CachedDiscordUser
+                    {
+                        Id = user.Id,
+                        Username = user.Username,
+                        DisplayName = user.GlobalName ?? user.Username,
+                        AvatarUrl = user.AvatarUrl ?? user.DefaultAvatarUrl,
+                        IsBot = user.IsBot
+                    };
+                    await dbContext.Users.AddAsync(newUser);
                 }
+                else
+                {
+                    if (cachedUser.Username != user.Username)
+                    {
+                        await LogChannelHelper.LogMessageAsync("users", new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.UserUpdate} **Member username updated!** - {user.Mention}")
+                            .AddEmbed(new DiscordEmbedBuilder()
+                                .WithColor(new DiscordColor(0x3E9D28))
+                                .WithTimestamp(DateTimeOffset.Now)
+                                .WithThumbnail(user.AvatarUrl)
+                                .AddField("Old username", cachedUser.Username)
+                                .AddField("New username", user.Username)
+                                .WithFooter($"User ID: {user.Id}\n{client.CurrentUser.Username}UserUpdate")));
+                    }
 
-                if (cachedUser.Username != user.Username || cachedUser.DisplayName != (user.GlobalName ?? user.Username) || cachedUser.AvatarUrl != (user.AvatarUrl ?? user.DefaultAvatarUrl))
-                {
-                    cachedUser.Username = user.Username;
-                    cachedUser.DisplayName = user.GlobalName ?? user.Username;
-                    cachedUser.AvatarUrl = user.AvatarUrl ?? user.DefaultAvatarUrl;
-                    dbContext.Update(cachedUser);
-                    await dbContext.SaveChangesAsync();
+                    if (cachedUser.Username != user.Username || cachedUser.DisplayName != (user.GlobalName ?? user.Username) || cachedUser.AvatarUrl != (user.AvatarUrl ?? user.DefaultAvatarUrl))
+                    {
+                        cachedUser.Username = user.Username;
+                        cachedUser.DisplayName = user.GlobalName ?? user.Username;
+                        cachedUser.AvatarUrl = user.AvatarUrl ?? user.DefaultAvatarUrl;
+                        dbContext.Update(cachedUser);
+                        await dbContext.SaveChangesAsync();
+                    }
                 }
             }
-            await dbContext.DisposeAsync();
         }
 
         public static async Task UserUpdated(DiscordClient client, UserUpdatedEventArgs e)

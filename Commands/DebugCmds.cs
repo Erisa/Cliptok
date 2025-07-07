@@ -22,11 +22,13 @@ namespace Cliptok.Commands
                     return;
                 }
 
-                var dbContext = new CliptokDbContext();
-                var records = (await dbContext.Messages.Include(m => m.User).OrderByDescending(m => m.Id).Take(100).ToListAsync());
-                var json = JsonConvert.SerializeObject(records, Formatting.Indented);
-                await ctx.RespondAsync(new DiscordMessageBuilder()
-                    .WithContent($"100 most recent message logs:\n{await StringHelpers.CodeOrHasteBinAsync(json, "json", plain: true)}"));
+                using (var dbContext = new CliptokDbContext())
+                {
+                    var records = (await dbContext.Messages.Include(m => m.User).OrderByDescending(m => m.Id).Take(100).ToListAsync());
+                    var json = JsonConvert.SerializeObject(records, Formatting.Indented);
+                    await ctx.RespondAsync(new DiscordMessageBuilder()
+                        .WithContent($"100 most recent message logs:\n{await StringHelpers.CodeOrHasteBinAsync(json, "json", plain: true)}"));
+                }
             }
 
             [Command("mutestatus")]

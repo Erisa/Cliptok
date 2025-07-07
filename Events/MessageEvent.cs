@@ -84,16 +84,16 @@ namespace Cliptok.Events
 
             if (Program.cfgjson.EnablePersistentDb)
             {
-                var dbContext = new CliptokDbContext();
-                var cachedMessage = await dbContext.Messages.Include(m => m.User).FirstOrDefaultAsync(m => m.Id == e.Message.Id);
-
-                // we store bot messages but don't log them right now
-                if (cachedMessage is not null && !cachedMessage.User.IsBot)
+                using (var dbContext = new CliptokDbContext())
                 {
-                    await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(cachedMessage, "deleted", true, true));
-                }
+                    var cachedMessage = await dbContext.Messages.Include(m => m.User).FirstOrDefaultAsync(m => m.Id == e.Message.Id);
 
-                _ = dbContext.DisposeAsync();
+                    // we store bot messages but don't log them right now
+                    if (cachedMessage is not null && !cachedMessage.User.IsBot)
+                    {
+                        await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(cachedMessage, "deleted", true, true));
+                    }
+                }
 
                 await DiscordHelpers.DoEmptyThreadCleanupAsync(e.Channel, e.Message);
             }
@@ -123,10 +123,12 @@ namespace Cliptok.Events
 
                 var messageIds = e.Messages.Select(m => m.Id).ToList();
 
-                var dbContext = new CliptokDbContext();
-                var cachedMessages = dbContext.Messages.Include(m => m.User).Where(m => messageIds.Contains(m.Id));
-                await LogChannelHelper.LogMessageAsync("messages", await LogChannelHelper.CreateDumpMessageAsync($"{Program.cfgjson.Emoji.Deleted} {e.Messages.Count} messages were deleted from {e.Channel.Mention}, {cachedMessages.ToList().Count} were logged:", cachedMessages.ToList(), e.Channel));
-                _ = dbContext.DisposeAsync();
+                using (var dbContext = new CliptokDbContext())
+                {
+                    var cachedMessages = dbContext.Messages.Include(m => m.User).Where(m => messageIds.Contains(m.Id));
+                    await LogChannelHelper.LogMessageAsync("messages", await LogChannelHelper.CreateDumpMessageAsync($"{Program.cfgjson.Emoji.Deleted} {e.Messages.Count} messages were deleted from {e.Channel.Mention}, {cachedMessages.ToList().Count} were logged:", cachedMessages.ToList(), e.Channel));
+                    _ = dbContext.DisposeAsync();
+                }
             }
         }
 
@@ -238,22 +240,23 @@ namespace Cliptok.Events
             {
                 if (isAnEdit)
                 {
-                    var dbContext = new CliptokDbContext();
-                    var cachedMessage = dbContext.Messages.Include(m => m.User).FirstOrDefault(m => m.Id == message.Id);
-                    if (cachedMessage is not null && cachedMessage.Content != message.Content)
+                    using (var dbContext = new CliptokDbContext())
                     {
-                        var newMessage = await CacheMessageAsync(message, dbContext);
-                        // we store bot messages but don't log them right now
-                        if (cachedMessage is not null && !cachedMessage.User.IsBot)
+                        var cachedMessage = dbContext.Messages.Include(m => m.User).FirstOrDefault(m => m.Id == message.Id);
+                        if (cachedMessage is not null && cachedMessage.Content != message.Content)
                         {
-                            await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(newMessage, "edited", true, true, cachedMessage));
-                        }
+                            var newMessage = await CacheMessageAsync(message, dbContext);
+                            // we store bot messages but don't log them right now
+                            if (cachedMessage is not null && !cachedMessage.User.IsBot)
+                            {
+                                await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(newMessage, "edited", true, true, cachedMessage));
+                            }
 
-                        cachedMessage.Content = newMessage.Content;
-                        cachedMessage.AttachmentURLs = newMessage.AttachmentURLs;
-                        await UpdateMessageAsync(cachedMessage, dbContext);
+                            cachedMessage.Content = newMessage.Content;
+                            cachedMessage.AttachmentURLs = newMessage.AttachmentURLs;
+                            await UpdateMessageAsync(cachedMessage, dbContext);
+                        }
                     }
-                    _ = dbContext.DisposeAsync();
                 }
                 else
                 {
