@@ -275,12 +275,12 @@
             return new DiscordMessageBuilder().AddEmbeds(embeds.AsEnumerable());
         }
 
-        public static async Task<DiscordMessageBuilder> GenerateMessageRelay(Models.CachedDiscordMessage message, string type, bool channelRef = true, bool showChannelId = true, Models.CachedDiscordMessage oldMessage = null)
+        public static async Task<DiscordMessageBuilder> GenerateMessageRelay(Models.CachedDiscordMessage message, string type, bool channelRef = true, bool showChannelId = true, Models.CachedDiscordMessage oldMessage = null, bool showMessageId = true)
         {
             var channel = await Program.homeGuild.GetChannelAsync(message.ChannelId);
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithAuthor($"Message by {message.User.DisplayName}{(channelRef ? $" was {type} in #{channel.Name}" : "")}", null, message.User.AvatarUrl)
-                .WithFooter($"{(showChannelId ? $"Channel ID: {message.ChannelId} | " : "")}User ID: {message.User.Id}");
+                .WithFooter($"{(showChannelId ? $"Channel ID: {message.ChannelId} | " : "")}User ID: {message.User.Id} {(showMessageId ? $" | Message ID: {message.Id}" : "")}");
 
             if (message.AttachmentURLs.Count > 0)
                 embed.WithImageUrl(message.AttachmentURLs[0])
