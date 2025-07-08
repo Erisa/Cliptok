@@ -170,9 +170,6 @@
         [JsonProperty("everyoneFilter")]
         public bool EveryoneFilter { get; private set; } = false;
 
-        [JsonProperty("usernameAPILogChannel")]
-        public ulong UsernameAPILogChannel { get; private set; } = 0;
-
         [JsonProperty("logChannels")]
         public Dictionary<string, LogChannelConfig> LogChannels { get; private set; }
 

@@ -30,7 +30,6 @@ namespace Cliptok.Helpers
                 { "dms", config.DmLogChannelId },
                 { "errors", config.ErrorLogChannelId },
                 { "secret", config.MysteryLogChannelId },
-                { "username", config.UsernameAPILogChannel}
             };
 
             if (config.LogChannels is not null)
