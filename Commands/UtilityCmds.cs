@@ -1,4 +1,5 @@
 using Cliptok.Constants;
+using Microsoft.EntityFrameworkCore;
 
 namespace Cliptok.Commands
 {
@@ -185,6 +186,35 @@ namespace Cliptok.Commands
                 .WithAllowedMentions(Mentions.None)
                 .AddEmbed(new DiscordEmbedBuilder().WithDescription(input))
             );
+        }
+
+        [Command("bulklogs")]
+        [Description("Query bulk msg logs for a given user.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
+        [RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        public async Task BulkLogsCmd(CommandContext ctx, [Parameter("user"), Description("The user you're looking for bulk logs containing")] DiscordUser user)
+        {
+            if (ctx is SlashCommandContext)
+                await ctx.As<SlashCommandContext>().DeferResponseAsync(ephemeral: false);
+
+            using (var dbContext = new CliptokDbContext())
+            {
+                var bulkLogs = await dbContext.BulkMessageLogStore.Include(b => b.Users).Where(b => b.Users.Any(u => u.Id == user.Id)).ToListAsync();
+                if (bulkLogs.Count == 0)
+                {
+                    await ctx.RespondAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} There are no bulk message logs for {user.Mention}!").WithAllowedMentions(Mentions.None));
+                } else
+                {
+                    var stringRespBuilder = new StringBuilder();
+
+                    foreach (var log in bulkLogs)
+                    {
+                        stringRespBuilder.Append($"- [{TimeHelpers.TimeToPrettyFormat(DateTime.UtcNow - log.CreatedAt)}]({log.PasteUrl}) ({log.DiscordUrl})\n");
+                    }
+
+                    await ctx.RespondAsync(new DiscordEmbedBuilder().WithAuthor($"Bulk logs containing {user.GlobalName ?? user.Username}", null, user.AvatarUrl).WithDescription(await StringHelpers.CodeOrHasteBinAsync(stringRespBuilder.ToString(), "md", 4000, false, true, false, $"## Bulk logs containing {user.GlobalName ?? user.Username}\n\n")).WithFooter($"User ID: {user.Id}"));
+                }
+            }
         }
     }
 }

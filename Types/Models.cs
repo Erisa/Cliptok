@@ -23,6 +23,16 @@ namespace Cliptok.Types
             public string DisplayName { get; set; }
             public string AvatarUrl { get; set; }
             public bool IsBot { get; set; }
+            public List<BulkMessageLogStore> BulkMessageLogs { get; set; }
+        }
+
+        public class BulkMessageLogStore
+        {
+            public int Id { get; set; }
+            public string PasteUrl { get; set; }
+            public string DiscordUrl { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public List<CachedDiscordUser> Users { get; set; }
         }
     }
 }

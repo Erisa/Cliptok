@@ -29,19 +29,24 @@
                 return $"{Program.cfgjson.Emoji.Warning} {user.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**";
         }
 
-        public static async Task<string> CodeOrHasteBinAsync(string input, string language = "", int charLimit = 1930, bool plain = false, bool noCode = false, bool messageWrapper = false)
+        public static async Task<string> CodeOrHasteBinAsync(string input, string language = "", int charLimit = 1930, bool plain = false, bool noCode = false, bool messageWrapper = false, string overflowHeader = "")
         {
             bool inputHasCodeBlock = input.Contains("```");
             if (input.Length > charLimit || inputHasCodeBlock)
             {
+                if (overflowHeader != "")
+                {
+                    input = overflowHeader + input;
+                }
+
                 HasteBinResult hasteResult = await Program.hasteUploader.PostAsync(input, language);
                 if (hasteResult.IsSuccess)
                 {
                     var hasteUrl = hasteResult.FullUrl;
 
                     if (plain)
-                        return hasteUrl;
-                    else if (messageWrapper)
+                        return hasteUrl;                    
+                    if (messageWrapper)
                         return $"[`📄 View online`]({hasteResult.RawUrl})";
                     else if (inputHasCodeBlock)
                         return $"{Program.cfgjson.Emoji.Warning} Output contained a code block, so it was uploaded to Hastebin to avoid formatting issues: {hasteUrl}";

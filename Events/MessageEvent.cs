@@ -126,8 +126,17 @@ namespace Cliptok.Events
                 using (var dbContext = new CliptokDbContext())
                 {
                     var cachedMessages = dbContext.Messages.Include(m => m.User).Where(m => messageIds.Contains(m.Id));
-                    await LogChannelHelper.LogMessageAsync("messages", await LogChannelHelper.CreateDumpMessageAsync($"{Program.cfgjson.Emoji.Deleted} {e.Messages.Count} messages were deleted from {e.Channel.Mention}, {cachedMessages.ToList().Count} were logged:", cachedMessages.ToList(), e.Channel));
-                    _ = dbContext.DisposeAsync();
+                    var cachedUsers = dbContext.Users.Where(u => cachedMessages.Select(m => m.User.Id).Contains(u.Id)).ToList();
+                    var (dumpMessage, pasteUrl) = await LogChannelHelper.CreateDumpMessageAsync($"{Program.cfgjson.Emoji.Deleted} {e.Messages.Count} messages were deleted from {e.Channel.Mention}, {cachedMessages.ToList().Count} were logged:", cachedMessages.ToList(), e.Channel);
+                    var logMsg = await LogChannelHelper.LogMessageAsync("messages", dumpMessage);
+                    await dbContext.BulkMessageLogStore.AddAsync(new Models.BulkMessageLogStore
+                    {
+                        PasteUrl = pasteUrl,
+                        DiscordUrl = DiscordHelpers.MessageLink(logMsg),
+                        CreatedAt = DateTime.UtcNow,
+                        Users = cachedUsers,
+                    });
+                    await dbContext.SaveChangesAsync();
                 }
             }
         }
