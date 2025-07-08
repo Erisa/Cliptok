@@ -362,7 +362,7 @@
   "enablePersistentDb": true,
   "disableMicrosoftCommands": false,
   "noFun": false,
-  "messageCachePruneDays": 7,
+  "messageCachePruneDays": 30,
   "messageLogExcludedChannels": [
     883400305679663156,
     593381041629298688,
