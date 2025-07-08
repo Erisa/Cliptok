@@ -194,6 +194,12 @@ namespace Cliptok.Commands
         [RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task BulkLogsCmd(CommandContext ctx, [Parameter("user"), Description("The user you're looking for bulk logs containing")] DiscordUser user)
         {
+            if (!Program.cfgjson.EnablePersistentDb)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Database support is not enabled, so this command does nothing.");
+                return;
+            }
+
             if (ctx is SlashCommandContext)
                 await ctx.As<SlashCommandContext>().DeferResponseAsync(ephemeral: false);
 
