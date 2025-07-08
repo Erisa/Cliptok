@@ -255,7 +255,7 @@ namespace Cliptok.Events
                     using (var dbContext = new CliptokDbContext())
                     {
                         var cachedMessage = dbContext.Messages.Include(m => m.User).FirstOrDefault(m => m.Id == message.Id);
-                        if (cachedMessage is not null && cachedMessage.Content != message.Content)
+                        if (cachedMessage is not null && (cachedMessage.Content != message.Content || cachedMessage.AttachmentURLs.Count != message.Attachments.Count))
                         {
                             var newMessage = await CacheMessageAsync(message, dbContext);
                             // we store bot messages but don't log them right now
