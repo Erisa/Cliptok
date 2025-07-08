@@ -291,16 +291,24 @@
                 embed.AddField("Message Link", $"{MessageLink(message)}");
                 if (oldMessage is not null)
                 {
-                    embed.AddField("Old content", await StringHelpers.CodeOrHasteBinAsync(oldMessage.Content, noCode: true, messageWrapper: true));
+                    if (oldMessage.Content is null || oldMessage.Content == "")
+                        embed.AddField("Old content", "`[ No content ]`");
+                    else
+                        embed.AddField("Old content", await StringHelpers.CodeOrHasteBinAsync(oldMessage.Content, noCode: true, messageWrapper: true, charLimit: 1024));
                 }
-                embed.AddField("New content", await StringHelpers.CodeOrHasteBinAsync(message.Content, noCode: true, messageWrapper: true));
+                if (message.Content is null || message.Content == "")
+                    embed.AddField("New content", "`[ No content ]`");
+                else
+                    embed.AddField("New content", await StringHelpers.CodeOrHasteBinAsync(message.Content, noCode: true, messageWrapper: true, charLimit: 1024));
                 embed.Color = DiscordColor.Yellow;
-
             }
             else if (type == "deleted")
             {
                 embed.Color = DiscordColor.Red;
-                embed.WithDescription(message.Content);
+                if (message.Content is null || message.Content == "")
+                    embed.WithDescription("`[ No content ]`");
+                else
+                    embed.WithDescription(message.Content);
             }
             else
             {
