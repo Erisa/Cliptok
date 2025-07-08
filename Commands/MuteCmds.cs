@@ -447,7 +447,7 @@ namespace Cliptok.Commands
                                 $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(mute.ExpireTime)}:R>";
                 }
 
-                if (reason.ToLower().Contains("modmail"))
+                if (reason.ToLower().Contains("modmail") && Program.cfgjson.ModmailUserId != 0)
                 {
                     dmContent += $"\n{Program.cfgjson.Emoji.Information} When contacting <@{Program.cfgjson.ModmailUserId}>, make sure to **enable DMs** from the server to allow your message to go through.";
                 }

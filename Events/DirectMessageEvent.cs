@@ -19,7 +19,7 @@
                 if ((DateTime.UtcNow - msgBefore.CreationTimestamp.DateTime).TotalHours < Program.cfgjson.DmAutoresponseTimeLimit)
                 {
                     // Make sure the message before the current one is from the bot and is a warn/mute DM & respond
-                    if (msgBefore.Author.Id == Program.discord.CurrentUser.Id &&
+                    if (msgBefore.Author.Id == Program.discord.CurrentUser.Id && Program.cfgjson.ModmailUserId != 0 &&
                         (msgBefore.Content.Contains("You were warned") ||
                             msgBefore.Content.Contains("You have been muted") ||
                             msgBefore.Content.Contains("You were automatically warned") ||

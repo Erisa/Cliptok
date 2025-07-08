@@ -111,7 +111,7 @@
         public string SecondaryAutoDehoistCharacters { get; private set; }
 
         [JsonProperty("modmailUserId")]
-        public ulong ModmailUserId { get; private set; }
+        public ulong ModmailUserId { get; private set; } = 0;
 
         [JsonProperty("announcementRoles")]
         public Dictionary<string, ulong> AnnouncementRoles { get; private set; }
