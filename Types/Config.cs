@@ -185,9 +185,6 @@
         [JsonProperty("tqsRoleId")]
         public ulong TqsRoleId { get; private set; } = 0;
 
-        [JsonProperty("supportForumIntroThreadId")]
-        public ulong SupportForumIntroThreadId { get; private set; } = 0;
-
         [JsonProperty("supportForumId")]
         public ulong SupportForumId { get; private set; } = 0;
 
@@ -196,9 +193,6 @@
 
         [JsonProperty("feedbackHubForum")]
         public ulong FeedbackHubForum { get; private set; } = 0;
-
-        [JsonProperty("forumIntroPosts")]
-        public List<ulong> ForumIntroPosts { get; private set; } = new();
 
         [JsonProperty("insiderInfoChannel")]
         public ulong InsiderInfoChannel { get; private set; }

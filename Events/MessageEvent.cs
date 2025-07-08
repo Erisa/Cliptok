@@ -533,22 +533,6 @@ namespace Cliptok.Events
                 #region content filters
                 if ((await GetPermLevelAsync(member)) < ServerPermLevel.TrialModerator)
                 {
-                    #region block messages in forum intro thread
-                    if (!limitFilters)
-                    {
-                        if ((channel.Id == Program.cfgjson.SupportForumIntroThreadId ||
-                             Program.cfgjson.ForumIntroPosts.Contains(channel.Id)) &&
-                            !member.Roles.Any(role => role.Id == Program.cfgjson.TqsRoleId))
-                        {
-                            await message.DeleteAsync();
-                            var msg = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {message.Author.Mention}, you can't send messages in this thread!\nTry creating a post on {channel.Parent.Mention} instead.");
-                            await Task.Delay(5000);
-                            await msg.DeleteAsync();
-                            return;
-                        }
-                    }
-                    #endregion
-
                     #region mass mentions ban filter
                     if ((message.MentionedUsers is not null && message.MentionedUsers.Count > Program.cfgjson.MassMentionBanThreshold) || (message.MentionedUsersCount > Program.cfgjson.MassMentionBanThreshold))
                     {
