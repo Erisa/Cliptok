@@ -12,6 +12,7 @@ namespace Cliptok
         public DbSet<Models.CachedDiscordMessage> Messages { get; set; }
         public DbSet<Models.CachedDiscordUser> Users { get; set; }
         public DbSet<Models.BulkMessageLogStore> BulkMessageLogStore { get; set; }
+        public DbSet<Models.CachedDiscordSticker> Stickers { get; set; }
 
         public CliptokDbContext()
         {

@@ -86,7 +86,7 @@ namespace Cliptok.Events
             {
                 using (var dbContext = new CliptokDbContext())
                 {
-                    var cachedMessage = await dbContext.Messages.Include(m => m.User).FirstOrDefaultAsync(m => m.Id == e.Message.Id);
+                    var cachedMessage = await dbContext.Messages.Include(m => m.User).Include(m => m.Sticker).FirstOrDefaultAsync(m => m.Id == e.Message.Id);
 
                     // we store bot messages but don't log them right now
                     if (cachedMessage is not null && !cachedMessage.User.IsBot)
@@ -125,7 +125,7 @@ namespace Cliptok.Events
 
                 using (var dbContext = new CliptokDbContext())
                 {
-                    var cachedMessages = dbContext.Messages.Include(m => m.User).Where(m => messageIds.Contains(m.Id));
+                    var cachedMessages = dbContext.Messages.Include(m => m.User).Include(m => m.Sticker).Where(m => messageIds.Contains(m.Id));
                     var cachedUsers = dbContext.Users.Where(u => cachedMessages.Select(m => m.User.Id).Contains(u.Id)).ToList();
                     var (dumpMessage, pasteUrl) = await LogChannelHelper.CreateDumpMessageAsync($"{Program.cfgjson.Emoji.Deleted} {e.Messages.Count} messages were deleted from {e.Channel.Mention}, {cachedMessages.ToList().Count} were logged:", cachedMessages.ToList(), e.Channel);
                     var logMsg = await LogChannelHelper.LogMessageAsync("messages", dumpMessage);
@@ -213,19 +213,41 @@ namespace Cliptok.Events
                     IsBot = message.Author.IsBot
                 };
                 await ctx.Users.AddAsync(cachedMessage.User);
-                await ctx.SaveChangesAsync();
             }
             else
             {
                 cachedMessage.User = existingUser;
             }
 
+            if (message.Stickers.Count != 0)
+            {
+                var existingSticker = await ctx.Stickers.FirstOrDefaultAsync(s => s.Id == message.Stickers[0].Id);
+
+                if (existingSticker is null)
+                {
+                    cachedMessage.Sticker = new Models.CachedDiscordSticker
+                    {
+                        Id = message.Stickers[0].Id,
+                        Url = message.Stickers[0].StickerUrl,
+                        Name = message.Stickers[0].Name
+                    };
+                    await ctx.Stickers.AddAsync(cachedMessage.Sticker);
+                }
+                else
+                {
+                    cachedMessage.Sticker = existingSticker;
+                }
+            }
+
+            await ctx.SaveChangesAsync();
             return cachedMessage;
         }
 
         public static async Task UpdateMessageAsync(Models.CachedDiscordMessage cachedMessage, CliptokDbContext ctx)
         {
             ctx.Users.Attach(cachedMessage.User);
+            if (cachedMessage.Sticker is not null)
+                ctx.Stickers.Attach(cachedMessage.Sticker);
             ctx.Messages.Update(cachedMessage);
             await ctx.SaveChangesAsync();
         }
@@ -233,6 +255,8 @@ namespace Cliptok.Events
         public static async Task AddMessageToCacheAsync(Models.CachedDiscordMessage cachedMessage, CliptokDbContext ctx)
         {
             ctx.Attach(cachedMessage.User);
+            if (cachedMessage.Sticker is not null)
+                ctx.Stickers.Attach(cachedMessage.Sticker);
             await ctx.AddAsync(cachedMessage);
             await ctx.SaveChangesAsync();
         }
@@ -254,7 +278,7 @@ namespace Cliptok.Events
                 {
                     using (var dbContext = new CliptokDbContext())
                     {
-                        var cachedMessage = dbContext.Messages.Include(m => m.User).FirstOrDefault(m => m.Id == message.Id);
+                        var cachedMessage = dbContext.Messages.Include(m => m.User).Include(m => m.Sticker).FirstOrDefault(m => m.Id == message.Id);
                         if (cachedMessage is not null && (cachedMessage.Content != message.Content || cachedMessage.AttachmentURLs.Count != message.Attachments.Count))
                         {
                             var newMessage = await CacheMessageAsync(message, dbContext);

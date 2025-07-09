@@ -135,6 +135,11 @@
                         output.AppendLine($"{attachment}");
                     }
                 }
+
+                if (message.Sticker is not null)
+                {
+                    output.AppendLine($"[Sticker: {message.Sticker.Name}] ({message.Sticker.Url})");
+                }
             }
 
             return output.ToString();
@@ -299,8 +304,10 @@
 
                             oldContent += String.Join("\n", oldMessage.AttachmentURLs.ToArray());
                         }
-                        embed.AddField("Old content", await StringHelpers.CodeOrHasteBinAsync(oldContent, noCode: true, messageWrapper: true, charLimit: 1024));
 
+                        if (oldMessage.Sticker is not null)
+                            oldContent += $"\n[{oldMessage.Sticker.Name}]({oldMessage.Sticker.Url})";
+                        embed.AddField("Old content", await StringHelpers.CodeOrHasteBinAsync(oldContent, noCode: true, messageWrapper: true, charLimit: 1024));
                     }
                 }
                 if (message.Content is null || message.Content == "")
@@ -316,6 +323,9 @@
                         content += String.Join("\n", message.AttachmentURLs.ToArray());
                     }
 
+                    if (oldMessage.Sticker is not null)
+                        content += $"\n[{message.Sticker.Name}]({message.Sticker.Url})";
+
                     embed.AddField("New content", await StringHelpers.CodeOrHasteBinAsync(content, noCode: true, messageWrapper: true, charLimit: 1024));
                 }
                 embed.Color = DiscordColor.Yellow;
@@ -327,6 +337,13 @@
                     embed.WithDescription("`[ No content ]`");
                 else
                     embed.WithDescription(message.Content);
+
+                if (message.Sticker is not null)
+                {
+                    string fieldValue = $"[{message.Sticker.Name}]({message.Sticker.Url})";
+                    embed.AddField($"Sticker", fieldValue);
+                    embed.WithImageUrl(message.Sticker.Url.Replace("cdn.discordapp.com", "media.discordapp.net") + "?size=160");
+                }
             }
             else
             {

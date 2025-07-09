@@ -14,6 +14,7 @@ namespace Cliptok.Types
             public List<string>? AttachmentURLs { get; set; }
 
             public CachedDiscordUser User { get; set; }
+            public CachedDiscordSticker Sticker { get; set; }
         }
 
         public class CachedDiscordUser
@@ -24,6 +25,13 @@ namespace Cliptok.Types
             public string AvatarUrl { get; set; }
             public bool IsBot { get; set; }
             public List<BulkMessageLogStore> BulkMessageLogs { get; set; }
+        }
+
+        public class CachedDiscordSticker
+        {
+            public ulong Id { get; set; }
+            public string Url { get; set; }
+            public string Name { get; set; }
         }
 
         public class BulkMessageLogStore
