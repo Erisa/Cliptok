@@ -42,7 +42,8 @@
     "winadmins",
     "minecraft",
     "intel",
-    "csharp"
+    "csharp",
+    "go-copilot"
   ],
   "inviteIDExclusion": [
     150662382874525696,
@@ -70,7 +71,8 @@
     834949385535750214,
     554824368740630529,
     924393747112919090,
-    143867839282020352
+    143867839282020352,
+    1266463141642895422
   ],
   "warningDaysThreshold": 30,
   "autoMuteThresholds": {
