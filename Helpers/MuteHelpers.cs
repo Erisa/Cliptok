@@ -338,7 +338,7 @@
                     Reason = reason
                 };
 
-                await Program.db.HashSetAsync("mutes", targetUserId, JsonConvert.SerializeObject(newMute));
+                await Program.redis.HashSetAsync("mutes", targetUserId, JsonConvert.SerializeObject(newMute));
 
                 return true;
             }
@@ -357,7 +357,7 @@
                 var member = await targetGuild.GetMemberAsync(targetUserId);
                 await member.RevokeRoleAsync(mutedRole, reason);
                 
-                await Program.db.HashDeleteAsync("mutes", targetUserId);
+                await Program.redis.HashDeleteAsync("mutes", targetUserId);
 
                 return true;
             }

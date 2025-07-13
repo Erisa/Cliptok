@@ -215,7 +215,7 @@
                     Reason = reason
                 };
 
-                await Program.db.HashSetAsync("bans", targetUserId, JsonConvert.SerializeObject(newBan));
+                await Program.redis.HashSetAsync("bans", targetUserId, JsonConvert.SerializeObject(newBan));
 
                 // Remove user message tracking
                 if (await Program.redis.SetContainsAsync("trackedUsers", targetUserId))
