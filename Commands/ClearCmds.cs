@@ -105,12 +105,19 @@
                 }
 
                 // List of messages to delete, up to (not including) the one we just got.
-                var firstMsg = (await channel.GetMessagesAfterAsync(message.Id, 1).ToListAsync())[0];
+                var firstMsg = (await channel.GetMessagesAfterAsync(message.Id, 1).ToListAsync()).FirstOrDefault();
+                if (firstMsg is null)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find any messages to clear! Please try again. (Hint: `up_to` is NOT inclusive.)");
+                    return;
+                }
                 var firstMsgId = firstMsg.Id;
                 messagesToClear.Add(firstMsg);
                 while (true)
                 {
                     var newMessages = (await channel.GetMessagesAfterAsync(firstMsgId, 100).ToListAsync()).OrderByDescending(x => x.Id).ToList();
+                    if (newMessages.Count == 0)
+                        break;
                     messagesToClear.AddRange(newMessages);
                     firstMsgId = newMessages.First().Id;
                     if (newMessages.Count() < 100)
