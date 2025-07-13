@@ -129,7 +129,7 @@ namespace Cliptok.Commands
             [Description("Check the status of permadehoist for a member.")]
             public async Task PermadehoistStatusSlashCmd(CommandContext ctx, [Parameter("member"), Description("The member whose permadehoist status to check.")] DiscordUser discordUser)
             {
-                if (await Program.db.SetContainsAsync("permadehoists", discordUser.Id))
+                if (await Program.redis.SetContainsAsync("permadehoists", discordUser.Id))
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.On} {discordUser.Mention} is permadehoisted.", mentions: false);
                 else
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Off} {discordUser.Mention} is not permadehoisted.", mentions: false);

@@ -92,21 +92,23 @@
                         Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error occurred trying to purge messages from {channel}", channelBefore.Name);
                     }
                     
-                    if (messages.Count == 0)
-                        return;
+                    // logging is now handled in the bulk delete event
+                    if (!Program.cfgjson.EnablePersistentDb)
+                    {
+                        if (messages.Count == 0)
+                            return;
 
-                    messages.Reverse();
+                        messages.Reverse();
 
-                    await LogChannelHelper.LogDeletedMessagesAsync(
-                        "messages",
-                        $"{Program.cfgjson.Emoji.Deleted} Automatically purged **{messages.Count}** messages from {channelBefore.Mention}.",
-                        messages,
-                        channelBefore
-                    );
-
+                        await LogChannelHelper.LogDeletedMessagesAsync(
+                            "messages",
+                            $"{Program.cfgjson.Emoji.Deleted} Automatically purged **{messages.Count}** messages from {channelBefore.Mention}.",
+                            messages,
+                            channelBefore
+                        );
+                    }
                 }
             }
-
         }
 
         public static async Task UserJoined(DiscordClient client, VoiceStateUpdatedEventArgs e)

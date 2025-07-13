@@ -13,16 +13,16 @@ namespace Cliptok.Commands
             if (ctx.Channel.Id != LogChannelHelper.GetLogChannelId("dms")) return;
 
             // Check blocklist for user
-            if (await Program.db.SetContainsAsync("dmRelayBlocklist", user.Id))
+            if (await Program.redis.SetContainsAsync("dmRelayBlocklist", user.Id))
             {
                 // If already in list, remove
-                await Program.db.SetRemoveAsync("dmRelayBlocklist", user.Id);
+                await Program.redis.SetRemoveAsync("dmRelayBlocklist", user.Id);
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {user.Mention} has been unblocked successfully!");
                 return;
             }
 
             // If not in list, add
-            await Program.db.SetAddAsync("dmRelayBlocklist", user.Id);
+            await Program.redis.SetAddAsync("dmRelayBlocklist", user.Id);
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {user.Mention} has been blocked. Their DMs will not appear here.");
         }
     }

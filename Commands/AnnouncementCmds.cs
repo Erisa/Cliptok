@@ -65,13 +65,13 @@ namespace Cliptok.Commands
             }
 
             // Avoid duplicate announcements
-            if (await Program.db.SetContainsAsync("announcedInsiderBuilds", buildNumber) && !forceReannounce)
+            if (await Program.redis.SetContainsAsync("announcedInsiderBuilds", buildNumber) && !forceReannounce)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Build {buildNumber} has already been announced! If you are sure you want to announce it again, set `force_reannounce` to True.", ephemeral: true);
                 return;
             }
 
-            await Program.db.SetAddAsync("announcedInsiderBuilds", buildNumber);
+            await Program.redis.SetAddAsync("announcedInsiderBuilds", buildNumber);
 
             if (flavourText == "" && windowsVersion == 10)
             {

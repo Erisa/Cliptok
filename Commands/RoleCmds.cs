@@ -174,8 +174,9 @@ namespace Cliptok.Commands
 
             for (int i = 0; i < roleIds.Length; i++)
             {
-                // quick patch to exclude giveaways role
-                if ((ulong)roleIds[i].GetValue(Program.cfgjson.UserRoles, null) == Program.cfgjson.UserRoles.Giveaways)
+                // quick patch to exclude giveaways role & insider chat role
+                if ((ulong)roleIds[i].GetValue(Program.cfgjson.UserRoles, null) == Program.cfgjson.UserRoles.Giveaways ||
+                    (ulong)roleIds[i].GetValue(Program.cfgjson.UserRoles, null) == Program.cfgjson.UserRoles.InsiderChat)
                     continue;
 
                 DiscordRole roleToGrant = await guild.GetRoleAsync((ulong)roleIds[i].GetValue(Program.cfgjson.UserRoles, null));
@@ -212,8 +213,9 @@ namespace Cliptok.Commands
             System.Reflection.PropertyInfo[] roleIds = Program.cfgjson.UserRoles.GetType().GetProperties().Where(predicate).ToArray();
             foreach (System.Reflection.PropertyInfo roleId in roleIds)
             {
-                // quick patch to exclude giveaways role
-                if ((ulong)roleId.GetValue(Program.cfgjson.UserRoles, null) == Program.cfgjson.UserRoles.Giveaways)
+                // quick patch to exclude giveaways role & insider chat role
+                if ((ulong)roleId.GetValue(Program.cfgjson.UserRoles, null) == Program.cfgjson.UserRoles.Giveaways ||
+                    (ulong)roleId.GetValue(Program.cfgjson.UserRoles, null) == Program.cfgjson.UserRoles.InsiderChat)
                     continue;
 
                 DiscordRole roleToGrant = await guild.GetRoleAsync((ulong)roleId.GetValue(Program.cfgjson.UserRoles, null));

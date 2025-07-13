@@ -28,9 +28,9 @@
                 // nothing
             }
 
-            if (await Program.db.HashExistsAsync("mutes", user.Id))
+            if (await Program.redis.HashExistsAsync("mutes", user.Id))
             {
-                MemberPunishment mute = JsonConvert.DeserializeObject<MemberPunishment>(Program.db.HashGet("mutes", user.Id));
+                MemberPunishment mute = JsonConvert.DeserializeObject<MemberPunishment>(Program.redis.HashGet("mutes", user.Id));
 
                 if (mute.Reason is null && mute.ModId == Program.discord.CurrentUser.Id)
                 {
@@ -193,7 +193,7 @@
                         }
                     }
 
-                    if (reason.ToLower().Contains("modmail"))
+                    if (reason.ToLower().Contains("modmail") && Program.cfgjson.ModmailUserId != 0)
                     {
                         dmContent += $"\n{Program.cfgjson.Emoji.Information} When contacting <@{Program.cfgjson.ModmailUserId}>, make sure to **enable DMs** from the server to allow your message to go through.";
                     }
@@ -313,7 +313,7 @@
                 Program.discord.Logger.LogError(ex, "thing");
             }
 
-            await Program.db.HashSetAsync("mutes", naughtyUser.Id, JsonConvert.SerializeObject(newMute));
+            await Program.redis.HashSetAsync("mutes", naughtyUser.Id, JsonConvert.SerializeObject(newMute));
             MostRecentMute = newMute;
 
             return output;
@@ -373,7 +373,7 @@
             if (manual && modUser is not null)
                 auditLogReason = $"[Manual {(isTqsUnmute ? "TQS " : "")}unmute by {DiscordHelpers.UniqueUsername(modUser)}]: {reason}";
             
-            var muteDetailsJson = await Program.db.HashGetAsync("mutes", targetUser.Id);
+            var muteDetailsJson = await Program.redis.HashGetAsync("mutes", targetUser.Id);
             bool success = false;
             bool wasTqsMute = false;
             DiscordGuild guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
@@ -502,7 +502,7 @@
             }
             // Even if the bot failed to remove the role, it reported that failure to a log channel and thus the mute
             //  can be safely removed internally.
-            await Program.db.HashDeleteAsync("mutes", targetUser.Id);
+            await Program.redis.HashDeleteAsync("mutes", targetUser.Id);
 
             return true;
         }

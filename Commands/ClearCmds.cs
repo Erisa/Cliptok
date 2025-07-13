@@ -105,12 +105,19 @@
                 }
 
                 // List of messages to delete, up to (not including) the one we just got.
-                var firstMsg = (await channel.GetMessagesAfterAsync(message.Id, 1).ToListAsync())[0];
+                var firstMsg = (await channel.GetMessagesAfterAsync(message.Id, 1).ToListAsync()).FirstOrDefault();
+                if (firstMsg is null)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find any messages to clear! Please try again. (Hint: `up_to` is NOT inclusive.)");
+                    return;
+                }
                 var firstMsgId = firstMsg.Id;
                 messagesToClear.Add(firstMsg);
                 while (true)
                 {
                     var newMessages = (await channel.GetMessagesAfterAsync(firstMsgId, 100).ToListAsync()).OrderByDescending(x => x.Id).ToList();
+                    if (newMessages.Count == 0)
+                        break;
                     messagesToClear.AddRange(newMessages);
                     firstMsgId = newMessages.First().Id;
                     if (newMessages.Count() < 100)
@@ -256,9 +263,9 @@
 
             if (dryRun)
             {
-                var msg = await LogChannelHelper.CreateDumpMessageAsync($"{Program.cfgjson.Emoji.Information} **{messagesToClear.Count}** messages would have been deleted, but are instead logged below.",
+                var msg = (await LogChannelHelper.CreateDumpMessageAsync($"{Program.cfgjson.Emoji.Information} **{messagesToClear.Count}** messages would have been deleted, but are instead logged below.",
                     messagesToClear,
-                    channel);
+                    channel)).messageBuilder;
                 await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent(msg.Content).AddFiles(msg.Files).AddEmbeds(msg.Embeds).AsEphemeral(false));
                 return;
             }
@@ -296,13 +303,17 @@
                     await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} There were no messages that matched all of the arguments you provided! Nothing to do."));
                 }
 
-                await LogChannelHelper.LogDeletedMessagesAsync(
-                    "messages",
-                    $"{Program.cfgjson.Emoji.Deleted} **{messagesToClear.Count}** messages were cleared from {channel.Mention} by {ctx.User.Mention}.",
-                    messagesToClear,
-                    channel
-                );
+                // logging is now handled in the bulk delete event
 
+                if (!Program.cfgjson.EnablePersistentDb)
+                {
+                    await LogChannelHelper.LogDeletedMessagesAsync(
+                        "messages",
+                        $"{Program.cfgjson.Emoji.Deleted} **{messagesToClear.Count}** messages were cleared from {channel.Mention} by {ctx.User.Mention}.",
+                        messagesToClear,
+                        channel
+                    );
+                }
             }
         }
     }

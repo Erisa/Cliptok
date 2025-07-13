@@ -5,7 +5,7 @@
         public static async Task<bool> CheckBansAsync()
         {
             DiscordGuild targetGuild = Program.homeGuild;
-            Dictionary<string, MemberPunishment> banList = (await Program.db.HashGetAllAsync("bans")).ToDictionary(
+            Dictionary<string, MemberPunishment> banList = (await Program.redis.HashGetAllAsync("bans")).ToDictionary(
                 x => x.Name.ToString(),
                 x => JsonConvert.DeserializeObject<MemberPunishment>(x.Value)
             );
@@ -34,7 +34,7 @@
         }
         public static async Task<bool> CheckMutesAsync()
         {
-            Dictionary<string, MemberPunishment> muteList = (await Program.db.HashGetAllAsync("mutes")).ToDictionary(
+            Dictionary<string, MemberPunishment> muteList = (await Program.redis.HashGetAllAsync("mutes")).ToDictionary(
                 x => x.Name.ToString(),
                 x => JsonConvert.DeserializeObject<MemberPunishment>(x.Value)
             );
@@ -69,7 +69,7 @@
 
             if (Program.cfgjson.AutoWarnMsgAutoDeleteDays > 0)
             {
-                Dictionary<string, UserWarning> warnList = (await Program.db.HashGetAllAsync("automaticWarnings")).ToDictionary(
+                Dictionary<string, UserWarning> warnList = (await Program.redis.HashGetAllAsync("automaticWarnings")).ToDictionary(
                     x => x.Name.ToString(),
                     x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
                 );
@@ -87,13 +87,13 @@
                         {
                             var contextMessage = await DiscordHelpers.GetMessageFromReferenceAsync(warn.ContextMessageReference);
                             await contextMessage.DeleteAsync();
-                            Program.db.HashDelete("automaticWarnings", warn.WarningId);
+                            Program.redis.HashDelete("automaticWarnings", warn.WarningId);
                             success = true;
                         }
                         catch (Exception ex)
                         {
                             // If we fail to delete the message, forget about it; this isn't incredibly important & we don't want to keep trying every task run
-                            Program.db.HashDelete("automaticWarnings", warn.WarningId);
+                            Program.redis.HashDelete("automaticWarnings", warn.WarningId);
                             
                             // Log a warning too
                             Program.discord.Logger.LogWarning(ex, "Failed to clean up automatic warning message: {messageLink}; it will be skipped", warn.ContextLink);
@@ -105,7 +105,7 @@
 
             if (Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays > 0)
             {
-                Dictionary<string, MemberPunishment> banList = (await Program.db.HashGetAllAsync("compromisedAccountBans")).ToDictionary(
+                Dictionary<string, MemberPunishment> banList = (await Program.redis.HashGetAllAsync("compromisedAccountBans")).ToDictionary(
                     x => x.Name.ToString(),
                     x => JsonConvert.DeserializeObject<MemberPunishment>(x.Value)
                 );
@@ -123,13 +123,13 @@
                         {
                             var contextMessage = await DiscordHelpers.GetMessageFromReferenceAsync(ban.ContextMessageReference);
                             await contextMessage.DeleteAsync();
-                            Program.db.HashDelete("compromisedAccountBans", ban.MemberId);
+                            Program.redis.HashDelete("compromisedAccountBans", ban.MemberId);
                             success = true;
                         }
                         catch (Exception ex)
                         {
                             // If we fail to delete the message, forget about it; this isn't incredibly important & we don't want to keep trying every task run
-                            Program.db.HashDelete("compromisedAccountBans", ban.MemberId);
+                            Program.redis.HashDelete("compromisedAccountBans", ban.MemberId);
                             
                             // Log a warning too
                             var messageLink = ban.ContextMessageReference is null

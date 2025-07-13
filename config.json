@@ -42,8 +42,8 @@
     "winadmins",
     "minecraft",
     "intel",
-    "excel",
-    "csharp"
+    "csharp",
+    "go-copilot"
   ],
   "inviteIDExclusion": [
     150662382874525696,
@@ -71,7 +71,8 @@
     834949385535750214,
     554824368740630529,
     924393747112919090,
-    143867839282020352
+    143867839282020352,
+    1266463141642895422
   ],
   "warningDaysThreshold": 30,
   "autoMuteThresholds": {
@@ -229,7 +230,8 @@
   "heartosoftId": 413429915187281940,
   "autoDehoistCharacters": " !\"#$%&'()*+,-./:;<=>?@[\\]^_`'",
   "secondaryAutoDehoistCharacters": "0123456789",
-  "hastebinEndpoint": "https://haste.erisa.uk",
+  "hastebinEndpoint": "https://paste.erisa.ts.net",
+  "hastebinType": "tclip",
   "userRoles": {
     "insiderCanary": 434426594271166474,
     "insiderDev": 1082364328474329179,
@@ -290,9 +292,6 @@
     "users": {
       "channelId": 870053642500182046
     },
-    "username": {
-      "channelId": 984230829343535105
-    },
     "messages": {
       "channelId": 1002631072179294218
     },
@@ -316,17 +315,11 @@
   ],
   "enableTextInVoice": true,
   "tqsRoleId": 513434929280057354,
-  "supportForumIntroThreadId": 1007802643856510996,
   "supportForumId": 1006577277313744996,
   "everyoneExcludedRoles": [
     707996864317751321
   ],
   "feedbackHubForum": 1033193525975715911,
-  "forumIntroPosts": [
-    1007802643856510996,
-    1033197019164061756,
-    1065659890036646019
-  ],
   "insiderThreads": {
     "canary": 1082394217168523315,
     "dev": 1358210048777654352,
@@ -367,5 +360,14 @@
   "duplicateMessageThreshold": 4,
   "duplicateMessageSeconds": 60,
   "insiderThreadKeepLastPins": 3,
-  "warningLogReactionTimeMinutes": 5
+  "warningLogReactionTimeMinutes": 5,
+  "enablePersistentDb": true,
+  "disableMicrosoftCommands": false,
+  "noFun": false,
+  "messageCachePruneDays": 30,
+  "messageLogExcludedChannels": [
+    883400305679663156,
+    593381041629298688,
+    450181490345508884
+  ]
 }

@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace Cliptok.Commands
 {
     public class DebugCmds
@@ -11,6 +13,24 @@ namespace Cliptok.Commands
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         class DebugCmd
         {
+            [Command("logprint")]
+            public async Task LogPrint(TextCommandContext ctx)
+            {
+                if (!Program.cfgjson.EnablePersistentDb)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Database support is not enabled.");
+                    return;
+                }
+
+                using (var dbContext = new CliptokDbContext())
+                {
+                    var records = (await dbContext.Messages.Include(m => m.User).Include(m => m.Sticker).Include(m => m.User.BulkMessageLogs).OrderByDescending(m => m.Id).Take(100).ToListAsync());
+                    var json = JsonConvert.SerializeObject(records, Formatting.Indented);
+                    await ctx.RespondAsync(new DiscordMessageBuilder()
+                        .WithContent($"100 most recent message logs:\n{await StringHelpers.CodeOrHasteBinAsync(json, "json", plain: true)}"));
+                }
+            }
+
             [Command("mutestatus")]
             public async Task MuteStatus(TextCommandContext ctx, DiscordUser targetUser = default)
             {
@@ -32,7 +52,7 @@ namespace Cliptok.Commands
                 string strOut = "";
                 if (targetUser == default)
                 {
-                    var muteList = (await Program.db.HashGetAllAsync("mutes")).ToDictionary();
+                    var muteList = (await Program.redis.HashGetAllAsync("mutes")).ToDictionary();
                     if (muteList is null | muteList.Keys.Count == 0)
                     {
                         await ctx.RespondAsync("No mutes found in database!");
@@ -49,7 +69,7 @@ namespace Cliptok.Commands
                 }
                 else // if (targetUser != default)
                 {
-                    var userMute = Program.db.HashGet("mutes", targetUser.Id);
+                    var userMute = Program.redis.HashGet("mutes", targetUser.Id);
                     if (userMute.IsNull)
                     {
                         await ctx.RespondAsync("That user has no mute registered in the database!");
@@ -71,7 +91,7 @@ namespace Cliptok.Commands
                 string strOut = "";
                 if (targetUser == default)
                 {
-                    var banList = (await Program.db.HashGetAllAsync("bans")).ToDictionary();
+                    var banList = (await Program.redis.HashGetAllAsync("bans")).ToDictionary();
                     if (banList is null | banList.Keys.Count == 0)
                     {
                         await ctx.RespondAsync("No bans found in database!");
@@ -88,7 +108,7 @@ namespace Cliptok.Commands
                 }
                 else // if (targetUser != default)
                 {
-                    var userMute = Program.db.HashGet("bans", targetUser.Id);
+                    var userMute = Program.redis.HashGet("bans", targetUser.Id);
                     if (userMute.IsNull)
                     {
                         await ctx.RespondAsync("That user has no ban registered in the database!");
@@ -182,7 +202,7 @@ namespace Cliptok.Commands
             {
                 await DiscordHelpers.SafeTyping(ctx.Channel);
 
-                var server = Program.redis.GetServer(Program.redis.GetEndPoints()[0]);
+                var server = Program.redisConnection.GetServer(Program.redisConnection.GetEndPoints()[0]);
                 var keys = server.Keys();
 
                 Dictionary<string, Dictionary<long, MemberPunishment>> warningdata = new();
@@ -190,7 +210,7 @@ namespace Cliptok.Commands
                 {
                     if (ulong.TryParse(key.ToString(), out ulong number))
                     {
-                        var warnings = await Program.db.HashGetAllAsync(key);
+                        var warnings = await Program.redis.HashGetAllAsync(key);
                         Dictionary<long, MemberPunishment> warningdict = new();
                         foreach (var warning in warnings)
                         {
@@ -365,7 +385,7 @@ namespace Cliptok.Commands
                 public async Task ShowOverrides(TextCommandContext ctx,
                     [Description("The user whose overrides to show.")] DiscordUser user)
                 {
-                    var userOverrides = await Program.db.HashGetAsync("overrides", user.Id.ToString());
+                    var userOverrides = await Program.redis.HashGetAsync("overrides", user.Id.ToString());
                     if (string.IsNullOrWhiteSpace(userOverrides))
                     {
                         await ctx.RespondAsync(
@@ -505,7 +525,7 @@ namespace Cliptok.Commands
                     [Description("The channel to remove overrides from.")] DiscordChannel channel)
                 {
                     // Remove user's overrides for channel from db
-                    foreach (var overwriteHash in await Program.db.HashGetAllAsync("overrides"))
+                    foreach (var overwriteHash in await Program.redis.HashGetAllAsync("overrides"))
                     {
                         var overwriteDict =
                             JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(
@@ -518,10 +538,10 @@ namespace Cliptok.Commands
                             overwriteDict.Remove(overwrite.Key);
 
                             if (overwriteDict.Count > 0)
-                                await Program.db.HashSetAsync("overrides", user.Id,
+                                await Program.redis.HashSetAsync("overrides", user.Id,
                                     JsonConvert.SerializeObject(overwriteDict));
                             else
-                                await Program.db.HashDeleteAsync("overrides", user.Id);
+                                await Program.redis.HashDeleteAsync("overrides", user.Id);
                         }
                     }
 
@@ -550,7 +570,7 @@ namespace Cliptok.Commands
                         return;
                     }
 
-                    var userOverwrites = await Program.db.HashGetAsync("overrides", member.Id.ToString());
+                    var userOverwrites = await Program.redis.HashGetAsync("overrides", member.Id.ToString());
                     if (string.IsNullOrWhiteSpace(userOverwrites))
                     {
                         // User has no overrides saved
@@ -625,7 +645,7 @@ namespace Cliptok.Commands
                         List<DiscordOverwrite> overwrites = new();
                         try
                         {
-                            var allOverwrites = await Program.db.HashGetAllAsync("overrides");
+                            var allOverwrites = await Program.redis.HashGetAllAsync("overrides");
                             foreach (var overwrite in allOverwrites)
                             {
                                 var overwriteDict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(overwrite.Value);
@@ -670,7 +690,7 @@ namespace Cliptok.Commands
                     var msg = await ctx.GetResponseAsync();
                     var removedOverridesCount = 0;
 
-                    var dbOverwrites = await Program.db.HashGetAllAsync("overrides");
+                    var dbOverwrites = await Program.redis.HashGetAllAsync("overrides");
                     foreach (var userOverwrites in dbOverwrites)
                     {
                         var overwriteDict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(userOverwrites.Value);
@@ -690,12 +710,12 @@ namespace Cliptok.Commands
                         // If the user now has no overrides, remove them from the db entirely
                         if (overwriteDict.Count == 0)
                         {
-                            await Program.db.HashDeleteAsync("overrides", userOverwrites.Name);
+                            await Program.redis.HashDeleteAsync("overrides", userOverwrites.Name);
                         }
                         else
                         {
                             // Otherwise, update the user's overrides in the db
-                            await Program.db.HashSetAsync("overrides", userOverwrites.Name, JsonConvert.SerializeObject(overwriteDict));
+                            await Program.redis.HashSetAsync("overrides", userOverwrites.Name, JsonConvert.SerializeObject(overwriteDict));
                         }
                     }
 
@@ -715,11 +735,11 @@ namespace Cliptok.Commands
                     if (overwrite.Type == DiscordOverwriteType.Role) continue;
 
                     // Get user's current overrides from db
-                    var userOverrides = await Program.db.HashGetAsync("overrides", overwrite.Id.ToString());
+                    var userOverrides = await Program.redis.HashGetAsync("overrides", overwrite.Id.ToString());
                     if (string.IsNullOrWhiteSpace(userOverrides))
                     {
                         // User doesn't have any overrides in db, so just add the new one
-                        await Program.db.HashSetAsync("overrides", overwrite.Id.ToString(),
+                        await Program.redis.HashSetAsync("overrides", overwrite.Id.ToString(),
                             JsonConvert.SerializeObject(new Dictionary<ulong, DiscordOverwrite>
                             {
                                 { channel.Id, overwrite }
@@ -741,7 +761,7 @@ namespace Cliptok.Commands
                             overwrites.Add(channel.Id, overwrite);
 
                         // Update the db
-                        await Program.db.HashSetAsync("overrides", overwrite.Id.ToString(),
+                        await Program.redis.HashSetAsync("overrides", overwrite.Id.ToString(),
                             JsonConvert.SerializeObject(overwrites));
                     }
                 }
