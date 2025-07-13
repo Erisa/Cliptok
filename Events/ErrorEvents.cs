@@ -34,9 +34,15 @@ namespace Cliptok.Events
             if (e.Exception is CommandNotFoundException && (e.Context.Command is null || commandName != "help"))
                 return;
             
+            // Show help for command if used with no arguments
             if (e.Exception is ArgumentParseException && e.Context.Arguments.All(x => x.Value is null or ArgumentNotParsedResult or Optional<ArgumentNotParsedResult>))
             {
-                await Commands.GlobalCmds.Help(e.Context, e.Context.Command.Name);
+                // If this is a command with subcommands, we are looking at the default subcommand if there is one;
+                // if the user did not explicitly specify a subcommand however, we should show help for the [group] command, not the default subcommand
+                if (e.Context.As<TextCommandContext>().Message.Content.Contains(' '))
+                    await Commands.GlobalCmds.Help(e.Context, e.Context.Command.FullName);
+                else
+                    await Commands.GlobalCmds.Help(e.Context, e.Context.Command.FullName.Split(' ').First());
                 return;
             }
 

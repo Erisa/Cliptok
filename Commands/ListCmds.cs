@@ -185,6 +185,49 @@
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Anti-phishing API is not configured, nothing for me to do.");
             }
         }
+        
+        [Command("invitecheck")]
+        [Description("Check if a server invite is known to the malicious invites API.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        public async Task InviteCheck(CommandContext ctx, [Parameter("input"), Description("Server invite to scan.")] string content)
+        {
+            var inviteMatches = Constants.RegexConstants.invite_rx.Matches(content);
+            
+            if (inviteMatches.Count == 0)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That doesn't look like a valid invite! Please try again.");
+                return;
+            }
+            
+            var invite = inviteMatches.First();
+            ulong guildId;
+            try
+            {
+                guildId = (await Program.discord.GetInviteByCodeAsync(invite.Groups[1].Value)).Guild.Id;   
+            }
+            catch (DSharpPlus.Exceptions.NotFoundException)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That invite isn't valid!");
+                return;
+            }
+                
+            var (match, httpStatus, responseString, _) = await APIs.ServerAPI.ServerAPICheckAsync(guildId);
+
+            string responseToSend;
+            if (match)
+            {
+                responseToSend = $"Match found:\n";
+            }
+            else
+            {
+                responseToSend = $"No valid match found.\nHTTP Status `{(int)httpStatus}`, result:\n";
+            }
+
+            responseToSend += await StringHelpers.CodeOrHasteBinAsync(responseString, "json");
+
+            await ctx.RespondAsync(responseToSend);
+        }
 
         [Command("appealblocktextcmd")]
         [TextAlias("appealblock", "superduperban", "ablock")]
@@ -196,16 +239,16 @@
             [Description("The user to block from ban appeals.")] DiscordUser user
         )
         {
-            if (Program.db.SetContains("appealBlocks", user.Id))
+            if (Program.redis.SetContains("appealBlocks", user.Id))
             {
                 // User is already blocked, unblock
-                Program.db.SetRemove("appealBlocks", user.Id);
+                Program.redis.SetRemove("appealBlocks", user.Id);
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully unblocked {user.Mention}, since they were already in the list.");
             }
             else
             {
                 // User is not blocked, block
-                Program.db.SetAdd("appealBlocks", user.Id);
+                Program.redis.SetAdd("appealBlocks", user.Id);
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {user.Mention} is now blocked from appealing bans.");
             }
         }

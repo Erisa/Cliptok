@@ -30,7 +30,6 @@ namespace Cliptok.Helpers
                 { "dms", config.DmLogChannelId },
                 { "errors", config.ErrorLogChannelId },
                 { "secret", config.MysteryLogChannelId },
-                { "username", config.UsernameAPILogChannel}
             };
 
             if (config.LogChannels is not null)
@@ -155,26 +154,36 @@ namespace Cliptok.Helpers
             }
         }
 
-        public static async Task<DiscordMessageBuilder> CreateDumpMessageAsync(string content, List<DiscordMessage> messages, DiscordChannel channel)
+        public static async Task<(DiscordMessageBuilder messageBuilder, string pasteUrl)> CreateDumpMessageAsync(string content, List<DiscordMessage> messages, DiscordChannel channel)
         {
             string messageLog = await DiscordHelpers.CompileMessagesAsync(messages.AsEnumerable().OrderBy(x => x.Id).ToList(), channel);
+            return await DumpMessageFromStringAsync(messageLog, content);
+        }
 
+        public static async Task<(DiscordMessageBuilder messageBuilder, string pasteUrl)> CreateDumpMessageAsync(string content, List<Models.CachedDiscordMessage> messages, DiscordChannel channel)
+        {
+            string messageLog = await DiscordHelpers.CompileMessagesAsync(messages.AsEnumerable().OrderBy(x => x.Id).ToList(), channel);
+            return await DumpMessageFromStringAsync(messageLog, content);
+        }
+
+        public static async Task<(DiscordMessageBuilder messageBuilder, string pasteUrl)> DumpMessageFromStringAsync(string messageLog, string content)
+        {
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(messageLog));
             var msg = new DiscordMessageBuilder().WithContent(content).AddFile("messages.txt", stream);
 
-            var hasteResult = await Program.hasteUploader.Post(messageLog);
+            var hasteResult = await Program.hasteUploader.PostAsync(messageLog);
 
             if (hasteResult.IsSuccess)
             {
-                msg.AddEmbed(new DiscordEmbedBuilder().WithDescription($"[`📄 View online`]({Program.cfgjson.HastebinEndpoint}/raw/{hasteResult.Key})"));
+                msg.AddEmbed(new DiscordEmbedBuilder().WithDescription($"[`📄 View online`]({hasteResult.RawUrl})"));
             }
-            return msg;
+
+            return (msg, hasteResult.RawUrl);
         }
 
         public static async Task<DiscordMessage> LogDeletedMessagesAsync(string key, string content, List<DiscordMessage> messages, DiscordChannel channel)
         {
-
-            return await LogMessageAsync(key, await CreateDumpMessageAsync(content, messages, channel));
+            return await LogMessageAsync(key, (await CreateDumpMessageAsync(content, messages, channel)).messageBuilder);
         }
 
         public static ulong GetLogChannelId(string key)

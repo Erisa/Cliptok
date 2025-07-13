@@ -19,7 +19,7 @@
                 if ((DateTime.UtcNow - msgBefore.CreationTimestamp.DateTime).TotalHours < Program.cfgjson.DmAutoresponseTimeLimit)
                 {
                     // Make sure the message before the current one is from the bot and is a warn/mute DM & respond
-                    if (msgBefore.Author.Id == Program.discord.CurrentUser.Id &&
+                    if (msgBefore.Author.Id == Program.discord.CurrentUser.Id && Program.cfgjson.ModmailUserId != 0 &&
                         (msgBefore.Content.Contains("You were warned") ||
                             msgBefore.Content.Contains("You have been muted") ||
                             msgBefore.Content.Contains("You were automatically warned") ||
@@ -38,7 +38,7 @@
             if (message.Author.IsBot) return;
 
             // Don't relay message if user is blocked
-            if (await Program.db.SetContainsAsync("dmRelayBlocklist", message.Author.Id)) return;
+            if (await Program.redis.SetContainsAsync("dmRelayBlocklist", message.Author.Id)) return;
 
             // Log DMs to DM log channel, include note about auto-response if applicable
             await LogChannelHelper.LogMessageAsync("dms", await DiscordHelpers.GenerateMessageRelay(message, sentAutoresponse: sentAutoresponse));

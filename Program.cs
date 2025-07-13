@@ -3,6 +3,7 @@ using DSharpPlus.Extensions;
 using DSharpPlus.Net.Gateway;
 using Serilog.Sinks.Grafana.Loki;
 using System.Reflection;
+using Microsoft.EntityFrameworkCore;
 using Serilog.Events;
 
 namespace Cliptok
@@ -44,8 +45,8 @@ namespace Cliptok
         public static DiscordClient discord;
         public static Random rnd = new();
         public static ConfigJson cfgjson;
-        public static ConnectionMultiplexer redis;
-        public static IDatabase db;
+        public static ConnectionMultiplexer redisConnection;
+        public static IDatabase redis;
         internal static EventId CliptokEventID { get; } = new EventId(1000, "Cliptok");
         internal static EventId LogChannelErrorID { get; } = new EventId(1001, "LogChannelError");
 
@@ -64,6 +65,9 @@ namespace Cliptok
         public static List<ServerApiResponseJson> serverApiList = new();
 
         public static DiscordChannel ForumChannelAutoWarnFallbackChannel;
+
+        public static CliptokDbContext dbContext;
+        internal static readonly string[] microsoftCommandTypes = ["AnnouncementCmds", "TechSupportCmds", "RoleCmds"];
 
         public static void UpdateLists()
         {
@@ -139,7 +143,7 @@ namespace Cliptok
 
             Log.Logger = loggerConfig.CreateLogger();
 
-            hasteUploader = new HasteBinClient(cfgjson.HastebinEndpoint);
+            hasteUploader = new HasteBinClient(cfgjson.HastebinEndpoint, cfgjson.HastebinType);
 
             UpdateLists();
 
@@ -156,7 +160,7 @@ namespace Cliptok
                 token = cfgjson.Core.Token;
 
             if (Environment.GetEnvironmentVariable("REDIS_URL") is not null)
-                redis = ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("REDIS_URL"));
+                redisConnection = ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("REDIS_URL"));
             else
             {
                 string redisHost;
@@ -164,13 +168,26 @@ namespace Cliptok
                     redisHost = "redis";
                 else
                     redisHost = cfgjson.Redis.Host;
-                redis = ConnectionMultiplexer.Connect($"{redisHost}:{cfgjson.Redis.Port}");
+                redisConnection = ConnectionMultiplexer.Connect($"{redisHost}:{cfgjson.Redis.Port}");
             }
 
-            db = redis.GetDatabase();
+            redis = redisConnection.GetDatabase();
 
             // Migration away from a broken attempt at a key in the past.
-            db.KeyDelete("messages");
+            redis.KeyDelete("messages");
+
+            if (cfgjson.EnablePersistentDb)
+            {
+                // create db context that we can use
+                using (dbContext = new CliptokDbContext())
+                {
+                    var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+                    if (pendingMigrations.Any())
+                    {
+                        await dbContext.Database.MigrateAsync();
+                    }
+                }
+            }
 
             DiscordClientBuilder discordBuilder = DiscordClientBuilder.CreateDefault(token, DiscordIntents.All);
 
@@ -191,10 +208,23 @@ namespace Cliptok
                 // Register commands
                 var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands");
                 foreach (var type in commandClasses)
+                {
+                    // config-disabled commands
+                    if (
+                        (cfgjson.DisableMicrosoftCommands && microsoftCommandTypes.Contains(type.Name))
+                        || (cfgjson.GitHubWorkflow == default && type.Name == "ListCmds")
+                        || (cfgjson.NoFun && type.Name == "FunCmds")
+                    )
+                    {
+                        continue;
+                    }
+
                     if (type.Name == "GlobalCmds")
                         builder.AddCommands(type);
                     else
                         builder.AddCommands(type, cfgjson.ServerID);
+
+                }
 
                 // Register command checks
                 builder.AddCheck<HomeServerCheck>();
@@ -278,8 +308,9 @@ namespace Cliptok
                         Tasks.EventTasks.HandlePendingChannelDeleteEventsAsync(),
                     ];
 
-                    // This one has its own time management, run it asynchronously and throw caution to the wind.
+                    // These have their own time management, run them asynchronously and throw caution to the wind.
                     Tasks.MassDehoistTasks.CheckAndMassDehoistTask();
+                    Tasks.CacheCleanupTasks.CheckAndDeleteOldMessageCacheAsync();
 
                     // To prevent a future issue if checks take longer than 10 seconds,
                     // we only start the 10 second counter after all tasks have concluded.

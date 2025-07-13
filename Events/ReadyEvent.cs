@@ -24,10 +24,10 @@ namespace Cliptok.Events
                 client.Logger.LogDebug("Successfully initalised malicious invite list with {count} servers.", fetchResult.Count);
             }
 
-            if (db.KeyExists("config:status") && db.KeyExists("config:status_type"))
+            if (redis.KeyExists("config:status") && redis.KeyExists("config:status_type"))
             {
-                var statusText = await db.StringGetAsync("config:status");
-                var statusType = await db.StringGetAsync("config:status_type");
+                var statusText = await redis.StringGetAsync("config:status");
+                var statusType = await redis.StringGetAsync("config:status_type");
 
                 try
                 {

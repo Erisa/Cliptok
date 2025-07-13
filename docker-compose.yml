@@ -3,6 +3,8 @@ services:
     image: ghcr.io/erisa/cliptok
     depends_on:
       - redis
+      # comment out this if you don't use db support
+      - postgres
     env_file:
       - .env
     restart: on-failure
@@ -28,13 +30,23 @@ services:
     # uncomment this for bespoke setups
     network_mode: service:tailscale
   redis:
-    image: 'mirror.gcr.io/redis:7.2-alpine'
+    image: mirror.gcr.io/redis:7.2-alpine
     restart: always
     volumes:
       - type: bind
         source: ./data
         target: /data
     command: --appendonly yes
+# Use only if enablePersistentDb is enabled in config.json
+  postgres:
+    image: postgres:17-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: cliptok
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: cliptok
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
 
 # You may want to comment out everything below if you're not Erisa.
   redis-exposer:
@@ -69,3 +81,5 @@ services:
       - net_admin
       - sys_module
     restart: always
+    extra_hosts:
+      - "paste.erisa.ts.net:100.104.163.12"
