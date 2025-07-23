@@ -51,6 +51,10 @@ namespace Cliptok.Events
             {
                 client.Logger.LogDebug("Got a message update event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
             }
+
+            if (e.Message.Channel.GuildId != Program.cfgjson.ServerID)
+                return;
+
             await MessageHandlerAsync(client, e.Message, e.Channel, true);
         }
 
@@ -69,7 +73,10 @@ namespace Cliptok.Events
             {
                 client.Logger.LogDebug("Got a message delete event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
             }
-            
+
+            if (e.Message.Channel.GuildId != Program.cfgjson.ServerID)
+                return;
+
             foreach (var warning in await Program.redis.HashGetAllAsync("automaticWarnings"))
             {
                 if (JsonConvert.DeserializeObject<UserWarning>(warning.Value).ContextMessageReference.MessageId == e.Message.Id)
@@ -115,6 +122,9 @@ namespace Cliptok.Events
                         await Program.redis.HashDeleteAsync("compromisedAccountBans", ban.Name);
                 }
             }
+
+            if (e.Messages[0].Channel.GuildId != Program.cfgjson.ServerID)
+                return;
 
             if (Program.cfgjson.EnablePersistentDb)
             {
@@ -268,9 +278,9 @@ namespace Cliptok.Events
         public static async Task MessageHandlerAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
             #region message logging fill to db
-
             // If db support is enabled, and this message is not in an excluded channel, cache it
-            if (Program.cfgjson.EnablePersistentDb
+            if (message.Channel.GuildId == Program.cfgjson.ServerID
+                && Program.cfgjson.EnablePersistentDb
                 && !Program.cfgjson.MessageLogExcludedChannels.Contains(message.ChannelId)
                 && (message.Channel.ParentId is null || !Program.cfgjson.MessageLogExcludedChannels.Contains((ulong)message.Channel.ParentId)))
             {
