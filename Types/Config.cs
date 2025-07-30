@@ -278,7 +278,7 @@
         public bool EnablePersistentDb { get; set; } = false;
         
         [JsonProperty("compromisedAccountBanAutoPardonHours")]
-        public int CompromisedAccountBanAutoPardonHours { get; private set; }
+        public int CompromisedAccountBanAutoPardonHours { get; private set; } = 0;
 
         [JsonProperty("disableMicrosoftCommands")]
         public bool DisableMicrosoftCommands { get; set; } = false;
