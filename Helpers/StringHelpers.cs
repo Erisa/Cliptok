@@ -29,7 +29,7 @@
                 return $"{Program.cfgjson.Emoji.Warning} {user.Mention} was warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**";
         }
 
-        public static async Task<string> CodeOrHasteBinAsync(string input, string language = "", int charLimit = 1930, bool plain = false, bool noCode = false, bool messageWrapper = false, string overflowHeader = "")
+        public static async Task<(bool Success, string Text)> CodeOrHasteBinAsync(string input, string language = "", int charLimit = 1930, bool plain = false, bool noCode = false, bool messageWrapper = false, string overflowHeader = "")
         {
             bool inputHasCodeBlock = input.Contains("```");
             if (input.Length > charLimit || inputHasCodeBlock)
@@ -45,29 +45,29 @@
                     var hasteUrl = hasteResult.FullUrl;
 
                     if (plain)
-                        return hasteUrl;                    
+                        return (true, hasteUrl);                    
                     if (messageWrapper)
-                        return $"[`📄 View online`]({hasteResult.RawUrl})";
+                        return (true, $"[`📄 View online`]({hasteResult.RawUrl})");
                     else if (inputHasCodeBlock)
-                        return $"{Program.cfgjson.Emoji.Warning} Output contained a code block, so it was uploaded to Hastebin to avoid formatting issues: {hasteUrl}";
+                        return (true, $"{Program.cfgjson.Emoji.Warning} Output contained a code block, so it was uploaded to Hastebin to avoid formatting issues: {hasteUrl}");
                     else
-                        return $"{Program.cfgjson.Emoji.Warning} Output exceeded character limit: {hasteUrl}";
+                        return (true, $"{Program.cfgjson.Emoji.Warning} Output exceeded character limit: {hasteUrl}");
                 }
                 else
                 {
                     Program.discord.Logger.LogError("Error ocurred uploading to Hastebin with status code: {code}\nPayload: {output}", hasteResult.StatusCode, input);
                     if (plain)
-                        return "Error, check logs.";
+                        return (false, "[`Error, check logs.`]");
 
-                    return $"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.";
+                    return (false, $"{Program.cfgjson.Emoji.Error} Unknown error occurred during upload to Hastebin.\nPlease try again or contact the bot owner.");
                 }
             }
             else if (noCode)
             {
-                return input;
+                return (true, input);
             }
             else {
-                return $"```{language}\n{input}\n```";
+                return (true, $"```{language}\n{input}\n```");
             }
         }
     }
