@@ -285,7 +285,7 @@ namespace Cliptok.Helpers
         public static async Task<DiscordMessageBuilder> GenerateMessageRelay(Models.CachedDiscordMessage message, string type, bool channelRef = true, bool showChannelId = true, Models.CachedDiscordMessage oldMessage = null, bool showMessageId = true)
         {
             var channel = await Program.homeGuild.GetChannelAsync(message.ChannelId);
-            var msgBuilder = new DiscordMessageBuilder().EnableV2Components();
+            var msgBuilder = new DiscordMessageBuilder();
 
             bool oldContentOverflow = false;
             bool newContentOverflow = false;
