@@ -98,6 +98,9 @@ namespace Cliptok.Events
                 await channel.AddOverwriteAsync(e.Member, overwrite.Value.Allowed, overwrite.Value.Denied,
                     "Restoring saved overrides for member.");
             }
+            
+            // Change member name if it attempts to impersonate/roleplay a public figure or organization
+            await MemberHelpers.CheckAndChangeBadMemberNameAsync(e.Member);
         }
 
         public static async Task GuildMemberRemoved(DiscordClient client, GuildMemberRemovedEventArgs e)
@@ -245,6 +248,9 @@ namespace Cliptok.Events
                         a.Nickname = DehoistHelpers.DehoistName(e.Member.DisplayName);
                         a.AuditLogReason = "[Automatic dehoist; user is permadehoisted]";
                     });
+            
+            // Change member name if it attempts to impersonate/roleplay a public figure or organization
+            await MemberHelpers.CheckAndChangeBadMemberNameAsync(e.Member);
 
             // cache user
             if (Program.cfgjson.EnablePersistentDb)
