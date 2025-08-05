@@ -1,3 +1,4 @@
+using Cliptok.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cliptok.Commands
@@ -24,10 +25,11 @@ namespace Cliptok.Commands
 
                 using (var dbContext = new CliptokDbContext())
                 {
-                    var records = (await dbContext.Messages.Include(m => m.User).Include(m => m.Sticker).Include(m => m.User.BulkMessageLogs).OrderByDescending(m => m.Id).Take(100).ToListAsync());
-                    var json = JsonConvert.SerializeObject(records, Formatting.Indented);
+                    var records = (await dbContext.Messages.Include(m => m.User).Include(m => m.Sticker).OrderByDescending(m => m.Id).Take(100).ToListAsync());
+                    var stream = new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(records, Formatting.Indented)));
                     await ctx.RespondAsync(new DiscordMessageBuilder()
-                        .WithContent($"100 most recent message logs:\n{await StringHelpers.CodeOrHasteBinAsync(json, "json", plain: true)}"));
+                        .WithContent($"100 most recent message logs")
+                        .AddFile("messages.json", stream));
                 }
             }
 
@@ -65,7 +67,14 @@ namespace Cliptok.Commands
                             strOut += $"{entry.Value}\n";
                         }
                     }
-                    await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(strOut, "json"));
+                    var hasteResult = await StringHelpers.CodeOrHasteBinAsync(strOut, "json");
+                    if (hasteResult.Success)
+                        await ctx.RespondAsync(hasteResult.Text);
+                    else
+                    {
+                        var stream = new MemoryStream(Encoding.UTF8.GetBytes(strOut));
+                        await ctx.RespondAsync(new DiscordMessageBuilder().AddFile("mutes.json", stream));
+                    }
                 }
                 else // if (targetUser != default)
                 {
@@ -104,7 +113,16 @@ namespace Cliptok.Commands
                             strOut += $"{entry.Value}\n";
                         }
                     }
-                    await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(strOut, "json"));
+                    var haste = await StringHelpers.CodeOrHasteBinAsync(strOut, "json");
+                    if (haste.Success)
+                        await ctx.Channel.SendMessageAsync(haste.Text);
+                    else
+                    {
+                        var stream = new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(strOut, Formatting.Indented)));
+                        await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder()
+                            .AddFile("bans.txt", stream));
+                    }
+
                 }
                 else // if (targetUser != default)
                 {
@@ -182,7 +200,7 @@ namespace Cliptok.Commands
                 ShellResult finishedShell = RunShellCommand(command);
                 string result = Regex.Replace(finishedShell.result, "ghp_[0-9a-zA-Z]{36}", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") ?? "DUMMYVALUE", "REDACTED");
 
-                string msgContent = await StringHelpers.CodeOrHasteBinAsync(result, charLimit: 1947);
+                string msgContent = (await StringHelpers.CodeOrHasteBinAsync(result, charLimit: 1947)).Text;
 
                 msgContent += $"\nProcess exited with code `{finishedShell.proc.ExitCode}`.";
 
@@ -264,8 +282,15 @@ namespace Cliptok.Commands
                     }
                     list += "```\n";
                 }
-
-                await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(list));
+                var haste = await StringHelpers.CodeOrHasteBinAsync(list, "json");
+                if (haste.Success)
+                    await ctx.Channel.SendMessageAsync(haste.Text);
+                else
+                {
+                    var stream = new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(list, Formatting.Indented)));
+                    await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder()
+                        .AddFile("events.txt", stream));
+                }
             }
 
             [Command("dmchannel")]
@@ -286,7 +311,15 @@ namespace Cliptok.Commands
 
                 var json = JsonConvert.SerializeObject(dmChannels, Formatting.Indented);
 
-                await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(json, "json"));
+                var haste = await StringHelpers.CodeOrHasteBinAsync(json, "json");
+                if (haste.Success)
+                    await ctx.Channel.SendMessageAsync(haste.Text);
+                else
+                {
+                    var stream = new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(json, Formatting.Indented)));
+                    await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder()
+                        .AddFile("members.json", stream));
+                }
             }
 
             [Command("searchmembers")]
@@ -305,7 +338,16 @@ namespace Cliptok.Commands
                 Dictionary<ulong, string> memberIdsTonames = matchedMembers.Select(member => new KeyValuePair<ulong, string>(member.Id, member.Username)).ToDictionary(x => x.Key, x => x.Value);
 
                 _ = msg.DeleteAsync();
-                await ctx.Channel.SendMessageAsync(await StringHelpers.CodeOrHasteBinAsync(JsonConvert.SerializeObject(memberIdsTonames, Formatting.Indented), "json"));
+                var json = JsonConvert.SerializeObject(memberIdsTonames, Formatting.Indented);
+                var haste = await StringHelpers.CodeOrHasteBinAsync(json, "json");
+                if (haste.Success)
+                    await ctx.Channel.SendMessageAsync(haste.Text);
+                else
+                {
+                    var stream = new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(json, Formatting.Indented)));
+                    await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder()
+                        .AddFile("members.json", stream));
+                }
             }
 
             [Command("testnre")]
@@ -340,7 +382,7 @@ namespace Cliptok.Commands
                     await ctx.RespondAsync("No cached warning found.");
                     return;
                 }
-                await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(JsonConvert.SerializeObject(WarningHelpers.mostRecentWarning, Formatting.Indented), "json"));
+                await ctx.RespondAsync((await StringHelpers.CodeOrHasteBinAsync(JsonConvert.SerializeObject(WarningHelpers.mostRecentWarning, Formatting.Indented), "json")).Text);
             }
 
             [Command("bancache")]
@@ -352,7 +394,7 @@ namespace Cliptok.Commands
                     await ctx.RespondAsync("No cached ban found.");
                     return;
                 }
-                await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(JsonConvert.SerializeObject(BanHelpers.MostRecentBan, Formatting.Indented), "json"));
+                await ctx.RespondAsync((await StringHelpers.CodeOrHasteBinAsync(JsonConvert.SerializeObject(BanHelpers.MostRecentBan, Formatting.Indented), "json")).Text);
             }
 
 
@@ -365,7 +407,7 @@ namespace Cliptok.Commands
                     await ctx.RespondAsync("No cached mute found.");
                     return;
                 }
-                await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(JsonConvert.SerializeObject(MuteHelpers.MostRecentMute, Formatting.Indented), "json"));
+                await ctx.RespondAsync((await StringHelpers.CodeOrHasteBinAsync(JsonConvert.SerializeObject(MuteHelpers.MostRecentMute, Formatting.Indented), "json")).Text);
             }
 
         }
@@ -424,7 +466,7 @@ namespace Cliptok.Commands
                     if (response.Length > 2000)
                     {
                         // I am abusing my own helper here. I know for a fact that it will be over the char limit so I know it won't return a code block.
-                        await ctx.RespondAsync(await StringHelpers.CodeOrHasteBinAsync(response));
+                        await ctx.RespondAsync((await StringHelpers.CodeOrHasteBinAsync(response)).Text);
                     }
                     else
                     {
@@ -633,7 +675,7 @@ namespace Cliptok.Commands
                             output += $"{JsonConvert.SerializeObject(overwrite)}\n";
                         }
 
-                        await ctx.RespondAsync($"Dump from Discord:\n{await StringHelpers.CodeOrHasteBinAsync(output, "json")}");
+                        await ctx.RespondAsync($"Dump from Discord:\n{(await StringHelpers.CodeOrHasteBinAsync(output, "json")).Text}");
                     }
 
                     [Command("db")]
@@ -676,7 +718,7 @@ namespace Cliptok.Commands
                             output += $"{JsonConvert.SerializeObject(overwrite)}\n";
                         }
 
-                        await ctx.RespondAsync($"Dump from db:\n{await StringHelpers.CodeOrHasteBinAsync(output, "json")}");
+                        await ctx.RespondAsync($"Dump from db:\n{(await StringHelpers.CodeOrHasteBinAsync(output, "json")).Text}");
                     }
                 }
 

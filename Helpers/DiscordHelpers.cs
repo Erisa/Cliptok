@@ -1,4 +1,6 @@
-﻿namespace Cliptok.Helpers
+﻿using System.IO;
+
+namespace Cliptok.Helpers
 {
     public class DiscordHelpers
     {
@@ -283,6 +285,11 @@
         public static async Task<DiscordMessageBuilder> GenerateMessageRelay(Models.CachedDiscordMessage message, string type, bool channelRef = true, bool showChannelId = true, Models.CachedDiscordMessage oldMessage = null, bool showMessageId = true)
         {
             var channel = await Program.homeGuild.GetChannelAsync(message.ChannelId);
+            var msgBuilder = new DiscordMessageBuilder();
+
+            bool oldContentOverflow = false;
+            bool newContentOverflow = false;
+
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithAuthor($"Message by {message.User.DisplayName}{(channelRef ? $" was {type} in #{channel.Name}" : "")}", null, message.User.AvatarUrl)
                 .WithFooter($"{(showChannelId ? $"Channel ID: {message.ChannelId} | " : "")}User ID: {message.User.Id} {(showMessageId ? $" | Message ID: {message.Id}" : "")}");
@@ -307,7 +314,14 @@
 
                         if (oldMessage.Sticker is not null)
                             oldContent += $"\n[{oldMessage.Sticker.Name}]({oldMessage.Sticker.Url})";
-                        embed.AddField("Old content", await StringHelpers.CodeOrHasteBinAsync(oldContent, noCode: true, messageWrapper: true, charLimit: 1024));
+                        var haste = await StringHelpers.CodeOrHasteBinAsync(oldContent, noCode: true, messageWrapper: true, charLimit: 1024);
+                        if (haste.Success)
+                            embed.AddField("Old content", haste.Text);
+                        else
+                        {
+                            msgBuilder.AddFile("old_content.txt", new MemoryStream(Encoding.UTF8.GetBytes(oldContent)));
+                            oldContentOverflow = true;
+                        }
                     }
                 }
                 if (message.Content is null || message.Content == "")
@@ -325,8 +339,15 @@
 
                     if (oldMessage.Sticker is not null)
                         content += $"\n[{message.Sticker.Name}]({message.Sticker.Url})";
-
-                    embed.AddField("New content", await StringHelpers.CodeOrHasteBinAsync(content, noCode: true, messageWrapper: true, charLimit: 1024));
+                    
+                    var haste = await StringHelpers.CodeOrHasteBinAsync(content, noCode: true, messageWrapper: true, charLimit: 1024);
+                    if (haste.Success)
+                        embed.AddField("New content", haste.Text);
+                    else
+                    {
+                        msgBuilder.AddFile("new_content.txt", new MemoryStream(Encoding.UTF8.GetBytes(content)));
+                        newContentOverflow = true;
+                    }
                 }
                 embed.Color = DiscordColor.Yellow;
             }
@@ -370,7 +391,8 @@
                 }
             }
 
-            return new DiscordMessageBuilder().AddEmbeds(embeds.AsEnumerable());
+            
+            return msgBuilder.AddEmbeds(embeds.AsEnumerable());
         }
 
 
