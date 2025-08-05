@@ -497,10 +497,16 @@ namespace Cliptok.Commands
             
             if (contextMessage is not null)
             {
+                string newCtxMsg;
                 if (banDuration == default)
-                    await contextMessage.ModifyAsync($"{Program.cfgjson.Emoji.Banned} {targetUser.Mention} has been banned: **{reason}**");
+                    newCtxMsg = $"{Program.cfgjson.Emoji.Banned} {targetUser.Mention} has been banned: **{reason}**";
                 else
-                    await contextMessage.ModifyAsync($"{Program.cfgjson.Emoji.Banned} {targetUser.Mention} has been banned for **{TimeHelpers.TimeToPrettyFormat(banDuration, false)}**: **{reason}**");
+                    newCtxMsg = $"{Program.cfgjson.Emoji.Banned} {targetUser.Mention} has been banned for **{TimeHelpers.TimeToPrettyFormat(banDuration, false)}**: **{reason}**";
+                
+                if (contextMessage.Content.Contains("-# This user's messages have been kept."))
+                    newCtxMsg += "\n-# This user's messages have been kept.";
+                
+                await contextMessage.ModifyAsync(newCtxMsg);
             }
             
             if (dmMessage is not null)

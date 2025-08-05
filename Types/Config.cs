@@ -120,7 +120,7 @@
         public Dictionary<string, string> AnnouncementRolesFriendlyNames { get; private set; }
 
         [JsonProperty("hastebinEndpoint")]
-        public string HastebinEndpoint { get; private set; }
+        public string HastebinEndpoint { get; private set; } = "";
 
         [JsonProperty("modmailCategory")]
         public ulong ModmailCategory { get; private set; }
