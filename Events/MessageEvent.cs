@@ -279,7 +279,7 @@ namespace Cliptok.Events
         {
             #region message logging fill to db
             // If db support is enabled, and this message is not in an excluded channel, cache it
-            if (message.Channel.GuildId == Program.cfgjson.ServerID
+            if (!wasAutoModBlock && message.Channel.GuildId == Program.cfgjson.ServerID
                 && Program.cfgjson.EnablePersistentDb
                 && !Program.cfgjson.MessageLogExcludedChannels.Contains(message.ChannelId)
                 && (message.Channel.ParentId is null || !Program.cfgjson.MessageLogExcludedChannels.Contains((ulong)message.Channel.ParentId)))
