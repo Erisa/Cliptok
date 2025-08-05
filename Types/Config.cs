@@ -292,6 +292,11 @@
         [JsonProperty("messageLogExcludedChannels")]
         public List<ulong> MessageLogExcludedChannels { get; set; } = new();
 
+        [JsonProperty("autoRenameBadNames")]
+        public List<string> AutoRenameBadNames { get; set; } = new();
+        
+        [JsonProperty("autoRenameAdverbs")]
+        public List<string> AutoRenameAdverbs { get; set; } = new();
     }
 
     public class WorkflowConfig
