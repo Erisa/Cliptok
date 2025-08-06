@@ -203,6 +203,8 @@ namespace Cliptok.Commands
                         break;
 
                     string warningString = $"{StringHelpers.Pad(warning.Value.WarningId)} - {StringHelpers.Truncate(warning.Value.WarnReason, 29, true)} - {TimeHelpers.TimeToPrettyFormat(DateTime.Now - warning.Value.WarnTimestamp, true)}";
+                    if (warning.Value.IsPardoned)
+                        warningString += " (pardoned)";
 
                     var focusedOption = ctx.Options.FirstOrDefault(option => option.Focused);
                     if (focusedOption is not null)
@@ -438,7 +440,7 @@ namespace Cliptok.Commands
                 );
 
                 await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Successfully pardoned warning `{StringHelpers.Pad(warnId)}` (belonging to {user.Mention})")
-                    .AddEmbed(await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), userID: user.Id, showPardoned: true)));
+                    .AddEmbed(await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), userID: user.Id, showPardonedInline: true)));
             }
         }
         
@@ -500,7 +502,7 @@ namespace Cliptok.Commands
                 );
 
                 await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Successfully unpardoned warning `{StringHelpers.Pad(warnId)}` (belonging to {user.Mention})")
-                    .AddEmbed(await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), userID: user.Id, showPardoned: true)));
+                    .AddEmbed(await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), userID: user.Id, showPardonedInline: true)));
             }
         }
 
