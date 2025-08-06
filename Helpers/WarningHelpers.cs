@@ -120,7 +120,7 @@
             return embed;
         }
 
-        public static async Task<DiscordEmbed> FancyWarnEmbedAsync(UserWarning warning, bool detailed = false, int colour = 0xFEC13D, bool showTime = true, ulong userID = default, bool showPardoned = false)
+        public static async Task<DiscordEmbed> FancyWarnEmbedAsync(UserWarning warning, bool detailed = false, int colour = 0xFEC13D, bool showTime = true, ulong userID = default, bool showPardonedInline = false)
         {
             if (userID == default)
                 userID = warning.TargetUserId;
@@ -151,8 +151,8 @@
             }
             if (showTime)
                 embed.AddField("Time", detailed ? $"<t:{TimeHelpers.ToUnixTimestamp(warning.WarnTimestamp)}:f>" : $"<t:{TimeHelpers.ToUnixTimestamp(warning.WarnTimestamp)}:R>", true);
-            if (showPardoned)
-                embed.AddField("Pardoned", warning.IsPardoned ? "Yes" : "No", true);
+            
+            embed.AddField("Pardoned", warning.IsPardoned ? "Yes" : "No", showPardonedInline);
 
             return embed;
         }
