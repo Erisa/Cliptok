@@ -312,7 +312,7 @@ namespace Cliptok.Commands
             string reason = "";
             foreach (var word in inputString)
             {
-                if (ulong.TryParse(word, out var id))
+                if (ulong.TryParse(word.Replace("<@", "").Replace(">", ""), out var id))
                     users.Add(id);
                 else
                     reason += $"{word} ";
