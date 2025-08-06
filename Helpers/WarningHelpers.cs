@@ -256,7 +256,7 @@
             {
                 if (Program.cfgjson.ReactionEmoji is not null)
                 {
-                    var emoji = DiscordEmoji.FromGuildEmote(Program.discord, Program.cfgjson.ReactionEmoji.Delete);
+                    var emoji = await Program.discord.GetApplicationEmojiAsync(Program.cfgjson.ReactionEmoji.Delete);
                     await logMsg.CreateReactionAsync(emoji);
                     Task.Run(async () =>
                     {

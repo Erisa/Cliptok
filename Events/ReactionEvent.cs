@@ -56,7 +56,7 @@ namespace Cliptok.Events
             if (await GetPermLevelAsync(member) < ServerPermLevel.TrialModerator)
                 return;
             
-            var recycleBinEmoji = DiscordEmoji.FromGuildEmote(discord, cfgjson.ReactionEmoji.Delete);
+            var recycleBinEmoji = await discord.GetApplicationEmojiAsync(cfgjson.ReactionEmoji.Delete);
             
             // Ignore reactions that are not the CliptokRecycleBin emoji!!
             if (e.Emoji != recycleBinEmoji)
@@ -102,7 +102,7 @@ namespace Cliptok.Events
                 }
                 else
                 {
-                    var errorEmoji = DiscordEmoji.FromGuildEmote(discord, cfgjson.ReactionEmoji.Error);
+                    var errorEmoji = await discord.GetApplicationEmojiAsync(cfgjson.ReactionEmoji.Error);
                     await targetMessage.CreateReactionAsync(errorEmoji);
                 }
             }
@@ -134,7 +134,7 @@ namespace Cliptok.Events
                     return warn.WarnReason == reason && warn.Type == WarningType.Warning;
                 }).Select(x => JsonConvert.DeserializeObject<UserWarning>(x.Value)).ToList();
                 
-                var errorEmoji = DiscordEmoji.FromGuildEmote(discord, cfgjson.ReactionEmoji.Error);
+                var errorEmoji = await discord.GetApplicationEmojiAsync(cfgjson.ReactionEmoji.Error);
                 if (matchingWarnings.Count > 1)
                 {
                     bool foundMatch = false;
@@ -181,7 +181,7 @@ namespace Cliptok.Events
                                 .WithAllowedMentions(Mentions.None)
                         );
                         
-                        var successEmoji = DiscordEmoji.FromGuildEmote(discord, cfgjson.ReactionEmoji.Success);
+                        var successEmoji = await discord.GetApplicationEmojiAsync(cfgjson.ReactionEmoji.Success);
                         await targetMessage.CreateReactionAsync(successEmoji);
                     }
                     else
