@@ -1127,7 +1127,7 @@ namespace Cliptok.Events
                     && channel.Id != Program.cfgjson.SupportForumId
                     && channel.Parent.Id != Program.cfgjson.SupportForumId)
                 {
-                        string reason = "Mentioned Community Tech Support outside of tech support channels";
+                        string reason = "Mentioned tech support role outside of tech support channels";
                     
                         if (await Program.redis.SetContainsAsync("ctsPingPardons", message.Author.Id))
                         {
