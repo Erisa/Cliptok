@@ -181,40 +181,70 @@ namespace Cliptok.Commands
         {
             public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext ctx)
             {
-                var list = new List<DiscordAutoCompleteChoice>();
-
-                var useroption = ctx.Options.FirstOrDefault(x => x.Name == "user");
-                if (useroption == default)
-                {
-                    return list;
-                }
-
-                var user = await ctx.Client.GetUserAsync((ulong)useroption.Value);
-
-                var warnings = (await Program.redis.HashGetAllAsync(user.Id.ToString()))
-                    .Where(x => JsonConvert.DeserializeObject<UserWarning>(x.Value).Type == WarningType.Warning).ToDictionary(
-                   x => x.Name.ToString(),
-                  x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
-                 ).OrderByDescending(x => x.Value.WarningId);
-
-                foreach (var warning in warnings)
-                {
-                    if (list.Count >= 25)
-                        break;
-
-                    string warningString = $"{StringHelpers.Pad(warning.Value.WarningId)} - {StringHelpers.Truncate(warning.Value.WarnReason, 29, true)} - {TimeHelpers.TimeToPrettyFormat(DateTime.Now - warning.Value.WarnTimestamp, true)}";
-                    if (warning.Value.IsPardoned)
-                        warningString += " (pardoned)";
-
-                    var focusedOption = ctx.Options.FirstOrDefault(option => option.Focused);
-                    if (focusedOption is not null)
-                        if (warning.Value.WarnReason.Contains((string)focusedOption.Value) || warningString.ToLower().Contains(focusedOption.Value.ToString().ToLower()))
-                            list.Add(new DiscordAutoCompleteChoice(warningString, StringHelpers.Pad(warning.Value.WarningId)));
-                }
-
-                return list;
-                //return Task.FromResult((IEnumerable<DiscordAutoCompleteChoice>)list);
+                return await GetWarningsForAutocompleteAsync(ctx);
             }
+        }
+        
+        internal partial class PardonedWarningsAutocompleteProvider : IAutoCompleteProvider
+        {
+            public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext ctx)
+            {
+                return await GetWarningsForAutocompleteAsync(ctx, pardonedOnly: true);
+            }
+        }
+        
+        internal partial class UnpardonedWarningsAutocompleteProvider : IAutoCompleteProvider
+        {
+            public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext ctx)
+            {
+                return await GetWarningsForAutocompleteAsync(ctx, excludePardoned: true);
+            }
+        }
+        
+        private static async Task<List<DiscordAutoCompleteChoice>> GetWarningsForAutocompleteAsync(AutoCompleteContext ctx, bool excludePardoned = false, bool pardonedOnly = false)
+        {
+            if (excludePardoned && pardonedOnly)
+                throw new ArgumentException("Cannot simultaneously exclude pardoned warnings from autocomplete suggestions and only show pardoned warnings.");
+            
+            var list = new List<DiscordAutoCompleteChoice>();
+
+            var useroption = ctx.Options.FirstOrDefault(x => x.Name == "user");
+            if (useroption == default)
+            {
+                return list;
+            }
+
+            var user = await ctx.Client.GetUserAsync((ulong)useroption.Value);
+
+            var warnings = (await Program.redis.HashGetAllAsync(user.Id.ToString()))
+                .Where(x => JsonConvert.DeserializeObject<UserWarning>(x.Value).Type == WarningType.Warning).ToDictionary(
+                    x => x.Name.ToString(),
+                    x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
+                ).OrderByDescending(x => x.Value.WarningId);
+
+            foreach (var warning in warnings)
+            {
+                if (list.Count >= 25)
+                    break;
+
+                string warningString = $"{StringHelpers.Pad(warning.Value.WarningId)} - {StringHelpers.Truncate(warning.Value.WarnReason, 29, true)} - {TimeHelpers.TimeToPrettyFormat(DateTime.Now - warning.Value.WarnTimestamp, true)}";
+                if (warning.Value.IsPardoned)
+                {
+                    if (excludePardoned)
+                        continue;
+                    
+                    warningString += " (pardoned)";
+                }
+                else if (pardonedOnly)
+                    continue;
+
+                var focusedOption = ctx.Options.FirstOrDefault(option => option.Focused);
+                if (focusedOption is not null)
+                    if (warning.Value.WarnReason.Contains((string)focusedOption.Value) || warningString.ToLower().Contains(focusedOption.Value.ToString().ToLower()))
+                        list.Add(new DiscordAutoCompleteChoice(warningString, StringHelpers.Pad(warning.Value.WarningId)));
+            }
+
+            return list;
         }
 
         [Command("warndetails")]
@@ -388,7 +418,7 @@ namespace Cliptok.Commands
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task PardonSlashCommand(SlashCommandContext ctx,
             [Parameter("user"), Description("The user to pardon a warning for.")] DiscordUser user,
-            [SlashAutoCompleteProvider(typeof(WarningsAutocompleteProvider))][Parameter("warning"), Description("Type to search! Find the warning you want to pardon.")] string warning,
+            [SlashAutoCompleteProvider(typeof(UnpardonedWarningsAutocompleteProvider))][Parameter("warning"), Description("Type to search! Find the warning you want to pardon.")] string warning,
             [Parameter("public"), Description("Whether to show the output publicly. Default: false")] bool showPublic = false)
         {
             if (warning.Contains(' '))
@@ -450,7 +480,7 @@ namespace Cliptok.Commands
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task UnpardonSlashCommand(SlashCommandContext ctx,
             [Parameter("user"), Description("The user to unpardon a warning for.")] DiscordUser user,
-            [SlashAutoCompleteProvider(typeof(WarningsAutocompleteProvider))][Parameter("warning"), Description("Type to search! Find the warning you want to unpardon.")] string warning,
+            [SlashAutoCompleteProvider(typeof(PardonedWarningsAutocompleteProvider))][Parameter("warning"), Description("Type to search! Find the warning you want to unpardon.")] string warning,
             [Parameter("public"), Description("Whether to show the output publicly. Default: false")] bool showPublic = false)
         {
             if (warning.Contains(' '))
