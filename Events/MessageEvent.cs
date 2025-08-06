@@ -1121,25 +1121,37 @@ namespace Cliptok.Events
                 #endregion
                 
                 #region CTS ping autowarn
-                if (message.Content.Contains(Program.cfgjson.CommunityTechSupportRoleID.ToString())
+                if (Program.cfgjson.CommunityTechSupportRoleID != 0
+                    && message.Content.Contains($"<@&{Program.cfgjson.CommunityTechSupportRoleID.ToString()}>")
                     && channel.Id != Program.cfgjson.TechSupportChannel
                     && channel.Parent.Id != Program.cfgjson.TechSupportChannel
                     && channel.Id != Program.cfgjson.SupportForumId
-                    && channel.Parent.Id != Program.cfgjson.SupportForumId)
+                    && channel.Parent.Id != Program.cfgjson.SupportForumId
+                    && await GetPermLevelAsync(member) < ServerPermLevel.TechnicalQueriesSlayer)
                 {
                         string reason = "Mentioned tech support role outside of tech support channels";
+                        
+                        string techSupportChannelsText;
+                        if (Program.cfgjson.TechSupportChannel != 0 && Program.cfgjson.SupportForumId != 0)
+                            techSupportChannelsText = $"<#{Program.cfgjson.TechSupportChannel}> and <#{Program.cfgjson.SupportForumId}>";
+                        else if (Program.cfgjson.TechSupportChannel != 0)
+                            techSupportChannelsText = $"<#{Program.cfgjson.TechSupportChannel}>";
+                        else if (Program.cfgjson.SupportForumId != 0)
+                            techSupportChannelsText = $"<#{Program.cfgjson.SupportForumId}>";
+                        else
+                            techSupportChannelsText = "the tech support channels";
                     
                         if (await Program.redis.SetContainsAsync("ctsPingPardons", message.Author.Id))
                         {
                             var msg = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**\n"
-                                + "Please keep requests for tech support inside the tech support channels to avoid punishment.");
+                                + $"Please keep requests for tech support inside {techSupportChannelsText} to avoid punishment.");
                             await WarningHelpers.GiveWarningAsync(message.Author, Program.discord.CurrentUser, reason, msg, channel, " automatically ");
                         }
                         else // also false when set does not exist
                         {
                             await Program.redis.SetAddAsync("ctsPingPardons", message.Author.Id);
                             await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, you mentioned Community Tech Support outside of a tech support channel.\n"
-                                + "Please keep requests for tech support inside the tech support channels to avoid further punishment.");
+                                + $"Please keep requests for tech support inside {techSupportChannelsText} to avoid further punishment.");
                         }
                 }
                 #endregion
