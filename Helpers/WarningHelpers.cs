@@ -254,13 +254,16 @@
             );
             try
             {
-                var emoji = DiscordEmoji.FromName(Program.discord, ":CliptokRecycleBin:", true);
-                await logMsg.CreateReactionAsync(emoji);
-                Task.Run(async () =>
+                if (Program.cfgjson.ReactionEmoji is not null)
                 {
-                    await Task.Delay(TimeSpan.FromMinutes(Program.cfgjson.WarningLogReactionTimeMinutes));
-                    await logMsg.DeleteOwnReactionAsync(emoji);
-                });
+                    var emoji = DiscordEmoji.FromGuildEmote(Program.discord, Program.cfgjson.ReactionEmoji.Delete);
+                    await logMsg.CreateReactionAsync(emoji);
+                    Task.Run(async () =>
+                    {
+                        await Task.Delay(TimeSpan.FromMinutes(Program.cfgjson.WarningLogReactionTimeMinutes));
+                        await logMsg.DeleteOwnReactionAsync(emoji);
+                    });
+                }
             }
             catch
             {

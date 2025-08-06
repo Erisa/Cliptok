@@ -51,9 +51,9 @@
                 logMsg = await channelOverride.SendMessageAsync(new DiscordMessageBuilder().WithContent(content).AddEmbed(embed).WithAllowedMentions(Mentions.None));
             
             // Add reaction to log message to be used to delete
-            if (logChannelKey == "investigations" && channelOverride == default)
+            if (logChannelKey == "investigations" && channelOverride == default && Program.cfgjson.ReactionEmoji is not null)
             {
-                var emoji = DiscordEmoji.FromName(Program.discord, ":CliptokRecycleBin:", true);
+                var emoji = DiscordEmoji.FromGuildEmote(Program.discord, Program.cfgjson.ReactionEmoji.Delete);
                 await logMsg.CreateReactionAsync(emoji);
                 Task.Run(async () =>
                 {

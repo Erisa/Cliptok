@@ -49,11 +49,14 @@ namespace Cliptok.Events
             if (e.Channel.Id != cfgjson.LogChannels["investigations"].ChannelId && e.Channel.Id != cfgjson.LogChannels["mod"].ChannelId)
                 return;
             
+            if (cfgjson.ReactionEmoji is null)
+                return;
+            
             var member = await e.Guild.GetMemberAsync(e.User.Id);
             if (await GetPermLevelAsync(member) < ServerPermLevel.TrialModerator)
                 return;
             
-            var recycleBinEmoji = DiscordEmoji.FromName(discord, ":CliptokRecycleBin:", true);
+            var recycleBinEmoji = DiscordEmoji.FromGuildEmote(discord, cfgjson.ReactionEmoji.Delete);
             
             // Ignore reactions that are not the CliptokRecycleBin emoji!!
             if (e.Emoji != recycleBinEmoji)
@@ -99,7 +102,7 @@ namespace Cliptok.Events
                 }
                 else
                 {
-                    var errorEmoji = DiscordEmoji.FromName(discord, ":CliptokCritical:", true);
+                    var errorEmoji = DiscordEmoji.FromGuildEmote(discord, cfgjson.ReactionEmoji.Error);
                     await targetMessage.CreateReactionAsync(errorEmoji);
                 }
             }
@@ -131,7 +134,7 @@ namespace Cliptok.Events
                     return warn.WarnReason == reason && warn.Type == WarningType.Warning;
                 }).Select(x => JsonConvert.DeserializeObject<UserWarning>(x.Value)).ToList();
                 
-                var errorEmoji = DiscordEmoji.FromName(discord, ":CliptokCritical:", true);
+                var errorEmoji = DiscordEmoji.FromGuildEmote(discord, cfgjson.ReactionEmoji.Error);
                 if (matchingWarnings.Count > 1)
                 {
                     bool foundMatch = false;
@@ -178,7 +181,7 @@ namespace Cliptok.Events
                                 .WithAllowedMentions(Mentions.None)
                         );
                         
-                        var successEmoji = DiscordEmoji.FromName(discord, ":CliptokSuccess:", true);
+                        var successEmoji = DiscordEmoji.FromGuildEmote(discord, cfgjson.ReactionEmoji.Success);
                         await targetMessage.CreateReactionAsync(successEmoji);
                     }
                     else
