@@ -238,7 +238,7 @@ namespace Cliptok.Events
 
             // Persist permadehoists
             if (await redis.SetContainsAsync("permadehoists", e.Member.Id))
-                if (e.Member.DisplayName[0] != DehoistHelpers.dehoistCharacter && !e.Member.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername))
+                if (e.Member.DisplayName[0] != DehoistHelpers.dehoistCharacter && !e.Member.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername) && !e.Member.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedGuildTag))
                     // Member is in permadehoist list. Dehoist.
                     e.Member.ModifyAsync(a =>
                     {

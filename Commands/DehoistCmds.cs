@@ -192,7 +192,7 @@ namespace Cliptok.Commands
                         continue;
                     }
 
-                    if (member.DisplayName[0] == DehoistHelpers.dehoistCharacter && !member.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername))
+                    if (member.DisplayName[0] == DehoistHelpers.dehoistCharacter && !member.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername) && !member.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedGuildTag))
                     {
                         var newNickname = member.Nickname[1..];
                         await member.ModifyAsync(a =>
