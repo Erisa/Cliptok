@@ -73,7 +73,7 @@ namespace Cliptok.Events
                     if (level == ServerPermLevel.Nothing && Program.rand.Next(1, 100) == 69)
                         levelText = $"naught but a thing, my dear human. Congratulations, you win {Program.rand.Next(1, 10)} bonus points.";
 
-                    if (att is not null && level < att.TargetLvl)
+                    if (att is not null && level < att.TargetLvl && !att.WorkOutside)
                     {
                         await e.Context.RespondAsync(
                             $"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{commandName}**!\n" +
