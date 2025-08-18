@@ -67,7 +67,7 @@ namespace Cliptok
         public static DiscordChannel ForumChannelAutoWarnFallbackChannel;
 
         public static CliptokDbContext dbContext;
-        internal static readonly string[] microsoftCommandTypes = ["AnnouncementCmds", "TechSupportCmds", "RoleCmds", "RoleSlashCommands"];
+        internal static readonly string[] microsoftCommandTypes = ["AnnouncementCmds", "TechSupportCmds", "RoleCmds", "RoleSlashCommands", "InsidersInteractions"];
 
         public static void UpdateLists()
         {
