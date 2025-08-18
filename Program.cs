@@ -67,7 +67,7 @@ namespace Cliptok
         public static DiscordChannel ForumChannelAutoWarnFallbackChannel;
 
         public static CliptokDbContext dbContext;
-        internal static readonly string[] microsoftCommandTypes = ["AnnouncementCmds", "TechSupportCmds", "RoleCmds"];
+        internal static readonly string[] microsoftCommandTypes = ["AnnouncementCmds", "TechSupportCmds", "RoleCmds", "RoleSlashCommands"];
 
         public static void UpdateLists()
         {
@@ -306,11 +306,11 @@ namespace Cliptok
                         Tasks.EventTasks.HandlePendingChannelCreateEventsAsync(),
                         Tasks.EventTasks.HandlePendingChannelUpdateEventsAsync(),
                         Tasks.EventTasks.HandlePendingChannelDeleteEventsAsync(),
-                    ];
 
-                    // These have their own time management, run them asynchronously and throw caution to the wind.
-                    Tasks.MassDehoistTasks.CheckAndMassDehoistTask();
-                    Tasks.CacheCleanupTasks.CheckAndDeleteOldMessageCacheAsync();
+                        // These have their own time checks
+                        Tasks.MassDehoistTasks.CheckAndMassDehoistTask(),
+                        Tasks.CacheCleanupTasks.CheckAndDeleteOldMessageCacheAsync()
+                    ];
 
                     // To prevent a future issue if checks take longer than 10 seconds,
                     // we only start the 10 second counter after all tasks have concluded.
