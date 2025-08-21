@@ -324,7 +324,7 @@
             var auditLogReason = reason;
             if (manual && modUser is not null)
                 auditLogReason = $"[Manual {(isTqsUnmute ? "TQS " : "")}unmute by {DiscordHelpers.UniqueUsername(modUser)}]: {reason}";
-            
+
             var muteDetailsJson = await Program.redis.HashGetAsync("mutes", targetUser.Id);
             bool success = false;
             bool wasTqsMute = false;

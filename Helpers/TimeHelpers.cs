@@ -38,7 +38,7 @@
         {
             return ((DateTimeOffset)dateTime).ToUnixTimeSeconds();
         }
-        
+
         public static DateTime ToDateTime(long unixTime, bool milliseconds = false)
         {
             /* This function creates a DateTime from a long thats a UNIX timestamp.

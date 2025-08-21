@@ -1,5 +1,3 @@
-using System.Threading.Channels;
-
 namespace Cliptok.Events
 {
     public class AutoModEvents
@@ -24,7 +22,8 @@ namespace Cliptok.Events
             }
             var message = new MockDiscordMessage(author: author, channel: channel, channelId: channel.Id, content: e.Rule.Content, mentionedUsersCount: mentionedUsers.Count);
 
-            if (e.Rule.Action.Type is DiscordRuleActionType.BlockMessage && Program.cfgjson.AutoModRules.Any(r => r.RuleId == e.Rule.RuleId)) {
+            if (e.Rule.Action.Type is DiscordRuleActionType.BlockMessage && Program.cfgjson.AutoModRules.Any(r => r.RuleId == e.Rule.RuleId))
+            {
                 var ruleConfig = Program.cfgjson.AutoModRules.First(r => r.RuleId == e.Rule.RuleId);
                 string reason = ruleConfig.Reason;
                 if (reason is null || reason == "")
@@ -32,7 +31,7 @@ namespace Cliptok.Events
 
                 var user = await client.GetUserAsync(e.Rule.UserId);
 
-                if (user is null )
+                if (user is null)
                 {
                     Program.discord.Logger.LogError("AutoMod rule executed for user {userId} but user could not be found.", e.Rule.UserId);
                     return;

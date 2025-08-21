@@ -116,7 +116,7 @@ namespace Cliptok.Commands
                     var defaultGroupCommand = cmd.Subcommands.FirstOrDefault(sc => sc.Attributes.Any(a => a is DefaultGroupCommandAttribute));
                     arguments = defaultGroupCommand?.Method?.GetParameters();
                 }
-                
+
                 if (arguments is not null && arguments.Length > 0)
                 {
                     var argumentsStr = $"`{cmd.Name.Replace("textcmd", "")}";
@@ -257,7 +257,7 @@ namespace Cliptok.Commands
         )
         {
             DateTime t = TimeHelpers.ParseAnyDateFormat(timetoParse);
-            
+
             if (t <= DateTime.Now)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time can't be in the past!");

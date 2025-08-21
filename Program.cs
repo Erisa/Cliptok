@@ -1,10 +1,10 @@
 using DSharpPlus.Commands.Processors.TextCommands.Parsing;
 using DSharpPlus.Extensions;
 using DSharpPlus.Net.Gateway;
-using Serilog.Sinks.Grafana.Loki;
-using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Serilog.Events;
+using Serilog.Sinks.Grafana.Loki;
+using System.Reflection;
 
 namespace Cliptok
 {
@@ -31,7 +31,8 @@ namespace Cliptok
         }
 
         public async Task ReconnectRequestedAsync(IGatewayClient _) { }
-        public async Task ReconnectFailedAsync(IGatewayClient _) {
+        public async Task ReconnectFailedAsync(IGatewayClient _)
+        {
             Program.discord.Logger.LogCritical("The gateway connection has irrecoverably failed, and the bot is being restarted to reconnect reliably.");
             Environment.Exit(1);
         }

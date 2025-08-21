@@ -407,7 +407,7 @@ namespace Cliptok.Events
             }
 
         }
-        
+
         public static async Task ModalSubmitted(DiscordClient _, ModalSubmittedEventArgs e)
         {
             if (e.Id == "editannounce-modal-callback")
@@ -416,27 +416,27 @@ namespace Cliptok.Events
                 var ctx = Commands.AnnouncementCmds.EditAnnounceCache[e.Interaction.User.Id];
                 DiscordRole role1 = await e.Interaction.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[ctx.role1]);
                 await role1.ModifyAsync(mentionable: true);
-                
+
                 DiscordRole role2 = null;
                 if (ctx.role2 is not null)
                 {
                     role2 = await e.Interaction.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[ctx.role2]);
                     await role2.ModifyAsync(mentionable: true);
                 }
-                
+
                 try
                 {
                     var msg = await e.Interaction.Channel.GetMessageAsync(ctx.msgId);
-                    
+
                     // Set up content, add role mentions if they arent anywhere else in the content already
                     string content = e.Values["editannounce-modal-new-text"];
                     if (role2 is not null && !content.Contains(role2.Id.ToString()))
                         content = $"{role2.Mention} {content}";
                     if (!content.Contains(role1.Id.ToString()))
                         content = $"{role1.Mention} {content}";
-                    
+
                     await msg.ModifyAsync(new DiscordMessageBuilder().WithContent(content).WithAllowedMentions(Mentions.All));
-                    
+
                     await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Done!").AsEphemeral(true));
                 }
                 catch

@@ -82,7 +82,7 @@ namespace Cliptok.Events
                 if (JsonConvert.DeserializeObject<UserWarning>(warning.Value).ContextMessageReference.MessageId == e.Message.Id)
                     await Program.redis.HashDeleteAsync("automaticWarnings", warning.Name);
             }
-            
+
             foreach (var ban in await Program.redis.HashGetAllAsync("compromisedAccountBans"))
             {
                 if (JsonConvert.DeserializeObject<MemberPunishment>(ban.Value).ContextMessageReference.MessageId == e.Message.Id)
@@ -105,7 +105,7 @@ namespace Cliptok.Events
                 await DiscordHelpers.DoEmptyThreadCleanupAsync(e.Channel, e.Message);
             }
         }
-        
+
         public static async Task MessagesBulkDeleted(DiscordClient client, MessagesBulkDeletedEventArgs e)
         {
             foreach (var message in e.Messages)
@@ -115,7 +115,7 @@ namespace Cliptok.Events
                     if (JsonConvert.DeserializeObject<UserWarning>(warning.Value).ContextMessageReference.MessageId == message.Id)
                         await Program.redis.HashDeleteAsync("automaticWarnings", warning.Name);
                 }
-            
+
                 foreach (var ban in await Program.redis.HashGetAllAsync("compromisedAccountBans"))
                 {
                     if (JsonConvert.DeserializeObject<MemberPunishment>(ban.Value).ContextMessageReference.MessageId == message.Id)
@@ -360,7 +360,7 @@ namespace Cliptok.Events
 
             #region avoid url bypass
 
-            
+
             var urls = url_rx.Matches(msgContentWithEmbedData);
 
             // urldecode and replace all urls
@@ -616,7 +616,8 @@ namespace Cliptok.Events
                                 duplicateMessageCache[message.Author.Id].Messages.ForEach(
                                     // don't delete a message if it was deleted on a past run of this check, but keep it in the list
                                     // also don't delete the current message because we'll do that later
-                                    async x => {
+                                    async x =>
+                                    {
                                         if (x.Id != message.Id && !deletedMessageCache.Contains(x.Id))
                                         {
                                             _ = DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(x);
@@ -624,7 +625,7 @@ namespace Cliptok.Events
                                         }
                                     }
                                 );
-                                
+
                                 string reason = "Duplicate message spam";
                                 string output = $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason}**";
                                 DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, output, wasAutoModBlock);
@@ -635,7 +636,7 @@ namespace Cliptok.Events
                             }
                         }
                         else
-                        {                                
+                        {
                             duplicateMessageCache[message.Author.Id] = new RecentMessageInfo
                             {
                                 Content = msgContentWithEmbedData,

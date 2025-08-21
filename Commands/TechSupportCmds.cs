@@ -107,7 +107,7 @@ namespace Cliptok.Commands
                 .WithColor(DiscordColor.Red)
             ));
         }
-        
+
         [Command("solved")]
         [Description("Mark a #tech-support-forum post as solved and close it.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
@@ -115,14 +115,14 @@ namespace Cliptok.Commands
         public async Task MarkTechSupportPostSolved(SlashCommandContext ctx)
         {
             await ctx.DeferResponseAsync(ephemeral: true);
-            
+
             // Restrict to #tech-support-forum posts
             if (ctx.Channel.Parent is null || ctx.Channel.Parent.Id != Program.cfgjson.SupportForumId)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command can only be used inside of a <#{Program.cfgjson.SupportForumId}> post!", ephemeral: true);
                 return;
             }
-            
+
             // Re-fetch channel to forcefully re-cache it, & cast to thread to read thread-specific data
             var channel = await ctx.Guild.GetChannelAsync(ctx.Channel.Id, skipCache: true) as DiscordThreadChannel;
 
@@ -132,10 +132,10 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Only the original poster or a <@&{Program.cfgjson.TqsRoleId}> can mark this post as solved!");
                 return;
             }
-            
+
             var forum = await ctx.Client.GetChannelAsync(channel.Parent.Id) as DiscordForumChannel;
             var solvedTagId = forum.AvailableTags.FirstOrDefault(x => x.Name == "Solved").Id;
-            
+
             var errorOccurred = false;
 
             // Add solved tag & archive thread
@@ -160,9 +160,9 @@ namespace Cliptok.Commands
                     Program.discord.Logger.LogWarning(ex, "An error occurred while attempting to mark this post as solved: {threadLink}:", $"https://discord.com/channels/{ctx.Guild.Id}/{ctx.Channel.Id}");
                 }
             }
-            
+
             await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Success} This post is solved and has been closed!\n**Unless you are the original poster, please do not reopen this post.** If you have a similar issue, please create your own post.");
-            
+
             try
             {
                 await channel.ModifyAsync(t => t.IsArchived = true);
@@ -173,7 +173,7 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't close this post! Please report this to the bot maintainers.");
                 Program.discord.Logger.LogWarning(ex, "An error occurred while attempting to close this post: {threadLink}:", $"https://discord.com/channels/{ctx.Guild.Id}/{ctx.Channel.Id}");
             }
-            
+
             // Try to DM the OP a link to their post so they can find it again
             try
             {
@@ -184,7 +184,7 @@ namespace Cliptok.Commands
             {
                 // Failing to send this DM isn't important
             }
-            
+
             if (!errorOccurred)
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Post successfully marked as solved!", ephemeral: true);
         }

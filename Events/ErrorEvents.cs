@@ -33,7 +33,7 @@ namespace Cliptok.Events
 
             if (e.Exception is CommandNotFoundException && (e.Context.Command is null || commandName != "help"))
                 return;
-            
+
             // Show help for command if used with no arguments
             if (e.Exception is ArgumentParseException && e.Context.Arguments.All(x => x.Value is null or ArgumentNotParsedResult or Optional<ArgumentNotParsedResult>))
             {

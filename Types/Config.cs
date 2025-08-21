@@ -291,7 +291,7 @@
 
         [JsonProperty("messageLogExcludedChannels")]
         public List<ulong> MessageLogExcludedChannels { get; set; } = new();
-        
+
         [JsonProperty("reactionEmoji")]
         public ReactionEmojiConfig ReactionEmoji { get; set; }
 
@@ -307,7 +307,7 @@
         [JsonProperty("action")]
         public string Action { get; private set; }
 
-        [JsonProperty("reason")]    
+        [JsonProperty("reason")]
         public string Reason { get; private set; } = "Automod rule violation";
     }
 
@@ -496,15 +496,15 @@
         [JsonProperty("webhookEnvVar")]
         public string WebhookEnvVar { get; private set; } = "";
     }
-    
+
     public class ReactionEmojiConfig
     {
         [JsonProperty("delete")]
         public ulong Delete { get; private set; } = 0;
-        
+
         [JsonProperty("success")]
         public ulong Success { get; private set; } = 0;
-        
+
         [JsonProperty("error")]
         public ulong Error { get; private set; } = 0;
     }

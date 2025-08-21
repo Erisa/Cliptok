@@ -5,7 +5,7 @@ namespace Cliptok.Commands
         // used to pass context to modal handling for /editannounce
         // keyed by user ID
         public static Dictionary<ulong, (ulong msgId, string role1, string role2)> EditAnnounceCache = new();
-        
+
         [Command("announcebuild")]
         [Description("Announce a Windows Insider build in the current channel.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
@@ -51,13 +51,13 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync(text: $"{Program.cfgjson.Emoji.Error} Windows 10 only has a Release Preview Channel.", ephemeral: true);
                 return;
             }
-            
+
             if (threadChannel != default && threadChannel == threadChannel2)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Both threads cannot be the same! Simply set one instead.", ephemeral: true);
                 return;
             }
-            
+
             if (threadChannel == default && threadChannel2 != default)
             {
                 threadChannel = threadChannel2;
@@ -188,7 +188,7 @@ namespace Cliptok.Commands
                                 threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp"]);
                             break;
                     }
-                    
+
                     switch (insiderChannel2)
                     {
                         case "Canary":
@@ -207,7 +207,7 @@ namespace Cliptok.Commands
                                 threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp"]);
                             break;
                     }
-                        
+
                     pingMsgString += $"\n\nDiscuss it here: {threadChannel.Mention}";
                     if (threadChannel2 != default)
                         pingMsgString += $" & {threadChannel2.Mention}";
@@ -258,7 +258,7 @@ namespace Cliptok.Commands
                                 threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp"]);
                             break;
                     }
-                    
+
                     switch (insiderChannel2)
                     {
                         case "Canary":
@@ -277,7 +277,7 @@ namespace Cliptok.Commands
                                 threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp"]);
                             break;
                     }
-                        
+
                     noPingMsgString += $"\n\nDiscuss it here: {threadChannel.Mention}";
                     if (threadChannel2 != default)
                         noPingMsgString += $" & {threadChannel2.Mention}";
@@ -384,13 +384,13 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That message ID wasn't recognised!", ephemeral: true);
                 return;
             }
-            
+
             if (msg.Author.Id != ctx.Client.CurrentUser.Id)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That message wasn't sent by me, so I can't edit it!", ephemeral: true);
                 return;
             }
-            
+
             // Validate roles
             if (!Program.cfgjson.AnnouncementRoles.ContainsKey(role1Name) || (role2Name is not null && !Program.cfgjson.AnnouncementRoles.ContainsKey(role2Name)))
             {
@@ -402,12 +402,12 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} You provided the same role name twice! Did you mean to use two different roles?", ephemeral: true);
                 return;
             }
-            
+
             EditAnnounceCache[ctx.User.Id] = (Convert.ToUInt64(messageId), role1Name, role2Name);
 
             await ctx.RespondWithModalAsync(new DiscordInteractionResponseBuilder().WithTitle("Edit Announcement").WithCustomId("editannounce-modal-callback").AddTextInputComponent(new DiscordTextInputComponent("New announcement text. Do not include roles!", "editannounce-modal-new-text", value: msg.Content, style: DiscordTextInputStyle.Paragraph)));
         }
-        
+
         [Command("announce")]
         [Description("Announces something in the current channel, pinging an Insider role in the process.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
@@ -431,7 +431,7 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync(text: $"{Program.cfgjson.Emoji.Error} Windows 10 only has a Release Preview Channel.", ephemeral: true);
                 return;
             }
-            
+
             string roleKey1;
             if (windowsVersion == 10 && insiderChannel1 == "RP")
             {
@@ -465,7 +465,7 @@ namespace Cliptok.Commands
 
                 insiderRole2 = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[roleKey2]);
             }
-            
+
             await insiderRole1.ModifyAsync(mentionable: true);
             if (insiderRole2 != default)
                 await insiderRole2.ModifyAsync(mentionable: true);
@@ -486,7 +486,7 @@ namespace Cliptok.Commands
             await insiderRole1.ModifyAsync(mentionable: false);
             if (insiderRole2 != default)
                 await insiderRole2.ModifyAsync(mentionable: false);
-            
+
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Announcement sent successfully!");
         }
 
@@ -632,7 +632,7 @@ namespace Cliptok.Commands
                 };
             }
         }
-        
+
         internal class AnnouncementRoleChoiceProvider : IChoiceProvider
         {
             public async ValueTask<IEnumerable<DiscordApplicationCommandOptionChoice>> ProvideAsync(CommandParameter _)

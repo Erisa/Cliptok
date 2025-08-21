@@ -16,7 +16,7 @@
         public static async Task<bool> CheckAndDehoistMemberAsync(DiscordMember targetMember, DiscordUser responsibleMod = default, bool isMassDehoist = false, bool dryRun = false, string nickname = default)
         {
             Program.discord.Logger.LogDebug("Attempting to dehoist member {member}...", targetMember.Id);
-            
+
             string displayName = nickname;
             if (nickname == default)
             {

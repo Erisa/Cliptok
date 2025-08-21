@@ -441,7 +441,7 @@ namespace Cliptok.Commands
                 }
             }
         }
-        
+
         [Command("editbantextcmd")]
         [TextAlias("editban")]
         [Description("Edit the details of a ban. Updates the DM to the user, among other things.")]
@@ -457,25 +457,25 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} There's no record of a ban for that user! Please make sure they're banned or you got the right user.");
                 return;
             }
-            
+
             (TimeSpan banDuration, string reason, bool appealable) = PunishmentHelpers.UnpackTimeAndReason(timeAndReason, ctx.Message.Timestamp.DateTime);
 
             var ban = JsonConvert.DeserializeObject<MemberPunishment>(await Program.redis.HashGetAsync("bans", targetUser.Id));
-            
+
             ban.ModId = ctx.User.Id;
             if (banDuration == default)
                 ban.ExpireTime = null;
             else
                 ban.ExpireTime = ban.ActionTime + banDuration;
             ban.Reason = reason;
-            
+
             var guild = await Program.discord.GetGuildAsync(ban.ServerId);
-            
+
             var contextMessage = await DiscordHelpers.GetMessageFromReferenceAsync(ban.ContextMessageReference);
             var dmMessage = await DiscordHelpers.GetMessageFromReferenceAsync(ban.DmMessageReference);
-            
+
             reason = reason.Replace("`", "\\`").Replace("*", "\\*");
-            
+
             if (contextMessage is not null)
             {
                 string newCtxMsg;
@@ -483,13 +483,13 @@ namespace Cliptok.Commands
                     newCtxMsg = $"{Program.cfgjson.Emoji.Banned} {targetUser.Mention} has been banned: **{reason}**";
                 else
                     newCtxMsg = $"{Program.cfgjson.Emoji.Banned} {targetUser.Mention} has been banned for **{TimeHelpers.TimeToPrettyFormat(banDuration, false)}**: **{reason}**";
-                
+
                 if (contextMessage.Content.Contains("-# This user's messages have been kept."))
                     newCtxMsg += "\n-# This user's messages have been kept.";
-                
+
                 await contextMessage.ModifyAsync(newCtxMsg);
             }
-            
+
             if (dmMessage is not null)
             {
                 if (ban.ExpireTime == null)
@@ -511,12 +511,12 @@ namespace Cliptok.Commands
                     await dmMessage.ModifyAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}** for {TimeHelpers.TimeToPrettyFormat(banDuration, false)}!\nReason: **{reason}**\nBan expires: <t:{TimeHelpers.ToUnixTimestamp(ban.ExpireTime)}:R>");
                 }
             }
-            
+
             await Program.redis.HashSetAsync("bans", targetUser.Id.ToString(), JsonConvert.SerializeObject(ban));
-            
+
             // Construct log message
             string logOut = $"{Program.cfgjson.Emoji.MessageEdit} The ban for {targetUser.Mention} was edited by {ctx.User.Mention}!\nReason: **{reason}**";
-            
+
             if (ban.ExpireTime == null)
             {
                 logOut += "\nBan expires: **Never**"
@@ -526,10 +526,10 @@ namespace Cliptok.Commands
             {
                 logOut += $"\nBan expires: <t:{TimeHelpers.ToUnixTimestamp(ban.ExpireTime)}:R>";
             }
-            
+
             // Log to mod log
             await LogChannelHelper.LogMessageAsync("mod", logOut);
-            
+
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully edited the ban for {targetUser.Mention}!");
         }
     }

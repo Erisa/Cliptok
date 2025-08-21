@@ -35,7 +35,7 @@
                 return ServerPermLevel.Admin;
 
             bool HasRole(ulong roleId) => target.Roles.Any(r => r.Id == roleId);
-            
+
             return HasRole(Program.cfgjson.AdminRole) ? ServerPermLevel.Admin
                 : HasRole(Program.cfgjson.ModRole) ? ServerPermLevel.Moderator
                 : HasRole(Program.cfgjson.MutedRole) ? ServerPermLevel.Muted

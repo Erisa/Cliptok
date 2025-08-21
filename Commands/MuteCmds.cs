@@ -100,7 +100,7 @@ namespace Cliptok.Commands
         {
             if (ctx is SlashCommandContext)
                 await ctx.DeferResponseAsync();
-            
+
             // todo: store per-guild
             DiscordRole mutedRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.MutedRole);
             DiscordRole tqsMutedRole = default;
@@ -121,7 +121,7 @@ namespace Cliptok.Commands
             {
                 await MuteHelpers.UnmuteUserAsync(targetUser, reason, true, ctx.User);
                 var unmuteMsg = $"{Program.cfgjson.Emoji.Information} Successfully unmuted **{DiscordHelpers.UniqueUsername(targetUser)}**";
-                
+
                 if (reason != "No reason specified.")
                     unmuteMsg += $": **{reason}**";
 
@@ -223,7 +223,7 @@ namespace Cliptok.Commands
 
             _ = MuteHelpers.MuteUserAsync(targetUser, reason, ctx.User.Id, ctx.Guild, ctx.Channel, muteDuration, true);
         }
-        
+
         [Command("editmutetextcmd")]
         [TextAlias("editmute")]
         [Description("Edit the details of a mute. Updates the DM to the user, among other things.")]
@@ -239,25 +239,25 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} There's no record of a mute for that user! Please make sure they're muted or you got the right user.");
                 return;
             }
-            
+
             (TimeSpan muteDuration, string reason, bool _) = PunishmentHelpers.UnpackTimeAndReason(timeAndReason, ctx.Message.Timestamp.DateTime);
 
             var mute = JsonConvert.DeserializeObject<MemberPunishment>(await Program.redis.HashGetAsync("mutes", targetUser.Id));
-            
+
             mute.ModId = ctx.User.Id;
             if (muteDuration == default)
                 mute.ExpireTime = null;
             else
                 mute.ExpireTime = mute.ActionTime + muteDuration;
             mute.Reason = reason;
-            
+
             var guild = await Program.discord.GetGuildAsync(mute.ServerId);
-            
+
             var contextMessage = await DiscordHelpers.GetMessageFromReferenceAsync(mute.ContextMessageReference);
             var dmMessage = await DiscordHelpers.GetMessageFromReferenceAsync(mute.DmMessageReference);
-            
+
             reason = reason.Replace("`", "\\`").Replace("*", "\\*");
-            
+
             if (contextMessage is not null)
             {
                 if (muteDuration == default)
@@ -267,7 +267,7 @@ namespace Cliptok.Commands
                     await contextMessage.ModifyAsync($"{Program.cfgjson.Emoji.Muted} {targetUser.Mention} has been muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}**: **{reason}**");
                 }
             }
-            
+
             if (dmMessage is not null)
             {
                 string dmContent = "";
@@ -289,7 +289,7 @@ namespace Cliptok.Commands
                 }
                 await dmMessage.ModifyAsync(dmContent);
             }
-            
+
             try
             {
                 var targetMember = await guild.GetMemberAsync(targetUser.Id);
@@ -299,12 +299,12 @@ namespace Cliptok.Commands
             {
                 Program.discord.Logger.LogError(e, "Failed to issue timeout to {user}", targetUser.Id);
             }
-            
+
             await Program.redis.HashSetAsync("mutes", targetUser.Id.ToString(), JsonConvert.SerializeObject(mute));
-            
+
             // Construct log message
             string logOut = $"{Program.cfgjson.Emoji.MessageEdit} The mute for {targetUser.Mention} was edited by {ctx.User.Mention}!\nReason: **{reason}**";
-            
+
             if (mute.ExpireTime == null)
             {
                 logOut += "\nMute expires: **Never**";
@@ -313,10 +313,10 @@ namespace Cliptok.Commands
             {
                 logOut += $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(mute.ExpireTime)}:R>";
             }
-            
+
             // Log to mod log
             await LogChannelHelper.LogMessageAsync("mod", logOut);
-            
+
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully edited the mute for {targetUser.Mention}!");
         }
     }
