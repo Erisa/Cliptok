@@ -3,8 +3,8 @@
 ## About
 This bot is a Discord moderation bot, it was originally designed for the [Microsoft Community](https://msft.chat/) but its use has since expanded to other servers.  
 
-The bot s only designed to run in a single server at a time, and is difficult to adjust. A lot is assumed about the environment and you will encounter problems along the way.
-While ome efforts have been made the bot not actively break other instances with different configs, modularity and portability is not the goal of this project. You are on your own if you attempt to host this bot for your own purposes. (Good luck though, I hope it works out!)
+The bot is only designed to run in a single server at a time, and is difficult to adjust. A lot is assumed about the environment and you will encounter problems along the way.
+While some efforts have been made to not actively break other instances with different configs, modularity and portability is not the goal of this project. You are on your own if you attempt to host this bot for your own purposes. (Good luck though, I hope it works out!)
 
 GitHub Issues will generally only be accepted if they are reproducible in a standard and supported environment, please do not report issues that arise as a result of misconfiguring the bot.
 
