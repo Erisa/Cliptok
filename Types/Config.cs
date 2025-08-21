@@ -295,6 +295,20 @@
         [JsonProperty("reactionEmoji")]
         public ReactionEmojiConfig ReactionEmoji { get; set; }
 
+        [JsonProperty("autoModRules")]
+        public List<AutoModRuleConfig> AutoModRules { get; set; } = new();
+    }
+
+    public class AutoModRuleConfig
+    {
+        [JsonProperty("ruleId")]
+        public ulong RuleId { get; private set; }
+
+        [JsonProperty("action")]
+        public string Action { get; private set; }
+
+        [JsonProperty("reason")]    
+        public string Reason { get; private set; } = "Automod rule violation";
     }
 
     public class WorkflowConfig
