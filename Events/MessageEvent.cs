@@ -893,6 +893,7 @@ namespace Cliptok.Events
 
                                 var msgOut = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, pardonOutput, wasAutoModBlock);
                                 await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, DiscordHelpers.MessageLink(msgOut), messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
+                                await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, DiscordHelpers.MessageLink(msgOut), messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                                 return;
                             }
 
@@ -906,6 +907,7 @@ namespace Cliptok.Events
                             DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, output, wasAutoModBlock);
                             var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
                             await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
+                            await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                             return;
                         }
                         #endregion
