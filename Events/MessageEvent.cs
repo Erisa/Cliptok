@@ -1083,7 +1083,7 @@ namespace Cliptok.Events
                             {
                                 messageBuilder.AddActionRowComponent(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
                                 msg = await channel.SendMessageAsync(messageBuilder);
-                                await Program.redis.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
+                                await Program.redis.HashSetAsync("deletedMessageReferences", msg.Id, msgContentWithEmbedData);
                             }
                             else
                             {
@@ -1103,7 +1103,7 @@ namespace Cliptok.Events
                             {
                                 messageBuilder.AddActionRowComponent(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
                                 msg = await channel.SendMessageAsync(messageBuilder);
-                                await Program.redis.HashSetAsync("deletedMessageReferences", msg.Id, message.Content);
+                                await Program.redis.HashSetAsync("deletedMessageReferences", msg.Id, msgContentWithEmbedData);
                             }
                             else
                             {
