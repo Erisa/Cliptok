@@ -142,16 +142,13 @@ namespace Cliptok.Commands
             List<ulong> tags = channel.AppliedTags.Select(x => x.Id).ToList();
             if (tags.All(x => x != solvedTagId))
             {
+                if (tags.Count == 5)
+                    tags.RemoveAt(4);
+                
                 tags.Add(solvedTagId);
                 try
                 {
                     await channel.ModifyAsync(t => t.AppliedTags = tags);
-                }
-                catch (BadRequestException bre)
-                {
-                    errorOccurred = true;
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't add the Solved tag to this post! Please add it manually. If this post has 5 tags, you may need to remove one first.");
-                    Program.discord.Logger.LogWarning(bre, "A BadRequestException occurred while attempting to mark this post as solved: {threadLink}:", $"https://discord.com/channels/{ctx.Guild.Id}/{ctx.Channel.Id}");
                 }
                 catch (Exception ex)
                 {
