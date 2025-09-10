@@ -632,6 +632,7 @@ namespace Cliptok.Events
                                 deletedMessageCache.Add(message.Id);
                                 var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
                                 await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
+                                await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                                 return;
                             }
                         }
@@ -795,6 +796,7 @@ namespace Cliptok.Events
                             string reason = "Sent a malicious Discord invite";
 
                             DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock);
+                            await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                             var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
 
                             string responseToSend = $"```json\n{JsonConvert.SerializeObject(maliciousCache)}\n```";
@@ -984,6 +986,7 @@ namespace Cliptok.Events
 
                                 string reason = "Sending phishing URL(s)";
                                 DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock);
+                                await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                                 var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
 
                                 string responseToSend = (await StringHelpers.CodeOrHasteBinAsync(responseText, "json", 1000, true)).Text;
@@ -1013,6 +1016,7 @@ namespace Cliptok.Events
 
                         string reason = "Attempted to ping everyone/here";
                         DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock);
+                        await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                         var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
                         await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                         return;
@@ -1113,9 +1117,9 @@ namespace Cliptok.Events
                                 msg = await channel.SendMessageAsync(messageBuilder);
                             }
 
+                            await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                             var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
                             await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                            await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
 
                             return;
                         }
@@ -1286,6 +1290,7 @@ namespace Cliptok.Events
                 string reason = "Sent a malicious Discord invite";
 
                 DiscordMessage msg = await message.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**");
+                await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
                 var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, message.Channel, " automatically ");
 
                 string responseToSend = $"```json\n{responseString}\n```";
