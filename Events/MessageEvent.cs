@@ -28,6 +28,14 @@ namespace Cliptok.Events
             {
                 client.Logger.LogDebug("Got a message create event for a message with no author: {message}", DiscordHelpers.MessageLink(e.Message));
             }
+            else if (e.Message.Channel is null)
+            {
+                client.Logger.LogDebug("Got a message create event for a message with no channel: {messageId} by {user}", e.Message.Id, e.Message.Author.Id);
+            }
+            else if (e.Message.Channel.Guild is null && !e.Message.Channel.IsPrivate)
+            {
+                client.Logger.LogDebug("Got a message create event for a non-DM message with no guild: {messageId} in {channelId} by {user}", e.Message.Id, e.Message.Channel.Id, e.Message.Author.Id);
+            }
             else
             {
                 client.Logger.LogDebug("Got a message create event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
@@ -46,6 +54,14 @@ namespace Cliptok.Events
             else if (e.Message.Author is null)
             {
                 client.Logger.LogDebug("Got a message update event for a message with no author: {message}", DiscordHelpers.MessageLink(e.Message));
+            }
+            else if (e.Message.Channel is null)
+            {
+                client.Logger.LogDebug("Got a message update event for a message with no channel: {messageId} by {user}", e.Message.Id, e.Message.Author.Id);
+            }
+            else if (e.Message.Channel.Guild is null && !e.Message.Channel.IsPrivate)
+            {
+                client.Logger.LogDebug("Got a message update event for a non-DM message with no guild: {messageId} in {channelId} by {user}", e.Message.Id, e.Message.Channel.Id, e.Message.Author.Id);
             }
             else
             {
@@ -68,6 +84,14 @@ namespace Cliptok.Events
             else if (e.Message.Author is null)
             {
                 client.Logger.LogDebug("Got a message delete event for a message with no author: {message}", DiscordHelpers.MessageLink(e.Message));
+            }
+            else if (e.Message.Channel is null)
+            {
+                client.Logger.LogDebug("Got a message delete event for a message with no channel: {messageId} by {user}", e.Message.Id, e.Message.Author.Id);
+            }
+            else if (e.Message.Channel.Guild is null && !e.Message.Channel.IsPrivate)
+            {
+                client.Logger.LogDebug("Got a message delete event for a non-DM message with no guild: {messageId} in {channelId} by {user}", e.Message.Id, e.Message.Channel.Id, e.Message.Author.Id);
             }
             else
             {
