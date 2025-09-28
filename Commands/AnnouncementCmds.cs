@@ -349,7 +349,7 @@ namespace Cliptok.Commands
                 TimeSpan lockDuration;
                 try
                 {
-                    lockDuration = HumanDateParser.HumanDateParser.Parse(lockdownTime).Subtract(DateTime.Now);
+                    lockDuration = HumanDateParser.HumanDateParser.Parse(lockdownTime).ToUniversalTime().Subtract(DateTime.UtcNow);
                 }
                 catch
                 {

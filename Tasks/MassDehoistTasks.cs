@@ -12,7 +12,7 @@
             }
 
             var lastMassDehoistRun = DateTimeOffset.FromUnixTimeSeconds((int)dbResult);
-            var timeSinceLastRun = DateTime.Now - lastMassDehoistRun;
+            var timeSinceLastRun = DateTime.UtcNow - lastMassDehoistRun;
 
             if (timeSinceLastRun > TimeSpan.FromHours(24))
             {

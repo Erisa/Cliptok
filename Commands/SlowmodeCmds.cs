@@ -39,8 +39,8 @@ namespace Cliptok.Commands
             {
                 try
                 {
-                    DateTime anchorTime = DateTime.Now;
-                    slowmodeTime = HumanDateParser.HumanDateParser.Parse(timeToParse, anchorTime).Subtract(anchorTime);
+                    DateTime anchorTime = DateTime.UtcNow;
+                    slowmodeTime = HumanDateParser.HumanDateParser.Parse(timeToParse, anchorTime).ToUniversalTime().Subtract(anchorTime);
 
                     seconds = (int)slowmodeTime.TotalSeconds;
 

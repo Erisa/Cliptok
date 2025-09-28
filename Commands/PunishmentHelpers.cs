@@ -11,7 +11,7 @@ namespace Cliptok.Commands
             string possibleTime = timeAndReason.Split(' ').First();
             try
             {
-                duration = HumanDateParser.HumanDateParser.Parse(possibleTime).Subtract(anchorTime);
+                duration = HumanDateParser.HumanDateParser.Parse(possibleTime).ToUniversalTime().Subtract(anchorTime);
                 timeParsed = true;
             }
             catch

@@ -135,7 +135,7 @@ namespace Cliptok.Events
                         ModId = discord.CurrentUser.Id,
                         ServerId = e.Guild.Id,
                         ExpireTime = null,
-                        ActionTime = DateTime.Now
+                        ActionTime = DateTime.UtcNow
                     };
 
                     redis.HashSetAsync("mutes", e.Member.Id, JsonConvert.SerializeObject(newMute));
@@ -209,7 +209,7 @@ namespace Cliptok.Events
 
             // If they're externally unmuted, untrack it?
             // But not if they just joined.
-            var currentTime = DateTime.Now;
+            var currentTime = DateTime.UtcNow;
             var joinTime = e.Member.JoinedAt.DateTime;
             var differrence = currentTime.Subtract(joinTime).TotalSeconds;
             if (differrence > 10 && !userMute.IsNull && !e.Member.Roles.Contains(muteRole))

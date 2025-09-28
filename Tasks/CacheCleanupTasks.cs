@@ -30,7 +30,7 @@ namespace Cliptok.Tasks
             }
 
             var lastCacheDelete = DateTimeOffset.FromUnixTimeSeconds((int)dbResult);
-            var timeSinceLastRun = DateTime.Now - lastCacheDelete;
+            var timeSinceLastRun = DateTime.UtcNow - lastCacheDelete;
 
             if (firstRun)
                 return true;

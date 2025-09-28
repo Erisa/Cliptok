@@ -91,7 +91,7 @@
             else if (!DateTime.TryParse(inputString, out t))
             {
                 // if it couldnt parse it as that, finally try humandateparser
-                t = HumanDateParser.HumanDateParser.Parse(inputString);
+                t = HumanDateParser.HumanDateParser.Parse(inputString).ToUniversalTime();
             }
 
             return t;

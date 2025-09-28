@@ -402,7 +402,7 @@ namespace Cliptok.Events
             try
             {
                 #region return early checks
-                if (message.Timestamp is not null && message.Timestamp.Value.Year < (DateTime.Now.Year - 2))
+                if (message.Timestamp is not null && message.Timestamp.Value.Year < (DateTime.UtcNow.Year - 2))
                     return;
 
                 if (isAnEdit && message.BaseMessage is not null && (message.BaseMessage.EditedTimestamp is null || message.BaseMessage.EditedTimestamp == message.BaseMessage.CreationTimestamp || message.BaseMessage.EditedTimestamp < DateTimeOffset.Now - TimeSpan.FromDays(1)))
@@ -630,7 +630,7 @@ namespace Cliptok.Events
                         if (
                             duplicateMessageCache.ContainsKey(message.Author.Id)
                             && duplicateMessageCache[message.Author.Id].Content == msgContentWithEmbedData
-                            && (DateTime.Now - duplicateMessageCache[message.Author.Id].LastMessageTime).TotalSeconds < Program.cfgjson.DuplicateMessageSeconds)
+                            && (DateTime.UtcNow - duplicateMessageCache[message.Author.Id].LastMessageTime).TotalSeconds < Program.cfgjson.DuplicateMessageSeconds)
                         {
                             duplicateMessageCache[message.Author.Id].Messages.Add(message);
                             duplicateMessageCache[message.Author.Id].LastMessageTime = message.Timestamp.HasValue ? message.Timestamp.Value.UtcDateTime : DateTime.UtcNow;
@@ -946,16 +946,16 @@ namespace Cliptok.Events
                             {
                                 if (supportRatelimit.ContainsKey(message.Author.Id))
                                 {
-                                    if (supportRatelimit[message.Author.Id] > DateTime.Now)
+                                    if (supportRatelimit[message.Author.Id] > DateTime.UtcNow)
                                         return;
                                     else
                                         supportRatelimit.Remove(message.Author.Id);
                                 }
 
-                                supportRatelimit.Add(message.Author.Id, DateTime.Now.Add(TimeSpan.FromMinutes(Program.cfgjson.SupportRatelimitMinutes)));
+                                supportRatelimit.Add(message.Author.Id, DateTime.UtcNow.Add(TimeSpan.FromMinutes(Program.cfgjson.SupportRatelimitMinutes)));
 
                                 var embed = new DiscordEmbedBuilder()
-                                    .WithTimestamp(DateTime.Now)
+                                    .WithTimestamp(DateTime.UtcNow)
                                     .WithAuthor(DiscordHelpers.UniqueUsername(message.Author), null, $"https://cdn.discordapp.com/avatars/{message.Author.Id}/{message.Author.AvatarHash}.png?size=128");
 
                                 var lastMsgs = await channel.GetMessagesBeforeAsync(message.Id, 50).ToListAsync();

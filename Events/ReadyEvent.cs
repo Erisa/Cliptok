@@ -119,7 +119,7 @@ namespace Cliptok.Events
 
             if (string.IsNullOrWhiteSpace(commitTime))
             {
-                commitTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss zzz");
+                commitTime = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss zzz");
             }
 
             bool listSuccess = false;

@@ -64,7 +64,7 @@ namespace Cliptok.Commands
             {
                 try
                 {
-                    muteDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(ctx.Interaction.CreationTimestamp.LocalDateTime);
+                    muteDuration = HumanDateParser.HumanDateParser.Parse(time).ToUniversalTime().Subtract(ctx.Interaction.CreationTimestamp.LocalDateTime);
                 }
                 catch
                 {
@@ -204,7 +204,7 @@ namespace Cliptok.Commands
 
             try
             {
-                muteDuration = HumanDateParser.HumanDateParser.Parse(possibleTime).Subtract(ctx.Message.Timestamp.DateTime);
+                muteDuration = HumanDateParser.HumanDateParser.Parse(possibleTime).ToUniversalTime().Subtract(ctx.Message.Timestamp.DateTime);
                 timeParsed = true;
             }
             catch
