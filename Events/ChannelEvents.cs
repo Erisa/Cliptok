@@ -6,7 +6,7 @@
         {
             // see comment on ChannelUpdated
 
-            var timestamp = DateTime.Now;
+            var timestamp = DateTime.UtcNow;
             Tasks.EventTasks.PendingChannelCreateEvents.Add(timestamp, e);
         }
 
@@ -14,7 +14,7 @@
         {
             // Add this event to the pending events list. These are handled in a task later, see Tasks/EventTasks/HandlePendingChannelUpdateEventsAsync
             // using DateTime might seem weird, but it's something that is unique for each event
-            var timestamp = DateTime.Now;
+            var timestamp = DateTime.UtcNow;
             Tasks.EventTasks.PendingChannelUpdateEvents.Add(timestamp, e);
         }
 
@@ -22,7 +22,7 @@
         {
             // see comment on ChannelUpdated
 
-            var timestamp = DateTime.Now;
+            var timestamp = DateTime.UtcNow;
             Tasks.EventTasks.PendingChannelDeleteEvents.Add(timestamp, e);
         }
     }

@@ -25,9 +25,9 @@ namespace Cliptok.Commands
                 return;
             }
 
-            if (member.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername))
+            if (member.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername) || member.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedGuildTag))
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {member.Mention} is quarantined because their name is in violation of AutoMod rules! Discord will not let me dehoist them. Please change their nickname manually.", ephemeral: true);
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {member.Mention} is quarantined because their profile is in violation of AutoMod rules! Discord will not let me dehoist them. Please change their nickname manually.", ephemeral: true);
                 return;
             }
 

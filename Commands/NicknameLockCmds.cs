@@ -40,12 +40,13 @@ namespace Cliptok.Commands
                 {
                     dehoistable = await DehoistHelpers.CheckAndDehoistMemberAsync(member, null, false, true);
                     nickname = member.DisplayName;
-                } else
+                }
+                else
                 {
                     dehoistable = await DehoistHelpers.CheckAndDehoistMemberAsync(member, null, false, true, nickname);
                 }
 
-                
+
 
                 if (dehoistable)
                 {

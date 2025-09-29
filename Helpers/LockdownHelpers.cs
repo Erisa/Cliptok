@@ -81,8 +81,8 @@
 
             if (duration is not null)
             {
-                await Program.redis.HashSetAsync("unlocks", channel.Id, TimeHelpers.ToUnixTimestamp(DateTime.Now + duration));
-                msg += $"\nChannel unlocks: <t:{TimeHelpers.ToUnixTimestamp(DateTime.Now + duration)}:R>";
+                await Program.redis.HashSetAsync("unlocks", channel.Id, TimeHelpers.ToUnixTimestamp(DateTime.UtcNow + duration));
+                msg += $"\nChannel unlocks: <t:{TimeHelpers.ToUnixTimestamp(DateTime.UtcNow + duration)}:R>";
             }
 
             await channel.SendMessageAsync(msg);

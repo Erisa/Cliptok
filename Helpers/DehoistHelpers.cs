@@ -16,7 +16,7 @@
         public static async Task<bool> CheckAndDehoistMemberAsync(DiscordMember targetMember, DiscordUser responsibleMod = default, bool isMassDehoist = false, bool dryRun = false, string nickname = default)
         {
             Program.discord.Logger.LogDebug("Attempting to dehoist member {member}...", targetMember.Id);
-            
+
             string displayName = nickname;
             if (nickname == default)
             {
@@ -24,7 +24,7 @@
                 displayName = targetMember.DisplayName;
             }
 
-            if ((await GetPermLevelAsync(targetMember)) >= ServerPermLevel.TrialModerator || targetMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername))
+            if ((await GetPermLevelAsync(targetMember)) >= ServerPermLevel.TrialModerator || targetMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername) || targetMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedGuildTag))
             {
                 Program.discord.Logger.LogDebug("Skipped dehoisting member {member}: member is moderator or is automod-quarantined", targetMember.Id);
                 return false;
@@ -75,7 +75,7 @@
                 if (ex is DSharpPlus.Exceptions.BadRequestException)
                 {
                     Program.discord.Logger.LogInformation(Program.CliptokEventID, "Failed to dehoist member {memberId}! Discord said Bad Request. If this member's profile is in violation of AutoMod rules, this is expected!", targetMember.Id);
-                    Program.discord.Logger.LogDebug("Failed to dehoist {memberId} with error Bad Request! Member has quarantined flag: {isQuarantined}; all flags: {memberFlags}", targetMember.Id, targetMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername), targetMember.MemberFlags.Value);
+                    Program.discord.Logger.LogDebug("Failed to dehoist {memberId} with error Bad Request! Member is quarantined for username: {isUsernameQuarantined}; member is quarantined for guild tag: {isGuildTagQuarantined}; all flags: {memberFlags}", targetMember.Id, targetMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername), targetMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedGuildTag), targetMember.MemberFlags.Value);
                 }
 
                 Program.discord.Logger.LogDebug(ex, "Failed to dehoist {memberId} with unexpected error:", targetMember.Id);
@@ -105,7 +105,7 @@
             // If member is dehoisted already, but NOT permadehoisted, skip updating nickname.
 
             // If member is not dehoisted
-            if (discordMember.DisplayName[0] != dehoistCharacter && !discordMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername))
+            if (discordMember.DisplayName[0] != dehoistCharacter && !discordMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername) && !discordMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedGuildTag))
             {
                 // Dehoist member
                 try
@@ -158,7 +158,7 @@
                 }
 
                 // Un-dehoist member
-                if (discordMember.DisplayName[0] == dehoistCharacter && !discordMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername))
+                if (discordMember.DisplayName[0] == dehoistCharacter && !discordMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername) && !discordMember.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedGuildTag))
                 {
                     var newNickname = discordMember.DisplayName[1..];
                     try

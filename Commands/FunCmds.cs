@@ -1,5 +1,3 @@
-using Cliptok.Constants;
-
 namespace Cliptok.Commands
 {
     public class FunCmds

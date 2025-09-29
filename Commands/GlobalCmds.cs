@@ -117,7 +117,7 @@ namespace Cliptok.Commands
                     var defaultGroupCommand = cmd.Subcommands.FirstOrDefault(sc => sc.Attributes.Any(a => a is DefaultGroupCommandAttribute));
                     arguments = defaultGroupCommand?.Method?.GetParameters();
                 }
-                
+
                 if (arguments is not null && arguments.Length > 0)
                 {
                     var argumentsStr = $"`{cmd.Name.Replace("textcmd", "")}";
@@ -258,14 +258,14 @@ namespace Cliptok.Commands
         )
         {
             DateTime t = TimeHelpers.ParseAnyDateFormat(timetoParse);
-            
-            if (t <= DateTime.Now)
+
+            if (t <= DateTime.UtcNow)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time can't be in the past!");
                 return;
             }
 #if !DEBUG
-            else if (t < (DateTime.Now + TimeSpan.FromSeconds(59)))
+            else if (t < (DateTime.UtcNow + TimeSpan.FromSeconds(59)))
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time must be at least a minute in the future!");
                 return;
@@ -286,7 +286,7 @@ namespace Cliptok.Commands
                 MessageLink = $"https://discord.com/channels/{guildId}/{ctx.Channel.Id}/{ctx.Message.Id}",
                 ReminderText = reminder,
                 ReminderTime = t,
-                OriginalTime = DateTime.Now
+                OriginalTime = DateTime.UtcNow
             };
 
             await Program.redis.ListRightPushAsync("reminders", JsonConvert.SerializeObject(reminderObject));

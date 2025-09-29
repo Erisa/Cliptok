@@ -24,7 +24,7 @@
         )
         {
             await ctx.DeferResponseAsync(ephemeral: !dryRun);
-            
+
             if (channel is null)
                 channel = ctx.Channel;
 
