@@ -85,7 +85,7 @@ namespace Cliptok.Commands
             {
                 try
                 {
-                    banDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(ctx.Interaction.CreationTimestamp.DateTime);
+                    banDuration = HumanDateParser.HumanDateParser.Parse(time).ToUniversalTime().Subtract(ctx.Interaction.CreationTimestamp.DateTime);
                 }
                 catch
                 {
@@ -274,7 +274,7 @@ namespace Cliptok.Commands
             string possibleTime = timeAndReason.Split(' ').First();
             try
             {
-                banDuration = HumanDateParser.HumanDateParser.Parse(possibleTime).Subtract(ctx.Message.Timestamp.DateTime);
+                banDuration = HumanDateParser.HumanDateParser.Parse(possibleTime).ToUniversalTime().Subtract(ctx.Message.Timestamp.DateTime);
                 timeParsed = true;
             }
             catch
@@ -379,7 +379,7 @@ namespace Cliptok.Commands
             string possibleTime = timeAndReason.Split(' ').First();
             try
             {
-                banDuration = HumanDateParser.HumanDateParser.Parse(possibleTime).Subtract(ctx.Message.Timestamp.DateTime);
+                banDuration = HumanDateParser.HumanDateParser.Parse(possibleTime).ToUniversalTime().Subtract(ctx.Message.Timestamp.DateTime);
                 timeParsed = true;
             }
             catch

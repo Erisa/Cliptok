@@ -9,7 +9,7 @@
             {
                 bool DmFallback = false;
                 var reminderObject = JsonConvert.DeserializeObject<Commands.GlobalCmds.Reminder>(reminder);
-                if (reminderObject.ReminderTime <= DateTime.Now)
+                if (reminderObject.ReminderTime <= DateTime.UtcNow)
                 {
                     var user = await Program.discord.GetUserAsync(reminderObject.UserID);
                     DiscordChannel channel = null;
@@ -49,7 +49,7 @@
                     )
                     .WithTimestamp(reminderObject.OriginalTime)
                     .WithAuthor(
-                        $"Reminder from {TimeHelpers.TimeToPrettyFormat(DateTime.Now.Subtract(reminderObject.OriginalTime), true)}",
+                        $"Reminder from {TimeHelpers.TimeToPrettyFormat(DateTime.UtcNow.Subtract(reminderObject.OriginalTime), true)}",
                         null,
                         user.AvatarUrl
                     )
@@ -87,7 +87,7 @@
                 }
 
             }
-            Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked reminders at {time} with result: {success}", DateTime.Now, success);
+            Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked reminders at {time} with result: {success}", DateTime.UtcNow, success);
             return success;
         }
 

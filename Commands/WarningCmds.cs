@@ -46,7 +46,7 @@ namespace Cliptok.Commands
             {
                 TargetUserId = user.Id,
                 ModUserId = ctx.User.Id,
-                WarnTimestamp = DateTime.Now,
+                WarnTimestamp = DateTime.UtcNow,
                 Stub = true // make it clear this isn't a real warning
             };
 
@@ -136,7 +136,7 @@ namespace Cliptok.Commands
                     if (list.Count >= 25)
                         break;
 
-                    string warningString = $"{StringHelpers.Pad(warning.Value.WarningId)} - {StringHelpers.Truncate(warning.Value.WarnReason, 29, true)} - {TimeHelpers.TimeToPrettyFormat(DateTime.Now - warning.Value.WarnTimestamp, true)}";
+                    string warningString = $"{StringHelpers.Pad(warning.Value.WarningId)} - {StringHelpers.Truncate(warning.Value.WarnReason, 29, true)} - {TimeHelpers.TimeToPrettyFormat(DateTime.UtcNow - warning.Value.WarnTimestamp, true)}";
 
                     var focusedOption = ctx.Options.FirstOrDefault(option => option.Focused);
                     if (focusedOption is not null)
@@ -346,7 +346,7 @@ namespace Cliptok.Commands
             {
                 TargetUserId = targetUser.Id,
                 ModUserId = ctx.User.Id,
-                WarnTimestamp = DateTime.Now,
+                WarnTimestamp = DateTime.UtcNow,
                 Stub = true // make it clear this isn't a real warning
             };
 
@@ -420,7 +420,7 @@ namespace Cliptok.Commands
             {
                 TargetUserId = targetUser.Id,
                 ModUserId = ctx.User.Id,
-                WarnTimestamp = DateTime.Now,
+                WarnTimestamp = DateTime.UtcNow,
                 Stub = true // make it clear this isn't a real warning
             };
 

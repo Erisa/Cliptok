@@ -349,7 +349,7 @@ namespace Cliptok.Commands
                 TimeSpan lockDuration;
                 try
                 {
-                    lockDuration = HumanDateParser.HumanDateParser.Parse(lockdownTime).Subtract(DateTime.Now);
+                    lockDuration = HumanDateParser.HumanDateParser.Parse(lockdownTime).ToUniversalTime().Subtract(DateTime.UtcNow);
                 }
                 catch
                 {
@@ -405,7 +405,7 @@ namespace Cliptok.Commands
 
             EditAnnounceCache[ctx.User.Id] = (Convert.ToUInt64(messageId), role1Name, role2Name);
 
-            await ctx.RespondWithModalAsync(new DiscordInteractionResponseBuilder().WithTitle("Edit Announcement").WithCustomId("editannounce-modal-callback").AddTextInputComponent(new DiscordTextInputComponent("New announcement text. Do not include roles!", "editannounce-modal-new-text", value: msg.Content, style: DiscordTextInputStyle.Paragraph)));
+            await ctx.RespondWithModalAsync(new DiscordModalBuilder().WithTitle("Edit Announcement").WithCustomId("editannounce-modal-callback").AddTextInput(new DiscordTextInputComponent("editannounce-modal-new-text", style: DiscordTextInputStyle.Paragraph, value: msg.Content), "New announcement text. Do not include roles!"));
         }
 
         [Command("announce")]

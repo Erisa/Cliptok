@@ -10,7 +10,7 @@
             foreach (var channelUnlock in channelUnlocks)
             {
                 long unixExpiration = (long)channelUnlock.Value;
-                long currentUnixTime = TimeHelpers.ToUnixTimestamp(DateTime.Now);
+                long currentUnixTime = TimeHelpers.ToUnixTimestamp(DateTime.UtcNow);
                 if (currentUnixTime >= unixExpiration)
                 {
                     var channel = await Program.discord.GetChannelAsync((ulong)channelUnlock.Name);

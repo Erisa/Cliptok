@@ -429,7 +429,7 @@ namespace Cliptok.Events
                     var msg = await e.Interaction.Channel.GetMessageAsync(ctx.msgId);
 
                     // Set up content, add role mentions if they arent anywhere else in the content already
-                    string content = e.Values["editannounce-modal-new-text"];
+                    string content = (e.Values["editannounce-modal-new-text"] as TextInputModalSubmission).Value;
                     if (role2 is not null && !content.Contains(role2.Id.ToString()))
                         content = $"{role2.Mention} {content}";
                     if (!content.Contains(role1.Id.ToString()))
