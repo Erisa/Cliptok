@@ -184,7 +184,7 @@ namespace Cliptok.Tasks
                 Program.discord.Logger.LogDebug(ex, "Failed to enumerate pending channel create events; this usually means a Channel Create event was just added to the list, or one was processed and removed from the list. Will try again on next task run.");
             }
 
-            Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked pending channel create events at {time} with result: {success}", DateTime.Now, success);
+            Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked pending channel create events at {time} with result: {success}", DateTime.UtcNow, success);
             return success;
         }
 
@@ -359,7 +359,7 @@ namespace Cliptok.Tasks
                 Program.discord.Logger.LogDebug(ex, "Failed to enumerate pending channel update events; this usually means a Channel Update event was just added to the list, or one was processed and removed from the list. Will try again on next task run.");
             }
 
-            Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked pending channel update events at {time} with result: {success}", DateTime.Now, success);
+            Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked pending channel update events at {time} with result: {success}", DateTime.UtcNow, success);
             return success;
         }
 
@@ -436,7 +436,7 @@ namespace Cliptok.Tasks
                 Program.discord.Logger.LogDebug(ex, "Failed to enumerate pending channel delete events; this usually means a Channel Delete event was just added to the list, or one was processed and removed from the list. Will try again on next task run.");
             }
 
-            Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked pending channel delete events at {time} with result: {success}", DateTime.Now, success);
+            Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked pending channel delete events at {time} with result: {success}", DateTime.UtcNow, success);
             return success;
         }
 

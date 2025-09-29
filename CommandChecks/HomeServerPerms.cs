@@ -28,41 +28,30 @@
             if (target is null || target.Guild is null || target.Guild.Id != Program.cfgjson.ServerID)
                 return ServerPermLevel.Nothing;
 
-            // Torch approved of this.
             if (target.IsOwner)
                 return ServerPermLevel.Owner;
-            else if (target.Roles.Contains(await target.Guild.GetRoleAsync(Program.cfgjson.AdminRole)) || target.Id == Program.discord.CurrentUser.Id)
+
+            if (target.Id == Program.discord.CurrentUser.Id)
                 return ServerPermLevel.Admin;
-            else if (target.Roles.Contains(await target.Guild.GetRoleAsync(Program.cfgjson.ModRole)))
-                return ServerPermLevel.Moderator;
-            else if (target.Roles.Contains(await target.Guild.GetRoleAsync(Program.cfgjson.MutedRole)))
-                return ServerPermLevel.Muted;
-            else if (target.Roles.Contains(await target.Guild.GetRoleAsync(Program.cfgjson.TrialModRole)))
-                return ServerPermLevel.TrialModerator;
-            else if (target.Roles.Contains(await target.Guild.GetRoleAsync(Program.cfgjson.TqsRoleId)))
-                return ServerPermLevel.TechnicalQueriesSlayer;
-            else if (target.Roles.Contains(await target.Guild.GetRoleAsync(Program.cfgjson.TierRoles[9])))
-                return ServerPermLevel.TierX;
-            else if (target.Roles.Contains(await target.Guild.GetRoleAsync(Program.cfgjson.TierRoles[8])))
-                return ServerPermLevel.TierS;
-            else if (target.Roles.Contains(await target.Guild.GetRoleAsync(Program.cfgjson.TierRoles[7])))
-                return ServerPermLevel.Tier8;
-            else if (target.Roles.Contains(await target.Guild.GetRoleAsync(Program.cfgjson.TierRoles[6])))
-                return ServerPermLevel.Tier7;
-            else if (target.Roles.Contains(await target.Guild.GetRoleAsync(Program.cfgjson.TierRoles[5])))
-                return ServerPermLevel.Tier6;
-            else if (target.Roles.Contains(await target.Guild.GetRoleAsync(Program.cfgjson.TierRoles[4])))
-                return ServerPermLevel.Tier5;
-            else if (target.Roles.Contains(await target.Guild.GetRoleAsync(Program.cfgjson.TierRoles[3])))
-                return ServerPermLevel.Tier4;
-            else if (target.Roles.Contains(await target.Guild.GetRoleAsync(Program.cfgjson.TierRoles[2])))
-                return ServerPermLevel.Tier3;
-            else if (target.Roles.Contains(await target.Guild.GetRoleAsync(Program.cfgjson.TierRoles[1])))
-                return ServerPermLevel.Tier2;
-            else if (target.Roles.Contains(await target.Guild.GetRoleAsync(Program.cfgjson.TierRoles[0])))
-                return ServerPermLevel.Tier1;
-            else
-                return ServerPermLevel.Nothing;
+
+            bool HasRole(ulong roleId) => target.Roles.Any(r => r.Id == roleId);
+
+            return HasRole(Program.cfgjson.AdminRole) ? ServerPermLevel.Admin
+                : HasRole(Program.cfgjson.ModRole) ? ServerPermLevel.Moderator
+                : HasRole(Program.cfgjson.MutedRole) ? ServerPermLevel.Muted
+                : HasRole(Program.cfgjson.TrialModRole) ? ServerPermLevel.TrialModerator
+                : HasRole(Program.cfgjson.TqsRoleId) ? ServerPermLevel.TechnicalQueriesSlayer
+                : HasRole(Program.cfgjson.TierRoles[9]) ? ServerPermLevel.TierX
+                : HasRole(Program.cfgjson.TierRoles[8]) ? ServerPermLevel.TierS
+                : HasRole(Program.cfgjson.TierRoles[7]) ? ServerPermLevel.Tier8
+                : HasRole(Program.cfgjson.TierRoles[6]) ? ServerPermLevel.Tier7
+                : HasRole(Program.cfgjson.TierRoles[5]) ? ServerPermLevel.Tier6
+                : HasRole(Program.cfgjson.TierRoles[4]) ? ServerPermLevel.Tier5
+                : HasRole(Program.cfgjson.TierRoles[3]) ? ServerPermLevel.Tier4
+                : HasRole(Program.cfgjson.TierRoles[2]) ? ServerPermLevel.Tier3
+                : HasRole(Program.cfgjson.TierRoles[1]) ? ServerPermLevel.Tier2
+                : HasRole(Program.cfgjson.TierRoles[0]) ? ServerPermLevel.Tier1
+                : ServerPermLevel.Nothing;
         }
 
         [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]

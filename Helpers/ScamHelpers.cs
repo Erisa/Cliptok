@@ -27,7 +27,7 @@ namespace Cliptok.Helpers
                     IEnumerable<ulong> enumerable = autoBannedUsersCache.Append(member.Id);
                     await BanHelpers.BanFromServerAsync(member.Id, "Automatic ban for matching patterns of common bot accounts. Please appeal if you are a human.", discord.CurrentUser.Id, guild, 7, null, default, true);
                     var embed = new DiscordEmbedBuilder()
-                        .WithTimestamp(DateTime.Now)
+                        .WithTimestamp(DateTime.UtcNow)
                         .WithFooter($"User ID: {member.Id}", null)
                         .WithAuthor($"{DiscordHelpers.UniqueUsername(member)}", null, member.AvatarUrl)
                         .AddField("Infringing name", member.Username)

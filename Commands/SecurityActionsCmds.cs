@@ -11,13 +11,13 @@ namespace Cliptok.Commands
             // need to make our own api calls because D#+ can't do this natively?
 
             // parse time from message
-            DateTime t = HumanDateParser.HumanDateParser.Parse(time);
-            if (t <= DateTime.Now)
+            DateTime t = HumanDateParser.HumanDateParser.Parse(time).ToUniversalTime();
+            if (t <= DateTime.UtcNow)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time can't be in the past!");
                 return;
             }
-            if (t > DateTime.Now.AddHours(24))
+            if (t > DateTime.UtcNow.AddHours(24))
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Time can't be greater than 24 hours!");
                 return;

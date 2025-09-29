@@ -72,9 +72,9 @@ namespace Cliptok.Commands
                     DateTime parsedExpiration;
 
                     if (duration == default)
-                        parsedExpiration = DateTime.Now.AddHours(3);
+                        parsedExpiration = DateTime.UtcNow.AddHours(3);
                     else
-                        parsedExpiration = HumanDateParser.HumanDateParser.Parse(duration);
+                        parsedExpiration = HumanDateParser.HumanDateParser.Parse(duration).ToUniversalTime();
 
                     long unixExpiration = TimeHelpers.ToUnixTimestamp(parsedExpiration);
                     Program.redis.HashSet("raidmode", ctx.Guild.Id, unixExpiration);
@@ -85,8 +85,8 @@ namespace Cliptok.Commands
                         Program.redis.KeyDelete("raidmode-accountage");
                     else
                     {
-                        DateTime anchorTime = DateTime.Now;
-                        DateTime parseResult = HumanDateParser.HumanDateParser.Parse(allowedAccountAge, anchorTime);
+                        DateTime anchorTime = DateTime.UtcNow;
+                        DateTime parseResult = HumanDateParser.HumanDateParser.Parse(allowedAccountAge, anchorTime).ToUniversalTime();
                         TimeSpan timeSpan = parseResult - anchorTime;
                         allowedAgeTime = anchorTime - timeSpan;
                         Program.redis.StringSet("raidmode-accountage", TimeHelpers.ToUnixTimestamp(allowedAgeTime));
