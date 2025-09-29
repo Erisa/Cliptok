@@ -1,6 +1,5 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace Cliptok
 {
@@ -34,7 +33,7 @@ namespace Cliptok
                 else
                 {
                     throw new ArgumentException("Persistent database enabled but no database connection string provided. Set CLIPTOK_POSTGRES environment variable.");
-                } 
+                }
             }
         }
     }

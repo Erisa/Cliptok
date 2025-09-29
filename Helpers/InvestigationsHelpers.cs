@@ -10,9 +10,9 @@
         {
             if (colour is null)
                 colour = new DiscordColor(0xf03916);
-            
+
             // If logging to #investigations and there is embed/forward data, leave it out & add a note to check #mod-logs instead
-            if (logChannelKey == "investigations" && !string.IsNullOrEmpty(messageContentOverride) && messageContentOverride != infringingMessage.Content)
+            if (logChannelKey == "investigations" && !string.IsNullOrEmpty(messageContentOverride) && messageContentOverride != Uri.UnescapeDataString(infringingMessage.Content))
                 messageContentOverride = $"{infringingMessage.Content}\n-# [...full content omitted, check <#{LogChannelHelper.GetLogChannelId("mod")}>...]";
 
             var embed = new DiscordEmbedBuilder()
@@ -49,11 +49,11 @@
                 logMsg = await LogChannelHelper.LogMessageAsync(logChannelKey, content, embed);
             else
                 logMsg = await channelOverride.SendMessageAsync(new DiscordMessageBuilder().WithContent(content).AddEmbed(embed).WithAllowedMentions(Mentions.None));
-            
+
             // Add reaction to log message to be used to delete
-            if (logChannelKey == "investigations" && channelOverride == default)
+            if (logChannelKey == "investigations" && channelOverride == default && Program.cfgjson.ReactionEmoji is not null)
             {
-                var emoji = DiscordEmoji.FromName(Program.discord, ":CliptokRecycleBin:", true);
+                var emoji = await Program.discord.GetApplicationEmojiAsync(Program.cfgjson.ReactionEmoji.Delete);
                 await logMsg.CreateReactionAsync(emoji);
                 Task.Run(async () =>
                 {

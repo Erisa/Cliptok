@@ -11,7 +11,7 @@
             else
             {
                 long unixExpiration = (long)Program.redis.HashGet("raidmode", guildId);
-                long currentUnixTime = TimeHelpers.ToUnixTimestamp(DateTime.Now);
+                long currentUnixTime = TimeHelpers.ToUnixTimestamp(DateTime.UtcNow);
                 if (currentUnixTime >= unixExpiration)
                 {
                     Program.redis.HashDelete("raidmode", guildId);

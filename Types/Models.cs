@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace Cliptok.Types
+﻿namespace Cliptok.Types
 {
     public class Models
     {

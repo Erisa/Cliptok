@@ -1,4 +1,3 @@
-using Cliptok.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cliptok.Commands
@@ -159,7 +158,8 @@ namespace Cliptok.Commands
                 {
                     await ctx.RespondAsync("Invalid argument. Make sure you know what you are doing.");
 
-                };
+                }
+                ;
             }
 
             [Command("refresh")]

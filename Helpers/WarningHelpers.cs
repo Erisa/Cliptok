@@ -20,7 +20,7 @@
             var embed = new DiscordEmbedBuilder()
                 .WithDescription(str)
                 .WithColor(new DiscordColor(0xFEC13D))
-                .WithTimestamp(DateTime.Now)
+                .WithTimestamp(DateTime.UtcNow)
                 .WithFooter(
                     $"User ID: {targetUser.Id}",
                     null
@@ -44,7 +44,7 @@
                     if (warning.IsPardoned)
                         continue;
 
-                    TimeSpan span = DateTime.Now - warning.WarnTimestamp;
+                    TimeSpan span = DateTime.UtcNow - warning.WarnTimestamp;
                     if (span <= timeToCheck)
                     {
                         recentCount += 1;
@@ -103,7 +103,7 @@
                 {
                     var hourRecentMatches = keys.Where(key =>
                     {
-                        TimeSpan span = DateTime.Now - warningsOutput[key].WarnTimestamp;
+                        TimeSpan span = DateTime.UtcNow - warningsOutput[key].WarnTimestamp;
                         return (span.TotalHours < Program.cfgjson.RecentWarningsPeriodHours && !warningsOutput[key].IsPardoned);
                     }
                     );
@@ -133,7 +133,7 @@
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
             .WithDescription($"**Reason**\n{reason}")
             .WithColor(new DiscordColor(colour))
-            .WithTimestamp(DateTime.Now)
+            .WithTimestamp(DateTime.UtcNow)
             .WithFooter(
                 $"User ID: {userID}",
                 null
@@ -247,7 +247,7 @@
                 TargetUserId = targetUser.Id,
                 ModUserId = modUser.Id,
                 WarnReason = reason,
-                WarnTimestamp = DateTime.Now,
+                WarnTimestamp = DateTime.UtcNow,
                 WarningId = warningId,
                 ContextLink = DiscordHelpers.MessageLink(contextMessage),
                 ContextMessageReference = new()
@@ -287,13 +287,16 @@
             );
             try
             {
-                var emoji = DiscordEmoji.FromName(Program.discord, ":CliptokRecycleBin:", true);
-                await logMsg.CreateReactionAsync(emoji);
-                Task.Run(async () =>
+                if (Program.cfgjson.ReactionEmoji is not null)
                 {
-                    await Task.Delay(TimeSpan.FromMinutes(Program.cfgjson.WarningLogReactionTimeMinutes));
-                    await logMsg.DeleteOwnReactionAsync(emoji);
-                });
+                    var emoji = await Program.discord.GetApplicationEmojiAsync(Program.cfgjson.ReactionEmoji.Delete);
+                    await logMsg.CreateReactionAsync(emoji);
+                    Task.Run(async () =>
+                    {
+                        await Task.Delay(TimeSpan.FromMinutes(Program.cfgjson.WarningLogReactionTimeMinutes));
+                        await logMsg.DeleteOwnReactionAsync(emoji);
+                    });
+                }
             }
             catch
             {

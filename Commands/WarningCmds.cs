@@ -46,7 +46,7 @@ namespace Cliptok.Commands
             {
                 TargetUserId = user.Id,
                 ModUserId = ctx.User.Id,
-                WarnTimestamp = DateTime.Now,
+                WarnTimestamp = DateTime.UtcNow,
                 Stub = true // make it clear this isn't a real warning
             };
 
@@ -227,7 +227,7 @@ namespace Cliptok.Commands
                 if (list.Count >= 25)
                     break;
 
-                string warningString = $"{StringHelpers.Pad(warning.Value.WarningId)} - {StringHelpers.Truncate(warning.Value.WarnReason, 29, true)} - {TimeHelpers.TimeToPrettyFormat(DateTime.Now - warning.Value.WarnTimestamp, true)}";
+                string warningString = $"{StringHelpers.Pad(warning.Value.WarningId)} - {StringHelpers.Truncate(warning.Value.WarnReason, 29, true)} - {TimeHelpers.TimeToPrettyFormat(DateTime.UtcNow - warning.Value.WarnTimestamp, true)}";
                 if (warning.Value.IsPardoned)
                 {
                     if (excludePardoned)
@@ -568,7 +568,7 @@ namespace Cliptok.Commands
             {
                 TargetUserId = targetUser.Id,
                 ModUserId = ctx.User.Id,
-                WarnTimestamp = DateTime.Now,
+                WarnTimestamp = DateTime.UtcNow,
                 Stub = true // make it clear this isn't a real warning
             };
 
@@ -642,7 +642,7 @@ namespace Cliptok.Commands
             {
                 TargetUserId = targetUser.Id,
                 ModUserId = ctx.User.Id,
-                WarnTimestamp = DateTime.Now,
+                WarnTimestamp = DateTime.UtcNow,
                 Stub = true // make it clear this isn't a real warning
             };
 
@@ -939,7 +939,7 @@ namespace Cliptok.Commands
             await ctx.RespondAsync($":thinking: As far as I can tell, the day with the most warnings issued was **{countList.Last().Key}** with a total of **{countList.Last().Value} warnings!**" +
                 $"\nExcluding automatic warnings, the most was on **{noAutoCountList.Last().Key}** with a total of **{noAutoCountList.Last().Value}** warnings!");
         }
-        
+
         [Command("revoke"), Description("Revoke a warning. Reply to the chat message for the warning to revoke when using this!")]
         [TextAlias("undo")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
@@ -947,41 +947,41 @@ namespace Cliptok.Commands
         {
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
             var msg = await ctx.GetResponseAsync();
-            
+
             var reply = ctx.Message.ReferencedMessage;
-            
+
             if (reply is null)
             {
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} Please reply to the warning message to delete!");
                 return;
             }
-            
+
             if (reply.Author.Id != Program.discord.CurrentUser.Id || (!Constants.RegexConstants.warn_msg_rx.IsMatch(reply.Content) && (!Constants.RegexConstants.auto_warn_msg_rx.IsMatch(reply.Content))))
             {
                 // this isnt a warning message
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} That reply doesn't look like a warning message! Please reply to the warning message to delete.");
                 return;
             }
-            
+
             // Collect data from message
             var userId = Constants.RegexConstants.user_rx.Match(reply.Content).Groups[1].ToString();
             var reason = Constants.RegexConstants.warn_msg_rx.Match(reply.Content).Groups[1].Value;
             if (string.IsNullOrEmpty(reason))
                 reason = Constants.RegexConstants.auto_warn_msg_rx.Match(reply.Content).Groups[1].Value;
             var userWarnings = (await Program.redis.HashGetAllAsync(userId));
-            
+
             // Try to match against user warnings;
             // match warnings that have a reason that exactly matches the reason in the msg being replied to,
             // and that are explicitly warnings (WarningType.Warning), not notes
-            
+
             UserWarning warning = null;
-            
+
             var matchingWarnings = userWarnings.Where(x =>
             {
                 var warn = JsonConvert.DeserializeObject<UserWarning>(x.Value);
                 return warn.WarnReason == reason && warn.Type == WarningType.Warning;
             }).Select(x => JsonConvert.DeserializeObject<UserWarning>(x.Value)).ToList();
-            
+
             if (matchingWarnings.Count > 1)
             {
                 bool foundMatch = false;
@@ -992,7 +992,7 @@ namespace Cliptok.Commands
                     {
                         warning = match;
                         foundMatch = true;
-                        break;   
+                        break;
                     }
                 }
                 if (!foundMatch)
@@ -1010,7 +1010,7 @@ namespace Cliptok.Commands
             {
                 warning = matchingWarnings.First();
             }
-            
+
             if ((await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
             {
                 await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!");

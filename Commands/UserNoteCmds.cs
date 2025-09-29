@@ -45,7 +45,7 @@ namespace Cliptok.Commands
                     ShowOnce = showOnce,
                     ShowOnJoinAndLeave = showOnJoinAndLeave,
                     NoteId = noteId,
-                    Timestamp = DateTime.Now,
+                    Timestamp = DateTime.UtcNow,
                     Type = WarningType.Note
                 };
 
@@ -233,7 +233,7 @@ namespace Cliptok.Commands
                         if (list.Count >= 25)
                             break;
 
-                        string noteString = $"{StringHelpers.Pad(note.Value.NoteId)} - {StringHelpers.Truncate(note.Value.NoteText, 29, true)} - {TimeHelpers.TimeToPrettyFormat(DateTime.Now - note.Value.Timestamp, true)}";
+                        string noteString = $"{StringHelpers.Pad(note.Value.NoteId)} - {StringHelpers.Truncate(note.Value.NoteText, 29, true)} - {TimeHelpers.TimeToPrettyFormat(DateTime.UtcNow - note.Value.Timestamp, true)}";
 
                         var focusedOption = ctx.Options.FirstOrDefault(option => option.Focused);
                         if (focusedOption is not null)

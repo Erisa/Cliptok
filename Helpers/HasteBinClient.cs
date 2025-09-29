@@ -24,7 +24,7 @@ namespace Cliptok.Helpers
             if (_baseUrl is null || _baseUrl == "")
                 return new HasteBinResult { IsSuccess = false, StatusCode = 0 };
 
-            switch (_hasteType) 
+            switch (_hasteType)
             {
                 case "haste":
                     return await PostHastebinAsync(content, language);

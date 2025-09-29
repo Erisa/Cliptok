@@ -18,7 +18,7 @@
                 foreach (KeyValuePair<string, MemberPunishment> entry in banList)
                 {
                     MemberPunishment banEntry = entry.Value;
-                    if (DateTime.Now > banEntry.ExpireTime)
+                    if (DateTime.UtcNow > banEntry.ExpireTime)
                     {
                         targetGuild = await Program.discord.GetGuildAsync(banEntry.ServerId);
                         var user = await Program.discord.GetUserAsync(banEntry.MemberId);
@@ -28,7 +28,7 @@
                     }
 
                 }
-                Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked bans at {time} with result: {result}", DateTime.Now, success);
+                Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked bans at {time} with result: {result}", DateTime.UtcNow, success);
                 return success;
             }
         }
@@ -47,13 +47,13 @@
                 foreach (KeyValuePair<string, MemberPunishment> entry in muteList)
                 {
                     MemberPunishment mute = entry.Value;
-                    if (DateTime.Now > mute.ExpireTime)
+                    if (DateTime.UtcNow > mute.ExpireTime)
                     {
                         await MuteHelpers.UnmuteUserAsync(await Program.discord.GetUserAsync(mute.MemberId), "Mute has naturally expired.", false);
                         success = true;
                     }
                 }
-                Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked mutes at {time} with result: {result}", DateTime.Now, success);
+                Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked mutes at {time} with result: {result}", DateTime.UtcNow, success);
                 return success;
             }
         }
@@ -78,9 +78,9 @@
                 {
                     UserWarning warn = entry.Value;
 #if DEBUG
-                    if (DateTime.Now > warn.WarnTimestamp.AddSeconds(Program.cfgjson.AutoWarnMsgAutoDeleteDays))
+                    if (DateTime.UtcNow > warn.WarnTimestamp.AddSeconds(Program.cfgjson.AutoWarnMsgAutoDeleteDays))
 #else
-                    if (DateTime.Now > warn.WarnTimestamp.AddDays(Program.cfgjson.AutoWarnMsgAutoDeleteDays))
+                    if (DateTime.UtcNow > warn.WarnTimestamp.AddDays(Program.cfgjson.AutoWarnMsgAutoDeleteDays))
 #endif
                     {
                         try
@@ -94,7 +94,7 @@
                         {
                             // If we fail to delete the message, forget about it; this isn't incredibly important & we don't want to keep trying every task run
                             Program.redis.HashDelete("automaticWarnings", warn.WarningId);
-                            
+
                             // Log a warning too
                             Program.discord.Logger.LogWarning(ex, "Failed to clean up automatic warning message: {messageLink}; it will be skipped", warn.ContextLink);
                             continue;
@@ -114,9 +114,9 @@
                 {
                     MemberPunishment ban = entry.Value;
 #if DEBUG
-                    if (DateTime.Now > ban.ActionTime.Value.AddSeconds(Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays))
+                    if (DateTime.UtcNow > ban.ActionTime.Value.AddSeconds(Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays))
 #else
-                    if (DateTime.Now > ban.ActionTime.Value.AddDays(Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays))
+                    if (DateTime.UtcNow > ban.ActionTime.Value.AddDays(Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays))
 #endif
                     {
                         try
@@ -130,7 +130,7 @@
                         {
                             // If we fail to delete the message, forget about it; this isn't incredibly important & we don't want to keep trying every task run
                             Program.redis.HashDelete("compromisedAccountBans", ban.MemberId);
-                            
+
                             // Log a warning too
                             var messageLink = ban.ContextMessageReference is null
                                 ? "[no ContextMessageReference]"
@@ -142,7 +142,7 @@
                 }
             }
 
-            Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked for auto-warn and compromised account ban messages at {time} with result: {result}", DateTime.Now, success);
+            Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked for auto-warn and compromised account ban messages at {time} with result: {result}", DateTime.UtcNow, success);
             return success;
         }
     }

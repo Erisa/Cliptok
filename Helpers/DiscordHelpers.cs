@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace Cliptok.Helpers
+﻿namespace Cliptok.Helpers
 {
     public class DiscordHelpers
     {
@@ -287,9 +285,6 @@ namespace Cliptok.Helpers
             var channel = await Program.homeGuild.GetChannelAsync(message.ChannelId);
             var msgBuilder = new DiscordMessageBuilder();
 
-            bool oldContentOverflow = false;
-            bool newContentOverflow = false;
-
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithAuthor($"Message by {message.User.DisplayName}{(channelRef ? $" was {type} in #{channel.Name}" : "")}", null, message.User.AvatarUrl)
                 .WithFooter($"{(showChannelId ? $"Channel ID: {message.ChannelId} | " : "")}User ID: {message.User.Id} {(showMessageId ? $" | Message ID: {message.Id}" : "")}");
@@ -320,7 +315,6 @@ namespace Cliptok.Helpers
                         else
                         {
                             msgBuilder.AddFile("old_content.txt", new MemoryStream(Encoding.UTF8.GetBytes(oldContent)));
-                            oldContentOverflow = true;
                         }
                     }
                 }
@@ -339,14 +333,13 @@ namespace Cliptok.Helpers
 
                     if (oldMessage.Sticker is not null)
                         content += $"\n[{message.Sticker.Name}]({message.Sticker.Url})";
-                    
+
                     var haste = await StringHelpers.CodeOrHasteBinAsync(content, noCode: true, messageWrapper: true, charLimit: 1024);
                     if (haste.Success)
                         embed.AddField("New content", haste.Text);
                     else
                     {
                         msgBuilder.AddFile("new_content.txt", new MemoryStream(Encoding.UTF8.GetBytes(content)));
-                        newContentOverflow = true;
                     }
                 }
                 embed.Color = DiscordColor.Yellow;
@@ -391,7 +384,7 @@ namespace Cliptok.Helpers
                 }
             }
 
-            
+
             return msgBuilder.AddEmbeds(embeds.AsEnumerable());
         }
 

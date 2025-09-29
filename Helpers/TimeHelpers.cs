@@ -38,7 +38,7 @@
         {
             return ((DateTimeOffset)dateTime).ToUnixTimeSeconds();
         }
-        
+
         public static DateTime ToDateTime(long unixTime, bool milliseconds = false)
         {
             /* This function creates a DateTime from a long thats a UNIX timestamp.
@@ -91,7 +91,7 @@
             else if (!DateTime.TryParse(inputString, out t))
             {
                 // if it couldnt parse it as that, finally try humandateparser
-                t = HumanDateParser.HumanDateParser.Parse(inputString);
+                t = HumanDateParser.HumanDateParser.Parse(inputString).ToUniversalTime();
             }
 
             return t;
