@@ -27,6 +27,7 @@ services:
       # Overrides your configs Redis options for use with Docker Compose
       #  I don't advise changing this unless you have a strange setup
       - REDIS_DOCKER_OVERRIDE=true
+      - TZ=Etc/UTC
     # uncomment this for bespoke setups
     network_mode: service:tailscale
   redis:

@@ -64,7 +64,7 @@ namespace Cliptok.Commands
             {
                 try
                 {
-                    muteDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(ctx.Interaction.CreationTimestamp.LocalDateTime);
+                    muteDuration = HumanDateParser.HumanDateParser.Parse(time).ToUniversalTime().Subtract(ctx.Interaction.CreationTimestamp.LocalDateTime);
                 }
                 catch
                 {
@@ -75,170 +75,6 @@ namespace Cliptok.Commands
 
             await MuteHelpers.MuteUserAsync(targetUser, reason, ctx.User.Id, ctx.Guild, ctx.Channel, muteDuration, true);
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Command completed successfully."));
-        }
-
-        [Command("tqsmute")]
-        [Description("Temporarily mute a user in tech support channels.")]
-        [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TechnicalQueriesSlayer)]
-        public async Task TqsMuteSlashCommand(
-            CommandContext ctx,
-            [Parameter("user"), Description("The user to mute.")] DiscordUser targetUser,
-            [Parameter("reason"), Description("The reason for the mute.")] string reason)
-        {
-            if (ctx is SlashCommandContext)
-                await ctx.As<SlashCommandContext>().DeferResponseAsync(ephemeral: true);
-            else
-                await ctx.As<TextCommandContext>().Message.DeleteAsync();
-
-            // only work if TQS mute role is configured
-            if (Program.cfgjson.TqsMutedRole == 0)
-            {
-                if (ctx is SlashCommandContext)
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} TQS mutes are not configured, so this command does nothing. Please contact the bot maintainer if this is unexpected."));
-                else
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} TQS mutes are not configured, so this command does nothing. Please contact the bot maintainer if this is unexpected.");
-                return;
-            }
-
-            // Only allow usage in #tech-support, #tech-support-forum, and their threads + #bot-commands
-            if (ctx.Channel.Id != Program.cfgjson.TechSupportChannel &&
-                ctx.Channel.Id != Program.cfgjson.SupportForumId &&
-                ctx.Channel.Parent.Id != Program.cfgjson.TechSupportChannel &&
-                ctx.Channel.Parent.Id != Program.cfgjson.SupportForumId &&
-                ctx.Channel.Id != Program.cfgjson.BotCommandsChannel)
-            {
-                if (ctx is SlashCommandContext)
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} This command can only be used in <#{Program.cfgjson.TechSupportChannel}>, <#{Program.cfgjson.SupportForumId}>, and threads in those channels!"));
-                else
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command can only be used in <#{Program.cfgjson.TechSupportChannel}>, <#{Program.cfgjson.SupportForumId}>, and threads in those channels!");
-                return;
-            }
-
-            // Check if the user is already muted; disallow TQS-mute if so
-
-            DiscordRole mutedRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.MutedRole);
-            DiscordRole tqsMutedRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.TqsMutedRole);
-
-            // Get member
-            DiscordMember targetMember = default;
-            try
-            {
-                targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
-            }
-            catch (DSharpPlus.Exceptions.NotFoundException)
-            {
-                // blah
-            }
-
-            if (await Program.redis.HashExistsAsync("mutes", targetUser.Id) || (targetMember is not null && (targetMember.Roles.Contains(mutedRole) || targetMember.Roles.Contains(tqsMutedRole))))
-            {
-                if (ctx is SlashCommandContext)
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, that user is already muted."));
-                else
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, that user is already muted.");
-                return;
-            }
-
-            // Check if user to be muted is staff or TQS, and disallow if so
-            if (targetMember != default && (await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TechnicalQueriesSlayer && ((await GetPermLevelAsync(targetMember)) >= ServerPermLevel.TechnicalQueriesSlayer || targetMember.IsBot))
-            {
-                if (ctx is SlashCommandContext)
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, you cannot mute other TQS or staff members."));
-                else
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, you cannot mute other TQS or staff members.");
-                return;
-            }
-
-            // mute duration is static for TQS mutes
-            TimeSpan muteDuration = TimeSpan.FromHours(Program.cfgjson.TqsMuteDurationHours);
-
-            await MuteHelpers.MuteUserAsync(targetUser, reason, ctx.User.Id, ctx.Guild, ctx.Channel, muteDuration, true, true);
-            if (ctx is SlashCommandContext)
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Done. Please open a modmail thread for this user if you haven't already!"));
-        }
-        
-        [Command("tqsunmute")]
-        [TextAlias("tqs-unmute", "untqsmute")]
-        [Description("Removes a TQS Mute from a previously TQS-muted user. See also: tqsmute")]
-        [AllowedProcessors(typeof(TextCommandProcessor), typeof(SlashCommandProcessor))]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TechnicalQueriesSlayer)]
-        public async Task TqsUnmuteCmd(CommandContext ctx, [Parameter("user"), Description("The user you're trying to unmute.")] DiscordUser targetUser, [Description("The reason for the unmute.")] string reason)
-        {
-            if (ctx is SlashCommandContext)
-                await ctx.As<SlashCommandContext>().DeferResponseAsync();
-            
-            // only work if TQS mute role is configured
-            if (Program.cfgjson.TqsMutedRole == 0)
-            {
-                if (ctx is SlashCommandContext)
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} TQS mutes are not configured, so this command does nothing. Please contact the bot maintainer if this is unexpected."));
-                else
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} TQS mutes are not configured, so this command does nothing. Please contact the bot maintainer if this is unexpected.");
-                return;
-            }
-            
-            // Only allow usage in #tech-support, #tech-support-forum, and their threads + #bot-commands
-            if (ctx.Channel.Id != Program.cfgjson.TechSupportChannel &&
-                ctx.Channel.Id != Program.cfgjson.SupportForumId &&
-                ctx.Channel.Parent.Id != Program.cfgjson.TechSupportChannel &&
-                ctx.Channel.Parent.Id != Program.cfgjson.SupportForumId &&
-                ctx.Channel.Id != Program.cfgjson.BotCommandsChannel)
-            {
-                if (ctx is SlashCommandContext)
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} This command can only be used in <#{Program.cfgjson.TechSupportChannel}>, <#{Program.cfgjson.SupportForumId}>, and threads in those channels!"));
-                else
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command can only be used in <#{Program.cfgjson.TechSupportChannel}>, <#{Program.cfgjson.SupportForumId}>, their threads, and <#{Program.cfgjson.BotCommandsChannel}>!");
-                return;
-            }
-            
-            // Get muted roles
-            DiscordRole mutedRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.MutedRole);
-            DiscordRole tqsMutedRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.TqsMutedRole);
-
-            // Get member
-            DiscordMember targetMember = default;
-            try
-            {
-                targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
-            }
-            catch (DSharpPlus.Exceptions.NotFoundException)
-            {
-                // couldn't fetch member, fail
-                if (ctx is SlashCommandContext)
-                    await ctx.EditResponseAsync($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be in the server!");
-                else
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be in the server!");
-                return;
-            }
-
-            if (await Program.redis.HashExistsAsync("mutes", targetUser.Id) && targetMember is not null && targetMember.Roles.Contains(tqsMutedRole))
-            {
-                // If the member has a regular mute, leave the TQS mute alone (it's only a role now & it has no effect if they also have Muted); it will be removed when they are unmuted
-                if (targetMember.Roles.Contains(mutedRole))
-                {
-                    if (ctx is SlashCommandContext)
-                        await ctx.EditResponseAsync($"{Program.cfgjson.Emoji.Error} {targetUser.Mention} has been muted by a Moderator! Their TQS Mute will be removed when the Moderator-issued mute expires.");
-                    else
-                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {targetUser.Mention} has been muted by a Moderator! Their TQS Mute will be removed when the Moderator-issued mute expires.");
-                    return;
-                }
-                
-                // user is TQS-muted; unmute
-                await MuteHelpers.UnmuteUserAsync(targetUser, reason, true, ctx.User, true);
-                if (ctx is SlashCommandContext)
-                    await ctx.EditResponseAsync($"{Program.cfgjson.Emoji.Success} Successfully unmuted {targetUser.Mention}!");
-                else
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully unmuted {targetUser.Mention}!");
-            }
-            else
-            {
-                // member is not TQS-muted, fail
-                if (ctx is SlashCommandContext)
-                    await ctx.EditResponseAsync($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be TQS-muted!");
-                else
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user doesn't appear to be TQS-muted!");
-            }
         }
 
         [Command("muteinfo")]
@@ -264,7 +100,7 @@ namespace Cliptok.Commands
         {
             if (ctx is SlashCommandContext)
                 await ctx.DeferResponseAsync();
-            
+
             // todo: store per-guild
             DiscordRole mutedRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.MutedRole);
             DiscordRole tqsMutedRole = default;
@@ -285,7 +121,7 @@ namespace Cliptok.Commands
             {
                 await MuteHelpers.UnmuteUserAsync(targetUser, reason, true, ctx.User);
                 var unmuteMsg = $"{Program.cfgjson.Emoji.Information} Successfully unmuted **{DiscordHelpers.UniqueUsername(targetUser)}**";
-                
+
                 if (reason != "No reason specified.")
                     unmuteMsg += $": **{reason}**";
 
@@ -368,7 +204,7 @@ namespace Cliptok.Commands
 
             try
             {
-                muteDuration = HumanDateParser.HumanDateParser.Parse(possibleTime).Subtract(ctx.Message.Timestamp.DateTime);
+                muteDuration = HumanDateParser.HumanDateParser.Parse(possibleTime).ToUniversalTime().Subtract(ctx.Message.Timestamp.DateTime);
                 timeParsed = true;
             }
             catch
@@ -387,7 +223,7 @@ namespace Cliptok.Commands
 
             _ = MuteHelpers.MuteUserAsync(targetUser, reason, ctx.User.Id, ctx.Guild, ctx.Channel, muteDuration, true);
         }
-        
+
         [Command("editmutetextcmd")]
         [TextAlias("editmute")]
         [Description("Edit the details of a mute. Updates the DM to the user, among other things.")]
@@ -403,25 +239,25 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} There's no record of a mute for that user! Please make sure they're muted or you got the right user.");
                 return;
             }
-            
+
             (TimeSpan muteDuration, string reason, bool _) = PunishmentHelpers.UnpackTimeAndReason(timeAndReason, ctx.Message.Timestamp.DateTime);
 
             var mute = JsonConvert.DeserializeObject<MemberPunishment>(await Program.redis.HashGetAsync("mutes", targetUser.Id));
-            
+
             mute.ModId = ctx.User.Id;
             if (muteDuration == default)
                 mute.ExpireTime = null;
             else
                 mute.ExpireTime = mute.ActionTime + muteDuration;
             mute.Reason = reason;
-            
+
             var guild = await Program.discord.GetGuildAsync(mute.ServerId);
-            
+
             var contextMessage = await DiscordHelpers.GetMessageFromReferenceAsync(mute.ContextMessageReference);
             var dmMessage = await DiscordHelpers.GetMessageFromReferenceAsync(mute.DmMessageReference);
-            
+
             reason = reason.Replace("`", "\\`").Replace("*", "\\*");
-            
+
             if (contextMessage is not null)
             {
                 if (muteDuration == default)
@@ -431,7 +267,7 @@ namespace Cliptok.Commands
                     await contextMessage.ModifyAsync($"{Program.cfgjson.Emoji.Muted} {targetUser.Mention} has been muted for **{TimeHelpers.TimeToPrettyFormat(muteDuration, false)}**: **{reason}**");
                 }
             }
-            
+
             if (dmMessage is not null)
             {
                 string dmContent = "";
@@ -453,7 +289,7 @@ namespace Cliptok.Commands
                 }
                 await dmMessage.ModifyAsync(dmContent);
             }
-            
+
             try
             {
                 var targetMember = await guild.GetMemberAsync(targetUser.Id);
@@ -463,12 +299,12 @@ namespace Cliptok.Commands
             {
                 Program.discord.Logger.LogError(e, "Failed to issue timeout to {user}", targetUser.Id);
             }
-            
+
             await Program.redis.HashSetAsync("mutes", targetUser.Id.ToString(), JsonConvert.SerializeObject(mute));
-            
+
             // Construct log message
             string logOut = $"{Program.cfgjson.Emoji.MessageEdit} The mute for {targetUser.Mention} was edited by {ctx.User.Mention}!\nReason: **{reason}**";
-            
+
             if (mute.ExpireTime == null)
             {
                 logOut += "\nMute expires: **Never**";
@@ -477,10 +313,10 @@ namespace Cliptok.Commands
             {
                 logOut += $"\nMute expires: <t:{TimeHelpers.ToUnixTimestamp(mute.ExpireTime)}:R>";
             }
-            
+
             // Log to mod log
             await LogChannelHelper.LogMessageAsync("mod", logOut);
-            
+
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully edited the mute for {targetUser.Mention}!");
         }
     }

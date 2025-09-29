@@ -45,7 +45,7 @@ namespace Cliptok.Helpers
             var embed = new DiscordEmbedBuilder()
                 .WithDescription(str)
                 .WithColor(colorOverride ?? new DiscordColor(0xFEC13D))
-                .WithTimestamp(DateTime.Now)
+                .WithTimestamp(DateTime.UtcNow)
                 .WithFooter(
                     $"User ID: {user.Id}",
                     null
@@ -88,7 +88,7 @@ namespace Cliptok.Helpers
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithDescription($"**Note**\n{note.NoteText}")
                 .WithColor(colorOverride ?? new DiscordColor(0xFEC13D))
-                .WithTimestamp(DateTime.Now)
+                .WithTimestamp(DateTime.UtcNow)
                 .WithFooter(
                     $"User ID: {user.Id}",
                     null
@@ -113,7 +113,7 @@ namespace Cliptok.Helpers
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithDescription($"**Note**\n{note.NoteText}")
                 .WithColor(colorOverride ?? new DiscordColor(0xFEC13D))
-                .WithTimestamp(DateTime.Now)
+                .WithTimestamp(DateTime.UtcNow)
                 .WithFooter(
                     $"User ID: {user.Id}",
                     null

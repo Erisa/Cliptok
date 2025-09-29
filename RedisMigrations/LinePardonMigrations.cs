@@ -4,7 +4,7 @@
     {
         public static async Task MigrateLinePardonToSetAsync()
         {
-           if (!Program.redis.KeyExists("linePardoned") || Program.redis.KeyType("linePardoned") == RedisType.Set)
+            if (!Program.redis.KeyExists("linePardoned") || Program.redis.KeyType("linePardoned") == RedisType.Set)
                 return;
 
             // archive old data

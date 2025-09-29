@@ -209,7 +209,8 @@ namespace Cliptok.Commands
                 if (bulkLogs.Count == 0)
                 {
                     await ctx.RespondAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} There are no bulk message logs for {user.Mention}!").WithAllowedMentions(Mentions.None));
-                } else
+                }
+                else
                 {
                     var stringRespBuilder = new StringBuilder();
 

@@ -110,7 +110,7 @@
             if (
                 Program.cfgjson.GitHubWorkflowPrivate is not null
                 && githubTokenPrivate is not null
-                && Directory.GetFiles($"Lists/{Program.cfgjson.GitListDirectory}").Any(x => x.EndsWith(fileName)) )
+                && Directory.GetFiles($"Lists/{Program.cfgjson.GitListDirectory}").Any(x => x.EndsWith(fileName)))
             {
                 workflowId = Program.cfgjson.GitHubWorkflowPrivate.WorkflowId;
                 refName = Program.cfgjson.GitHubWorkflowPrivate.Ref;
@@ -185,7 +185,7 @@
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Anti-phishing API is not configured, nothing for me to do.");
             }
         }
-        
+
         [Command("invitecheck")]
         [Description("Check if a server invite is known to the malicious invites API.")]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
@@ -193,25 +193,25 @@
         public async Task InviteCheck(CommandContext ctx, [Parameter("input"), Description("Server invite to scan.")] string content)
         {
             var inviteMatches = Constants.RegexConstants.invite_rx.Matches(content);
-            
+
             if (inviteMatches.Count == 0)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That doesn't look like a valid invite! Please try again.");
                 return;
             }
-            
+
             var invite = inviteMatches.First();
             ulong guildId;
             try
             {
-                guildId = (await Program.discord.GetInviteByCodeAsync(invite.Groups[1].Value)).Guild.Id;   
+                guildId = (await Program.discord.GetInviteByCodeAsync(invite.Groups[1].Value)).Guild.Id;
             }
             catch (DSharpPlus.Exceptions.NotFoundException)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That invite isn't valid!");
                 return;
             }
-                
+
             var (match, httpStatus, responseString, _) = await APIs.ServerAPI.ServerAPICheckAsync(guildId);
 
             string responseToSend;
