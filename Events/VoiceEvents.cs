@@ -10,7 +10,7 @@
         {
             if (!Program.cfgjson.EnableTextInVoice)
                 return;
-            
+
             var channelBefore = e.Before?.ChannelId is null ? null : await Program.discord.GetChannelAsync(e.Before.ChannelId.Value);
             var channelAfter = e.After?.ChannelId is null ? null : await Program.discord.GetChannelAsync(e.After.ChannelId.Value);
             var user = await e.GetUserAsync();
@@ -91,7 +91,7 @@
                         PendingPurge.Remove(channelBefore.Id);
                         Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error occurred trying to purge messages from {channel}", channelBefore.Name);
                     }
-                    
+
                     // logging is now handled in the bulk delete event
                     if (!Program.cfgjson.EnablePersistentDb)
                     {
@@ -117,7 +117,7 @@
             var user = await e.GetUserAsync();
             var guild = await e.GetGuildAsync();
             var member = await guild.GetMemberAsync(user.Id);
-            
+
             if (Program.cfgjson.IgnoredVoiceChannels.Contains(channelAfter.Id))
                 return;
 
@@ -175,7 +175,7 @@
             var user = await e.GetUserAsync();
             var guild = await e.GetGuildAsync();
             var member = await guild.GetMemberAsync(user.Id);
-            
+
             if (Program.cfgjson.IgnoredVoiceChannels.Contains(channelBefore.Id))
                 return;
 

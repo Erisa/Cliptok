@@ -42,23 +42,26 @@ namespace Cliptok.Events
             }
 
             // Reaction to undo warnings in log channels
-            
+
             if (e.User.Id == discord.CurrentUser.Id)
                 return;
-            
+
             if (e.Channel.Id != cfgjson.LogChannels["investigations"].ChannelId && e.Channel.Id != cfgjson.LogChannels["mod"].ChannelId)
                 return;
-            
+
+            if (cfgjson.ReactionEmoji is null)
+                return;
+
             var member = await e.Guild.GetMemberAsync(e.User.Id);
             if (await GetPermLevelAsync(member) < ServerPermLevel.TrialModerator)
                 return;
-            
-            var recycleBinEmoji = DiscordEmoji.FromName(discord, ":CliptokRecycleBin:", true);
-            
+
+            var recycleBinEmoji = await discord.GetApplicationEmojiAsync(cfgjson.ReactionEmoji.Delete);
+
             // Ignore reactions that are not the CliptokRecycleBin emoji!!
             if (e.Emoji != recycleBinEmoji)
                 return;
-            
+
             if (e.Channel.Id == cfgjson.LogChannels["mod"].ChannelId)
             {
                 string warningId;
@@ -73,13 +76,13 @@ namespace Cliptok.Events
                 }
                 if (warningId is null) // probably reacted to invalid msg, ignore
                     return;
-                
+
                 var targetUserId = Convert.ToUInt64(user_rx.Match(targetMessage.Content).Groups[1].ToString());
                 var warning = WarningHelpers.GetWarning(targetUserId, Convert.ToUInt32(warningId));
-                
+
                 if ((await GetPermLevelAsync(member)) == ServerPermLevel.TrialModerator && warning.ModUserId != e.User.Id && warning.ModUserId != discord.CurrentUser.Id)
                     return;
-                
+
                 if (warning is null)
                 {
                     await targetMessage.DeleteReactionsEmojiAsync(recycleBinEmoji);
@@ -99,7 +102,7 @@ namespace Cliptok.Events
                 }
                 else
                 {
-                    var errorEmoji = DiscordEmoji.FromName(discord, ":CliptokCritical:", true);
+                    var errorEmoji = await discord.GetApplicationEmojiAsync(cfgjson.ReactionEmoji.Error);
                     await targetMessage.CreateReactionAsync(errorEmoji);
                 }
             }
@@ -118,20 +121,20 @@ namespace Cliptok.Events
                     return;
                 }
                 var userWarnings = (await Program.redis.HashGetAllAsync(userId));
-                
+
                 // Try to match against user warnings;
                 // match warnings that have a reason that exactly matches the reason in the msg,
                 // and that are explicitly warnings (WarningType.Warning), not notes
-                
+
                 UserWarning warning = null;
-                
+
                 var matchingWarnings = userWarnings.Where(x =>
                 {
                     var warn = JsonConvert.DeserializeObject<UserWarning>(x.Value);
                     return warn.WarnReason == reason && warn.Type == WarningType.Warning;
                 }).Select(x => JsonConvert.DeserializeObject<UserWarning>(x.Value)).ToList();
-                
-                var errorEmoji = DiscordEmoji.FromName(discord, ":CliptokCritical:", true);
+
+                var errorEmoji = await discord.GetApplicationEmojiAsync(cfgjson.ReactionEmoji.Error);
                 if (matchingWarnings.Count > 1)
                 {
                     bool foundMatch = false;
@@ -142,7 +145,7 @@ namespace Cliptok.Events
                         {
                             warning = match;
                             foundMatch = true;
-                            break;   
+                            break;
                         }
                     }
                     if (!foundMatch)
@@ -160,7 +163,7 @@ namespace Cliptok.Events
                 {
                     warning = matchingWarnings.First();
                 }
-                
+
                 if ((await GetPermLevelAsync(member)) == ServerPermLevel.TrialModerator && warning.ModUserId != e.User.Id && warning.ModUserId != discord.CurrentUser.Id)
                 {
                     await targetMessage.CreateReactionAsync(errorEmoji);
@@ -177,8 +180,8 @@ namespace Cliptok.Events
                                 .AddEmbed(await WarningHelpers.FancyWarnEmbedAsync(warning, true, 0xf03916, true, warning.TargetUserId))
                                 .WithAllowedMentions(Mentions.None)
                         );
-                        
-                        var successEmoji = DiscordEmoji.FromName(discord, ":CliptokSuccess:", true);
+
+                        var successEmoji = await discord.GetApplicationEmojiAsync(cfgjson.ReactionEmoji.Success);
                         await targetMessage.CreateReactionAsync(successEmoji);
                     }
                     else

@@ -45,7 +45,7 @@
                     var hasteUrl = hasteResult.FullUrl;
 
                     if (plain)
-                        return (true, hasteUrl);                    
+                        return (true, hasteUrl);
                     if (messageWrapper)
                         return (true, $"[`📄 View online`]({hasteResult.RawUrl})");
                     else if (inputHasCodeBlock)
@@ -66,7 +66,8 @@
             {
                 return (true, input);
             }
-            else {
+            else
+            {
                 return (true, $"```{language}\n{input}\n```");
             }
         }

@@ -52,9 +52,9 @@ namespace Cliptok.Commands
                 if (!string.IsNullOrWhiteSpace(time))
                 {
                     if (ctx is SlashCommandContext)
-                        lockDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(ctx.As<SlashCommandContext>().Interaction.CreationTimestamp.DateTime);
+                        lockDuration = HumanDateParser.HumanDateParser.Parse(time).ToUniversalTime().Subtract(ctx.As<SlashCommandContext>().Interaction.CreationTimestamp.DateTime);
                     else
-                        lockDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(ctx.As<TextCommandContext>().Message.Timestamp.DateTime);
+                        lockDuration = HumanDateParser.HumanDateParser.Parse(time).ToUniversalTime().Subtract(ctx.As<TextCommandContext>().Message.Timestamp.DateTime);
                 }
 
                 var currentChannel = ctx.Channel;
@@ -114,9 +114,9 @@ namespace Cliptok.Commands
                 if (!string.IsNullOrWhiteSpace(time))
                 {
                     if (ctx is SlashCommandContext)
-                        lockDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(ctx.As<SlashCommandContext>().Interaction.CreationTimestamp.DateTime);
+                        lockDuration = HumanDateParser.HumanDateParser.Parse(time).ToUniversalTime().Subtract(ctx.As<SlashCommandContext>().Interaction.CreationTimestamp.DateTime);
                     else
-                        lockDuration = HumanDateParser.HumanDateParser.Parse(time).Subtract(ctx.As<TextCommandContext>().Message.Timestamp.DateTime);
+                        lockDuration = HumanDateParser.HumanDateParser.Parse(time).ToUniversalTime().Subtract(ctx.As<TextCommandContext>().Message.Timestamp.DateTime);
                 }
 
                 foreach (var chanID in Program.cfgjson.LockdownEnabledChannels)

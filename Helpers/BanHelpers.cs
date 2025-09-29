@@ -2,12 +2,12 @@
 {
     public class BanHelpers
     {
-        public static MemberPunishment MostRecentBan; 
+        public static MemberPunishment MostRecentBan;
 
         public static async Task<bool> BanFromServerAsync(ulong targetUserId, string reason, ulong moderatorId, DiscordGuild guild, int deleteDays = 7, DiscordChannel channel = null, TimeSpan banDuration = default, bool appealable = false, bool compromisedAccount = false)
         {
             bool permaBan = false;
-            DateTime? actionTime = DateTime.Now;
+            DateTime? actionTime = DateTime.UtcNow;
             DateTime? expireTime = actionTime + banDuration;
             DiscordMember moderator = await guild.GetMemberAsync(moderatorId);
 
@@ -30,10 +30,10 @@
                     chatMessage = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> has been banned: **{reason}**";
                 else
                     chatMessage = $"{Program.cfgjson.Emoji.Banned} <@{targetUserId}> has been banned for **{TimeHelpers.TimeToPrettyFormat(banDuration, false)}**: **{reason}**";
-                
+
                 if (deleteDays == 0)
                     chatMessage += "\n-# This user's messages have been kept.";
-                
+
                 output.chatMessage = await channel.SendMessageAsync(chatMessage);
             }
 
@@ -228,7 +228,6 @@
 
         public static async Task<DiscordEmbed> BanStatusEmbed(DiscordUser user, DiscordGuild guild)
         {
-            DiscordMember member = default;
             DiscordEmbedBuilder embedBuilder = new();
             var guildBans = await guild.GetBansAsync();
             var userBan = guildBans.FirstOrDefault(x => x.User.Id == user.Id);

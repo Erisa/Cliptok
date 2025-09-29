@@ -35,7 +35,7 @@ namespace Cliptok.Migrations
                     ShowOnce = false,
                     ShowOnJoinAndLeave = true,
                     NoteId = redis.StringIncrement("totalWarnings"),
-                    Timestamp = DateTime.Now,
+                    Timestamp = DateTime.UtcNow,
                     Type = WarningType.Note
                 };
 

@@ -80,7 +80,7 @@
             foreach (KeyValuePair<string, UserWarning> entry in warningDictionary)
             {
                 UserWarning entryWarning = entry.Value;
-                TimeSpan span = DateTime.Now - entryWarning.WarnTimestamp;
+                TimeSpan span = DateTime.UtcNow - entryWarning.WarnTimestamp;
                 if (span <= timeToCheck)
                     warnsSinceThreshold += 1;
             }
@@ -106,7 +106,7 @@
         public static async Task<(DiscordMessage? dmMessage, DiscordMessage? chatMessage)> MuteUserAsync(DiscordUser naughtyUser, string reason, ulong moderatorId, DiscordGuild guild, DiscordChannel channel = null, TimeSpan muteDuration = default, bool alwaysRespond = false, bool isTqsMute = false)
         {
             bool permaMute = false;
-            DateTime? actionTime = DateTime.Now;
+            DateTime? actionTime = DateTime.UtcNow;
             DiscordRole mutedRole = isTqsMute
                 ? await guild.GetRoleAsync(Program.cfgjson.TqsMutedRole)
                 : await guild.GetRoleAsync(Program.cfgjson.MutedRole);
@@ -324,7 +324,7 @@
             var auditLogReason = reason;
             if (manual && modUser is not null)
                 auditLogReason = $"[Manual {(isTqsUnmute ? "TQS " : "")}unmute by {DiscordHelpers.UniqueUsername(modUser)}]: {reason}";
-            
+
             var muteDetailsJson = await Program.redis.HashGetAsync("mutes", targetUser.Id);
             bool success = false;
             bool wasTqsMute = false;

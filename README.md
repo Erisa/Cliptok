@@ -1,30 +1,21 @@
-﻿# Cliptok - A Discord bot for Microsoft Community
+﻿# Cliptok - Opinionated moderation Discord bot
 
 ## About
-This bot is a Discord moderation bot specifically designed for the [Microsoft Community](https://msft.chat/).  
+This bot is a Discord moderation bot, it was originally designed for the [Microsoft Community](https://msft.chat/) but its use has since expanded to other servers.  
 
-The bot has not been designed for use outside of that server. A lot is assumed about the environment and you **will** encounter problems along the way.
-While a couple efforts have been made to not actively break other instances, modularity and portability is not the goal of this project. You are on your own if you attempt to host this bot outside of the intended environment. (Good luck though, I hope it works out!)
+The bot is only designed to run in a single server at a time, and is difficult to adjust. A lot is assumed about the environment and you will encounter problems along the way.
+While some efforts have been made to not actively break other instances with different configs, modularity and portability is not the goal of this project. You are on your own if you attempt to host this bot for your own purposes. (Good luck though, I hope it works out!)
 
-GitHub Issues will only be accepted if they are reproducible on the production bot (Cliptok in Microsoft Community).
-
-## Note about scam domains
-Cliptok no longer includes scam domains in its public source code. If you are using Cliptok or its lists to assist with your moderation, **don't**.  
-There are many projects better suited to this, and Cliptok now uses new methods of detecting phishing links that we do not wish to make public.
-
-Scam message parts continue to be available at [Lists/scams.txt](Lists/scams.txt) and you are free to contribute to those. Do not contribute scam domains, we don't need them.
-
-If you have questions about this, reach out to `Moderators' mail` on https://discord.gg/microsoft and ask for Erisa, citing this README as a source. Do not Direct Message me unless we are friends or you are sponsoring me on GitHub.
+GitHub Issues will generally only be accepted if they are reproducible in a standard and supported environment, please do not report issues that arise as a result of misconfiguring the bot.
 
 ## Configuration
-If you're using the bot on the Microsoft Community Discord server, the configuration should be fairly simple since the default configuration values are filled in for you.  
 
-Simply copy `.env-example` to `.env` and edit in the token for your Discord bot. If you require a different prefix, that can be done in the same file.
+Copy `.env-example` to `.env` and edit in the token for your Discord bot. If you require a different prefix, that can be done in the same file.
 
-If you're using the bot elsewhere, you will need to edit the configuration file more thoroughly, including all of the role IDs and the server ID. It is vital that every config value is present and valid.
+To use the bot outside of it's intended environments, you will need to edit the configuration file more thoroughly, including all of the role IDs and the server ID. It is vital that every config value is present and valid.
 
 ## Limitations
-Currently the bot will only work with one server. This choice was made because the bot was specifically created for a single server and will never be made publicly available. If you are looking to host a bot for multiple servers, this bot is not for you.
+Currently the bot will only work with one server. This choice was made because the bot was specifically created for a single server at a time and will never be made publicly available. If you are looking to host a bot for multiple servers, this bot is not for you.
 
 A lot of the configuration (Role IDs, emoji IDs, etc.) are in the `config.json` file and cannot be edited at runtime. This means the bot will have to be relaunched for changes to those settings to take effect. This may be improved in the future, however it is not a high priority.
 
@@ -42,7 +33,7 @@ First you'll want to install Docker. On a Debian or Ubuntu-based Linux distribut
 Then:
 1. Clone this repository and `cd` into the directory.
 2. Copy `.env-example` to `.env` and add the bot token.
-3. If you're not deploying for Microsoft Community, uncomment lines 21-23 in `docker-compose.yml` and edit the `config.json` to fit your needs.
+3. Uncomment lines 21-23 in `docker-compose.yml` and edit the `config.json` to fit your needs.
 4. Run the bot in the background: `docker-compose up -d`
 
 That's it! If you ever need to see the logs, `cd` back into the directory and run `docker-compose logs`.
@@ -66,7 +57,7 @@ If you want to run the bot as a standalone application rather than a Docker cont
 Once you have everything installed:
 1. Clone this repository and `cd` into the directory.
 2. Set the `CLIPTOK_TOKEN` environment variable to your bots token.
-3. If you're not deploying for Microsoft Community, edit the `config.json` to fit your needs.
+3. Edit the `config.json` to fit your needs.
 4. Compile the bot for production: `dotnet build -c Release`.
 5. Run the bot: `dotnet run -c Release`
 
