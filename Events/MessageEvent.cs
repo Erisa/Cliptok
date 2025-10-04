@@ -1183,7 +1183,7 @@ namespace Cliptok.Events
                         else // also false when set does not exist
                         {
                             await Program.redis.SetAddAsync("ctsPingPardons", message.Author.Id);
-                            await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, you mentioned Community Tech Support outside of a tech support channel.\n"
+                            await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, you mentioned the tech support role outside of a tech support channel.\n"
                                 + $"Please keep requests for tech support inside {techSupportChannelsText} to avoid further punishment.");
                         }
                 }
