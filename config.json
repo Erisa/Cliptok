@@ -374,5 +374,6 @@
     "delete": 1263632727660298240,
     "success": 1263632761877565605,
     "error": 1263632640758780016
-  }
+  },
+  "compromisedAccountBanAutoPardonHours": 12
 }

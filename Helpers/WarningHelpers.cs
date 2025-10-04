@@ -37,20 +37,20 @@
             else
             {
                 TimeSpan timeToCheck = TimeSpan.FromDays(Program.cfgjson.WarningDaysThreshold);
+                var numHiddenWarnings = 0;
                 foreach (string key in keys)
                 {
                     UserWarning warning = warningsOutput[key];
+                    if (warning.IsPardoned)
+                        continue;
+
                     TimeSpan span = DateTime.UtcNow - warning.WarnTimestamp;
                     if (span <= timeToCheck)
                     {
                         recentCount += 1;
                     }
-                    if (count == 66)
-                    {
-                        str += $"+ {keys.Count() - 65} more…";
-                        count += 1;
-                    }
-                    else if (count < 66)
+                    
+                    if (4096 - str.Length - 60 - 15 > 0) // each warning entry is max 60 chars; give 15 chars of room for "+ x more…" if needed
                     {
                         var reason = warning.WarnReason;
                         if (string.IsNullOrWhiteSpace(reason))
@@ -66,15 +66,45 @@
                         str += $"`{StringHelpers.Pad(warning.WarningId)}` **{reason}** • <t:{TimeHelpers.ToUnixTimestamp(warning.WarnTimestamp)}:R>\n";
                         count += 1;
                     }
+                    else
+                    {
+                        numHiddenWarnings++;
+                    }
 
                 }
+
+                var pardonedWarningList = warningsOutput.Values.Where(x => x.IsPardoned)
+                    .GroupBy(x => x.WarnReason)
+                    .Select(x => new { Reason = x.Key, Count = x.Count() })
+                    .OrderByDescending(x => x.Count)
+                    .ThenBy(x => x.Reason);
+                
+                foreach (var pardonedWarning in pardonedWarningList)
+                {
+                    if (4096 - str.Length - 45 - 15 > 0) // each pardoned warning entry is max 45 chars; give 15 chars of room for "+ x more…" if needed
+                    {
+                        var reason = pardonedWarning.Reason;
+                        if (reason.Length > 25)
+                        {
+                            reason = StringHelpers.Truncate(reason, 25) + "…";
+                        }
+                        str += $"(Pardoned) {(pardonedWarning.Count > 1 ? pardonedWarning.Count > 99 ? "many " : $"{pardonedWarning.Count}x " : "")}**{reason}**\n";
+                    }
+                    else
+                    {
+                        numHiddenWarnings += pardonedWarning.Count;
+                    }
+                }
+                
+                if (numHiddenWarnings > 0)
+                    str += $"+ {numHiddenWarnings} more…";
 
                 if (Program.cfgjson.RecentWarningsPeriodHours != 0)
                 {
                     var hourRecentMatches = keys.Where(key =>
                     {
                         TimeSpan span = DateTime.UtcNow - warningsOutput[key].WarnTimestamp;
-                        return (span.TotalHours < Program.cfgjson.RecentWarningsPeriodHours);
+                        return (span.TotalHours < Program.cfgjson.RecentWarningsPeriodHours && !warningsOutput[key].IsPardoned);
                     }
                     );
 
@@ -90,7 +120,7 @@
             return embed;
         }
 
-        public static async Task<DiscordEmbed> FancyWarnEmbedAsync(UserWarning warning, bool detailed = false, int colour = 0xFEC13D, bool showTime = true, ulong userID = default)
+        public static async Task<DiscordEmbed> FancyWarnEmbedAsync(UserWarning warning, bool detailed = false, int colour = 0xFEC13D, bool showTime = true, ulong userID = default, bool showPardonedInline = false)
         {
             if (userID == default)
                 userID = warning.TargetUserId;
@@ -121,6 +151,8 @@
             }
             if (showTime)
                 embed.AddField("Time", detailed ? $"<t:{TimeHelpers.ToUnixTimestamp(warning.WarnTimestamp)}:f>" : $"<t:{TimeHelpers.ToUnixTimestamp(warning.WarnTimestamp)}:R>", true);
+            
+            embed.AddField("Pardoned", warning.IsPardoned ? "Yes" : "No", showPardonedInline);
 
             return embed;
         }
@@ -223,7 +255,8 @@
                     MessageId = contextMessage.Id,
                     ChannelId = contextMessage.ChannelId
                 },
-                Type = WarningType.Warning
+                Type = WarningType.Warning,
+                IsPardoned = false
             };
 
             if (dmMessage is not null)

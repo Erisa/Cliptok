@@ -181,38 +181,70 @@ namespace Cliptok.Commands
         {
             public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext ctx)
             {
-                var list = new List<DiscordAutoCompleteChoice>();
-
-                var useroption = ctx.Options.FirstOrDefault(x => x.Name == "user");
-                if (useroption == default)
-                {
-                    return list;
-                }
-
-                var user = await ctx.Client.GetUserAsync((ulong)useroption.Value);
-
-                var warnings = (await Program.redis.HashGetAllAsync(user.Id.ToString()))
-                    .Where(x => JsonConvert.DeserializeObject<UserWarning>(x.Value).Type == WarningType.Warning).ToDictionary(
-                   x => x.Name.ToString(),
-                  x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
-                 ).OrderByDescending(x => x.Value.WarningId);
-
-                foreach (var warning in warnings)
-                {
-                    if (list.Count >= 25)
-                        break;
-
-                    string warningString = $"{StringHelpers.Pad(warning.Value.WarningId)} - {StringHelpers.Truncate(warning.Value.WarnReason, 29, true)} - {TimeHelpers.TimeToPrettyFormat(DateTime.UtcNow - warning.Value.WarnTimestamp, true)}";
-
-                    var focusedOption = ctx.Options.FirstOrDefault(option => option.Focused);
-                    if (focusedOption is not null)
-                        if (warning.Value.WarnReason.Contains((string)focusedOption.Value) || warningString.ToLower().Contains(focusedOption.Value.ToString().ToLower()))
-                            list.Add(new DiscordAutoCompleteChoice(warningString, StringHelpers.Pad(warning.Value.WarningId)));
-                }
-
-                return list;
-                //return Task.FromResult((IEnumerable<DiscordAutoCompleteChoice>)list);
+                return await GetWarningsForAutocompleteAsync(ctx);
             }
+        }
+        
+        internal partial class PardonedWarningsAutocompleteProvider : IAutoCompleteProvider
+        {
+            public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext ctx)
+            {
+                return await GetWarningsForAutocompleteAsync(ctx, pardonedOnly: true);
+            }
+        }
+        
+        internal partial class UnpardonedWarningsAutocompleteProvider : IAutoCompleteProvider
+        {
+            public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext ctx)
+            {
+                return await GetWarningsForAutocompleteAsync(ctx, excludePardoned: true);
+            }
+        }
+        
+        private static async Task<List<DiscordAutoCompleteChoice>> GetWarningsForAutocompleteAsync(AutoCompleteContext ctx, bool excludePardoned = false, bool pardonedOnly = false)
+        {
+            if (excludePardoned && pardonedOnly)
+                throw new ArgumentException("Cannot simultaneously exclude pardoned warnings from autocomplete suggestions and only show pardoned warnings.");
+            
+            var list = new List<DiscordAutoCompleteChoice>();
+
+            var useroption = ctx.Options.FirstOrDefault(x => x.Name == "user");
+            if (useroption == default)
+            {
+                return list;
+            }
+
+            var user = await ctx.Client.GetUserAsync((ulong)useroption.Value);
+
+            var warnings = (await Program.redis.HashGetAllAsync(user.Id.ToString()))
+                .Where(x => JsonConvert.DeserializeObject<UserWarning>(x.Value).Type == WarningType.Warning).ToDictionary(
+                    x => x.Name.ToString(),
+                    x => JsonConvert.DeserializeObject<UserWarning>(x.Value)
+                ).OrderByDescending(x => x.Value.WarningId);
+
+            foreach (var warning in warnings)
+            {
+                if (list.Count >= 25)
+                    break;
+
+                string warningString = $"{StringHelpers.Pad(warning.Value.WarningId)} - {StringHelpers.Truncate(warning.Value.WarnReason, 29, true)} - {TimeHelpers.TimeToPrettyFormat(DateTime.UtcNow - warning.Value.WarnTimestamp, true)}";
+                if (warning.Value.IsPardoned)
+                {
+                    if (excludePardoned)
+                        continue;
+                    
+                    warningString += " (pardoned)";
+                }
+                else if (pardonedOnly)
+                    continue;
+
+                var focusedOption = ctx.Options.FirstOrDefault(option => option.Focused);
+                if (focusedOption is not null)
+                    if (warning.Value.WarnReason.Contains((string)focusedOption.Value) || warningString.ToLower().Contains(focusedOption.Value.ToString().ToLower()))
+                        list.Add(new DiscordAutoCompleteChoice(warningString, StringHelpers.Pad(warning.Value.WarningId)));
+            }
+
+            return list;
         }
 
         [Command("warndetails")]
@@ -377,6 +409,130 @@ namespace Cliptok.Commands
 
                 await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Successfully edited warning `{StringHelpers.Pad(warnId)}` (belonging to {user.Mention})")
                     .AddEmbed(await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), userID: user.Id)));
+            }
+        }
+        
+        [Command("pardon")]
+        [Description("Pardon a warning.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        public async Task PardonSlashCommand(SlashCommandContext ctx,
+            [Parameter("user"), Description("The user to pardon a warning for.")] DiscordUser user,
+            [SlashAutoCompleteProvider(typeof(UnpardonedWarningsAutocompleteProvider))][Parameter("warning"), Description("Type to search! Find the warning you want to pardon.")] string warning,
+            [Parameter("public"), Description("Whether to show the output publicly. Default: false")] bool showPublic = false)
+        {
+            if (warning.Contains(' '))
+            {
+                warning = warning.Split(' ')[0];
+            }
+
+            long warnId;
+            try
+            {
+                warnId = Convert.ToInt64(warning);
+            }
+            catch
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Looks like your warning option was invalid! Give it another go?", ephemeral: true);
+                return;
+            }
+
+            var warningObject = GetWarning(user.Id, warnId);
+
+            if (warningObject is null)
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.", ephemeral: true);
+            else if (warningObject.Type == WarningType.Note)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Make sure you've got the right warning ID.", ephemeral: true);
+            }
+            else if ((await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && warningObject.ModUserId != ctx.User.Id && warningObject.ModUserId != ctx.Client.CurrentUser.Id)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!", ephemeral: true);
+            }
+            else
+            {
+                await ctx.DeferResponseAsync(ephemeral: !showPublic);
+                
+                if (warningObject.IsPardoned)
+                {
+                    await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} That warning has already been pardoned!");
+                    return;
+                }
+
+                warningObject.IsPardoned = true;
+                await Program.redis.HashSetAsync(warningObject.TargetUserId.ToString(), warningObject.WarningId.ToString(), JsonConvert.SerializeObject(warningObject));
+
+                await LogChannelHelper.LogMessageAsync("mod",
+                    new DiscordMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Information} Warning pardoned:" +
+                        $"`{StringHelpers.Pad(warnId)}` (belonging to {user.Mention})")
+                        .AddEmbed(await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), true, userID: user.Id))
+                );
+
+                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Successfully pardoned warning `{StringHelpers.Pad(warnId)}` (belonging to {user.Mention})")
+                    .AddEmbed(await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), userID: user.Id, showPardonedInline: true)));
+            }
+        }
+        
+        [Command("unpardon")]
+        [Description("Unpardon a warning.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor))]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        public async Task UnpardonSlashCommand(SlashCommandContext ctx,
+            [Parameter("user"), Description("The user to unpardon a warning for.")] DiscordUser user,
+            [SlashAutoCompleteProvider(typeof(PardonedWarningsAutocompleteProvider))][Parameter("warning"), Description("Type to search! Find the warning you want to unpardon.")] string warning,
+            [Parameter("public"), Description("Whether to show the output publicly. Default: false")] bool showPublic = false)
+        {
+            if (warning.Contains(' '))
+            {
+                warning = warning.Split(' ')[0];
+            }
+
+            long warnId;
+            try
+            {
+                warnId = Convert.ToInt64(warning);
+            }
+            catch
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Looks like your warning option was invalid! Give it another go?", ephemeral: true);
+                return;
+            }
+
+            var warningObject = GetWarning(user.Id, warnId);
+
+            if (warningObject is null)
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I couldn't find a warning for that user with that ID! Please check again.", ephemeral: true);
+            else if (warningObject.Type == WarningType.Note)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That's a note, not a warning! Make sure you've got the right warning ID.", ephemeral: true);
+            }
+            else if ((await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && warningObject.ModUserId != ctx.User.Id && warningObject.ModUserId != ctx.Client.CurrentUser.Id)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!", ephemeral: true);
+            }
+            else
+            {
+                await ctx.DeferResponseAsync(ephemeral: !showPublic);
+                
+                if (!warningObject.IsPardoned)
+                {
+                    await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} That warning isn't pardoned!");
+                    return;
+                }
+
+                warningObject.IsPardoned = false;
+                await Program.redis.HashSetAsync(warningObject.TargetUserId.ToString(), warningObject.WarningId.ToString(), JsonConvert.SerializeObject(warningObject));
+
+                await LogChannelHelper.LogMessageAsync("mod",
+                    new DiscordMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Information} Warning unpardoned:" +
+                        $"`{StringHelpers.Pad(warnId)}` (belonging to {user.Mention})")
+                        .AddEmbed(await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), true, userID: user.Id))
+                );
+
+                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Successfully unpardoned warning `{StringHelpers.Pad(warnId)}` (belonging to {user.Mention})")
+                    .AddEmbed(await FancyWarnEmbedAsync(GetWarning(user.Id, warnId), userID: user.Id, showPardonedInline: true)));
             }
         }
 
