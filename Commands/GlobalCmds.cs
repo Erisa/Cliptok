@@ -23,7 +23,8 @@ namespace Cliptok.Commands
 
             IEnumerable<Command> cmds = ctx.Extension.Commands.Values.Where(cmd =>
                  cmd.Attributes.Any(attr => attr is AllowedProcessorsAttribute apAttr
-                                            && apAttr.Processors.Contains(typeof(TextCommandProcessor))));
+                                            && apAttr.Processors.Contains(typeof(TextCommandProcessor)))
+                 && !cmd.Attributes.Any(attr => attr is HiddenAttribute && command == ""));
 
             if (commandSplit.Length != 0 && commandSplit[0] != "")
             {
