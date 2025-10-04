@@ -99,7 +99,6 @@ If you have a change to make that follows the contribution guidelines, send a Pu
 
 ### 💗 Significant sponsors
 - [FloatingMilkshake](https://github.com/FloatingMilkshake)
-- [TorchGM](https://github.com/TorchGM)
 
 ### 🙏Special thanks
 - [TorchGM](https://github.com/TorchGM) for initial testing and providing core design feedback. Seriously, thank you Torch.
