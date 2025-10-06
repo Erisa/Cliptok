@@ -1024,7 +1024,8 @@ namespace Cliptok.Events
                     #endregion
 
                     #region everyone/here ping filter
-                    var msgContent = msgContentWithEmbedData;
+                    //var msgContent = msgContentWithEmbedData;
+                    var msgContent = message.Content;
                     foreach (var letter in Checks.ListChecks.lookalikeAlphabetMap)
                         msgContent = msgContent.Replace(letter.Key, letter.Value);
                     if (Program.cfgjson.EveryoneFilter && !member.Roles.Any(role => Program.cfgjson.EveryoneExcludedRoles.Contains(role.Id)) && !Program.cfgjson.EveryoneExcludedChannels.Contains(channel.Id) && (msgContent.Contains("@everyone") || msgContent.Contains("@here")))
