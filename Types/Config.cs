@@ -297,12 +297,6 @@
 
         [JsonProperty("autoModRules")]
         public List<AutoModRuleConfig> AutoModRules { get; set; } = new();
-        
-        [JsonProperty("autoRenameBadNames")]
-        public List<string> AutoRenameBadNames { get; set; } = new();
-        
-        [JsonProperty("autoRenameAdverbs")]
-        public List<string> AutoRenameAdverbs { get; set; } = new();
     }
 
     public class AutoModRuleConfig
