@@ -61,7 +61,6 @@ namespace Cliptok.Commands
                     "insiderDev" => Program.cfgjson.UserRoles.InsiderDev,
                     "insiderBeta" => Program.cfgjson.UserRoles.InsiderBeta,
                     "insiderRP" => Program.cfgjson.UserRoles.InsiderRP,
-                    "insider10RP" => Program.cfgjson.UserRoles.Insider10RP,
                     "patchTuesday" => Program.cfgjson.UserRoles.PatchTuesday,
                     "giveaways" => Program.cfgjson.UserRoles.Giveaways,
                     "cts" => Program.cfgjson.CommunityTechSupportRoleID,
@@ -101,7 +100,6 @@ namespace Cliptok.Commands
                     "insiderDev" => Program.cfgjson.UserRoles.InsiderDev,
                     "insiderBeta" => Program.cfgjson.UserRoles.InsiderBeta,
                     "insiderRP" => Program.cfgjson.UserRoles.InsiderRP,
-                    "insider10RP" => Program.cfgjson.UserRoles.Insider10RP,
                     "patchTuesday" => Program.cfgjson.UserRoles.PatchTuesday,
                     "giveaways" => Program.cfgjson.UserRoles.Giveaways,
                     "cts" => Program.cfgjson.CommunityTechSupportRoleID,
@@ -131,7 +129,6 @@ namespace Cliptok.Commands
                         { "Windows 11 Insiders (Dev)", "insiderDev" },
                         { "Windows 11 Insiders (Beta)", "insiderBeta" },
                         { "Windows 11 Insiders (Release Preview)", "insiderRP" },
-                        { "Windows 10 Insiders (Release Preview)", "insider10RP" },
                         { "Patch Tuesday", "patchTuesday" },
                         { "Giveaways", "giveaways" },
                         { "Community Tech Support (CTS)", "cts" }
@@ -226,35 +223,6 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("swap-insider-rptextcmd"),
-            TextAlias("swap-insider-rp", "swap-insiders-rp"),
-            Description("Removes the Windows 11 Insiders (Release Preview) role and replaces it with Windows 10 Insiders (Release Preview) role"),
-            AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer,
-            UserRolesPresent
-        ]
-        public async Task SwapInsiderRpCmd(TextCommandContext ctx)
-        {
-            await RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderRP);
-            await GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.Insider10RP);
-        }
-
-        [
-            Command("swap-insider-devtextcmd"),
-            TextAlias("swap-insider-dev", "swap-insiders-dev", "swap-insider-canary", "swap-insiders-canary", "swap-insider-can", "swap-insiders-can"),
-            AllowedProcessors(typeof(TextCommandProcessor)),
-            Description("Removes the Windows 11 Insiders (Canary) role and replaces it with Windows 10 Insiders (Dev) role"),
-            HomeServer,
-            UserRolesPresent
-        ]
-        public async Task SwapInsiderDevCmd(TextCommandContext ctx)
-        {
-            await RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderCanary);
-            await GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderDev);
-        }
-
-
-        [
             Command("join-insider-devtextcmd"),
             TextAlias("join-insider-dev", "join-insiders-dev"),
             Description("Gives you the Windows 11 Insiders (Dev) role"),
@@ -305,19 +273,6 @@ namespace Cliptok.Commands
         public async Task JoinInsiderRPCmd(TextCommandContext ctx)
         {
             await GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderRP);
-        }
-
-        [
-            Command("join-insider-10textcmd"),
-            TextAlias("join-insider-10", "join-insiders-10"),
-            Description("Gives you to the Windows 10 Insiders (Release Preview) role"),
-            AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer,
-            UserRolesPresent
-        ]
-        public async Task JoinInsiders10Cmd(TextCommandContext ctx)
-        {
-            await GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.Insider10RP);
         }
 
         [
@@ -419,18 +374,6 @@ namespace Cliptok.Commands
             await RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderBeta);
         }
 
-        [
-            Command("leave-insider-10textcmd"),
-            TextAlias("leave-insider-10", "leave-insiders-10"),
-            Description("Removes the Windows 10 Insiders (Release Preview) role"),
-            AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer,
-            UserRolesPresent
-        ]
-        public async Task LeaveInsiderRPCmd(TextCommandContext ctx)
-        {
-            await RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.Insider10RP);
-        }
 
         [
             Command("leave-insider-rptextcmd"),
@@ -440,7 +383,7 @@ namespace Cliptok.Commands
             HomeServer,
             UserRolesPresent
         ]
-        public async Task LeaveInsider10RPCmd(TextCommandContext ctx)
+        public async Task LeaveInsiderRPCmd(TextCommandContext ctx)
         {
             await RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderRP);
         }

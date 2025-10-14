@@ -12,10 +12,7 @@ namespace Cliptok.Commands
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         [RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task AnnounceBuildSlashCommand(SlashCommandContext ctx,
-            [SlashChoiceProvider(typeof(WindowsVersionChoiceProvider))]
-            [Parameter("windows_version"), Description("The Windows version to announce a build of. Must be either 10 or 11.")] long windowsVersion,
-
-            [Parameter("build_number"), Description("Windows build number, including any decimals (Decimals are optional). Do not include the word Build.")] string buildNumber,
+            [Parameter("build_number"), Description("Windows 11 build number, including decimals (Decimals are optional). Do not include the word Build.")] string buildNumber,
 
             [Parameter("blog_link"), Description("The link to the Windows blog entry relating to this build.")] string blogLink,
 
@@ -28,7 +25,7 @@ namespace Cliptok.Commands
             [Parameter("create_new_thread"), Description("Enable this option if you want to create a new thread for some reason")] bool createNewThread = false,
             [Parameter("thread1"), Description("The thread to mention in the announcement.")] DiscordChannel threadChannel = default,
             [Parameter("thread2"), Description("The second thread to mention in the announcement.")] DiscordChannel threadChannel2 = default,
-            [Parameter("flavour_text"), Description("Extra text appended on the end of the main line, replacing :WindowsInsider: or :Windows10:")] string flavourText = "",
+            [Parameter("flavour_text"), Description("Extra text appended on the end of the main line, replacing :WindowsInsider:")] string flavourText = "",
             [Parameter("autothread_name"), Description("If no thread is given, create a thread with this name.")] string autothreadName = "Build {0} ({1})",
 
             [Parameter("lockdown"), Description("Set 0 to not lock. Lock the channel for a certain period of time after announcing the build.")] string lockdownTime = "auto",
@@ -43,12 +40,6 @@ namespace Cliptok.Commands
             if (insiderChannel1 == insiderChannel2)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Both insider channels cannot be the same! Simply set one instead.", ephemeral: true);
-                return;
-            }
-
-            if (windowsVersion == 10 && insiderChannel1 != "RP")
-            {
-                await ctx.RespondAsync(text: $"{Program.cfgjson.Emoji.Error} Windows 10 only has a Release Preview Channel.", ephemeral: true);
                 return;
             }
 
@@ -73,28 +64,12 @@ namespace Cliptok.Commands
 
             await Program.redis.SetAddAsync("announcedInsiderBuilds", buildNumber);
 
-            if (flavourText == "" && windowsVersion == 10)
-            {
-                flavourText = Program.cfgjson.Emoji.Windows10;
-            }
-            else if (flavourText == "" && windowsVersion == 11)
+            if (flavourText == "")
             {
                 flavourText = Program.cfgjson.Emoji.Insider;
             }
 
-            string roleKey1;
-            if (windowsVersion == 10 && insiderChannel1 == "RP")
-            {
-                roleKey1 = "rp10";
-            }
-            else if (windowsVersion == 10 && insiderChannel1 == "Beta")
-            {
-                roleKey1 = "beta10";
-            }
-            else
-            {
-                roleKey1 = insiderChannel1.ToLower();
-            }
+            string roleKey1= insiderChannel1.ToLower();
 
             // defer since we're going to do lots of rest calls now
             await ctx.DeferResponseAsync(ephemeral: false);
@@ -106,14 +81,7 @@ namespace Cliptok.Commands
 
             string insiderChannel1Pretty = insiderChannel1 == "RP" ? "Release Preview" : insiderChannel1;
 
-            if (insiderChannel1 == "RP" || insiderChannel2 == "RP")
-            {
-                channelString.Append($"the Windows {windowsVersion} ");
-            }
-            else
-            {
-                channelString.Append("the ");
-            }
+            channelString.Append("the ");
 
             channelString.Append($"**{insiderChannel1Pretty}");
 
@@ -129,32 +97,20 @@ namespace Cliptok.Commands
 
             if (insiderChannel2 != "")
             {
-                string roleKey2;
-                if (windowsVersion == 10 && insiderChannel2 == "RP")
-                {
-                    roleKey2 = "rp10";
-                }
-                else if (windowsVersion == 10 && insiderChannel2 == "Beta")
-                {
-                    roleKey2 = "beta10";
-                }
-                else
-                {
-                    roleKey2 = insiderChannel2.ToLower();
-                }
+                string roleKey2 = insiderChannel2.ToLower();
 
                 insiderRole2 = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[roleKey2]);
             }
 
             string pingMsgBareString = $"{insiderRole1.Mention}{(insiderChannel2 != "" ? $" {insiderRole2.Mention}\n" : " - ")}Hi Insiders!\n\n" +
-                $"Windows {windowsVersion} Build **{buildNumber}** has just been released to {channelString}! {flavourText}\n\n" +
+                $"Windows 11 Build **{buildNumber}** has just been released to {channelString}! {flavourText}\n\n" +
                 $"Check it out here: {blogLink}";
 
             string innerThreadMsgString = $"Hi Insiders!\n\n" +
-                $"Windows {windowsVersion} Build **{buildNumber}** has just been released to {channelString}! {flavourText}\n\n" +
+                $"Windows 11 Build **{buildNumber}** has just been released to {channelString}! {flavourText}\n\n" +
                 $"Check it out here: {blogLink}";
 
-            string noPingMsgString = $"{(windowsVersion == 11 ? Program.cfgjson.Emoji.Windows11 : Program.cfgjson.Emoji.Windows10)} Windows {windowsVersion} Build **{buildNumber}** has just been released to {channelString}! {flavourText}\n\n" +
+            string noPingMsgString = $"{Program.cfgjson.Emoji.Windows11} Windows 11 Build **{buildNumber}** has just been released to {channelString}! {flavourText}\n\n" +
                 $"Check it out here: <{blogLink}>";
 
             string pingMsgString = pingMsgBareString;
@@ -182,10 +138,7 @@ namespace Cliptok.Commands
                             threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["beta"]);
                             break;
                         case "RP":
-                            if (windowsVersion == 10)
-                                threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp10"]);
-                            else
-                                threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp"]);
+                            threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp"]);
                             break;
                     }
 
@@ -201,10 +154,7 @@ namespace Cliptok.Commands
                             threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["beta"]);
                             break;
                         case "RP":
-                            if (windowsVersion == 10)
-                                threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp10"]);
-                            else
-                                threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp"]);
+                            threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp"]);
                             break;
                     }
 
@@ -252,10 +202,7 @@ namespace Cliptok.Commands
                             threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["beta"]);
                             break;
                         case "RP":
-                            if (windowsVersion == 10)
-                                threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp10"]);
-                            else
-                                threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp"]);
+                            threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp"]);
                             break;
                     }
 
@@ -271,10 +218,7 @@ namespace Cliptok.Commands
                             threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["beta"]);
                             break;
                         case "RP":
-                            if (windowsVersion == 10)
-                                threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp10"]);
-                            else
-                                threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp"]);
+                            threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp"]);
                             break;
                     }
 
@@ -304,9 +248,6 @@ namespace Cliptok.Commands
                 string threadBrackets = insiderChannel1;
                 if (insiderChannel2 != "")
                     threadBrackets = $"{insiderChannel1} & {insiderChannel2}";
-
-                if (insiderChannel1 == "RP" && insiderChannel2 == "" && windowsVersion == 10)
-                    threadBrackets = "10 RP";
 
                 string threadName = string.Format(autothreadName, buildNumber, threadBrackets);
                 threadChannel = await messageSent.CreateThreadAsync(threadName, DiscordAutoArchiveDuration.Week, "Creating thread for Insider build.");
@@ -412,8 +353,6 @@ namespace Cliptok.Commands
         [Description("Announces something in the current channel, pinging an Insider role in the process.")]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task AnounceSlashCmd(SlashCommandContext ctx,
-            [SlashChoiceProvider(typeof(WindowsVersionChoiceProvider))]
-            [Parameter("windows_version"), Description("The Windows version to announce for.")] long windowsVersion,
             [SlashChoiceProvider(typeof(WindowsInsiderChannelChoiceProvider))]
             [Parameter("role1"), Description("The first Insider role to ping.")] string insiderChannel1,
             [Parameter("announcement_message"), Description("The message to announce.")] string announcementMessage,
@@ -426,21 +365,7 @@ namespace Cliptok.Commands
                 return;
             }
 
-            if (windowsVersion == 10 && insiderChannel1 != "RP")
-            {
-                await ctx.RespondAsync(text: $"{Program.cfgjson.Emoji.Error} Windows 10 only has a Release Preview Channel.", ephemeral: true);
-                return;
-            }
-
-            string roleKey1;
-            if (windowsVersion == 10 && insiderChannel1 == "RP")
-            {
-                roleKey1 = "rp10";
-            }
-            else
-            {
-                roleKey1 = insiderChannel1.ToLower();
-            }
+            string roleKey1 = insiderChannel1.ToLower();
 
             await ctx.DeferResponseAsync(ephemeral: true);
 
@@ -449,19 +374,7 @@ namespace Cliptok.Commands
 
             if (insiderChannel2 != "")
             {
-                string roleKey2;
-                if (windowsVersion == 10 && insiderChannel2 == "RP")
-                {
-                    roleKey2 = "rp10";
-                }
-                else if (windowsVersion == 10 && insiderChannel2 == "Beta")
-                {
-                    roleKey2 = "beta10";
-                }
-                else
-                {
-                    roleKey2 = insiderChannel2.ToLower();
-                }
+                string roleKey2= insiderChannel2.ToLower();
 
                 insiderRole2 = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[roleKey2]);
             }
@@ -495,7 +408,7 @@ namespace Cliptok.Commands
         [Description("Announces something in the current channel, pinging an Insider role in the process.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task AnnounceCmd(TextCommandContext ctx, [Description("'canary', 'dev', 'beta', 'beta10', 'rp', 'rp10', 'patch', 'rpbeta', 'rpbeta10', 'betadev', 'candev'")] string roleName, [RemainingText, Description("The announcement message to send.")] string announcementMessage)
+        public async Task AnnounceCmd(TextCommandContext ctx, [Description("'canary', 'dev', 'beta', 'rp', 'patch', 'rpbeta', 'betadev', 'candev'")] string roleName, [RemainingText, Description("The announcement message to send.")] string announcementMessage)
         {
             DiscordRole discordRole;
 
@@ -518,28 +431,6 @@ namespace Cliptok.Commands
             {
                 var rpRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles["rp"]);
                 var betaRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles["beta"]);
-
-                await rpRole.ModifyAsync(mentionable: true);
-                await betaRole.ModifyAsync(mentionable: true);
-
-                try
-                {
-                    await ctx.Message.DeleteAsync();
-                    await ctx.Channel.SendMessageAsync($"{rpRole.Mention} {betaRole.Mention}\n{announcementMessage}");
-                }
-                catch
-                {
-                    // We still need to remember to make it unmentionable even if the msg fails.
-                }
-
-                await rpRole.ModifyAsync(mentionable: false);
-                await betaRole.ModifyAsync(mentionable: false);
-            }
-            // this is rushed pending an actual solution
-            else if (roleName == "rpbeta10")
-            {
-                var rpRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles["rp10"]);
-                var betaRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles["beta10"]);
 
                 await rpRole.ModifyAsync(mentionable: true);
                 await betaRole.ModifyAsync(mentionable: true);
@@ -605,18 +496,6 @@ namespace Cliptok.Commands
                 return;
             }
 
-        }
-
-        internal class WindowsVersionChoiceProvider : IChoiceProvider
-        {
-            public async ValueTask<IEnumerable<DiscordApplicationCommandOptionChoice>> ProvideAsync(CommandParameter _)
-            {
-                return new List<DiscordApplicationCommandOptionChoice>
-                {
-                    new("Windows 10", "10"),
-                    new("Windows 11", "11")
-                };
-            }
         }
 
         internal class WindowsInsiderChannelChoiceProvider : IChoiceProvider

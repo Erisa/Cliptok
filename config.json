@@ -20,7 +20,6 @@
     "dev": 1082364328474329179,
     "beta": 643712828217360394,
     "rp": 288729239921098752,
-    "rp10": 910319453491839069,
     "patch": 445773142233710594
   },
   "announcementRolesFriendlyNames": {
@@ -28,7 +27,6 @@
     "dev": "Windows 11 Insiders (Dev)",
     "beta": "Windows 11 Insiders (Beta)",
     "rp": "Windows 11 Insiders (Release Preview)",
-    "rp10": "Windows 10 Insiders (Release Preview)",
     "patch": "Patch Tuesday"
   },
   "appealLink": "https://appeal.msft.chat",
@@ -131,8 +129,7 @@
     "windows11": "<:CliptokWindows11:1263633816170401842>",
     "on": "<:CliptokOn:1263632715119333416>",
     "off": "<:CliptokOff:1263632708752511017>​",
-    "insider": "<:WindowsInsider:1263632527436812502>",
-    "windows10": "<:Windows10:1263632887043850290>"
+    "insider": "<:WindowsInsider:1263632527436812502>"
   },
   "redis": {
     "host": "localhost",
@@ -237,7 +234,6 @@
     "insiderDev": 1082364328474329179,
     "insiderBeta": 643712828217360394,
     "insiderRP": 288729239921098752,
-    "insider10RP": 910319453491839069,
     "insiderChat": 1323636793668800547,
     "patchTuesday": 445773142233710594,
     "giveaways": 1169336992455200820
@@ -325,7 +321,6 @@
     "dev": 1358210048777654352,
     "beta": 1358210090880209066,
     "rp": 1358210147683401819,
-    "rp10": 1358210188011638844
   },
   "insiderAnnouncementChannel": 1043898319883219004,
   "insiderInfoChannel": 1279201622651572317,

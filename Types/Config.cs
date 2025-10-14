@@ -436,10 +436,6 @@
 
         [JsonProperty("insider")]
         public string Insider { get; set; }
-
-        [JsonProperty("windows10")]
-        public string Windows10 { get; set; }
-
     }
 
     public class CoreConfig
@@ -474,9 +470,6 @@
 
         [JsonProperty("insiderRP")]
         public ulong InsiderRP { get; private set; }
-
-        [JsonProperty("insider10RP")]
-        public ulong Insider10RP { get; private set; }
 
         [JsonProperty("insiderChat")]
         public ulong InsiderChat { get; private set; }
