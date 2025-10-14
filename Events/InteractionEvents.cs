@@ -250,7 +250,7 @@ namespace Cliptok.Events
                         new("Windows 11 Beta channel", "insiders-info-w11-beta", isDefault: member.Roles.Contains(insiderBetaRole)),
                         new("Windows 11 Release Preview channel", "insiders-info-w11-rp", isDefault: member.Roles.Contains(insiderRPRole)),
                         new("Patch Tuesday", "insiders-info-pt", isDefault: member.Roles.Contains(patchTuesdayRole)),
-                    }, minOptions: 0, maxOptions: 6);
+                    }, minOptions: 0, maxOptions: 5);
 
                 var builder = new DiscordFollowupMessageBuilder()
                     .WithContent($"{cfgjson.Emoji.Insider} Use the menu below to toggle your Insider roles!")
