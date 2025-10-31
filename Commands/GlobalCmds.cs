@@ -253,7 +253,7 @@ namespace Cliptok.Commands
         public async Task RemindMe(
             TextCommandContext ctx,
             [Description("When to trigger the reminder. Accepts many formats. Surround with quotes if you need to use spaces.")] string timetoParse,
-            [RemainingText, Description("The text to send when the reminder triggers.")] string reminder
+            [RemainingText, Description("The text to send when the reminder triggers.")] string reminder = "..."
         )
         {
             DateTime t = TimeHelpers.ParseAnyDateFormat(timetoParse);
