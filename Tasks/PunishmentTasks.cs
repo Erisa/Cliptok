@@ -122,7 +122,8 @@
                         try
                         {
                             var contextMessage = await DiscordHelpers.GetMessageFromReferenceAsync(ban.ContextMessageReference);
-                            await contextMessage.DeleteAsync();
+                            if (contextMessage is not null)
+                                await contextMessage.DeleteAsync();
                             Program.redis.HashDelete("compromisedAccountBans", ban.MemberId);
                             success = true;
                         }
