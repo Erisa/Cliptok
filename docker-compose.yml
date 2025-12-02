@@ -62,7 +62,7 @@ services:
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARED_TOKEN}
   watchtower:
-    image: ghcr.io/containrrr/watchtower
+    image: ghcr.io/nicholas-fedor/watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 30 --label-enable
