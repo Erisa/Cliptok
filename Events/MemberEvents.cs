@@ -236,6 +236,12 @@ namespace Cliptok.Events
 
             DehoistHelpers.CheckAndDehoistMemberAsync(e.Member);
 
+            // If member is not dehoisted but is in manualDehoists, remove them
+            if (e.Member.Nickname is null
+                || (e.Member.Nickname[0] != DehoistHelpers.dehoistCharacter
+                && await Program.redis.SetContainsAsync("manualDehoists", e.Member.Id)))
+                await Program.redis.SetRemoveAsync("manualDehoists", e.Member.Id);
+
             // Persist permadehoists
             if (await redis.SetContainsAsync("permadehoists", e.Member.Id))
                 if (e.Member.DisplayName[0] != DehoistHelpers.dehoistCharacter && !e.Member.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername) && !e.Member.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedGuildTag))

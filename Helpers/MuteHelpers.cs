@@ -465,7 +465,8 @@
             await Program.redis.HashDeleteAsync("mutes", targetUser.Id);
             
             // attempt to undehoist member if they should not otherwise be hoisted
-            if (member.Nickname is not null
+            if (!await Program.redis.SetContainsAsync("manualDehoists", member.Id)
+                && member.Nickname is not null
                 && member.Nickname[0] == DehoistHelpers.dehoistCharacter
                 && !Program.cfgjson.AutoDehoistCharacters.Contains(member.Nickname[1])
                 && !Program.cfgjson.SecondaryAutoDehoistCharacters.Contains(member.Nickname[1])
