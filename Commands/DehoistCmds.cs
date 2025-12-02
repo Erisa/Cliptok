@@ -38,6 +38,7 @@ namespace Cliptok.Commands
                     a.Nickname = DehoistHelpers.DehoistName(member.DisplayName);
                     a.AuditLogReason = $"[Dehoist by {DiscordHelpers.UniqueUsername(ctx.User)}]";
                 });
+                await Program.redis.SetAddAsync("manualDehoists", user.Id);
             }
             catch
             {

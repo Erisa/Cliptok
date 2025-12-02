@@ -315,6 +315,14 @@
 
             await Program.redis.HashSetAsync("mutes", naughtyUser.Id, JsonConvert.SerializeObject(newMute));
             MostRecentMute = newMute;
+            
+            // attempt to dehoist member if they aren't already dehoisted
+            if (naughtyMember.DisplayName[0] != DehoistHelpers.dehoistCharacter)
+                await naughtyMember.ModifyAsync(x =>
+                {
+                    x.Nickname = DehoistHelpers.DehoistName(naughtyMember.DisplayName);
+                    x.AuditLogReason = "[Automatic dehoist on mute]";
+                });
 
             return output;
         }
@@ -455,6 +463,25 @@
             // Even if the bot failed to remove the role, it reported that failure to a log channel and thus the mute
             //  can be safely removed internally.
             await Program.redis.HashDeleteAsync("mutes", targetUser.Id);
+            
+            // attempt to undehoist member if they should not otherwise be hoisted
+            if (!await Program.redis.SetContainsAsync("manualDehoists", member.Id)
+                && member.Nickname is not null
+                && member.Nickname[0] == DehoistHelpers.dehoistCharacter
+                && !Program.cfgjson.AutoDehoistCharacters.Contains(member.Nickname[1])
+                && !Program.cfgjson.SecondaryAutoDehoistCharacters.Contains(member.Nickname[1])
+                && !await Program.redis.SetContainsAsync("permadehoists", member.Id))
+            {
+                var undehoistedNickname = member.Nickname[1..];
+                if (undehoistedNickname == member.GlobalName || (member.GlobalName is null && undehoistedNickname == member.Username))
+                    undehoistedNickname = null;
+                
+                await member.ModifyAsync(x =>
+                {
+                    x.Nickname = undehoistedNickname;
+                    x.AuditLogReason = "[Automatic undehoist on unmute]";
+                });
+            }
 
             return true;
         }
