@@ -19,3 +19,9 @@ Mac OS X
 Google
 COVID-19
 Coronavirus
+Microsoft Word
+Microsoft Excel
+Microsoft PowerPoint
+Google Docs
+Google Sheets
+Google Slides
