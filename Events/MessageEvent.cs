@@ -1059,7 +1059,7 @@ namespace Cliptok.Events
                             Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered everyone/here mention filter", message.Id, channel.Id, message.Author.Id);
                         }
 
-                        string reason = "Attempted ato ping everyone/here";
+                        string reason = "Attempted to ping everyone/here";
                         DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock);
                         await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                         var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
