@@ -20,5 +20,6 @@
         readonly public static Regex url_rx = new("https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)");
         readonly public static Regex webhook_rx = new("(?:https?:\\/\\/)?discord(?:app)?.com\\/api\\/(?:v\\d\\/)?webhooks\\/(?<id>\\d+)\\/(?<token>[A-Za-z0-9_\\-]+)", RegexOptions.ECMAScript);
         readonly public static Regex id_rx = new("[0-9]{17,}");
+        readonly public static Regex image_url_rx = new(@"https:\/\/(?:(?:i\.)?imgur\.com\/(?:a\/)?[A-Za-z0-9]+(?:\.[A-Za-z]{3,4})?|i\.ibb\.co\/[A-Za-z0-9]+\/[A-Za-z0-9]+\.[A-Za-z]{3,4}|(?:cdn\.discordapp\.com|media\.discordapp\.net)\/attachments\/[0-9]{17,}\/[0-9]{17,}\/[A-Za-z0-9]+\.[A-Za-z]{3,4}\?ex=[A-Za-z0-9]+&is=[A-Za-z0-9]+&hm=[A-Za-z0-9]+&?(?:=&format=[A-Za-z0-9]+&width=[0-9]+&height=[0-9]+)?)");
     }
 }

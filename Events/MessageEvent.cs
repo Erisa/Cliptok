@@ -600,6 +600,26 @@ namespace Cliptok.Events
                 #region content filters
                 if ((await GetPermLevelAsync(member)) < ServerPermLevel.TrialModerator)
                 {
+                    #region scam message image URL matching
+                    if (Constants.RegexConstants.image_url_rx.Matches(message.Content).Count >= 3
+                        && (await GetPermLevelAsync(member) == ServerPermLevel.Nothing))
+                    {
+                        // Message contains 3 or more image urls, and was sent by T0 member; autowarn for probable scam message
+
+                        if (wasAutoModBlock)
+                            Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered scam image URL filter", channel.Id, message.Author.Id);
+                        else
+                            Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered scam image URL filter", message.Id, channel.Id, message.Author.Id);
+
+                        string reason = "Attempted scam message";
+                        DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock, 1);
+                        var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, msg, channel, " automatically ");
+                        await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
+
+                        return;
+                    }
+                    #endregion
+
                     #region mass mentions ban filter
                     if ((message.MentionedUsers is not null && message.MentionedUsers.Count > Program.cfgjson.MassMentionBanThreshold) || (message.MentionedUsersCount > Program.cfgjson.MassMentionBanThreshold))
                     {
@@ -1039,7 +1059,7 @@ namespace Cliptok.Events
                             Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered everyone/here mention filter", message.Id, channel.Id, message.Author.Id);
                         }
 
-                        string reason = "Attempted to ping everyone/here";
+                        string reason = "Attempted ato ping everyone/here";
                         DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock);
                         await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                         var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
