@@ -15,8 +15,14 @@
             if (logChannelKey == "investigations" && !string.IsNullOrEmpty(messageContentOverride) && messageContentOverride != Uri.UnescapeDataString(infringingMessage.Content))
                 messageContentOverride = $"{infringingMessage.Content}\n-# [...full content omitted, check <#{LogChannelHelper.GetLogChannelId("mod")}>...]";
 
+            var description = string.IsNullOrWhiteSpace(messageContentOverride)
+                ? infringingMessage.Content
+                : messageContentOverride;
+            if (useCodeBlock)
+                description = $"```\n{description}\n```";
+
             var embed = new DiscordEmbedBuilder()
-            .WithDescription(string.IsNullOrWhiteSpace(messageContentOverride) ? infringingMessage.Content : messageContentOverride)
+            .WithDescription(description)
             .WithColor((DiscordColor)colour)
             .WithTimestamp(infringingMessage.Timestamp)
             .WithFooter(
@@ -28,9 +34,6 @@
                 null,
                 await LykosAvatarMethods.UserOrMemberAvatarURL(infringingMessage.Author, infringingMessage.Channel.Guild, "png")
             );
-
-            if (useCodeBlock)
-                embed.Description = $"```\n{embed.Description}\n```";
 
             if (reason is not null && reason != "")
                 embed.AddField("Reason", reason, true);
