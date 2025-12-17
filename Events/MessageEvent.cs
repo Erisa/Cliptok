@@ -653,12 +653,19 @@ namespace Cliptok.Events
                     #endregion
 
                     #region duplicate message handling
-                    // skip empty and null content
-                    if (Program.cfgjson.DuplicateMessageSeconds != 0 && Program.cfgjson.DuplicateMessageThreshold != 0 && !isAnEdit && !limitFilters && !wasAutoModBlock && msgContentWithEmbedData is not null && msgContentWithEmbedData != "")
+                    // skip empty and null content, but allow messages with attachments
+                    var attachmentNames = message.Attachments?.Select(a => a.FileName).OrderBy(n => n).ToList() ?? [];
+                    if (Program.cfgjson.DuplicateMessageSeconds != 0
+                        && Program.cfgjson.DuplicateMessageThreshold != 0
+                        && !isAnEdit
+                        && !limitFilters
+                        && !wasAutoModBlock
+                        && (msgContentWithEmbedData is not null && msgContentWithEmbedData != "" || attachmentNames.Count > 0))
                     {
                         if (
                             duplicateMessageCache.ContainsKey(message.Author.Id)
                             && duplicateMessageCache[message.Author.Id].Content == msgContentWithEmbedData
+                            && duplicateMessageCache[message.Author.Id].AttachmentNames.SequenceEqual(attachmentNames)
                             && (DateTime.UtcNow - duplicateMessageCache[message.Author.Id].LastMessageTime).TotalSeconds < Program.cfgjson.DuplicateMessageSeconds)
                         {
                             duplicateMessageCache[message.Author.Id].Messages.Add(message);
@@ -694,6 +701,7 @@ namespace Cliptok.Events
                             duplicateMessageCache[message.Author.Id] = new RecentMessageInfo
                             {
                                 Content = msgContentWithEmbedData,
+                                AttachmentNames = attachmentNames,
                                 LastMessageTime = message.Timestamp.HasValue ? message.Timestamp.Value.UtcDateTime : DateTime.UtcNow,
                                 Messages = [message]
                             };
