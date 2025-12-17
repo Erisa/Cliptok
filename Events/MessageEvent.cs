@@ -691,8 +691,14 @@ namespace Cliptok.Events
                                 DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, output, wasAutoModBlock);
                                 deletedMessageCache.Add(message.Id);
                                 var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-                                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                                await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
+                                
+                                var attachmentUrls = message.Attachments?.Select(a => a.Url).ToList() ?? [];
+                                (string name, string value, bool inline) attachmentsField = attachmentUrls.Count > 0
+                                    ? ("Attachments", string.Join("\n", attachmentUrls), false)
+                                    : default;
+                                
+                                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField: attachmentsField, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
+                                await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, warning.ContextLink, extraField: attachmentsField, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                                 return;
                             }
                         }
