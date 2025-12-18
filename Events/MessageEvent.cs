@@ -609,11 +609,11 @@ namespace Cliptok.Events
                 #region content filters
                 if ((await GetPermLevelAsync(member)) < ServerPermLevel.TrialModerator)
                 {
-                    #region scam message image URL matching
+                    #region scam message image URL autowarn (<= Tier 1)
                     if (Constants.RegexConstants.image_url_rx.Matches(message.Content).Count >= 3
-                        && (await GetPermLevelAsync(member) == ServerPermLevel.Nothing))
+                        && await GetPermLevelAsync(member) == ServerPermLevel.Nothing || await GetPermLevelAsync(member) == ServerPermLevel.Tier1)
                     {
-                        // Message contains 3 or more image urls, and was sent by T0 member; autowarn for probable scam message
+                        // Message contains 3 or more image urls, and was sent by Tier 0 or Tier 1 member; autowarn for probable scam message
 
                         if (wasAutoModBlock)
                             Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered scam image URL filter", channel.Id, message.Author.Id);
@@ -1282,11 +1282,31 @@ namespace Cliptok.Events
                     }
                     #endregion
 
-                    #region passive list matching
-                    // Check the passive lists AFTER all other checks.
+                    #region Run passive checks AFTER all other checks.
                     if ((await GetPermLevelAsync(member)) >= ServerPermLevel.TrialModerator)
                         return;
+                    #endregion
 
+                    #region scam message image URL passive match (>= Tier 2)
+                    // Message contains 3 or more image urls, but was sent by Tier 2+ member; just alert in #investigations
+
+                    if (Constants.RegexConstants.image_url_rx.Matches(message.Content).Count >= 3
+                        && await GetPermLevelAsync(member) >= ServerPermLevel.Tier2)
+                    {
+                        string content = $"{Program.cfgjson.Emoji.Warning} Detected potential scam message by {message.Author.Mention} in {channel.Mention}:";
+
+                        await InvestigationsHelpers.SendInfringingMessaageAsync(
+                            "investigations",
+                            message,
+                            null,
+                            DiscordHelpers.MessageLink(message),
+                            content: content,
+                            colour: new DiscordColor(0xFEC13D)
+                        );
+                    }
+                    #endregion
+
+                    #region passive list matching
                     foreach (var listItem in Program.cfgjson.WordListList)
                     {
                         if (!listItem.Passive)
