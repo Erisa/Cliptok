@@ -604,14 +604,16 @@ namespace Cliptok.Events
 
                 if (member == default)
                     return;
+
+                ServerPermLevel permLevel = await GetPermLevelAsync(member);
                 #endregion
 
                 #region content filters
-                if ((await GetPermLevelAsync(member)) < ServerPermLevel.TrialModerator)
+                if (permLevel < ServerPermLevel.TrialModerator)
                 {
                     #region scam message image URL autowarn (<= Tier 1)
                     if (Constants.RegexConstants.image_url_rx.Matches(message.Content).Count >= 3
-                        && await GetPermLevelAsync(member) == ServerPermLevel.Nothing || await GetPermLevelAsync(member) == ServerPermLevel.Tier1)
+                        && permLevel == ServerPermLevel.Nothing || permLevel == ServerPermLevel.Tier1)
                     {
                         // Message contains 3 or more image urls, and was sent by Tier 0 or Tier 1 member; autowarn for probable scam message
 
@@ -745,7 +747,7 @@ namespace Cliptok.Events
                                     // still warn anyway
                                 }
 
-                                if (listItem.Name == "autoban.txt" && (await GetPermLevelAsync(member)) < ServerPermLevel.Tier4)
+                                if (listItem.Name == "autoban.txt" && permLevel < ServerPermLevel.Tier4)
                                 {
                                     await BanHelpers.BanFromServerAsync(message.Author.Id, reason, client.CurrentUser.Id, channel.Guild, 0, channel, default, true);
                                     return;
@@ -776,7 +778,7 @@ namespace Cliptok.Events
                     #region invite filter
                     string checkedMessage = msgContentWithEmbedData.Replace('\\', '/');
 
-                    if ((await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && checkedMessage.Contains("dsc.gg/") ||
+                    if (permLevel < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && checkedMessage.Contains("dsc.gg/") ||
                         checkedMessage.Contains("invite.gg/")
                         )
                     {
@@ -808,7 +810,7 @@ namespace Cliptok.Events
 
                     var inviteMatches = invite_rx.Matches(checkedMessage);
 
-                    if ((await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && inviteMatches.Count > 3)
+                    if (permLevel < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && inviteMatches.Count > 3)
                     {
                         string reason = "Sent too many invites";
                         await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock, messageContentOverride: msgContentWithEmbedData);
@@ -833,7 +835,7 @@ namespace Cliptok.Events
                         if (maliciousCache == default)
                         {
 
-                            if ((await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && disallowedInviteCodes.Contains(code))
+                            if (permLevel < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && disallowedInviteCodes.Contains(code))
                             {
                                 if (!match)
                                 {
@@ -885,7 +887,7 @@ namespace Cliptok.Events
 
 
                         if (
-                        (await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement
+                        permLevel < (ServerPermLevel)Program.cfgjson.InviteTierRequirement
                         && (
                             invite.Channel.Type == DiscordChannelType.Group
                             || (
@@ -951,7 +953,7 @@ namespace Cliptok.Events
 
                             string reason = "Mass emoji";
 
-                            if ((await GetPermLevelAsync(member)) == ServerPermLevel.Nothing && !Program.redis.HashExists("emojiPardoned", message.Author.Id.ToString()))
+                            if (permLevel == ServerPermLevel.Nothing && !Program.redis.HashExists("emojiPardoned", message.Author.Id.ToString()))
                             {
                                 await Program.redis.HashSetAsync("emojiPardoned", member.Id.ToString(), false);
                                 string pardonOutput;
@@ -1095,7 +1097,7 @@ namespace Cliptok.Events
                     #endregion
 
                     #region mass mentions warn filter
-                    if (((message.MentionedUsers is not null && message.MentionedUsers.Count >= Program.cfgjson.MassMentionThreshold) || (message.MentionedUsersCount >= Program.cfgjson.MassMentionThreshold)) && (await GetPermLevelAsync(member)) < ServerPermLevel.Tier3)
+                    if (((message.MentionedUsers is not null && message.MentionedUsers.Count >= Program.cfgjson.MassMentionThreshold) || (message.MentionedUsersCount >= Program.cfgjson.MassMentionThreshold)) && permLevel < ServerPermLevel.Tier3)
                     {
                         if (wasAutoModBlock)
                         {
@@ -1129,7 +1131,7 @@ namespace Cliptok.Events
                     if (!Program.cfgjson.LineLimitExcludedChannels.Contains(channel.Id)
                         && (channel.ParentId is null || !Program.cfgjson.LineLimitExcludedChannels.Contains((ulong)channel.ParentId))
                         && (lineCount >= Program.cfgjson.IncreasedLineLimit
-                        || (lineCount >= Program.cfgjson.LineLimit && (await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.LineLimitTier)))
+                        || (lineCount >= Program.cfgjson.LineLimit && permLevel < (ServerPermLevel)Program.cfgjson.LineLimitTier)))
                     {
                         if (wasAutoModBlock)
                         {
@@ -1207,7 +1209,7 @@ namespace Cliptok.Events
                     && channel.Parent.Id != Program.cfgjson.TechSupportChannel
                     && channel.Id != Program.cfgjson.SupportForumId
                     && channel.Parent.Id != Program.cfgjson.SupportForumId
-                    && await GetPermLevelAsync(member) < ServerPermLevel.TechnicalQueriesSlayer)
+                    && permLevel < ServerPermLevel.TechnicalQueriesSlayer)
                 {
                         string reason = "Mentioned tech support role outside of tech support channels";
                         
@@ -1239,7 +1241,7 @@ namespace Cliptok.Events
                 if (!limitFilters)
                 {
                     #region feedback hub forum validation
-                    if ((await GetPermLevelAsync(member)) < ServerPermLevel.TrialModerator && !isAnEdit && channel.IsThread && channel.ParentId == Program.cfgjson.FeedbackHubForum && !Program.redis.SetContains("processedFeedbackHubThreads", channel.Id))
+                    if (permLevel < ServerPermLevel.TrialModerator && !isAnEdit && channel.IsThread && channel.ParentId == Program.cfgjson.FeedbackHubForum && !Program.redis.SetContains("processedFeedbackHubThreads", channel.Id))
                     {
                         var thread = (DiscordThreadChannel)channel;
                         Program.redis.SetAdd("processedFeedbackHubThreads", thread.Id);
@@ -1291,7 +1293,7 @@ namespace Cliptok.Events
                     // Message contains 3 or more image urls, but was sent by Tier 2+ member; just alert in #investigations
 
                     if (Constants.RegexConstants.image_url_rx.Matches(message.Content).Count >= 3
-                        && await GetPermLevelAsync(member) >= ServerPermLevel.Tier2)
+                        && permLevel >= ServerPermLevel.Tier2)
                     {
                         string content = $"{Program.cfgjson.Emoji.Warning} Detected potential scam message by {message.Author.Mention} in {channel.Mention}:";
 
