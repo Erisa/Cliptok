@@ -613,7 +613,7 @@ namespace Cliptok.Events
                 {
                     #region scam message image URL autowarn (<= Tier 1)
                     if (Constants.RegexConstants.image_url_rx.Matches(message.Content).Count >= 3
-                        && permLevel == ServerPermLevel.Nothing || permLevel == ServerPermLevel.Tier1)
+                        && (permLevel == ServerPermLevel.Nothing || permLevel == ServerPermLevel.Tier1))
                     {
                         // Message contains 3 or more image urls, and was sent by Tier 0 or Tier 1 member; autowarn for probable scam message
 
