@@ -17,6 +17,8 @@ namespace Cliptok.Events
 
         static public readonly HttpClient httpClient = new();
 
+        #region event handlers
+
         public static async Task MessageCreated(DiscordClient client, MessageCreatedEventArgs e)
         {
             if (e.Message is null)
@@ -184,6 +186,10 @@ namespace Cliptok.Events
             }
         }
 
+        #endregion event handlers
+
+        #region warning helpers
+
         static async Task DeleteAndWarnAsync(DiscordMessage message, string reason, DiscordClient client, string messageContentOverride = default)
         {
             await DeleteAndWarnAsync(new MockDiscordMessage(message), reason, client, messageContentOverride: messageContentOverride);
@@ -222,6 +228,10 @@ namespace Cliptok.Events
             var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
             await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
         }
+
+        #endregion warning helpers
+
+        #region cache helpers
 
         public static async Task<Models.CachedDiscordMessage> CacheAndAddMessageAsync(MockDiscordMessage message, CliptokDbContext ctx, bool disposeContext)
         {
@@ -303,6 +313,8 @@ namespace Cliptok.Events
             await ctx.AddAsync(cachedMessage);
             await ctx.SaveChangesAsync();
         }
+
+        #endregion cache helpers
 
         public static async Task MessageHandlerAsync(DiscordClient client, DiscordMessage message, DiscordChannel channel, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
@@ -1389,6 +1401,8 @@ namespace Cliptok.Events
                 Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered no filters!", message.Id, channel.Id, message.Author.Id);
         }
 
+        #region helper functions
+
         public static int CountNewlines(string input)
         {
             int count = 0;
@@ -1470,5 +1484,6 @@ namespace Cliptok.Events
                 await DiscordHelpers.GenerateMessageRelay(message.BaseMessage, true, true));
         }
 
+        #endregion helper functions
     }
 }
