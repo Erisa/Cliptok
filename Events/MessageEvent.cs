@@ -272,28 +272,28 @@ namespace Cliptok.Events
                 {
                     // Content filters return true if user was warned
 
-                    if (await RunScamImageFilterAsync()) return;
+                    if (await RunScamImageFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
 
-                    if (await RunMassMentionsBanFilterAsync()) return;
+                    if (await RunMassMentionsBanFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
 
-                    if (await RunDuplicateMessageFilterAsync()) return;
+                    if (await RunDuplicateMessageFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
 
-                    if (await RunRestrictedWordListFilterAsync()) return;
+                    if (await RunRestrictedWordListFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
 
-                    if (await RunInviteFilterAsync()) return;
+                    if (await RunInviteFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
 
-                    if (await RunMassEmojiFilterAsync()) return;
+                    if (await RunMassEmojiFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
 
-                    if (await RunPhishingApiFilterAsync()) return;
+                    if (await RunPhishingApiFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
 
-                    if (await RunEveryoneHerePingFilterAsync()) return;
+                    if (await RunEveryoneHerePingFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
 
-                    if (await RunMassMentionsWarnFilterAsync()) return;
+                    if (await RunMassMentionsWarnFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
 
-                    if (await RunLineLimitFilterAsync()) return;
+                    if (await RunLineLimitFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
                 }
 
-                await RunCtsPingFilterAsync();
+                await RunCtsPingFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters);
                 #endregion
 
                 #region tech support relaying
@@ -752,7 +752,7 @@ namespace Cliptok.Events
 
         #region message filters
 
-        private static async Task<bool> RunScamImageFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        private static async Task<bool> RunScamImageFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
             if (Constants.RegexConstants.image_url_rx.Matches(message.Content).Count >= 3
                 && (permLevel == ServerPermLevel.Nothing || permLevel == ServerPermLevel.Tier1))
@@ -766,11 +766,12 @@ namespace Cliptok.Events
 
                 await DeleteAndWarnAsync(message, "Attempted scam message", client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
 
-                return;
+                return true;
             }
+            return false;
         }
 
-        private static async Task<bool> RunMassMentionsBanFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        private static async Task<bool> RunMassMentionsBanFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
             if ((message.MentionedUsers is not null && message.MentionedUsers.Count > Program.cfgjson.MassMentionBanThreshold) || (message.MentionedUsersCount > Program.cfgjson.MassMentionBanThreshold))
             {
@@ -790,11 +791,12 @@ namespace Cliptok.Events
                 var chatMsg = await channel.SendMessageAsync(content);
                 _ = InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, "Mass mentions (Ban threshold)", DiscordHelpers.MessageLink(chatMsg), content: content, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
                 _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, "Mass mentions (Ban threshold)", DiscordHelpers.MessageLink(chatMsg), content: content, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
-                return;
+                return true;
             }
+            return false;
         }
 
-        private static async Task<bool> RunDuplicateMessageFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        private static async Task<bool> RunDuplicateMessageFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
             // skip empty and null content, but allow messages with attachments
             var attachmentNames = message.Attachments?.Select(a => a.FileName).OrderBy(n => n).ToList() ?? [];
@@ -836,8 +838,8 @@ namespace Cliptok.Events
                             ? ("Attachments", string.Join("\n", attachmentUrls), false)
                             : default;
 
-                        await DeleteAndWarnAsync(message, "Duplicate message spam", client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: msgContentWithEmbedData);
-                        return;
+                        await DeleteAndWarnAsync(message, "Duplicate message spam", client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
+                        return true;
                     }
                 }
                 else
@@ -851,9 +853,10 @@ namespace Cliptok.Events
                     };
                 }
             }
+            return false;
         }
 
-        private static async Task<bool> RunRestrictedWordListFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        private static async Task<bool> RunRestrictedWordListFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
             bool match = false;
 
@@ -879,27 +882,31 @@ namespace Cliptok.Events
                         if (listItem.Name == "autoban.txt" && permLevel < ServerPermLevel.Tier4)
                         {
                             await BanHelpers.BanFromServerAsync(message.Author.Id, reason, client.CurrentUser.Id, channel.Guild, 0, channel, default, true);
-                            return;
+                            return true;
                         }
 
                         match = true;
 
                         await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride, useCodeBlock: listItem.Name == "exploits.txt");
 
-                        return;
+                        return true;
                     }
                 }
                 if (match)
-                    return;
+                    return true;
             }
 
             if (match)
-                return;
+                return true;
+
+            return false;
         }
 
-        private static async Task<bool> RunInviteFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        private static async Task<bool> RunInviteFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
             string checkedMessage = messageContentOverride.Replace('\\', '/');
+
+            bool match = false;
 
             if (permLevel < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && checkedMessage.Contains("dsc.gg/") ||
                 checkedMessage.Contains("invite.gg/")
@@ -917,7 +924,7 @@ namespace Cliptok.Events
                 await DeleteAndWarnAsync(message, "Sent an unapproved invite", client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
 
                 match = true;
-                return;
+                return match;
             }
 
             var inviteMatches = invite_rx.Matches(checkedMessage);
@@ -927,7 +934,7 @@ namespace Cliptok.Events
                 string reason = "Sent too many invites";
                 await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
                 match = true;
-                return;
+                return match;
             }
 
             foreach (Match currentMatch in inviteMatches)
@@ -1016,7 +1023,6 @@ namespace Cliptok.Events
                         string reason = "Sent an unapproved invite";
                         await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
                     }
-                    return;
                 }
                 else
                 {
@@ -1025,11 +1031,10 @@ namespace Cliptok.Events
 
             }
 
-            if (match)
-                return;
+            return match;
         }
 
-        private static async Task<bool> RunMassEmojiFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        private static async Task<bool> RunMassEmojiFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
             if (!Program.cfgjson.UnrestrictedEmojiChannels.Contains(channel.Id) && messageContentOverride.Length >= Program.cfgjson.MassEmojiThreshold)
             {
@@ -1078,7 +1083,7 @@ namespace Cliptok.Events
                             pardonOutput = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention} Your message was automatically deleted for mass emoji.";
 
                         await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
-                        return;
+                        return true;
                     }
 
                     string output = $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**";
@@ -1089,12 +1094,13 @@ namespace Cliptok.Events
                     }
 
                     await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
-                    return;
+                    return true;
                 }
             }
+            return false;
         }
 
-        private static async Task<bool> RunPhishingApiFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        private static async Task<bool> RunPhishingApiFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
             var urlMatches = domain_rx.Matches(messageContentOverride);
             if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") is not null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
@@ -1117,13 +1123,15 @@ namespace Cliptok.Events
                         string responseToSend = (await StringHelpers.CodeOrHasteBinAsync(responseText, "json", 1000, true)).Text;
                         (string name, string value, bool inline) extraField = new("API Response", responseToSend, false);
                         DeleteAndWarnAsync(message, "Sending phishing URL(s)", client, extraField, wasAutoModBlock, messageContentOverride);
-                        return;
+                        return true;
                     }
                 }
             }
+
+            return false;
         }
 
-        private static async Task<bool> RunEveryoneHerePingFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        private static async Task<bool> RunEveryoneHerePingFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
             var msgContent = message.Content;
             foreach (var letter in Checks.ListChecks.lookalikeAlphabetMap)
@@ -1140,11 +1148,13 @@ namespace Cliptok.Events
                 }
 
                 await DeleteAndWarnAsync(message, "Attempted to ping everyone/here", client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
-                return;
+                return true;
             }
+
+            return false;
         }
 
-        private static async Task<bool> RunMassMentionsWarnFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        private static async Task<bool> RunMassMentionsWarnFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
             if (((message.MentionedUsers is not null && message.MentionedUsers.Count >= Program.cfgjson.MassMentionThreshold) || (message.MentionedUsersCount >= Program.cfgjson.MassMentionThreshold)) && permLevel < ServerPermLevel.Tier3)
             {
@@ -1158,11 +1168,13 @@ namespace Cliptok.Events
                 }
 
                 await DeleteAndWarnAsync(message, "Mass mentions", client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
-                return;
+                return true;
             }
+
+            return false;
         }
 
-        private static async Task<bool> RunLineLimitFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        private static async Task<bool> RunLineLimitFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
             var lineCount = CountNewlines(messageContentOverride);
 
@@ -1208,7 +1220,7 @@ namespace Cliptok.Events
                     }
                     await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, DiscordHelpers.MessageLink(msg), messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
                     await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, DiscordHelpers.MessageLink(msg), messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
-                    return;
+                    return true;
                 }
                 else
                 {
@@ -1221,7 +1233,7 @@ namespace Cliptok.Events
                     {
                         messageBuilder.AddActionRowComponent(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
                         msg = await channel.SendMessageAsync(messageBuilder);
-                        await Program.redis.HashSetAsync("deletedMessageReferences", msg.Id, msgContentWithEmbedData);
+                        await Program.redis.HashSetAsync("deletedMessageReferences", msg.Id, messageContentOverride);
                     }
                     else
                     {
@@ -1230,15 +1242,17 @@ namespace Cliptok.Events
 
                     await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
                     var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-                    await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
+                    await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
 
-                    return;
+                    return true;
                 }
 
             }
+
+            return false;
         }
 
-        private static async Task<bool> RunCtsPingFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        private static async Task<bool> RunCtsPingFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
             if (Program.cfgjson.CommunityTechSupportRoleID != 0
                 && message.Content.Contains($"<@&{Program.cfgjson.CommunityTechSupportRoleID.ToString()}>")
@@ -1272,7 +1286,11 @@ namespace Cliptok.Events
                     await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, you mentioned the tech support role outside of a tech support channel.\n"
                         + $"Please keep requests for tech support inside {techSupportChannelsText} to avoid further punishment.");
                 }
+
+                return true;
             }
+
+            return false;
         }
 
 #endregion message filters
