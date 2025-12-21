@@ -473,10 +473,10 @@
             if (!wasAutoModBlock)
                 wasThreadDeleted = await DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(infringingMessage, minMessages);
 
-            return await ThreadAwareSendPublicWarningMessage(warningMessageContent, wasThreadDeleted, infringingMessage.Channel);
+            return await ThreadChannelAwareSendPublicWarningMessageAsync(warningMessageContent, wasThreadDeleted, infringingMessage.Channel);
         }
 
-        public static async Task<DiscordMessage> ThreadAwareSendPublicWarningMessage(string warningMessageContent, bool wasThreadDeleted, DiscordChannel targetChannel)
+        public static async Task<DiscordMessage> ThreadChannelAwareSendPublicWarningMessageAsync(string warningMessageContent, bool wasThreadDeleted, DiscordChannel targetChannel)
         {
             if (wasThreadDeleted || targetChannel.Id == Program.cfgjson.SupportForumId)
             {
