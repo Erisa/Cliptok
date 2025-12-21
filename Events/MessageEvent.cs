@@ -139,9 +139,9 @@ namespace Cliptok.Events
                         await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(cachedMessage, "deleted", true, true));
                     }
                 }
-
-                await DiscordHelpers.DoEmptyThreadCleanupAsync(e.Channel, e.Message);
             }
+
+            await DiscordHelpers.DoEmptyThreadCleanupAsync(e.Channel, e.Message);
         }
 
         public static async Task MessagesBulkDeleted(DiscordClient client, MessagesBulkDeletedEventArgs e)
