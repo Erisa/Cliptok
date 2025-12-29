@@ -1,4 +1,8 @@
-﻿namespace Cliptok.Helpers
+﻿using DiffPlex;
+using DiffPlex.DiffBuilder;
+using DiffPlex.DiffBuilder.Model;
+
+namespace Cliptok.Helpers
 {
     public class DiscordHelpers
     {
@@ -292,57 +296,69 @@
             if (type == "edited")
             {
                 embed.AddField("Message Link", $"{MessageLink(message)}");
+
+                var oldContent = oldMessage.Content;
                 if (oldMessage is not null)
                 {
-                    if (oldMessage.Content is null || oldMessage.Content == "")
-                        embed.AddField("Old content", "`[ No content ]`");
-                    else
+                    if (oldMessage.AttachmentURLs.Count != 0)
                     {
-                        var oldContent = oldMessage.Content;
-                        if (oldMessage.AttachmentURLs.Count != 0)
-                        {
-                            if (oldContent != "")
-                                oldContent += "\n";
+                        if (oldContent != "")
+                            oldContent += "\n";
 
-                            oldContent += String.Join("\n", oldMessage.AttachmentURLs.ToArray());
-                        }
-
-                        if (oldMessage.Sticker is not null)
-                            oldContent += $"\n[{oldMessage.Sticker.Name}]({oldMessage.Sticker.Url})";
-                        var haste = await StringHelpers.CodeOrHasteBinAsync(oldContent, noCode: true, messageWrapper: true, charLimit: 1024);
-                        if (haste.Success)
-                            embed.AddField("Old content", haste.Text);
-                        else
-                        {
-                            msgBuilder.AddFile("old_content.txt", new MemoryStream(Encoding.UTF8.GetBytes(oldContent)));
-                        }
-                    }
-                }
-                if (message.Content is null || message.Content == "")
-                    embed.AddField("New content", "`[ No content ]`");
-                else
-                {
-                    var content = message.Content;
-                    if (message.AttachmentURLs.Count != 0)
-                    {
-                        if (content != "")
-                            content += "\n";
-
-                        content += String.Join("\n", message.AttachmentURLs.ToArray());
+                        oldContent += String.Join("\n", oldMessage.AttachmentURLs.ToArray());
                     }
 
                     if (oldMessage.Sticker is not null)
-                        content += $"\n[{message.Sticker.Name}]({message.Sticker.Url})";
+                        oldContent += $"\n[{oldMessage.Sticker.Name}]({oldMessage.Sticker.Url})";
+                }
 
-                    var haste = await StringHelpers.CodeOrHasteBinAsync(content, noCode: true, messageWrapper: true, charLimit: 1024);
-                    if (haste.Success)
-                        embed.AddField("New content", haste.Text);
+                var content = message.Content;
+                if (message.AttachmentURLs.Count != 0)
+                {
+                    if (content != "")
+                        content += "\n";
+
+                    content += String.Join("\n", message.AttachmentURLs.ToArray());
+                }
+
+                if (message.Sticker is not null)
+                    content += $"\n[{message.Sticker.Name}]({message.Sticker.Url})";
+
+                if (oldContent == content)
+                {
+                    embed.WithDescription("### Content unchanged\n" + content);
+                }
+                else
+                {
+                    // diff generation
+                    var diffBuilder = new InlineDiffBuilder(new Differ());
+                    var diff = diffBuilder.BuildDiffModel(oldContent, content);
+
+                    var diffTextBuilder = new StringBuilder();
+                    foreach (var line in diff.Lines)
+                    {
+                        var prefix = line.Type switch
+                        {
+                            ChangeType.Inserted => "+ ",
+                            ChangeType.Deleted => "- ",
+                            _ => "  "
+                        };
+                        diffTextBuilder.AppendLine($"{prefix}{line.Text}");
+                    }
+
+                    string diffText = diffTextBuilder.ToString();
+
+                    var newHaste = await StringHelpers.CodeOrHasteBinAsync(diffText, noCode: false, messageWrapper: true, charLimit: 4096, language: "diff");
+                    if (newHaste.Success)
+                        embed.WithDescription(newHaste.Text);
                     else
                     {
-                        msgBuilder.AddFile("new_content.txt", new MemoryStream(Encoding.UTF8.GetBytes(content)));
+                        msgBuilder.AddFile("messagedit.diff", new MemoryStream(Encoding.UTF8.GetBytes(diffText)));
                     }
+
+                    embed.Color = DiscordColor.Yellow;
                 }
-                embed.Color = DiscordColor.Yellow;
+
             }
             else if (type == "deleted")
             {
@@ -383,7 +399,6 @@
                         .WithImageUrl(attachment));
                 }
             }
-
 
             return msgBuilder.AddEmbeds(embeds.AsEnumerable());
         }
