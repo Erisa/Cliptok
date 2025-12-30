@@ -22,7 +22,7 @@ RUN touch dummy.txt && \
     fi
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/runtime:10.0.1-alpine3.22
+FROM mcr.microsoft.com/dotnet/runtime:10.0.1-alpine3.23
 LABEL com.centurylinklabs.watchtower.enable=true
 WORKDIR /app
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
