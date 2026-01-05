@@ -296,6 +296,7 @@ namespace Cliptok.Helpers
             if (type == "edited")
             {
                 embed.AddField("Message Link", $"{MessageLink(message)}");
+                embed.Color = DiscordColor.Yellow;
 
                 var oldContent = oldMessage.Content;
                 if (oldMessage is not null)
@@ -355,8 +356,6 @@ namespace Cliptok.Helpers
                     {
                         msgBuilder.AddFile("messagedit.diff", new MemoryStream(Encoding.UTF8.GetBytes(diffText)));
                     }
-
-                    embed.Color = DiscordColor.Yellow;
                 }
 
             }
