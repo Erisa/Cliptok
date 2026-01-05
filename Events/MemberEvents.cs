@@ -186,8 +186,24 @@ namespace Cliptok.Events
 
             if (userNotes.Count > 0)
             {
+                // check if theyre banned
+                DiscordBan discordBan = default;
+                
+                var redisBan = await redis.HashGetAsync("bans", e.Member.Id);
+
+                client.Logger.LogDebug("Checking ban on leave for user {user}: Discord ban: {discordBan}, Redis ban: {redisBan}", e.Member.Id, discordBan, redisBan);
+
+                string msgContent;
+                if (redisBan.IsNull)
+                {
+                    msgContent = $"{cfgjson.Emoji.UserLeave} {e.Member.Mention} just left the server with {(userNotes.Count == 1 ? "a note" : "notes")} set to show on leave!";
+                } else
+                {
+                    msgContent = $"{cfgjson.Emoji.Banned} {e.Member.Mention} was just **banned** from the server with {(userNotes.Count == 1 ? "a note" : "notes")} set to show on leave!";
+                }
+
                 var notesEmbed = await UserNoteHelpers.GenerateUserNotesEmbedAsync(e.Member, false, userNotes, colorOverride: new DiscordColor(0xBA4119));
-                LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.UserLeave} {e.Member.Mention} just left the server with {(userNotes.Count == 1 ? "a note" : "notes")} set to show on leave!", notesEmbed);
+                LogChannelHelper.LogMessageAsync("investigations", msgContent, notesEmbed);
             }
         }
 
