@@ -186,12 +186,10 @@ namespace Cliptok.Events
 
             if (userNotes.Count > 0)
             {
-                // check if theyre banned
-                DiscordBan discordBan = default;
-                
+                // check if theyre banned            
                 var redisBan = await redis.HashGetAsync("bans", e.Member.Id);
 
-                client.Logger.LogDebug("Checking ban on leave for user {user}: Discord ban: {discordBan}, Redis ban: {redisBan}", e.Member.Id, discordBan, redisBan);
+                client.Logger.LogDebug("Checking ban on leave for user {user}: {redisBan}", e.Member.Id, redisBan);
 
                 string msgContent;
                 if (redisBan.IsNull)
