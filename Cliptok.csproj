@@ -16,8 +16,8 @@
 	<ItemGroup>
 		<PackageReference Include="Abyssal.HumanDateParser" Version="2.0.0-20191113.1" />
 		<PackageReference Include="DiffPlex" Version="1.9.0" />
-		<PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02563" />
-		<PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02563" />
+		<PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02566" />
+		<PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02566" />
 		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.1" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1">
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
