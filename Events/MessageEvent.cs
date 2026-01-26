@@ -611,11 +611,19 @@ namespace Cliptok.Events
                 #region content filters
                 if (permLevel < ServerPermLevel.TrialModerator)
                 {
-                    #region scam message image URL autowarn (<= Tier 1)
-                    if (Constants.RegexConstants.image_url_rx.Matches(message.Content).Count >= 3
+
+                    #region scam message image URL / attachment autowarn (<= Tier 1)
+                    if (
+                        (
+                            // Message contains 3 or more image URLs
+                            (message.Content is not null && Constants.RegexConstants.image_url_rx.Matches(message.Content).Count >= 3)
+
+                            // Message has no content but 3+ attachments
+                            || ((message.Content is null || message.Content == "") && message.Attachments is not null && message.Attachments.Count >= 3)
+                        )
                         && (permLevel == ServerPermLevel.Nothing || permLevel == ServerPermLevel.Tier1))
                     {
-                        // Message contains 3 or more image urls, and was sent by Tier 0 or Tier 1 member; autowarn for probable scam message
+                        // Message contains 3 or more images, and was sent by Tier 0 or Tier 1 member; autowarn for probable scam message
 
                         if (wasAutoModBlock)
                             Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered scam image URL filter", channel.Id, message.Author.Id);
@@ -693,12 +701,12 @@ namespace Cliptok.Events
                                 DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, output, wasAutoModBlock);
                                 deletedMessageCache.Add(message.Id);
                                 var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-                                
+
                                 var attachmentUrls = message.Attachments?.Select(a => a.Url).ToList() ?? [];
                                 (string name, string value, bool inline) attachmentsField = attachmentUrls.Count > 0
                                     ? ("Attachments", string.Join("\n", attachmentUrls), false)
                                     : default;
-                                
+
                                 await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField: attachmentsField, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                                 await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, warning.ContextLink, extraField: attachmentsField, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
                                 return;
@@ -1201,7 +1209,7 @@ namespace Cliptok.Events
                     #endregion
                 }
                 #endregion
-                
+
                 #region CTS ping autowarn
                 if (Program.cfgjson.CommunityTechSupportRoleID != 0
                     && message.Content.Contains($"<@&{Program.cfgjson.CommunityTechSupportRoleID.ToString()}>")
@@ -1211,30 +1219,30 @@ namespace Cliptok.Events
                     && channel.Parent.Id != Program.cfgjson.SupportForumId
                     && permLevel < ServerPermLevel.TechnicalQueriesSlayer)
                 {
-                        string reason = "Mentioned tech support role outside of tech support channels";
-                        
-                        string techSupportChannelsText;
-                        if (Program.cfgjson.TechSupportChannel != 0 && Program.cfgjson.SupportForumId != 0)
-                            techSupportChannelsText = $"<#{Program.cfgjson.TechSupportChannel}> and <#{Program.cfgjson.SupportForumId}>";
-                        else if (Program.cfgjson.TechSupportChannel != 0)
-                            techSupportChannelsText = $"<#{Program.cfgjson.TechSupportChannel}>";
-                        else if (Program.cfgjson.SupportForumId != 0)
-                            techSupportChannelsText = $"<#{Program.cfgjson.SupportForumId}>";
-                        else
-                            techSupportChannelsText = "the tech support channels";
-                    
-                        if (await Program.redis.SetContainsAsync("ctsPingPardons", message.Author.Id))
-                        {
-                            var msg = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**\n"
-                                + $"Please keep requests for tech support inside {techSupportChannelsText} to avoid punishment.");
-                            await WarningHelpers.GiveWarningAsync(message.Author, Program.discord.CurrentUser, reason, msg, channel, " automatically ");
-                        }
-                        else // also false when set does not exist
-                        {
-                            await Program.redis.SetAddAsync("ctsPingPardons", message.Author.Id);
-                            await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, you mentioned the tech support role outside of a tech support channel.\n"
-                                + $"Please keep requests for tech support inside {techSupportChannelsText} to avoid further punishment.");
-                        }
+                    string reason = "Mentioned tech support role outside of tech support channels";
+
+                    string techSupportChannelsText;
+                    if (Program.cfgjson.TechSupportChannel != 0 && Program.cfgjson.SupportForumId != 0)
+                        techSupportChannelsText = $"<#{Program.cfgjson.TechSupportChannel}> and <#{Program.cfgjson.SupportForumId}>";
+                    else if (Program.cfgjson.TechSupportChannel != 0)
+                        techSupportChannelsText = $"<#{Program.cfgjson.TechSupportChannel}>";
+                    else if (Program.cfgjson.SupportForumId != 0)
+                        techSupportChannelsText = $"<#{Program.cfgjson.SupportForumId}>";
+                    else
+                        techSupportChannelsText = "the tech support channels";
+
+                    if (await Program.redis.SetContainsAsync("ctsPingPardons", message.Author.Id))
+                    {
+                        var msg = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**\n"
+                            + $"Please keep requests for tech support inside {techSupportChannelsText} to avoid punishment.");
+                        await WarningHelpers.GiveWarningAsync(message.Author, Program.discord.CurrentUser, reason, msg, channel, " automatically ");
+                    }
+                    else // also false when set does not exist
+                    {
+                        await Program.redis.SetAddAsync("ctsPingPardons", message.Author.Id);
+                        await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, you mentioned the tech support role outside of a tech support channel.\n"
+                            + $"Please keep requests for tech support inside {techSupportChannelsText} to avoid further punishment.");
+                    }
                 }
                 #endregion
 
