@@ -35,7 +35,7 @@ namespace Cliptok.Events
                 return;
 
             // Show help for command if used with no arguments
-            if (e.Exception is ArgumentParseException && e.Context.Arguments.All(x => x.Value is null or ArgumentNotParsedResult or Optional<ArgumentNotParsedResult>))
+            if (e.Exception is ArgumentParseException && e.Context.Arguments.First().Value is null or ArgumentNotParsedResult or Optional<ArgumentNotParsedResult>)
             {
                 // If this is a command with subcommands, we are looking at the default subcommand if there is one;
                 // if the user did not explicitly specify a subcommand however, we should show help for the [group] command, not the default subcommand
