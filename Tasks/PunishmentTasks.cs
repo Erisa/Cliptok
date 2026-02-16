@@ -61,13 +61,22 @@
         // Cleans up public messages for automatic warnings & bans for compromised accounts
         public static async Task<bool> CleanUpPunishmentMessagesAsync()
         {
-            if (Program.cfgjson.AutoWarnMsgAutoDeleteDays == 0 && Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays == 0)
+            TimeSpan autoWarnDeleteSpan = Program.cfgjson.AutoWarnMsgAutoDeleteHours > 0
+                ? TimeSpan.FromHours(Program.cfgjson.AutoWarnMsgAutoDeleteHours)
+                : TimeSpan.FromDays(Program.cfgjson.AutoWarnMsgAutoDeleteDays);
+
+#if DEBUG
+            // each hour passes in a second during debug
+            autoWarnDeleteSpan = TimeSpan.FromSeconds(autoWarnDeleteSpan.TotalHours);
+#endif
+
+            if (autoWarnDeleteSpan == TimeSpan.Zero && Program.cfgjson.CompromisedAccountBanMsgAutoDeleteDays == 0)
                 return false;
 
             // The success value will be changed later if any of the message deletes are successful.
             bool success = false;
 
-            if (Program.cfgjson.AutoWarnMsgAutoDeleteDays > 0)
+            if (autoWarnDeleteSpan > TimeSpan.Zero)
             {
                 Dictionary<string, UserWarning> warnList = (await Program.redis.HashGetAllAsync("automaticWarnings")).ToDictionary(
                     x => x.Name.ToString(),
@@ -77,11 +86,7 @@
                 foreach (KeyValuePair<string, UserWarning> entry in warnList)
                 {
                     UserWarning warn = entry.Value;
-#if DEBUG
-                    if (DateTime.UtcNow > warn.WarnTimestamp.AddSeconds(Program.cfgjson.AutoWarnMsgAutoDeleteDays))
-#else
-                    if (DateTime.UtcNow > warn.WarnTimestamp.AddDays(Program.cfgjson.AutoWarnMsgAutoDeleteDays))
-#endif
+                    if (DateTime.UtcNow > warn.WarnTimestamp + autoWarnDeleteSpan)
                     {
                         try
                         {

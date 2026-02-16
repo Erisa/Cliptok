@@ -229,6 +229,9 @@
         [JsonProperty("autoWarnMsgAutoDeleteDays")]
         public int AutoWarnMsgAutoDeleteDays { get; private set; }
 
+        [JsonProperty("autoWarnMsgAutoDeleteHours")]
+        public int AutoWarnMsgAutoDeleteHours { get; private set; }
+
         [JsonProperty("compromisedAccountBanMsgAutoDeleteDays")]
         public int CompromisedAccountBanMsgAutoDeleteDays { get; private set; }
 
