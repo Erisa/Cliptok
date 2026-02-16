@@ -329,7 +329,7 @@
   "autoDeleteEmptyThreads": true,
   "tqsMutedRole": 752821045408563230,
   "tqsMuteDurationHours": 2,
-  "autoWarnMsgAutoDeleteDays": 1,
+  "autoWarnMsgAutoDeleteHours": 24,
   "compromisedAccountBanMsgAutoDeleteDays": 3,
   "logLevel": "Debug",
   "lokiURL": "http://100.79.19.82:3100",
