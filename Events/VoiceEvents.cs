@@ -58,12 +58,15 @@
                     }
                     else
                     {
+                        Program.discord.Logger.LogDebug("[Voice Purge] {channel} is queued for purge. Waiting...", channelBefore.Name);
                         await Task.Delay(10000);
                     }
                 }
 
                 if (guild.Channels[channelBefore.Id].Users.Count == 0 && Program.cfgjson.VoiceChannelPurge)
                 {
+                    Program.discord.Logger.LogDebug("[Voice Purge] Voice channel {channel} is empty and will be purged now!", channelBefore.Name);
+
                     List<DiscordMessage> messages = new();
                     try
                     {
@@ -71,12 +74,15 @@
                         if (firstMsg == default)
                             return;
 
+                        Program.discord.Logger.LogDebug("[Voice Purge] Found first message to purge in voice channel {channel}", channelBefore.Name);
+
                         messages.Add(firstMsg);
                         var lastMsgId = firstMsg.Id;
                         // delete all the messages from the channel
                         while (true)
                         {
                             var newmsgs = await channelBefore.GetMessagesBeforeAsync(lastMsgId, 100).ToListAsync();
+                            Program.discord.Logger.LogDebug("[Voice Purge] Successfully fetched {count} messages in voice channel {channel}", newmsgs.Count, channelBefore.Name);
                             messages.AddRange(newmsgs);
                             if (newmsgs.Count() < 100)
                                 break;
@@ -86,7 +92,9 @@
                         messages.RemoveAll(message => message.CreationTimestamp.ToUniversalTime() < DateTime.UtcNow.AddDays(-14));
                         PendingPurge.Remove(channelBefore.Id);
 
+                        Program.discord.Logger.LogDebug("[Voice Purge] Purging {count} messages in {channel}", messages.Count, channelBefore.Name);
                         await channelBefore.DeleteMessagesAsync(messages);
+                        Program.discord.Logger.LogDebug("[Voice Purge] Successfully purged {count} messages in {channel}", messages.Count, channelBefore.Name);
                     }
                     catch (Exception ex)
                     {
