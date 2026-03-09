@@ -754,7 +754,14 @@ namespace Cliptok.Events
 
         private static async Task<bool> RunScamImageFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
-            if (Constants.RegexConstants.image_url_rx.Matches(message.Content).Count >= 3
+            if (
+                (
+                    // Message contains 3 or more image URLs
+                    (message.Content is not null && Constants.RegexConstants.image_url_rx.Matches(message.Content).Count >= 3)
+
+                    // Message has no content but 3+ attachments
+                    || ((message.Content is null || message.Content == "") && message.Attachments is not null && message.Attachments.Count >= 3)
+                )
                 && (permLevel == ServerPermLevel.Nothing || permLevel == ServerPermLevel.Tier1))
             {
                 // Message contains 3 or more image urls, and was sent by Tier 0 or Tier 1 member; autowarn for probable scam message
