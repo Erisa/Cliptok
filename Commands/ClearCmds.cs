@@ -21,7 +21,7 @@
             [Parameter("links_only"), Description("Optionally filter the deletion to only messages containing links.")] bool linksOnly = false,
             [Parameter("dry_run"), Description("Don't actually delete the messages, just output what would be deleted.")] bool dryRun = false,
             [Parameter("channel"), Description("Choose a specific channel to clear from. Defaults to the current channel.")] DiscordChannel channel = default,
-            [Parameter("multi-channel"), Description("Optionally clear across all channels.")] bool multiChannel = false
+            [Parameter("multi_channel"), Description("Optionally clear across all channels.")] bool multiChannel = false
         )
         {
             await ctx.DeferResponseAsync(ephemeral: !dryRun);
