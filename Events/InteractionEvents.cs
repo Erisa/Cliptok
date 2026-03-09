@@ -1,5 +1,4 @@
-﻿using System.Threading.Channels;
-using static Cliptok.Program;
+﻿using static Cliptok.Program;
 
 namespace Cliptok.Events
 {
