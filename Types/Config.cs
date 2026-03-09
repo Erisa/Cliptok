@@ -80,6 +80,9 @@
         [JsonProperty("lockdownEnabledChannels")]
         public List<ulong> LockdownEnabledChannels { get; private set; }
 
+        [JsonProperty("publicFacingChannels")]
+        public List<ulong> PublicFacingChannels { get; private set; }
+
         [JsonProperty("heartosoftId")]
         public ulong HeartosoftId { get; private set; }
 
