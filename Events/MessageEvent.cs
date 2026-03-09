@@ -1,7 +1,4 @@
-using Cliptok.APIs;
 using Microsoft.EntityFrameworkCore;
-using System.Text.RegularExpressions;
-using System.Threading.Channels;
 using static Cliptok.Constants.RegexConstants;
 
 namespace Cliptok.Events
