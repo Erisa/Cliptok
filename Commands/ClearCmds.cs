@@ -2,7 +2,10 @@
 {
     public class ClearCmds
     {
-        public static Dictionary<ulong, Dictionary<ulong, List<DiscordMessage>>> MessagesToClear = new(); // I am so sorry
+        // Outer ulong is confirmation message ID, used to keep track of the entire set of messages between /clear and the confirmation button on that message
+        // Inner ulong is channel ID, holding the list of messages to clear just for the respective channel
+        // so Dictionary<confirmation message ID, Dictionary<channel ID, List<DiscordMessage>>>
+        public static Dictionary<ulong, Dictionary<ulong, List<DiscordMessage>>> MessagesToClear = new();
 
         [Command("clear")]
         [Description("Delete many messages from the current channel.")]
