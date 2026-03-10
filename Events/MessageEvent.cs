@@ -269,28 +269,28 @@ namespace Cliptok.Events
                 {
                     // Content filters return true if user was warned
 
-                    if (await RunScamImageFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
+                    if (await RunScamImageFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
 
-                    if (await RunMassMentionsBanFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
+                    if (await RunMassMentionsBanFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
 
-                    if (await RunDuplicateMessageFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
+                    if (await RunDuplicateMessageFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
 
-                    if (await RunRestrictedWordListFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
+                    if (await RunRestrictedWordListFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
 
-                    if (await RunInviteFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
+                    if (await RunInviteFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
 
-                    if (await RunMassEmojiFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
+                    if (await RunMassEmojiFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
 
-                    if (await RunPhishingApiFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
+                    if (await RunPhishingApiFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
 
-                    if (await RunEveryoneHerePingFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
+                    if (await RunEveryoneHerePingFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
 
-                    if (await RunMassMentionsWarnFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
+                    if (await RunMassMentionsWarnFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
 
-                    if (await RunLineLimitFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters)) return;
+                    if (await RunLineLimitFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
                 }
 
-                await RunCtsPingFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters);
+                await RunCtsPingFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock);
                 #endregion
 
                 #region tech support relaying
@@ -420,7 +420,6 @@ namespace Cliptok.Events
                 }
             }
 
-            // TODO: this relies on us always returning when messages match filters. Does that happen? Might have to change this.
             if (wasAutoModBlock)
                 Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered no filters!", channel.Id, message.Author.Id);
             else
