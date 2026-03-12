@@ -307,7 +307,8 @@
                     {
                         channel = ctx.Guild.Channels[messagesForChannel.Key];
                         await channel.DeleteMessagesAsync(messagesForChannel.Value, $"[Clear by {DiscordHelpers.UniqueUsername(ctx.User)}]");
-                        await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Cleared **{messagesForChannel.Value.Count}** messages from {channel.Mention}!");
+                        if (messagesToClear.Count == 1)
+                            await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Cleared **{messagesForChannel.Value.Count}** messages from {channel.Mention}!");
                         await LogChannelHelper.LogMessageAsync("mod",
                             new DiscordMessageBuilder()
                                 .WithContent($"{Program.cfgjson.Emoji.Deleted} **{messagesForChannel.Value.Count}** messages were cleared in {channel.Mention} by {ctx.User.Mention}.")
