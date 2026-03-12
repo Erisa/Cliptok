@@ -93,21 +93,21 @@ namespace Cliptok.Events
                 client.Logger.LogDebug("Got a message delete event for a message with no author: {message}. Continuing with event anyway.", DiscordHelpers.MessageLink(e.Message));
             }
             
-            if (e.Message.Channel is null)
+            if (e.Channel is null)
             {
-                client.Logger.LogDebug("Got a message delete event for a message with no channel: {messageId} by {user}", e.Message.Id, e.Message.Author.Id);
+                client.Logger.LogDebug("Got a message delete event for a message with no channel: {messageId} by {user}", e.Message.Id, e.Message.Author?.Id);
                 return;
             }
             
-            if (e.Message.Channel.Guild is null && !e.Message.Channel.IsPrivate)
+            if (e.Guild is null && !e.Channel.IsPrivate)
             {
-                client.Logger.LogDebug("Got a message delete event for a non-DM message with no guild: {messageId} in {channelId} by {user}", e.Message.Id, e.Message.Channel.Id, e.Message.Author.Id);
+                client.Logger.LogDebug("Got a message delete event for a non-DM message with no guild: {messageId} in {channelId} by {user}", e.Message.Id, e.Channel.Id, e.Message.Author?.Id);
                 return;
             }
             
-            client.Logger.LogDebug("Got a message delete event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
+            client.Logger.LogDebug("Got a message delete event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author?.Id);
 
-            if (e.Message.Channel.GuildId != Program.cfgjson.ServerID)
+            if (e.Guild.Id != Program.cfgjson.ServerID)
                 return;
 
             foreach (var warning in await Program.redis.HashGetAllAsync("automaticWarnings"))
