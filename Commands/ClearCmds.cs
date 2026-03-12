@@ -336,7 +336,7 @@
 
         private static Dictionary<ulong, List<DiscordMessage>> AddToMessageList(Dictionary<ulong, List<DiscordMessage>> messagesToClear, DiscordMessage messageToAdd)
         {
-            return AddToMessageList(messagesToClear, messageToAdd);
+            return AddToMessageList(messagesToClear, [messageToAdd]);
         }
 
         private static Dictionary<ulong, List<DiscordMessage>> AddToMessageList(Dictionary<ulong, List<DiscordMessage>> messagesToClear, List<DiscordMessage> messagesToAdd)
