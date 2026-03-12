@@ -457,11 +457,6 @@
             }
         }
 
-        public static async Task<DiscordMessage> SendPublicWarningMessageAndDeleteInfringingMessageAsync(DiscordMessage infringingMessage, string warningMessageContent, bool wasAutoModBlock = false, int minMessages = 0)
-        {
-            return await SendPublicWarningMessageAndDeleteInfringingMessageAsync(new MockDiscordMessage(infringingMessage), warningMessageContent, wasAutoModBlock, minMessages);
-        }
-
         public static async Task<DiscordMessage> SendPublicWarningMessageAndDeleteInfringingMessageAsync(MockDiscordMessage infringingMessage, string warningMessageContent, bool wasAutoModBlock = false, int minMessages = 0)
         {
             // If this is a `GuildForum` channel, delete the thread if it is empty; if not empty, just delete the infringing message.
@@ -473,11 +468,7 @@
             if (!wasAutoModBlock)
                 wasThreadDeleted = await DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(infringingMessage, minMessages);
 
-            return await ThreadAwareSendPublicWarningMessage(warningMessageContent, wasThreadDeleted, infringingMessage.Channel);
-        }
-
-        public static async Task<DiscordMessage> ThreadAwareSendPublicWarningMessage(string warningMessageContent, bool wasThreadDeleted, DiscordChannel targetChannel)
-        {
+            DiscordChannel targetChannel = infringingMessage.Channel;
             if (wasThreadDeleted || targetChannel.Id == Program.cfgjson.SupportForumId)
             {
                 if (Program.cfgjson.ForumChannelAutoWarnFallbackChannel == 0)
@@ -486,8 +477,7 @@
                     targetChannel = Program.ForumChannelAutoWarnFallbackChannel;
             }
 
-            var warningMessage = await targetChannel.SendMessageAsync(warningMessageContent);
-            return warningMessage;
+            return await targetChannel.SendMessageAsync(warningMessageContent);
         }
     }
 }
