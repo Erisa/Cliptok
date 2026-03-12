@@ -2,7 +2,10 @@
 {
     public class ClearCmds
     {
-        public static Dictionary<ulong, List<DiscordMessage>> MessagesToClear = new();
+        // Outer ulong is confirmation message ID, used to keep track of the entire set of messages between /clear and the confirmation button on that message
+        // Inner ulong is channel ID, holding the list of messages to clear just for the respective channel
+        // so Dictionary<confirmation message ID, Dictionary<channel ID, List<DiscordMessage>>>
+        public static Dictionary<ulong, Dictionary<ulong, List<DiscordMessage>>> MessagesToClear = new();
 
         [Command("clear")]
         [Description("Delete many messages from the current channel.")]
@@ -20,7 +23,8 @@
             [Parameter("stickers_only"), Description("Optionally filter the deletion to only messages with stickers.")] bool stickersOnly = false,
             [Parameter("links_only"), Description("Optionally filter the deletion to only messages containing links.")] bool linksOnly = false,
             [Parameter("dry_run"), Description("Don't actually delete the messages, just output what would be deleted.")] bool dryRun = false,
-            [Parameter("channel"), Description("Choose a specific channel to clear from. Defaults to the current channel.")] DiscordChannel channel = default
+            [Parameter("channel"), Description("Choose a specific channel to clear from. Defaults to the current channel.")] DiscordChannel channel = default,
+            [Parameter("multi_channel"), Description("Optionally clear across all channels.")] bool multiChannel = false
         )
         {
             await ctx.DeferResponseAsync(ephemeral: !dryRun);
@@ -55,6 +59,20 @@
                 return;
             }
 
+            // If multi-channel, limit msg count per channel to 100 to try to limit API requests...
+
+            if (multiChannel && upTo != "")
+            {
+                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Sorry, but if you are using `multi_channel`, you can only use `count`, and the count cannot be greater than 100.").AsEphemeral(true));
+                return;
+            }
+
+            if (multiChannel && count > 100)
+            {
+                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Sorry, but if you are using `multi_channel`, `count` cannot be greater than 100!").AsEphemeral(true));
+                return;
+            }
+
             // Get messages to delete, whether that's messages up to a certain one or the last 'x' number of messages.
 
             if (upTo != "" && count != 0)
@@ -63,11 +81,29 @@
                 return;
             }
 
-            List<DiscordMessage> messagesToClear = new();
+            await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Loading} Looking for messages that match your filters. This may take a while..."));
+
+            Dictionary<ulong, List<DiscordMessage>> messagesToClear = new();
             if (upTo == "")
             {
-                var messages = await channel.GetMessagesAsync((int)count).ToListAsync();
-                messagesToClear = messages.ToList();
+                List<DiscordChannel> channelsToSearch;
+                if (multiChannel)
+                {
+                    var clearChannelIds = Program.cfgjson.PublicFacingChannels is not null
+                        ? Program.cfgjson.PublicFacingChannels
+                        : Program.cfgjson.LockdownEnabledChannels;
+
+                    channelsToSearch = ctx.Guild.Channels.Values.Where(x => clearChannelIds.Contains(x.Id)).ToList();
+                }
+                else
+                {
+                    channelsToSearch = [channel];
+                }
+
+                foreach (var c in channelsToSearch)
+                {
+                    messagesToClear.Add(c.Id, await c.GetMessagesAsync((int)count).ToListAsync());
+                }
             }
             else
             {
@@ -112,13 +148,13 @@
                     return;
                 }
                 var firstMsgId = firstMsg.Id;
-                messagesToClear.Add(firstMsg);
+                AddToMessageList(messagesToClear, firstMsg);
                 while (true)
                 {
                     var newMessages = (await channel.GetMessagesAfterAsync(firstMsgId, 100).ToListAsync()).OrderByDescending(x => x.Id).ToList();
                     if (newMessages.Count == 0)
                         break;
-                    messagesToClear.AddRange(newMessages);
+                    AddToMessageList(messagesToClear, newMessages);
                     firstMsgId = newMessages.First().Id;
                     if (newMessages.Count() < 100)
                         break;
@@ -131,34 +167,34 @@
             // Match user
             if (user != default)
             {
-                foreach (var message in messagesToClear.ToList())
+                foreach (var messagesForChannel in messagesToClear)
                 {
-                    if (message.Author.Id != user.Id)
-                    {
-                        messagesToClear.Remove(message);
-                    }
+                    messagesToClear[messagesForChannel.Key].RemoveAll(message => message.Author.Id != user.Id);
                 }
             }
 
             // Ignore mods
             if (ignoreMods)
             {
-                foreach (var message in messagesToClear.ToList())
+                foreach (var messagesForChannel in messagesToClear)
                 {
-                    DiscordMember member;
-                    try
+                    foreach (var message in messagesForChannel.Value)
                     {
-                        member = await ctx.Guild.GetMemberAsync(message.Author.Id);
-                    }
-                    catch (DSharpPlus.Exceptions.NotFoundException)
-                    {
-                        // User is not in the server, so they can't be a current mod
-                        continue;
-                    }
+                        DiscordMember member;
+                        try
+                        {
+                            member = await ctx.Guild.GetMemberAsync(message.Author.Id);
+                        }
+                        catch (DSharpPlus.Exceptions.NotFoundException)
+                        {
+                            // User is not in the server, so they can't be a current mod
+                            continue;
+                        }
 
-                    if ((await GetPermLevelAsync(member)) >= ServerPermLevel.TrialModerator)
-                    {
-                        messagesToClear.Remove(message);
+                        if ((await GetPermLevelAsync(member)) >= ServerPermLevel.TrialModerator)
+                        {
+                            messagesToClear[messagesForChannel.Key].Remove(message);
+                        }
                     }
                 }
             }
@@ -166,12 +202,9 @@
             // Match text
             if (match != "")
             {
-                foreach (var message in messagesToClear.ToList())
+                foreach (var messagesForChannel in messagesToClear)
                 {
-                    if (!message.Content.ToLower().Contains(match.ToLower()))
-                    {
-                        messagesToClear.Remove(message);
-                    }
+                    messagesToClear[messagesForChannel.Key].RemoveAll(message => !message.Content.ToLower().Contains(match.ToLower()));
                 }
             }
 
@@ -184,137 +217,138 @@
                     return;
                 }
 
-                foreach (var message in messagesToClear.ToList())
+                foreach (var messagesForChannel in messagesToClear)
                 {
-                    if (!message.Author.IsBot)
-                    {
-                        messagesToClear.Remove(message);
-                    }
+                    messagesToClear[messagesForChannel.Key].RemoveAll(message => !message.Author.IsBot);
                 }
             }
 
             // Humans only
             if (humansOnly)
             {
-                foreach (var message in messagesToClear.ToList())
+                foreach (var messagesForChannel in messagesToClear)
                 {
-                    if (message.Author.IsBot)
-                    {
-                        messagesToClear.Remove(message);
-                    }
+                    messagesToClear[messagesForChannel.Key].RemoveAll(message => message.Author.IsBot);
                 }
             }
 
             // Attachments only
             if (attachmentsOnly)
             {
-                foreach (var message in messagesToClear.ToList())
+                foreach (var messagesForChannel in messagesToClear)
                 {
-                    if (message.Attachments.Count == 0)
-                    {
-                        messagesToClear.Remove(message);
-                    }
+                    messagesToClear[messagesForChannel.Key].RemoveAll(message => message.Attachments.Count == 0);
                 }
             }
 
             // Stickers only
             if (stickersOnly)
             {
-                foreach (var message in messagesToClear.ToList())
+                foreach (var messagesForChannel in messagesToClear)
                 {
-                    if (message.Stickers.Count == 0)
-                    {
-                        messagesToClear.Remove(message);
-                    }
+                    messagesToClear[messagesForChannel.Key].RemoveAll(message => message.Stickers.Count == 0);
                 }
             }
 
             // Links only
             if (linksOnly)
             {
-                foreach (var message in messagesToClear.ToList())
+                foreach (var messagesForChannel in messagesToClear)
                 {
-                    if (!Constants.RegexConstants.domain_rx.IsMatch(message.Content.ToLower()))
-                    {
-                        messagesToClear.Remove(message);
-                    }
+                    messagesToClear[messagesForChannel.Key].RemoveAll(message => !Constants.RegexConstants.domain_rx.IsMatch(message.Content.ToLower()));
                 }
             }
 
             // Skip messages older than 2 weeks, since Discord won't let us delete them anyway
-
-            bool skipped = false;
-            foreach (var message in messagesToClear.ToList())
+            foreach (var messagesForChannel in messagesToClear)
             {
-                if (message.CreationTimestamp.ToUniversalTime() < DateTime.UtcNow.AddDays(-14))
-                {
-                    messagesToClear.Remove(message);
-                    skipped = true;
-                }
+                messagesToClear[messagesForChannel.Key].RemoveAll(message => message.CreationTimestamp.ToUniversalTime() < DateTime.UtcNow.AddDays(-14));
             }
 
-            if (messagesToClear.Count == 0 && skipped)
+            // Clean up a bit
+            foreach (var messagesForChannel in messagesToClear)
+            {
+                if (messagesForChannel.Value.Count == 0)
+                    messagesToClear.Remove(messagesForChannel.Key);
+            }
+
+            if (messagesToClear.Count == 0)
             {
                 await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} All of the messages to delete are older than 2 weeks, so I can't delete them!").AsEphemeral(true));
                 return;
             }
 
-            // All filters checked. 'messages' is now our final list of messages to delete.
+            // All filters checked. 'messagesToClear' is now our final list of messages to delete, by channel
 
             if (dryRun)
             {
                 var msg = (await LogChannelHelper.CreateDumpMessageAsync($"{Program.cfgjson.Emoji.Information} **{messagesToClear.Count}** messages would have been deleted, but are instead logged below.",
-                    messagesToClear,
+                    messagesToClear.Values.SelectMany(x => x).ToList(), // pull all of the messages out of the dict
                     channel)).messageBuilder;
                 await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent(msg.Content).AddFiles(msg.Files).AddEmbeds(msg.Embeds).AsEphemeral(false));
                 return;
             }
 
             // Warn the mod if we're going to be deleting 50 or more messages.
-            if (messagesToClear.Count >= 50)
+            if (messagesToClear.Values.Sum(x => x.Count) >= 50)
             {
                 DiscordButtonComponent confirmButton = new(DiscordButtonStyle.Danger, "clear-confirm-callback", "Delete Messages");
-                DiscordMessage confirmationMessage = await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Muted} You're about to delete {messagesToClear.Count} messages. Are you sure?").AddActionRowComponent(confirmButton).AsEphemeral(true));
+                DiscordMessage confirmationMessage = await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Muted} You're about to delete {messagesToClear.Values.Sum(x => x.Count)} messages. Are you sure?").AddActionRowComponent(confirmButton));
 
                 MessagesToClear.Add(confirmationMessage.Id, messagesToClear);
             }
             else
             {
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Loading} Deleting messages. This may take a while..."));
+
                 if (messagesToClear.Count >= 1)
                 {
-                    await channel.DeleteMessagesAsync(messagesToClear, $"[Clear by {DiscordHelpers.UniqueUsername(ctx.User)}]");
-                    if (skipped)
+                    foreach (var messagesForChannel in messagesToClear)
                     {
-                        await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Cleared **{messagesToClear.Count}** messages from {channel.Mention}!\nSome messages were not deleted because they are older than 2 weeks.");
+                        channel = ctx.Guild.Channels[messagesForChannel.Key];
+                        await channel.DeleteMessagesAsync(messagesForChannel.Value, $"[Clear by {DiscordHelpers.UniqueUsername(ctx.User)}]");
+                        if (messagesToClear.Count == 1)
+                            await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Cleared **{messagesForChannel.Value.Count}** messages from {channel.Mention}!");
+                        await LogChannelHelper.LogMessageAsync("mod",
+                            new DiscordMessageBuilder()
+                                .WithContent($"{Program.cfgjson.Emoji.Deleted} **{messagesForChannel.Value.Count}** messages were cleared in {channel.Mention} by {ctx.User.Mention}.")
+                                .WithAllowedMentions(Mentions.None)
+                        );
+
+                        // logging is now handled in the bulk delete event
+                        if (!Program.cfgjson.EnablePersistentDb)
+                        {
+                            await LogChannelHelper.LogDeletedMessagesAsync(
+                                "messages",
+                                $"{Program.cfgjson.Emoji.Deleted} **{messagesForChannel.Value.Count}** messages were cleared from {channel.Mention} by {ctx.User.Mention}.",
+                                messagesForChannel.Value,
+                                channel
+                            );
+                        }
                     }
-                    else
-                    {
-                        await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Cleared **{messagesToClear.Count}** messages from {channel.Mention}!");
-                    }
-                    await LogChannelHelper.LogMessageAsync("mod",
-                        new DiscordMessageBuilder()
-                            .WithContent($"{Program.cfgjson.Emoji.Deleted} **{messagesToClear.Count}** messages were cleared in {channel.Mention} by {ctx.User.Mention}.")
-                            .WithAllowedMentions(Mentions.None)
-                    );
-                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Done!").AsEphemeral(true));
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Success} Done!"));
                 }
                 else
                 {
-                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} There were no messages that matched all of the arguments you provided! Nothing to do."));
-                }
-
-                // logging is now handled in the bulk delete event
-
-                if (!Program.cfgjson.EnablePersistentDb)
-                {
-                    await LogChannelHelper.LogDeletedMessagesAsync(
-                        "messages",
-                        $"{Program.cfgjson.Emoji.Deleted} **{messagesToClear.Count}** messages were cleared from {channel.Mention} by {ctx.User.Mention}.",
-                        messagesToClear,
-                        channel
-                    );
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} There were no messages that matched all of the arguments you provided! Nothing to do."));
                 }
             }
+        }
+
+        private static Dictionary<ulong, List<DiscordMessage>> AddToMessageList(Dictionary<ulong, List<DiscordMessage>> messagesToClear, DiscordMessage messageToAdd)
+        {
+            return AddToMessageList(messagesToClear, [messageToAdd]);
+        }
+
+        private static Dictionary<ulong, List<DiscordMessage>> AddToMessageList(Dictionary<ulong, List<DiscordMessage>> messagesToClear, List<DiscordMessage> messagesToAdd)
+        {
+            var channelId = messagesToAdd.First().Channel.Id;
+            if (messagesToClear.ContainsKey(channelId))
+                messagesToClear[channelId].AddRange(messagesToAdd);
+            else
+                messagesToClear.Add(channelId, messagesToAdd);
+
+            return messagesToClear;
         }
     }
 }
