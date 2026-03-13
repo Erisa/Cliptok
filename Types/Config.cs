@@ -309,6 +309,9 @@
 
         [JsonProperty("enableModActionReplyAutoWarn")]
         public bool EnableModActionReplyAutoWarn { get; set; } = false;
+
+        [JsonProperty("modActionReplyAutoWarnReason")]
+        public string ModActionReplyAutoWarnReason { get; set; } = "";
     }
 
     public class AutoModRuleConfig

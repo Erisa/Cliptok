@@ -363,5 +363,6 @@
     "error": 1263632640758780016
   },
   "compromisedAccountBanAutoPardonHours": 12,
-  "enableModActionReplyAutoWarn":  true
+  "enableModActionReplyAutoWarn":  true,
+  "modActionReplyAutoWarnReason":  "rule 12"
 }

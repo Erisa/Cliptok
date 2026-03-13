@@ -1262,6 +1262,7 @@ namespace Cliptok.Events
         private static async Task<bool> RunModActionReplyFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
             if (Program.cfgjson.EnableModActionReplyAutoWarn &&
+                !string.IsNullOrWhiteSpace(Program.cfgjson.ModActionReplyAutoWarnReason) &&
                 message.ReferencedMessage is not null &&
                 (warn_msg_rx.IsMatch(message.ReferencedMessage.Content) ||
                 auto_warn_msg_rx.IsMatch(message.ReferencedMessage.Content) ||
@@ -1271,13 +1272,13 @@ namespace Cliptok.Events
                 Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered mod action reply filter", message.Id, channel.Id, message.Author.Id);
                 await DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(message);
 
-                string reason = "rule 12";
+                string reason = Program.cfgjson.ModActionReplyAutoWarnReason;
 
                 if (!Program.redis.SetContains("modActionReplyPardoned", message.Author.Id.ToString()))
                 {
                     await Program.redis.SetAddAsync("modActionReplyPardoned", message.Author.Id.ToString());
                     string output = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, your message was deleted because it was a reply to a moderation action." +
-                            $"\nPlease DM <@{Program.cfgjson.ModmailUserId}> if you would like to discuss moderation actions, as per rule 12.";
+                            $"\nPlease DM <@{Program.cfgjson.ModmailUserId}> if you would like to discuss moderation actions, as per {reason}.";
                     DiscordMessage msg = await channel.SendMessageAsync(output);
                     await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, DiscordHelpers.MessageLink(msg), messageContentOverride: messageContentOverride);
                     await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, DiscordHelpers.MessageLink(msg), messageContentOverride: messageContentOverride);
