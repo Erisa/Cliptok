@@ -306,6 +306,9 @@
 
         [JsonProperty("autoModRules")]
         public List<AutoModRuleConfig> AutoModRules { get; set; } = new();
+
+        [JsonProperty("enableModActionReplyAutoWarn")]
+        public bool EnableModActionReplyAutoWarn { get; set; } = false;
     }
 
     public class AutoModRuleConfig

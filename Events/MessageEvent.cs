@@ -1261,7 +1261,8 @@ namespace Cliptok.Events
 
         private static async Task<bool> RunModActionReplyFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
-            if (message.ReferencedMessage is not null &&
+            if (Program.cfgjson.EnableModActionReplyAutoWarn &&
+                message.ReferencedMessage is not null &&
                 (warn_msg_rx.IsMatch(message.ReferencedMessage.Content) ||
                 auto_warn_msg_rx.IsMatch(message.ReferencedMessage.Content) ||
                 mute_msg_rx.IsMatch(message.ReferencedMessage.Content) ||
