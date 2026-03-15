@@ -361,7 +361,7 @@ namespace Cliptok.Commands
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [Hidden]
-        public static async Task MassUnmuteAliasCmd(CommandContext ctx, [Description("The list of users to mute, separated by newlines or spaces, optionally followed by a reason."), RemainingText] string input)
+        public static async Task MassUnmuteAliasCmd(CommandContext ctx, [Description("The list of users to unmute, separated by newlines or spaces, optionally followed by a reason."), RemainingText] string input)
         {
             await MassCmds.MassUnmuteCmd(ctx, input);
         }
