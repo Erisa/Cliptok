@@ -97,7 +97,7 @@ namespace Cliptok.Commands
             }
 
             // Check if the user is already banned first. If they are, we will update the ban record (editban) instead of writing a new one
-            var userAlreadyBanned = await Program.redis.HashExistsAsync("bans", user.Id);
+            var userAlreadyBanned = (await ctx.Guild.GetBansAsync()).Any(x => x.User.Id == user.Id);
 
             DiscordMember member;
             try
@@ -260,7 +260,7 @@ namespace Cliptok.Commands
             }
 
             // Check if the user is already banned first. If they are, we will update the ban record (editban) instead of writing a new one
-            var userAlreadyBanned = await Program.redis.HashExistsAsync("bans", targetMember.Id);
+            var userAlreadyBanned = (await ctx.Guild.GetBansAsync()).Any(x => x.User.Id == targetMember.Id);
 
             DiscordMember member;
             try
