@@ -4,7 +4,11 @@
     {
         public static async Task LockChannelAsync(DiscordUser user, DiscordChannel channel, TimeSpan? duration = null, string reason = "No reason specified.", bool lockThreads = false)
         {
-            if (!Program.cfgjson.LockdownEnabledChannels.Contains(channel.Id))
+            var lockdownChannels = Program.cfgjson.PublicFacingChannels is not null
+                    ? Program.cfgjson.PublicFacingChannels
+                    : Program.cfgjson.LockdownEnabledChannels;
+
+            if (!lockdownChannels.Contains(channel.Id))
             {
                 throw new ArgumentException($"Channel {channel.Id} is not in the lockdown whitelist.");
             }
@@ -90,7 +94,11 @@
 
         public static async Task UnlockChannel(DiscordChannel discordChannel, DiscordMember discordMember, string reason = "No reason specified.", bool isMassUnlock = false)
         {
-            if (!Program.cfgjson.LockdownEnabledChannels.Contains(discordChannel.Id))
+            var lockdownChannels = Program.cfgjson.PublicFacingChannels is not null
+                    ? Program.cfgjson.PublicFacingChannels
+                    : Program.cfgjson.LockdownEnabledChannels;
+
+            if (!lockdownChannels.Contains(discordChannel.Id))
             {
                 throw new ArgumentException($"Channel {discordChannel.Id} is not in the lockdown whitelist.");
             }

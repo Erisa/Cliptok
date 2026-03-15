@@ -69,6 +69,12 @@ namespace Cliptok.Events
             if (Environment.GetEnvironmentVariable("RAVY_API_TOKEN") is null || Environment.GetEnvironmentVariable("RAVY_API_TOKEN") == "goodluckfindingone")
                 discord.Logger.LogWarning(CliptokEventID, "Ravy API features disabled due to missing API token.");
 
+            if (cfgjson.AutoWarnMsgAutoDeleteHours > 0 && cfgjson.AutoWarnMsgAutoDeleteDays > 0)
+                discord.Logger.LogWarning(CliptokEventID, "Both autoWarnMsgAutoDeleteHours and autoWarnMsgAutoDeleteDays are set. Hours will be used, please remove the old days config. Using {hours} hours.", cfgjson.AutoWarnMsgAutoDeleteHours);
+
+            if (cfgjson.PublicFacingChannels is not null && cfgjson.LockdownEnabledChannels is not null)
+                discord.Logger.LogWarning(CliptokEventID, "Both publicFacingChannels and lockdownEnabledChannels are set. publicFacingChannels will be used, please remove the old lockdown config.");
+
             Tasks.PunishmentTasks.CheckMutesAsync();
             Tasks.PunishmentTasks.CheckBansAsync();
             Tasks.ReminderTasks.CheckRemindersAsync();

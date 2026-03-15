@@ -80,6 +80,9 @@
         [JsonProperty("lockdownEnabledChannels")]
         public List<ulong> LockdownEnabledChannels { get; private set; }
 
+        [JsonProperty("publicFacingChannels")]
+        public List<ulong> PublicFacingChannels { get; private set; }
+
         [JsonProperty("heartosoftId")]
         public ulong HeartosoftId { get; private set; }
 
@@ -229,6 +232,9 @@
         [JsonProperty("autoWarnMsgAutoDeleteDays")]
         public int AutoWarnMsgAutoDeleteDays { get; private set; }
 
+        [JsonProperty("autoWarnMsgAutoDeleteHours")]
+        public int AutoWarnMsgAutoDeleteHours { get; private set; }
+
         [JsonProperty("compromisedAccountBanMsgAutoDeleteDays")]
         public int CompromisedAccountBanMsgAutoDeleteDays { get; private set; }
 
@@ -276,6 +282,9 @@
 
         [JsonProperty("enablePersistentDb")]
         public bool EnablePersistentDb { get; set; } = false;
+        
+        [JsonProperty("compromisedAccountBanAutoPardonHours")]
+        public int CompromisedAccountBanAutoPardonHours { get; private set; } = 0;
 
         [JsonProperty("disableMicrosoftCommands")]
         public bool DisableMicrosoftCommands { get; set; } = false;
@@ -433,10 +442,6 @@
 
         [JsonProperty("insider")]
         public string Insider { get; set; }
-
-        [JsonProperty("windows10")]
-        public string Windows10 { get; set; }
-
     }
 
     public class CoreConfig
@@ -471,9 +476,6 @@
 
         [JsonProperty("insiderRP")]
         public ulong InsiderRP { get; private set; }
-
-        [JsonProperty("insider10RP")]
-        public ulong Insider10RP { get; private set; }
 
         [JsonProperty("insiderChat")]
         public ulong InsiderChat { get; private set; }

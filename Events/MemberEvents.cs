@@ -98,6 +98,9 @@ namespace Cliptok.Events
                 await channel.AddOverwriteAsync(e.Member, overwrite.Value.Allowed, overwrite.Value.Denied,
                     "Restoring saved overrides for member.");
             }
+            
+            // Change member name if it attempts to impersonate/roleplay a public figure or organization
+            await MemberHelpers.CheckAndChangeBadMemberNameAsync(e.Member);
         }
 
         public static async Task GuildMemberRemoved(DiscordClient client, GuildMemberRemovedEventArgs e)
@@ -183,8 +186,22 @@ namespace Cliptok.Events
 
             if (userNotes.Count > 0)
             {
+                // check if theyre banned            
+                var redisBan = await redis.HashGetAsync("bans", e.Member.Id);
+
+                client.Logger.LogDebug("Checking ban on leave for user {user}: {redisBan}", e.Member.Id, redisBan);
+
+                string msgContent;
+                if (redisBan.IsNull)
+                {
+                    msgContent = $"{cfgjson.Emoji.UserLeave} {e.Member.Mention} just left the server with {(userNotes.Count == 1 ? "a note" : "notes")} set to show on leave!";
+                } else
+                {
+                    msgContent = $"{cfgjson.Emoji.Banned} {e.Member.Mention} was just **banned** from the server with {(userNotes.Count == 1 ? "a note" : "notes")} set to show on leave!";
+                }
+
                 var notesEmbed = await UserNoteHelpers.GenerateUserNotesEmbedAsync(e.Member, false, userNotes, colorOverride: new DiscordColor(0xBA4119));
-                LogChannelHelper.LogMessageAsync("investigations", $"{cfgjson.Emoji.UserLeave} {e.Member.Mention} just left the server with {(userNotes.Count == 1 ? "a note" : "notes")} set to show on leave!", notesEmbed);
+                LogChannelHelper.LogMessageAsync("investigations", msgContent, notesEmbed);
             }
         }
 
@@ -236,6 +253,12 @@ namespace Cliptok.Events
 
             DehoistHelpers.CheckAndDehoistMemberAsync(e.Member);
 
+            // If member is not dehoisted but is in manualDehoists, remove them
+            if (e.Member.Nickname is null
+                || (e.Member.Nickname[0] != DehoistHelpers.dehoistCharacter
+                && await Program.redis.SetContainsAsync("manualDehoists", e.Member.Id)))
+                await Program.redis.SetRemoveAsync("manualDehoists", e.Member.Id);
+
             // Persist permadehoists
             if (await redis.SetContainsAsync("permadehoists", e.Member.Id))
                 if (e.Member.DisplayName[0] != DehoistHelpers.dehoistCharacter && !e.Member.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedUsername) && !e.Member.MemberFlags.Value.HasFlag(DiscordMemberFlags.AutomodQuarantinedGuildTag))
@@ -245,6 +268,9 @@ namespace Cliptok.Events
                         a.Nickname = DehoistHelpers.DehoistName(e.Member.DisplayName);
                         a.AuditLogReason = "[Automatic dehoist; user is permadehoisted]";
                     });
+            
+            // Change member name if it attempts to impersonate/roleplay a public figure or organization
+            await MemberHelpers.CheckAndChangeBadMemberNameAsync(e.Member);
 
             // cache user
             if (Program.cfgjson.EnablePersistentDb)

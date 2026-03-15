@@ -55,6 +55,9 @@ namespace Cliptok
         public static string[] avatars;
 
         public static string[] badUsernames;
+        public static string[] badNicknames;
+        public static string[] badNicknameAdverbs;
+        
         public static List<ulong> autoBannedUsersCache = new();
         public static DiscordGuild homeGuild;
 
@@ -152,6 +155,16 @@ namespace Cliptok
                 badUsernames = File.ReadAllLines("Lists/usernames.txt");
             else
                 badUsernames = Array.Empty<string>();
+            
+            if (File.Exists("Lists/nicknames.txt"))
+                badNicknames = File.ReadAllLines("Lists/nicknames.txt");
+            else
+                badNicknames = Array.Empty<string>();
+            
+            if (File.Exists("Lists/adverbs.txt"))
+                badNicknameAdverbs = File.ReadAllLines("Lists/adverbs.txt");
+            else
+                badNicknameAdverbs = Array.Empty<string>();
 
             avatars = File.ReadAllLines("Lists/avatars.txt");
 

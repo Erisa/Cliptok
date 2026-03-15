@@ -32,6 +32,8 @@ services:
     network_mode: service:tailscale
   redis:
     image: mirror.gcr.io/redis:7.2-alpine
+    ports:
+      - 127.0.0.1:6379:6379
     restart: always
     volumes:
       - type: bind
@@ -41,6 +43,8 @@ services:
 # Use only if enablePersistentDb is enabled in config.json
   postgres:
     image: postgres:17-alpine
+    ports:
+      - 127.0.0.1:5432:5432
     restart: always
     environment:
       POSTGRES_USER: cliptok
@@ -62,7 +66,7 @@ services:
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARED_TOKEN}
   watchtower:
-    image: ghcr.io/containrrr/watchtower
+    image: ghcr.io/nicholas-fedor/watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 30 --label-enable

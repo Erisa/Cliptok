@@ -57,8 +57,12 @@ namespace Cliptok.Commands
                         lockDuration = HumanDateParser.HumanDateParser.Parse(time).ToUniversalTime().Subtract(ctx.As<TextCommandContext>().Message.Timestamp.DateTime);
                 }
 
+                var lockdownChannels = Program.cfgjson.PublicFacingChannels is not null
+                    ? Program.cfgjson.PublicFacingChannels
+                    : Program.cfgjson.LockdownEnabledChannels;
+
                 var currentChannel = ctx.Channel;
-                if (!Program.cfgjson.LockdownEnabledChannels.Contains(currentChannel.Id))
+                if (!lockdownChannels.Contains(currentChannel.Id))
                 {
                     if (ctx is SlashCommandContext)
                         ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Denied} You can't lock or unlock this channel!\nIf this is in error, add its ID (`{currentChannel.Id}`) to the lockdown whitelist."));
@@ -119,7 +123,11 @@ namespace Cliptok.Commands
                         lockDuration = HumanDateParser.HumanDateParser.Parse(time).ToUniversalTime().Subtract(ctx.As<TextCommandContext>().Message.Timestamp.DateTime);
                 }
 
-                foreach (var chanID in Program.cfgjson.LockdownEnabledChannels)
+                var lockdownChannels = Program.cfgjson.PublicFacingChannels is not null
+                    ? Program.cfgjson.PublicFacingChannels
+                    : Program.cfgjson.LockdownEnabledChannels;
+
+                foreach (var chanID in lockdownChannels)
                 {
                     try
                     {
@@ -156,8 +164,12 @@ namespace Cliptok.Commands
                 if (ctx is SlashCommandContext)
                     await ctx.As<SlashCommandContext>().DeferResponseAsync(ephemeral: true);
 
+                var lockdownChannels = Program.cfgjson.PublicFacingChannels is not null
+                    ? Program.cfgjson.PublicFacingChannels
+                    : Program.cfgjson.LockdownEnabledChannels;
+
                 var currentChannel = ctx.Channel;
-                if (!Program.cfgjson.LockdownEnabledChannels.Contains(currentChannel.Id))
+                if (!lockdownChannels.Contains(currentChannel.Id))
                 {
                     if (ctx is SlashCommandContext)
                         await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Denied} You can't lock or unlock this channel!\nIf this is in error, add its ID (`{currentChannel.Id}`) to the lockdown whitelist.").AsEphemeral(true));
@@ -199,7 +211,12 @@ namespace Cliptok.Commands
                     await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Loading} Working on it, please hold..."));
                 else
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it, please hold...");
-                foreach (var chanID in Program.cfgjson.LockdownEnabledChannels)
+
+                var lockdownChannels = Program.cfgjson.PublicFacingChannels is not null
+                    ? Program.cfgjson.PublicFacingChannels
+                    : Program.cfgjson.LockdownEnabledChannels;
+
+                foreach (var chanID in lockdownChannels)
                 {
                     try
                     {

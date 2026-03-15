@@ -30,7 +30,7 @@ namespace Cliptok.Events
             }
 
             // Remove self-heartosofts
-            if (e.Emoji.Id == cfgjson.HeartosoftId)
+            if (e.Emoji.Id != 0 && e.Emoji.Id == cfgjson.HeartosoftId)
             {
                 // Avoid starboard race conditions
                 await Task.Delay(1000);

@@ -17,6 +17,8 @@ namespace Cliptok.Events
 
         static public readonly HttpClient httpClient = new();
 
+        #region event handlers
+
         public static async Task MessageCreated(DiscordClient client, MessageCreatedEventArgs e)
         {
             if (e.Message is null)
@@ -27,14 +29,17 @@ namespace Cliptok.Events
             else if (e.Message.Author is null)
             {
                 client.Logger.LogDebug("Got a message create event for a message with no author: {message}", DiscordHelpers.MessageLink(e.Message));
+                return;
             }
             else if (e.Message.Channel is null)
             {
                 client.Logger.LogDebug("Got a message create event for a message with no channel: {messageId} by {user}", e.Message.Id, e.Message.Author.Id);
+                return;
             }
             else if (e.Message.Channel.Guild is null && !e.Message.Channel.IsPrivate)
             {
                 client.Logger.LogDebug("Got a message create event for a non-DM message with no guild: {messageId} in {channelId} by {user}", e.Message.Id, e.Message.Channel.Id, e.Message.Author.Id);
+                return;
             }
             else
             {
@@ -54,14 +59,17 @@ namespace Cliptok.Events
             else if (e.Message.Author is null)
             {
                 client.Logger.LogDebug("Got a message update event for a message with no author: {message}", DiscordHelpers.MessageLink(e.Message));
+                return;
             }
             else if (e.Message.Channel is null)
             {
                 client.Logger.LogDebug("Got a message update event for a message with no channel: {messageId} by {user}", e.Message.Id, e.Message.Author.Id);
+                return;
             }
             else if (e.Message.Channel.Guild is null && !e.Message.Channel.IsPrivate)
             {
                 client.Logger.LogDebug("Got a message update event for a non-DM message with no guild: {messageId} in {channelId} by {user}", e.Message.Id, e.Message.Channel.Id, e.Message.Author.Id);
+                return;
             }
             else
             {
@@ -81,24 +89,27 @@ namespace Cliptok.Events
                 client.Logger.LogError("Got a message delete event but the message was null!");
                 return;
             }
-            else if (e.Message.Author is null)
+            
+            if (e.Message.Author is null)
             {
-                client.Logger.LogDebug("Got a message delete event for a message with no author: {message}", DiscordHelpers.MessageLink(e.Message));
+                client.Logger.LogDebug("Got a message delete event for a message with no author: {message}. Continuing with event anyway.", DiscordHelpers.MessageLink(e.Message));
             }
-            else if (e.Message.Channel is null)
+            
+            if (e.Channel is null)
             {
-                client.Logger.LogDebug("Got a message delete event for a message with no channel: {messageId} by {user}", e.Message.Id, e.Message.Author.Id);
+                client.Logger.LogDebug("Got a message delete event for a message with no channel: {messageId} by {user}", e.Message.Id, e.Message.Author?.Id);
+                return;
             }
-            else if (e.Message.Channel.Guild is null && !e.Message.Channel.IsPrivate)
+            
+            if (e.Guild is null && !e.Channel.IsPrivate)
             {
-                client.Logger.LogDebug("Got a message delete event for a non-DM message with no guild: {messageId} in {channelId} by {user}", e.Message.Id, e.Message.Channel.Id, e.Message.Author.Id);
+                client.Logger.LogDebug("Got a message delete event for a non-DM message with no guild: {messageId} in {channelId} by {user}", e.Message.Id, e.Channel.Id, e.Message.Author?.Id);
+                return;
             }
-            else
-            {
-                client.Logger.LogDebug("Got a message delete event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author.Id);
-            }
+            
+            client.Logger.LogDebug("Got a message delete event for {message} by {user}", DiscordHelpers.MessageLink(e.Message), e.Message.Author?.Id);
 
-            if (e.Message.Channel.GuildId != Program.cfgjson.ServerID)
+            if (e.Guild.Id != Program.cfgjson.ServerID)
                 return;
 
             foreach (var warning in await Program.redis.HashGetAllAsync("automaticWarnings"))
@@ -125,9 +136,9 @@ namespace Cliptok.Events
                         await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(cachedMessage, "deleted", true, true));
                     }
                 }
-
-                await DiscordHelpers.DoEmptyThreadCleanupAsync(e.Channel, e.Message);
             }
+
+            await DiscordHelpers.DoEmptyThreadCleanupAsync(e.Channel, e.Message);
         }
 
         public static async Task MessagesBulkDeleted(DiscordClient client, MessagesBulkDeletedEventArgs e)
@@ -175,12 +186,1123 @@ namespace Cliptok.Events
             }
         }
 
-        static async Task DeleteAndWarnAsync(DiscordMessage message, string reason, DiscordClient client, string messageContentOverride = default)
+        #endregion event handlers
+
+        public static async Task MessageHandlerAsync(DiscordClient client, DiscordMessage message, DiscordChannel channel, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
-            await DeleteAndWarnAsync(new MockDiscordMessage(message), reason, client, messageContentOverride: messageContentOverride);
+            await MessageHandlerAsync(client, new MockDiscordMessage(message), channel, isAnEdit, limitFilters, wasAutoModBlock);
+        }
+        public static async Task MessageHandlerAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        {
+            try
+            {
+                await CheckAndCacheMessageAsync(message, isAnEdit, wasAutoModBlock);
+
+                #region return early checks
+                if (message.Timestamp is not null && message.Timestamp.Value.Year < (DateTime.UtcNow.Year - 2))
+                    return;
+
+                if (isAnEdit && message.BaseMessage is not null && (message.BaseMessage.EditedTimestamp is null || message.BaseMessage.EditedTimestamp == message.BaseMessage.CreationTimestamp || message.BaseMessage.EditedTimestamp < DateTimeOffset.Now - TimeSpan.FromDays(1)))
+                    return;
+
+                if (message.Author is null || message.Author.Id == client.CurrentUser.Id)
+                    return;
+                #endregion
+
+                string msgContentWithEmbedData = await PrepareMessageAsync(message);
+
+                #region debug logging
+                if (wasAutoModBlock)
+                {
+                    Program.discord.Logger.LogDebug("Processing AutoMod-blocked message in {channelId} by user {userId}", channel.Id, message.Author.Id);
+                    if (channel.Type == DiscordChannelType.GuildForum && Program.cfgjson.ForumChannelAutoWarnFallbackChannel != 0)
+                        channel = Program.ForumChannelAutoWarnFallbackChannel;
+                }
+                else
+                {
+                    Program.discord.Logger.LogDebug("Processing message {messageId} in {channelId} by user {userId}", message.Id, channel.Id, message.Author.Id);
+                }
+                #endregion
+
+                if (!limitFilters)
+                {
+                    await HandleMessageRelaysAsync(client, message, channel, isAnEdit);
+
+                    await HandleSpecialChannelsAsync(message, channel, isAnEdit);
+                }
+
+                await DoListUpdateAsync(message);
+
+                #region Skip DMs, external guilds, and messages from bots, beyond this point.
+                if (channel.IsPrivate || channel.Guild.Id != Program.cfgjson.ServerID || message.Author.IsBot)
+                    return;
+                #endregion
+
+                #region mention relaying
+                if (!limitFilters && !Program.cfgjson.MentionTrackExcludedChannels.Contains(channel.Id) && (channel.ParentId is null || !Program.cfgjson.MentionTrackExcludedChannels.Contains((ulong)channel.ParentId)))
+                {
+                    // track mentions
+                    if (message.MentionedUsers.Any(x => x.Id == Program.discord.CurrentUser.Id))
+                        await LogChannelHelper.LogMessageAsync("mentions", await DiscordHelpers.GenerateMessageRelay(message.BaseMessage, true, true, false));
+                }
+                #endregion
+
+                #region retrieve member object
+                DiscordMember member;
+                try
+                {
+                    member = await channel.Guild.GetMemberAsync(message.Author.Id);
+                }
+                catch (DSharpPlus.Exceptions.NotFoundException)
+                {
+                    member = default;
+                }
+
+                if (member == default)
+                    return;
+
+                ServerPermLevel permLevel = await GetPermLevelAsync(member);
+                #endregion
+
+                #region content filters
+                if (permLevel < ServerPermLevel.TrialModerator)
+                {
+                    // Content filters return true if user was warned
+
+                    if (await RunScamImageFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
+
+                    if (await RunMassMentionsBanFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
+
+                    if (await RunDuplicateMessageFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
+
+                    if (await RunRestrictedWordListFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
+
+                    if (await RunInviteFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
+
+                    if (await RunMassEmojiFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
+
+                    if (await RunPhishingApiFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
+
+                    if (await RunEveryoneHerePingFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
+
+                    if (await RunMassMentionsWarnFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
+
+                    if (await RunLineLimitFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
+                }
+
+                await RunCtsPingFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock);
+                #endregion
+
+                #region tech support relaying
+                if (!limitFilters)
+                {
+                    if (channel.Id == Program.cfgjson.TechSupportChannel &&
+                        message.Content.Contains($"<@&{Program.cfgjson.CommunityTechSupportRoleID}>"))
+                    {
+                        if (supportRatelimit.ContainsKey(message.Author.Id))
+                        {
+                            if (supportRatelimit[message.Author.Id] > DateTime.UtcNow)
+                                return;
+                            else
+                                supportRatelimit.Remove(message.Author.Id);
+                        }
+
+                        supportRatelimit.Add(message.Author.Id, DateTime.UtcNow.Add(TimeSpan.FromMinutes(Program.cfgjson.SupportRatelimitMinutes)));
+
+                        var embed = new DiscordEmbedBuilder()
+                            .WithTimestamp(DateTime.UtcNow)
+                            .WithAuthor(DiscordHelpers.UniqueUsername(message.Author), null, $"https://cdn.discordapp.com/avatars/{message.Author.Id}/{message.Author.AvatarHash}.png?size=128");
+
+                        var lastMsgs = await channel.GetMessagesBeforeAsync(message.Id, 50).ToListAsync();
+                        var msgMatch = lastMsgs.FirstOrDefault(m => m.Author.Id == message.Author.Id);
+
+                        if (msgMatch is not null)
+                        {
+                            var matchContent = StringHelpers.Truncate(string.IsNullOrWhiteSpace(msgMatch.Content) ? "`[No content]`" : msgMatch.Content, 1020, true);
+                            embed.AddField("Previous message", matchContent);
+                            if (msgMatch.Attachments.Count != 0)
+                            {
+                                embed.WithImageUrl(msgMatch.Attachments[0].Url);
+                            }
+                        }
+
+                        var messageContent = StringHelpers.Truncate(string.IsNullOrWhiteSpace(message.Content) ? "`[No content]`" : message.Content, 1020, true);
+                        embed.AddField("Current message", messageContent);
+                        if (message.Attachments.Count != 0)
+                        {
+                            if (embed.ImageUrl is null)
+                                embed.WithImageUrl(message.Attachments[0].Url);
+                            else
+                                embed.ImageUrl = message.Attachments[0].Url;
+                        }
+
+                        embed.AddField("Message Link", $"https://discord.com/channels/{channel.Guild.Id}/{channel.Id}/{message.Id}");
+                        var logOut = await LogChannelHelper.LogMessageAsync("support", new DiscordMessageBuilder().AddEmbed(embed));
+                        _ = logOut.CreateReactionAsync(DiscordEmoji.FromName(client, ":CliptokAcknowledge:", true));
+                    }
+                }
+                #endregion
+
+                if (!limitFilters)
+                {
+                    #region feedback hub forum validation
+                    if (permLevel < ServerPermLevel.TrialModerator && !isAnEdit && channel.IsThread && channel.ParentId == Program.cfgjson.FeedbackHubForum && !Program.redis.SetContains("processedFeedbackHubThreads", channel.Id))
+                    {
+                        var thread = (DiscordThreadChannel)channel;
+                        Program.redis.SetAdd("processedFeedbackHubThreads", thread.Id);
+
+                        // we need to make sure this is the first message in the channel
+                        if ((await thread.GetMessagesBeforeAsync(message.Id).ToListAsync()).Count == 0)
+                        {
+                            // lock thread if there is no possible feedback hub link
+                            if (!message.Content.Contains("aka.ms/") && !message.Content.Contains("feedback-hub:"))
+                            {
+                                await message.BaseMessage.RespondAsync($"{Program.cfgjson.Emoji.Error} Your {channel.Parent.Mention} submission must include a Feedback Hub link!\nThis post will be automatically deleted shortly.");
+                                await thread.ModifyAsync(thread =>
+                                {
+                                    thread.IsArchived = true;
+                                    thread.Locked = true;
+                                });
+                                await Task.Delay(30000);
+                                await LogChannelHelper.LogMessageAsync("messages",
+                                    new DiscordMessageBuilder()
+                                        .WithContent($"{Program.cfgjson.Emoji.Deleted} Deleted non-feedback post from {message.Author.Mention} in {channel.Parent.Mention}:")
+                                        .AddEmbed(new DiscordEmbedBuilder()
+                                            .WithAuthor(
+                                                $"{DiscordHelpers.UniqueUsername(message.Author)} in #{channel.Parent.Name}",
+                                                null, await LykosAvatarMethods.UserOrMemberAvatarURL(message.Author, channel.Guild))
+                                            .WithTitle(thread.Name)
+                                            .WithDescription(message.Content)
+                                            .WithColor(DiscordColor.Red)
+                                        )
+
+                                );
+                                await thread.DeleteAsync();
+                                return;
+                            }
+                            else
+                            {
+                                await Task.Delay(2000);
+                                await message.BaseMessage.ModifyEmbedSuppressionAsync(true);
+                            }
+                        }
+                    }
+                    #endregion
+
+                    await DoPassiveMessageChecksAsync(message, channel, isAnEdit, permLevel, wasAutoModBlock);
+                }
+            }
+            catch (Exception e)
+            {
+                client.Logger.LogError(eventId: Program.CliptokEventID, message: "{message}", e.ToString());
+
+                var exs = new List<Exception>();
+                if (e is AggregateException ae)
+                    exs.AddRange(ae.InnerExceptions);
+                else
+                    exs.Add(e);
+
+                var cliptokChannel = await client.GetChannelAsync(Program.cfgjson.HomeChannel);
+
+                foreach (var ex in exs)
+                {
+
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Color = new DiscordColor("#FF0000"),
+                        Title = "An exception occurred when processing a message event.",
+                        Description = $"{Program.cfgjson.Emoji.BSOD} `{e.GetType()}` occurred when processing [this message]({DiscordHelpers.MessageLink(message)})!",
+                        Timestamp = DateTime.UtcNow
+                    };
+                    embed.WithFooter(client.CurrentUser.Username, client.CurrentUser.AvatarUrl)
+                        .AddField("Message", ex.Message);
+                    await LogChannelHelper.LogMessageAsync("errors", embed: embed.Build()).ConfigureAwait(false);
+                }
+            }
+
+            if (wasAutoModBlock)
+                Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered no filters!", channel.Id, message.Author.Id);
+            else
+                Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered no filters!", message.Id, channel.Id, message.Author.Id);
         }
 
-        static async Task DeleteAndWarnAsync(MockDiscordMessage message, string reason, DiscordClient client, bool wasAutoModBlock = false, string messageContentOverride = default)
+        #region message processing
+
+        private static async Task CheckAndCacheMessageAsync(MockDiscordMessage message, bool isAnEdit, bool wasAutoModBlock)
+        {
+            #region message logging fill to db
+            // If db support is enabled, and this message is not in an excluded channel, cache it
+            if (!wasAutoModBlock && message.Channel.GuildId == Program.cfgjson.ServerID
+                && Program.cfgjson.EnablePersistentDb
+                && !Program.cfgjson.MessageLogExcludedChannels.Contains(message.ChannelId)
+                && (message.Channel.ParentId is null || !Program.cfgjson.MessageLogExcludedChannels.Contains((ulong)message.Channel.ParentId)))
+            {
+                if (isAnEdit)
+                {
+                    using (var dbContext = new CliptokDbContext())
+                    {
+                        var cachedMessage = dbContext.Messages.Include(m => m.User).Include(m => m.Sticker).FirstOrDefault(m => m.Id == message.Id);
+                        if (cachedMessage is not null && (cachedMessage.Content != message.Content || cachedMessage.AttachmentURLs.Count != message.Attachments.Count))
+                        {
+                            var newMessage = await CacheMessageAsync(message, dbContext);
+                            // we store bot messages but don't log them right now
+                            if (cachedMessage is not null && !cachedMessage.User.IsBot)
+                            {
+                                await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(newMessage, "edited", true, true, cachedMessage));
+                            }
+                            cachedMessage.Content = newMessage.Content;
+                            cachedMessage.AttachmentURLs = newMessage.AttachmentURLs;
+                            await UpdateMessageAsync(cachedMessage, dbContext);
+                        }
+                    }
+                }
+                else
+                {
+                    // cache in the background to not impede execution of the message handler
+                    _ = CacheAndAddMessageAsync(message, new CliptokDbContext(), true);
+                }
+            }
+            #endregion
+        }
+
+        private static async Task<string> PrepareMessageAsync(MockDiscordMessage message)
+        {
+            #region combine all message text
+            // Get forwarded msg & embeds, if any, and combine with content to evaluate
+            // Combined as a single long string
+
+            string msgContentWithEmbedData = message.Content;
+            var embeds = new List<DiscordEmbed>();
+
+            if (message.MessageSnapshots is not null)
+                foreach (var snapshot in message.MessageSnapshots)
+                {
+                    msgContentWithEmbedData += $" {snapshot.Message.Content}";
+                    embeds.AddRange(snapshot.Message.Embeds);
+                }
+
+            foreach (var embed in embeds)
+            {
+                // Add any text from the embed into the content to be checked
+
+                if (embed.Author is not null)
+                {
+                    if (embed.Author.Name is not null)
+                        msgContentWithEmbedData += $" {embed.Author.Name}";
+
+                    if (embed.Author.Url is not null)
+                        msgContentWithEmbedData += $" {embed.Author.Url}";
+                }
+
+                if (embed.Title is not null)
+                    msgContentWithEmbedData += $" {embed.Title}";
+
+                if (embed.Url is not null)
+                    msgContentWithEmbedData += $" {embed.Url}";
+
+                if (embed.Description is not null)
+                    msgContentWithEmbedData += $" {embed.Description}";
+
+                if (embed.Footer is not null && embed.Footer.Text is not null)
+                    msgContentWithEmbedData += $" {embed.Footer.Text}";
+
+                if (embed.Fields is not null)
+                    foreach (var field in embed.Fields)
+                    {
+                        msgContentWithEmbedData += $" {field.Name} {field.Value}";
+                    }
+            }
+            #endregion
+
+            #region avoid url bypass
+            var urls = url_rx.Matches(msgContentWithEmbedData);
+
+            // urldecode and replace all urls
+            if (urls != null)
+            {
+                foreach (Match match in urls)
+                {
+                    string decodedUrl = Uri.UnescapeDataString(match.Value);
+                    msgContentWithEmbedData = msgContentWithEmbedData.Replace(match.Value, decodedUrl);
+                }
+            }
+            #endregion
+
+            return msgContentWithEmbedData;
+        }
+
+        private static async Task HandleMessageRelaysAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, bool isAnEdit)
+        {
+            #region tracked user relaying
+            if (Program.redis.SetContains("trackedUsers", message.Author.Id))
+            {
+                // Check current channel against tracking channels
+                var trackingChannels = await Program.redis.HashGetAsync("trackingChannels", message.Author.Id);
+                if (trackingChannels.HasValue)
+                {
+                    var trackingChannelsList = JsonConvert.DeserializeObject<List<ulong>>(trackingChannels);
+
+                    // Relay if this user's tracking is not filtered to any channels, or if this msg is in a channel the tracking is filtered to
+                    var channels = JsonConvert.DeserializeObject<List<ulong>>(trackingChannels);
+                    if (trackingChannelsList.Count == 0 || channels.Contains(channel.Id) || (channel.Parent is not null && channels.Contains(channel.Parent.Id)))
+                    {
+                        await RelayTrackedMessageAsync(client, message);
+                    }
+                }
+                else
+                {
+                    // This user's tracking is not filtered to channels, so just relay the msg to the tracking thread
+                    await RelayTrackedMessageAsync(client, message);
+                }
+            }
+            #endregion
+
+            #region DM relaying
+            if (!isAnEdit && channel.IsPrivate && Program.cfgjson.LogChannels.ContainsKey("dms"))
+            {
+                DirectMessageEvent.DirectMessageEventHandler(message.BaseMessage);
+                return;
+            }
+            #endregion
+        }
+
+        private static async Task HandleSpecialChannelsAsync(MockDiscordMessage message, DiscordChannel channel, bool isAnEdit)
+        {
+            #region modmail thread handling
+            if (!isAnEdit && message.Author.Id == Program.cfgjson.ModmailUserId && message.Content == "@here" && message.Embeds[0].Footer.Text.Contains("User ID:"))
+            {
+                Program.discord.Logger.LogDebug(Program.CliptokEventID, "Processing modmail message {message} in {channel}", message.Id, channel);
+                var idString = modmaiL_rx.Match(message.Embeds[0].Footer.Text).Groups[1].Captures[0].Value;
+                DiscordMember modmailMember = default;
+                try
+                {
+                    modmailMember = await channel.Guild.GetMemberAsync(Convert.ToUInt64(idString));
+                }
+                catch (DSharpPlus.Exceptions.NotFoundException)
+                {
+                    return;
+                }
+
+                DiscordMessageBuilder memberWarnInfo = new();
+
+                DiscordRole muted = await channel.Guild.GetRoleAsync(Program.cfgjson.MutedRole);
+                if (modmailMember.Roles.Contains(muted))
+                {
+                    memberWarnInfo.AddEmbed(await WarningHelpers.GenerateWarningsEmbedAsync(modmailMember)).AddEmbed(await MuteHelpers.MuteStatusEmbed(modmailMember, channel.Guild));
+                }
+
+                // Add notes to message if any exist & are set to show on modmail
+
+                // Get user notes
+                var notes = (await Program.redis.HashGetAllAsync(modmailMember.Id.ToString()))
+                    .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note).ToDictionary(
+                        x => x.Name.ToString(),
+                        x => JsonConvert.DeserializeObject<UserNote>(x.Value)
+                    );
+
+                // Filter to notes set to notify on modmail
+                var notesToNotify = notes.Where(x => x.Value.ShowOnModmail).ToDictionary(x => x.Key, x => x.Value);
+
+                // If there are notes, build embed and add to message
+                if (notesToNotify.Count != 0)
+                {
+                    memberWarnInfo.AddEmbed(await UserNoteHelpers.GenerateUserNotesEmbedAsync(modmailMember, notesToUse: notesToNotify));
+
+                    // For any notes set to show once, show the full note content in its own embed because it will not be able to be fetched manually
+                    foreach (var note in notesToNotify)
+                        if (memberWarnInfo.Embeds.Count < 10) // Limit to 10 embeds; this probably won't be an issue because we probably won't have that many 'show once' notes
+                            if (note.Value.ShowOnce)
+                                memberWarnInfo.AddEmbed(await UserNoteHelpers.GenerateUserNoteSimpleEmbedAsync(note.Value, modmailMember));
+                }
+
+                // If message was built (if user is muted OR if user has notes to show on modmail), send it
+                if (memberWarnInfo.Embeds.Count != 0)
+                    await channel.SendMessageAsync(memberWarnInfo);
+
+                // If any notes were shown & set to show only once, delete them now
+                foreach (var note in notesToNotify.Where(note => note.Value.ShowOnce))
+                {
+                    // Delete note
+                    await Program.redis.HashDeleteAsync(modmailMember.Id.ToString(), note.Key);
+
+                    // Log deletion to mod-logs channel
+                    var embed = new DiscordEmbedBuilder(await UserNoteHelpers.GenerateUserNoteDetailEmbedAsync(note.Value, modmailMember)).WithColor(0xf03916);
+                    await LogChannelHelper.LogMessageAsync("mod", $"{Program.cfgjson.Emoji.Deleted} Note `{note.Value.NoteId}` was automatically deleted after modmail thread creation (belonging to {modmailMember.Mention})", embed);
+                }
+            }
+            #endregion
+
+            #region giveaways handling
+            // handle #giveaways
+            if (!isAnEdit && message.Author.Id == Program.cfgjson.GiveawayBot && channel.Id == Program.cfgjson.GiveawaysChannel && message.Content == Program.cfgjson.GiveawayTriggerMessage)
+            {
+                string giveawayTitle = message.Embeds[0].Title;
+
+                if (giveawayTitle.Length > 100)
+                {
+                    giveawayTitle = StringHelpers.Truncate(giveawayTitle, 100, false);
+                }
+
+                await message.BaseMessage.CreateThreadAsync(giveawayTitle, DiscordAutoArchiveDuration.ThreeDays, "Automatically creating giveaway thread.");
+            }
+            #endregion
+        }
+
+        private static async Task DoListUpdateAsync(MockDiscordMessage message)
+        {
+            #region automatic listupdate for private lists
+            if (
+                Program.cfgjson.GitListDirectory is not null
+                && Program.cfgjson.GitListDirectory != ""
+                && message.Channel.Id == Program.cfgjson.HomeChannel
+                && message.Author.Discriminator == "0000"
+                && message.Embeds is not null
+                && message.Embeds.Count > 0
+                && message.Embeds[0].Title.StartsWith(Program.cfgjson.GithubWorkflowSucessString))
+            {
+                string command = $"cd Lists/{Program.cfgjson.GitListDirectory} && git pull";
+                var msg = await LogChannelHelper.LogMessageAsync("home", $"{Program.cfgjson.Emoji.Loading} Updating private lists..");
+
+                ShellResult finishedShell = RunShellCommand(command);
+
+                string result = Regex.Replace(finishedShell.result, "(?:ghp)|(?:github_pat)_[0-9a-zA-Z_]+", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED");
+
+                if (finishedShell.proc.ExitCode != 0)
+                {
+                    await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} An error occurred trying to update private lists!\n```\n{result}\n```");
+                }
+                else
+                {
+                    Program.UpdateLists();
+                    await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully updated and reloaded private lists!\n```\n{result}\n```");
+                }
+            }
+            #endregion
+        }
+
+        private static async Task DoPassiveMessageChecksAsync(MockDiscordMessage message, DiscordChannel channel, bool isAnEdit, ServerPermLevel permLevel, bool wasAutoModBlock = false)
+        {
+            // Skip if member is a moderator
+            if (permLevel >= ServerPermLevel.TrialModerator)
+                return;
+
+            #region scam message image URL passive match (>= Tier 2)
+            // Message contains 3 or more image urls, but was sent by Tier 2+ member; just alert in #investigations
+
+            if (Constants.RegexConstants.image_url_rx.Matches(message.Content).Count >= 3
+                && permLevel >= ServerPermLevel.Tier2)
+            {
+                string content = $"{Program.cfgjson.Emoji.Warning} Detected potential scam message by {message.Author.Mention} in {channel.Mention}:";
+
+                await InvestigationsHelpers.SendInfringingMessaageAsync(
+                    "investigations",
+                    message,
+                    null,
+                    DiscordHelpers.MessageLink(message),
+                    content: content,
+                    colour: new DiscordColor(0xFEC13D)
+                );
+            }
+            #endregion
+
+            #region passive list matching
+            foreach (var listItem in Program.cfgjson.WordListList)
+            {
+                if (!listItem.Passive)
+                {
+                    continue;
+                }
+                else
+                {
+                    (bool success, string flaggedWord) = Checks.ListChecks.CheckForNaughtyWords(message.Content.ToLower(), listItem);
+                    if (success)
+                    {
+                        DiscordChannel logChannel = default;
+                        if (listItem.ChannelId is not null)
+                        {
+                            logChannel = await Program.discord.GetChannelAsync((ulong)listItem.ChannelId);
+                        }
+
+                        string content = $"{Program.cfgjson.Emoji.Warning} Detected potentially suspicious message by {message.Author.Mention} in {channel.Mention}:";
+
+                        (string name, string value, bool inline) extraField = new("Match", flaggedWord, true);
+
+                        await InvestigationsHelpers.SendInfringingMessaageAsync(
+                            "investigations",
+                            message,
+                            listItem.Reason,
+                            DiscordHelpers.MessageLink(message),
+                            content: content,
+                            colour: new DiscordColor(0xFEC13D),
+                            channelOverride: logChannel,
+                            extraField: extraField,
+                            wasAutoModBlock: wasAutoModBlock
+                        );
+                    }
+                }
+            }
+            #endregion
+        }
+
+        #endregion message processing
+
+        #region message filters
+
+        private static async Task<bool> RunScamImageFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        {
+            if (
+                (
+                    // Message contains 3 or more image URLs
+                    (message.Content is not null && Constants.RegexConstants.image_url_rx.Matches(message.Content).Count >= 3)
+
+                    // Message has no content but 3+ attachments
+                    || ((message.Content is null || message.Content == "") && message.Attachments is not null && message.Attachments.Count >= 3)
+                )
+                && (permLevel == ServerPermLevel.Nothing || permLevel == ServerPermLevel.Tier1))
+            {
+                // Message contains 3 or more image urls, and was sent by Tier 0 or Tier 1 member; autowarn for probable scam message
+
+                if (wasAutoModBlock)
+                    Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered scam image URL filter", channel.Id, message.Author.Id);
+                else
+                    Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered scam image URL filter", message.Id, channel.Id, message.Author.Id);
+
+                await DeleteAndWarnAsync(message, "Attempted scam message", client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
+
+                return true;
+            }
+            return false;
+        }
+
+        private static async Task<bool> RunMassMentionsBanFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        {
+            if ((message.MentionedUsers is not null && message.MentionedUsers.Count > Program.cfgjson.MassMentionBanThreshold) || (message.MentionedUsersCount > Program.cfgjson.MassMentionBanThreshold))
+            {
+                if (wasAutoModBlock)
+                {
+                    Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered mass-mention filter", channel.Id, message.Author.Id);
+                }
+                else
+                {
+                    Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered mass-mention filter", message.Id, channel.Id, message.Author.Id);
+                    await DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(message);
+                }
+
+                _ = channel.Guild.BanMemberAsync(message.Author, TimeSpan.FromDays(7), $"Mentioned more than {Program.cfgjson.MassMentionBanThreshold} users in one message.");
+                var mentionCount = message.MentionedUsers is not null && message.MentionedUsers.Count > 0 ? message.MentionedUsers.Count : message.MentionedUsersCount;
+                string content = $"{Program.cfgjson.Emoji.Banned} {message.Author.Mention} was automatically banned for mentioning **{mentionCount}** users.";
+                var chatMsg = await channel.SendMessageAsync(content);
+                _ = InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, "Mass mentions (Ban threshold)", DiscordHelpers.MessageLink(chatMsg), content: content, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
+                _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, "Mass mentions (Ban threshold)", DiscordHelpers.MessageLink(chatMsg), content: content, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
+                return true;
+            }
+            return false;
+        }
+
+        private static async Task<bool> RunDuplicateMessageFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        {
+            // skip empty and null content, but allow messages with attachments
+            var attachmentNames = message.Attachments?.Select(a => a.FileName).OrderBy(n => n).ToList() ?? [];
+            if (Program.cfgjson.DuplicateMessageSeconds != 0
+                && Program.cfgjson.DuplicateMessageThreshold != 0
+                && !isAnEdit
+                && !limitFilters
+                && !wasAutoModBlock
+                && (messageContentOverride is not null && messageContentOverride != "" || attachmentNames.Count > 0))
+            {
+                if (
+                    duplicateMessageCache.ContainsKey(message.Author.Id)
+                    && duplicateMessageCache[message.Author.Id].Content == messageContentOverride
+                    && duplicateMessageCache[message.Author.Id].AttachmentNames.SequenceEqual(attachmentNames)
+                    && (DateTime.UtcNow - duplicateMessageCache[message.Author.Id].LastMessageTime).TotalSeconds < Program.cfgjson.DuplicateMessageSeconds)
+                {
+                    duplicateMessageCache[message.Author.Id].Messages.Add(message);
+                    duplicateMessageCache[message.Author.Id].LastMessageTime = message.Timestamp.HasValue ? message.Timestamp.Value.UtcDateTime : DateTime.UtcNow;
+
+                    if (duplicateMessageCache[message.Author.Id].Messages.Count >= Program.cfgjson.DuplicateMessageThreshold)
+                    {
+                        duplicateMessageCache[message.Author.Id].Messages.ForEach(
+                            // don't delete a message if it was deleted on a past run of this check, but keep it in the list
+                            // also don't delete the current message because we'll do that later
+                            async x =>
+                            {
+                                if (x.Id != message.Id && !deletedMessageCache.Contains(x.Id))
+                                {
+                                    _ = DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(x);
+                                    deletedMessageCache.Add(x.Id);
+                                }
+                            }
+                        );
+
+                        deletedMessageCache.Add(message.Id);
+
+                        var attachmentUrls = message.Attachments?.Select(a => a.Url).ToList() ?? [];
+                        (string name, string value, bool inline) attachmentsField = attachmentUrls.Count > 0
+                            ? ("Attachments", string.Join("\n", attachmentUrls), false)
+                            : default;
+
+                        await DeleteAndWarnAsync(message, "Duplicate message spam", client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
+                        return true;
+                    }
+                }
+                else
+                {
+                    duplicateMessageCache[message.Author.Id] = new RecentMessageInfo
+                    {
+                        Content = messageContentOverride,
+                        AttachmentNames = attachmentNames,
+                        LastMessageTime = message.Timestamp.HasValue ? message.Timestamp.Value.UtcDateTime : DateTime.UtcNow,
+                        Messages = [message]
+                    };
+                }
+            }
+            return false;
+        }
+
+        private static async Task<bool> RunRestrictedWordListFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        {
+            bool match = false;
+
+            // Matching word list
+            foreach (var listItem in Program.cfgjson.WordListList)
+            {
+                if (listItem.ExcludedChannels.Contains(channel.Id) || listItem.Passive)
+                {
+                    continue;
+                }
+                else
+                {
+                    (bool success, string flaggedWord) = Checks.ListChecks.CheckForNaughtyWords(messageContentOverride.ToLower(), listItem);
+                    if (success)
+                    {
+                        if (wasAutoModBlock)
+                            Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered word list filter", channel.Id, message.Author.Id);
+                        else
+                            Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered word list filter", message.Id, channel.Id, message.Author.Id);
+
+                        string reason = listItem.Reason;
+
+                        if (listItem.Name == "autoban.txt" && permLevel < ServerPermLevel.Tier4)
+                        {
+                            await BanHelpers.BanFromServerAsync(message.Author.Id, reason, client.CurrentUser.Id, channel.Guild, 0, channel, default, true);
+                            return true;
+                        }
+
+                        match = true;
+
+                        await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride, useCodeBlock: listItem.Name == "exploits.txt");
+
+                        return true;
+                    }
+                }
+                if (match)
+                    return true;
+            }
+
+            if (match)
+                return true;
+
+            return false;
+        }
+
+        private static async Task<bool> RunInviteFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        {
+            string checkedMessage = messageContentOverride.Replace('\\', '/');
+
+            bool match = false;
+
+            if (permLevel < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && checkedMessage.Contains("dsc.gg/") ||
+                checkedMessage.Contains("invite.gg/")
+                )
+            {
+                if (wasAutoModBlock)
+                {
+                    Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered unapproved invite filter", channel.Id, message.Author.Id);
+                }
+                else
+                {
+                    Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered unapproved invite filter", message.Id, channel.Id, message.Author.Id);
+                }
+
+                await DeleteAndWarnAsync(message, "Sent an unapproved invite", client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
+
+                match = true;
+                return match;
+            }
+
+            var inviteMatches = invite_rx.Matches(checkedMessage);
+
+            if (permLevel < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && inviteMatches.Count > 3)
+            {
+                string reason = "Sent too many invites";
+                await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
+                match = true;
+                return match;
+            }
+
+            foreach (Match currentMatch in inviteMatches)
+            {
+                string code = currentMatch.Groups[1].Value;
+
+                if (allowedInviteCodes.Contains(code) || Program.cfgjson.InviteExclusion.Contains(code))
+                {
+                    continue;
+                }
+
+                ServerApiResponseJson maliciousCache = default;
+
+                maliciousCache = Program.serverApiList.FirstOrDefault(x => x.Vanity == code || x.Invite == code);
+
+                DiscordInvite invite = default;
+                if (maliciousCache == default)
+                {
+
+                    if (permLevel < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && disallowedInviteCodes.Contains(code))
+                    {
+                        if (!match)
+                        {
+                            string reason = "Sent an unapproved invite";
+                            await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
+                            match = true;
+                        }
+                        break;
+                    }
+
+                    try
+                    {
+                        invite = await client.GetInviteByCodeAsync(code);
+                    }
+                    catch (DSharpPlus.Exceptions.NotFoundException)
+                    {
+                        allowedInviteCodes.Add(code);
+                        continue;
+                    }
+                }
+
+                if (invite != default && invite.Guild is not null && (Program.cfgjson.InviteIDExclusion.Contains(invite.Guild.Id) || invite.Guild.Id == channel.Guild.Id))
+                    continue;
+
+                if (maliciousCache == default && invite != default && invite.Guild is not null)
+                    maliciousCache = Program.serverApiList.FirstOrDefault(x => x.ServerID == invite.Guild.Id.ToString());
+
+                if (maliciousCache != default)
+                {
+                    string reason = "Sent a malicious Discord invite";
+
+                    DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock);
+                    await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
+                    var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
+
+                    string responseToSend = $"```json\n{JsonConvert.SerializeObject(maliciousCache)}\n```";
+
+                    (string name, string value, bool inline) extraField = new("Cached API response", responseToSend, false);
+                    await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
+
+                    match = true;
+                    break;
+                }
+
+                if (invite == default || invite.Channel is null)
+                {
+                    continue;
+                }
+
+
+                if (
+                permLevel < (ServerPermLevel)Program.cfgjson.InviteTierRequirement
+                && (
+                    invite.Channel.Type == DiscordChannelType.Group
+                    || (
+                        !Program.cfgjson.InviteExclusion.Contains(code)
+                        && !Program.cfgjson.InviteIDExclusion.Contains(invite.Guild.Id)
+                    )
+                )
+                )
+                {
+                    disallowedInviteCodes.Add(code);
+                    match = await InviteCheck(invite, message, client, messageContentOverride, wasAutoModBlock);
+                    if (!match)
+                    {
+                        string reason = "Sent an unapproved invite";
+                        await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
+                    }
+                }
+                else
+                {
+                    match = await InviteCheck(invite, message, client, messageContentOverride, wasAutoModBlock);
+                }
+
+            }
+
+            return match;
+        }
+
+        private static async Task<bool> RunMassEmojiFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        {
+            if (!Program.cfgjson.UnrestrictedEmojiChannels.Contains(channel.Id) && messageContentOverride.Length >= Program.cfgjson.MassEmojiThreshold)
+            {
+                char[] tempArray = messageContentOverride.Replace("🏻", "").Replace("🏼", "").Replace("🏽", "").Replace("🏾", "").Replace("🏿", "").ToCharArray();
+                int pos = 0;
+                foreach (char c in tempArray)
+                {
+
+                    if (c == '™' || c == '®' || c == '©')
+                    {
+                        tempArray[pos] = ' ';
+                    }
+                    if (c == '\u200d' && pos + 1 < tempArray.Length)
+                    {
+                        tempArray[pos] = ' ';
+                        tempArray[pos + 1] = ' ';
+                    }
+                    ++pos;
+                }
+                string input = new(tempArray);
+
+                var matches = emoji_rx.Matches(input);
+                if (matches.Count > Program.cfgjson.MassEmojiThreshold)
+                {
+                    if (wasAutoModBlock)
+                    {
+                        Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered mass emoji filter", channel.Id, message.Author.Id);
+                    }
+                    else
+                    {
+                        Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered mass emoji filter", message.Id, channel.Id, message.Author.Id);
+                    }
+
+                    string reason = "Mass emoji";
+
+                    if (permLevel == ServerPermLevel.Nothing && !Program.redis.HashExists("emojiPardoned", message.Author.Id.ToString()))
+                    {
+                        await Program.redis.HashSetAsync("emojiPardoned", member.Id.ToString(), false);
+                        string pardonOutput;
+                        if (Program.cfgjson.UnrestrictedEmojiChannels.Count > 0)
+                            pardonOutput = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, if you want to play around with lots of emoji, please use <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.";
+                        else
+                            if (wasAutoModBlock)
+                            pardonOutput = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention} Your message contained too many emoji.";
+                        else
+                            pardonOutput = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention} Your message was automatically deleted for mass emoji.";
+
+                        var msgOut = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, pardonOutput, wasAutoModBlock);
+                        await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, DiscordHelpers.MessageLink(msgOut), messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
+                        await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, DiscordHelpers.MessageLink(msgOut), messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
+                        return true;
+                    }
+
+                    string output = $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**";
+                    if (Program.cfgjson.UnrestrictedEmojiChannels.Count > 0 && (!Program.redis.HashExists("emojiPardoned", message.Author.Id.ToString()) || Program.redis.HashGet("emojiPardoned", message.Author.Id.ToString()) == false))
+                    {
+                        output += $"\nIf you want to play around with lots of emoji, please use <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.";
+                        await Program.redis.HashSetAsync("emojiPardoned", member.Id.ToString(), true);
+                    }
+
+                    await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static async Task<bool> RunPhishingApiFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        {
+            var urlMatches = domain_rx.Matches(messageContentOverride);
+            if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") is not null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
+            {
+                var (phishingMatch, httpStatus, responseText, phishingResponse) = await APIs.PhishingAPI.PhishingAPICheckAsync(messageContentOverride);
+
+                if (httpStatus == HttpStatusCode.OK)
+                {
+                    if (phishingMatch)
+                    {
+                        if (wasAutoModBlock)
+                        {
+                            Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered phishing message filter", channel.Id, message.Author.Id);
+                        }
+                        else
+                        {
+                            Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered phishing message filter", message.Id, channel.Id, message.Author.Id);
+                        }
+
+                        string responseToSend = (await StringHelpers.CodeOrHasteBinAsync(responseText, "json", 1000, true)).Text;
+                        (string name, string value, bool inline) extraField = new("API Response", responseToSend, false);
+                        DeleteAndWarnAsync(message, "Sending phishing URL(s)", client, extraField, wasAutoModBlock, messageContentOverride);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static async Task<bool> RunEveryoneHerePingFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        {
+            var msgContent = message.Content;
+            foreach (var letter in Checks.ListChecks.lookalikeAlphabetMap)
+                msgContent = msgContent.Replace(letter.Key, letter.Value);
+            if (Program.cfgjson.EveryoneFilter && !member.Roles.Any(role => Program.cfgjson.EveryoneExcludedRoles.Contains(role.Id)) && !Program.cfgjson.EveryoneExcludedChannels.Contains(channel.Id) && (msgContent.Contains("@everyone") || msgContent.Contains("@here")))
+            {
+                if (wasAutoModBlock)
+                {
+                    Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered everyone/here mention filter", channel.Id, message.Author.Id);
+                }
+                else
+                {
+                    Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered everyone/here mention filter", message.Id, channel.Id, message.Author.Id);
+                }
+
+                await DeleteAndWarnAsync(message, "Attempted to ping everyone/here", client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static async Task<bool> RunMassMentionsWarnFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        {
+            if (((message.MentionedUsers is not null && message.MentionedUsers.Count >= Program.cfgjson.MassMentionThreshold) || (message.MentionedUsersCount >= Program.cfgjson.MassMentionThreshold)) && permLevel < ServerPermLevel.Tier3)
+            {
+                if (wasAutoModBlock)
+                {
+                    Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered mass mention filter", channel.Id, message.Author.Id);
+                }
+                else
+                {
+                    Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered mass mention filter", message.Id, channel.Id, message.Author.Id);
+                }
+
+                await DeleteAndWarnAsync(message, "Mass mentions", client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static async Task<bool> RunLineLimitFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        {
+            var lineCount = CountNewlines(messageContentOverride);
+
+            if (!Program.cfgjson.LineLimitExcludedChannels.Contains(channel.Id)
+                && (channel.ParentId is null || !Program.cfgjson.LineLimitExcludedChannels.Contains((ulong)channel.ParentId))
+                && (lineCount >= Program.cfgjson.IncreasedLineLimit
+                || (lineCount >= Program.cfgjson.LineLimit && permLevel < (ServerPermLevel)Program.cfgjson.LineLimitTier)))
+            {
+                if (wasAutoModBlock)
+                {
+                    Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered line limit filter", channel.Id, message.Author.Id);
+                }
+                else
+                {
+                    Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered line limit filter", message.Id, channel.Id, message.Author.Id);
+                    await DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(message);
+                }
+
+                string reason = "Too many lines in a single message";
+
+                if (!Program.redis.SetContains("linePardoned", message.Author.Id.ToString()))
+                {
+                    await Program.redis.SetAddAsync("linePardoned", member.Id.ToString());
+                    string output;
+                    if (wasAutoModBlock)
+                        output = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, your message contained too many lines.\n" +
+                                 $"Please consider using a Pastebin-style website or <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid further punishment.";
+                    else
+                        output = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, your message was deleted for containing too many lines.\n" +
+                                 $"Please consider using a Pastebin-style website or <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid further punishment.";
+                    DiscordMessageBuilder messageBuilder = new();
+                    messageBuilder.WithContent(output);
+                    DiscordMessage msg;
+                    if (!wasAutoModBlock)
+                    {
+                        messageBuilder.AddActionRowComponent(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
+                        msg = await channel.SendMessageAsync(messageBuilder);
+                        await Program.redis.HashSetAsync("deletedMessageReferences", msg.Id, messageContentOverride);
+                    }
+                    else
+                    {
+                        msg = await channel.SendMessageAsync(messageBuilder);
+                    }
+                    await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, DiscordHelpers.MessageLink(msg), messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
+                    await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, DiscordHelpers.MessageLink(msg), messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
+                    return true;
+                }
+                else
+                {
+                    string output = $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**\n" +
+                        $"Please consider using a Pastebin-style website or <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.";
+                    DiscordMessageBuilder messageBuilder = new();
+                    messageBuilder.WithContent(output);
+                    DiscordMessage msg;
+                    if (!wasAutoModBlock)
+                    {
+                        messageBuilder.AddActionRowComponent(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
+                        msg = await channel.SendMessageAsync(messageBuilder);
+                        await Program.redis.HashSetAsync("deletedMessageReferences", msg.Id, messageContentOverride);
+                    }
+                    else
+                    {
+                        msg = await channel.SendMessageAsync(messageBuilder);
+                    }
+
+                    await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
+                    var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
+                    await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
+
+                    return true;
+                }
+
+            }
+
+            return false;
+        }
+
+        private static async Task<bool> RunCtsPingFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
+        {
+            if (Program.cfgjson.CommunityTechSupportRoleID != 0
+                && message.Content.Contains($"<@&{Program.cfgjson.CommunityTechSupportRoleID.ToString()}>")
+                && channel.Id != Program.cfgjson.TechSupportChannel
+                && channel.Parent.Id != Program.cfgjson.TechSupportChannel
+                && channel.Id != Program.cfgjson.SupportForumId
+                && channel.Parent.Id != Program.cfgjson.SupportForumId
+                && permLevel < ServerPermLevel.TechnicalQueriesSlayer)
+            {
+                string reason = "Mentioned tech support role outside of tech support channels";
+
+                string techSupportChannelsText;
+                if (Program.cfgjson.TechSupportChannel != 0 && Program.cfgjson.SupportForumId != 0)
+                    techSupportChannelsText = $"<#{Program.cfgjson.TechSupportChannel}> and <#{Program.cfgjson.SupportForumId}>";
+                else if (Program.cfgjson.TechSupportChannel != 0)
+                    techSupportChannelsText = $"<#{Program.cfgjson.TechSupportChannel}>";
+                else if (Program.cfgjson.SupportForumId != 0)
+                    techSupportChannelsText = $"<#{Program.cfgjson.SupportForumId}>";
+                else
+                    techSupportChannelsText = "the tech support channels";
+
+                if (await Program.redis.SetContainsAsync("ctsPingPardons", message.Author.Id))
+                {
+                    var msg = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**\n"
+                        + $"Please keep requests for tech support inside {techSupportChannelsText} to avoid punishment.");
+                    await WarningHelpers.GiveWarningAsync(message.Author, Program.discord.CurrentUser, reason, msg, channel, " automatically ");
+                }
+                else // also false when set does not exist
+                {
+                    await Program.redis.SetAddAsync("ctsPingPardons", message.Author.Id);
+                    await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, you mentioned the tech support role outside of a tech support channel.\n"
+                        + $"Please keep requests for tech support inside {techSupportChannelsText} to avoid further punishment.");
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+#endregion message filters
+
+        #region warning helpers
+
+        private static async Task DeleteAndWarnAsync(MockDiscordMessage message, string reason, DiscordClient client, (string name, string value, bool inline) extraField = default, bool wasAutoModBlock = false, string messageContentOverride = default, bool useCodeBlock = false)
         {
             var channel = message.Channel;
             DiscordMessage msg;
@@ -204,15 +1326,19 @@ namespace Cliptok.Events
 
             try
             {
-                _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
+                _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride, useCodeBlock: useCodeBlock);
             }
             catch
             {
                 // still warn anyway
             }
             var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock);
+            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField, messageContentOverride: messageContentOverride, wasAutoModBlock: wasAutoModBlock, useCodeBlock: useCodeBlock);
         }
+
+        #endregion warning helpers
+
+        #region cache helpers
 
         public static async Task<Models.CachedDiscordMessage> CacheAndAddMessageAsync(MockDiscordMessage message, CliptokDbContext ctx, bool disposeContext)
         {
@@ -295,986 +1421,9 @@ namespace Cliptok.Events
             await ctx.SaveChangesAsync();
         }
 
-        public static async Task MessageHandlerAsync(DiscordClient client, DiscordMessage message, DiscordChannel channel, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
-        {
-            await MessageHandlerAsync(client, new MockDiscordMessage(message), channel, isAnEdit, limitFilters, wasAutoModBlock);
-        }
-        public static async Task MessageHandlerAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
-        {
-            #region message logging fill to db
-            // If db support is enabled, and this message is not in an excluded channel, cache it
-            if (!wasAutoModBlock && message.Channel.GuildId == Program.cfgjson.ServerID
-                && Program.cfgjson.EnablePersistentDb
-                && !Program.cfgjson.MessageLogExcludedChannels.Contains(message.ChannelId)
-                && (message.Channel.ParentId is null || !Program.cfgjson.MessageLogExcludedChannels.Contains((ulong)message.Channel.ParentId)))
-            {
-                if (isAnEdit)
-                {
-                    using (var dbContext = new CliptokDbContext())
-                    {
-                        var cachedMessage = dbContext.Messages.Include(m => m.User).Include(m => m.Sticker).FirstOrDefault(m => m.Id == message.Id);
-                        if (cachedMessage is not null && (cachedMessage.Content != message.Content || cachedMessage.AttachmentURLs.Count != message.Attachments.Count))
-                        {
-                            var newMessage = await CacheMessageAsync(message, dbContext);
-                            // we store bot messages but don't log them right now
-                            if (cachedMessage is not null && !cachedMessage.User.IsBot)
-                            {
-                                await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(newMessage, "edited", true, true, cachedMessage));
-                            }
-                            cachedMessage.Content = newMessage.Content;
-                            cachedMessage.AttachmentURLs = newMessage.AttachmentURLs;
-                            await UpdateMessageAsync(cachedMessage, dbContext);
-                        }
-                    }
-                }
-                else
-                {
-                    // cache in the background to not impede execution of the message handler
-                    _ = CacheAndAddMessageAsync(message, new CliptokDbContext(), true);
-                }
-            }
-            #endregion
+        #endregion cache helpers
 
-            #region combine all message text
-            // Get forwarded msg & embeds, if any, and combine with content to evaluate
-            // Combined as a single long string
-
-            string msgContentWithEmbedData = message.Content;
-            var embeds = new List<DiscordEmbed>();
-
-            if (message.MessageSnapshots is not null)
-                foreach (var snapshot in message.MessageSnapshots)
-                {
-                    msgContentWithEmbedData += $" {snapshot.Message.Content}";
-                    embeds.AddRange(snapshot.Message.Embeds);
-                }
-
-            foreach (var embed in embeds)
-            {
-                // Add any text from the embed into the content to be checked
-
-                if (embed.Author is not null)
-                {
-                    if (embed.Author.Name is not null)
-                        msgContentWithEmbedData += $" {embed.Author.Name}";
-
-                    if (embed.Author.Url is not null)
-                        msgContentWithEmbedData += $" {embed.Author.Url}";
-                }
-
-                if (embed.Title is not null)
-                    msgContentWithEmbedData += $" {embed.Title}";
-
-                if (embed.Url is not null)
-                    msgContentWithEmbedData += $" {embed.Url}";
-
-                if (embed.Description is not null)
-                    msgContentWithEmbedData += $" {embed.Description}";
-
-                if (embed.Footer is not null && embed.Footer.Text is not null)
-                    msgContentWithEmbedData += $" {embed.Footer.Text}";
-
-                if (embed.Fields is not null)
-                    foreach (var field in embed.Fields)
-                    {
-                        msgContentWithEmbedData += $" {field.Name} {field.Value}";
-                    }
-            }
-            #endregion
-
-            #region avoid url bypass
-
-
-            var urls = url_rx.Matches(msgContentWithEmbedData);
-
-            // urldecode and replace all urls
-            if (urls != null)
-            {
-                foreach (Match match in urls)
-                {
-                    string decodedUrl = Uri.UnescapeDataString(match.Value);
-                    msgContentWithEmbedData = msgContentWithEmbedData.Replace(match.Value, decodedUrl);
-                }
-            }
-
-            #endregion
-
-            try
-            {
-                #region return early checks
-                if (message.Timestamp is not null && message.Timestamp.Value.Year < (DateTime.UtcNow.Year - 2))
-                    return;
-
-                if (isAnEdit && message.BaseMessage is not null && (message.BaseMessage.EditedTimestamp is null || message.BaseMessage.EditedTimestamp == message.BaseMessage.CreationTimestamp || message.BaseMessage.EditedTimestamp < DateTimeOffset.Now - TimeSpan.FromDays(1)))
-                    return;
-
-                if (message.Author is null || message.Author.Id == client.CurrentUser.Id)
-                    return;
-                #endregion
-
-                #region debug logging
-                if (wasAutoModBlock)
-                {
-                    Program.discord.Logger.LogDebug("Processing AutoMod-blocked message in {channelId} by user {userId}", channel.Id, message.Author.Id);
-                    if (channel.Type == DiscordChannelType.GuildForum && Program.cfgjson.ForumChannelAutoWarnFallbackChannel != 0)
-                        channel = Program.ForumChannelAutoWarnFallbackChannel;
-                }
-                else
-                {
-                    Program.discord.Logger.LogDebug("Processing message {messageId} in {channelId} by user {userId}", message.Id, channel.Id, message.Author.Id);
-                }
-                #endregion
-
-                if (!limitFilters)
-                {
-                    #region tracked user relaying
-                    if (Program.redis.SetContains("trackedUsers", message.Author.Id))
-                    {
-                        // Check current channel against tracking channels
-                        var trackingChannels = await Program.redis.HashGetAsync("trackingChannels", message.Author.Id);
-                        if (trackingChannels.HasValue)
-                        {
-                            var trackingChannelsList = JsonConvert.DeserializeObject<List<ulong>>(trackingChannels);
-
-                            // Relay if this user's tracking is not filtered to any channels, or if this msg is in a channel the tracking is filtered to
-                            var channels = JsonConvert.DeserializeObject<List<ulong>>(trackingChannels);
-                            if (trackingChannelsList.Count == 0 || channels.Contains(channel.Id) || (channel.Parent is not null && channels.Contains(channel.Parent.Id)))
-                            {
-                                await RelayTrackedMessageAsync(client, message);
-                            }
-                        }
-                        else
-                        {
-                            // This user's tracking is not filtered to channels, so just relay the msg to the tracking thread
-                            await RelayTrackedMessageAsync(client, message);
-                        }
-                    }
-                    #endregion
-
-                    #region DM relaying
-                    if (!isAnEdit && channel.IsPrivate && Program.cfgjson.LogChannels.ContainsKey("dms"))
-                    {
-                        DirectMessageEvent.DirectMessageEventHandler(message.BaseMessage);
-                        return;
-                    }
-                    #endregion
-
-                    #region modmail thread handling
-                    if (!isAnEdit && message.Author.Id == Program.cfgjson.ModmailUserId && message.Content == "@here" && message.Embeds[0].Footer.Text.Contains("User ID:"))
-                    {
-                        Program.discord.Logger.LogDebug(Program.CliptokEventID, "Processing modmail message {message} in {channel}", message.Id, channel);
-                        var idString = modmaiL_rx.Match(message.Embeds[0].Footer.Text).Groups[1].Captures[0].Value;
-                        DiscordMember modmailMember = default;
-                        try
-                        {
-                            modmailMember = await channel.Guild.GetMemberAsync(Convert.ToUInt64(idString));
-                        }
-                        catch (DSharpPlus.Exceptions.NotFoundException)
-                        {
-                            return;
-                        }
-
-                        DiscordMessageBuilder memberWarnInfo = new();
-
-                        DiscordRole muted = await channel.Guild.GetRoleAsync(Program.cfgjson.MutedRole);
-                        if (modmailMember.Roles.Contains(muted))
-                        {
-                            memberWarnInfo.AddEmbed(await WarningHelpers.GenerateWarningsEmbedAsync(modmailMember)).AddEmbed(await MuteHelpers.MuteStatusEmbed(modmailMember, channel.Guild));
-                        }
-
-                        // Add notes to message if any exist & are set to show on modmail
-
-                        // Get user notes
-                        var notes = (await Program.redis.HashGetAllAsync(modmailMember.Id.ToString()))
-                            .Where(x => JsonConvert.DeserializeObject<UserNote>(x.Value).Type == WarningType.Note).ToDictionary(
-                                x => x.Name.ToString(),
-                                x => JsonConvert.DeserializeObject<UserNote>(x.Value)
-                            );
-
-                        // Filter to notes set to notify on modmail
-                        var notesToNotify = notes.Where(x => x.Value.ShowOnModmail).ToDictionary(x => x.Key, x => x.Value);
-
-                        // If there are notes, build embed and add to message
-                        if (notesToNotify.Count != 0)
-                        {
-                            memberWarnInfo.AddEmbed(await UserNoteHelpers.GenerateUserNotesEmbedAsync(modmailMember, notesToUse: notesToNotify));
-
-                            // For any notes set to show once, show the full note content in its own embed because it will not be able to be fetched manually
-                            foreach (var note in notesToNotify)
-                                if (memberWarnInfo.Embeds.Count < 10) // Limit to 10 embeds; this probably won't be an issue because we probably won't have that many 'show once' notes
-                                    if (note.Value.ShowOnce)
-                                        memberWarnInfo.AddEmbed(await UserNoteHelpers.GenerateUserNoteSimpleEmbedAsync(note.Value, modmailMember));
-                        }
-
-                        // If message was built (if user is muted OR if user has notes to show on modmail), send it
-                        if (memberWarnInfo.Embeds.Count != 0)
-                            await channel.SendMessageAsync(memberWarnInfo);
-
-                        // If any notes were shown & set to show only once, delete them now
-                        foreach (var note in notesToNotify.Where(note => note.Value.ShowOnce))
-                        {
-                            // Delete note
-                            await Program.redis.HashDeleteAsync(modmailMember.Id.ToString(), note.Key);
-
-                            // Log deletion to mod-logs channel
-                            var embed = new DiscordEmbedBuilder(await UserNoteHelpers.GenerateUserNoteDetailEmbedAsync(note.Value, modmailMember)).WithColor(0xf03916);
-                            await LogChannelHelper.LogMessageAsync("mod", $"{Program.cfgjson.Emoji.Deleted} Note `{note.Value.NoteId}` was automatically deleted after modmail thread creation (belonging to {modmailMember.Mention})", embed);
-                        }
-                    }
-                    #endregion
-
-                    #region giveaways handling
-                    // handle #giveaways
-                    if (!isAnEdit && message.Author.Id == Program.cfgjson.GiveawayBot && channel.Id == Program.cfgjson.GiveawaysChannel && message.Content == Program.cfgjson.GiveawayTriggerMessage)
-                    {
-                        string giveawayTitle = message.Embeds[0].Title;
-
-                        if (giveawayTitle.Length > 100)
-                        {
-                            giveawayTitle = StringHelpers.Truncate(giveawayTitle, 100, false);
-                        }
-
-                        await message.BaseMessage.CreateThreadAsync(giveawayTitle, DiscordAutoArchiveDuration.ThreeDays, "Automatically creating giveaway thread.");
-                    }
-                    #endregion
-                }
-
-                #region automatic listupdate for private lists
-                if (
-                    Program.cfgjson.GitListDirectory is not null
-                    && Program.cfgjson.GitListDirectory != ""
-                    && message.Channel.Id == Program.cfgjson.HomeChannel
-                    && message.Author.Discriminator == "0000"
-                    && message.Embeds is not null
-                    && message.Embeds.Count > 0
-                    && message.Embeds[0].Title.StartsWith(Program.cfgjson.GithubWorkflowSucessString))
-                {
-                    string command = $"cd Lists/{Program.cfgjson.GitListDirectory} && git pull";
-                    var msg = await LogChannelHelper.LogMessageAsync("home", $"{Program.cfgjson.Emoji.Loading} Updating private lists..");
-
-                    ShellResult finishedShell = RunShellCommand(command);
-
-                    string result = Regex.Replace(finishedShell.result, "(?:ghp)|(?:github_pat)_[0-9a-zA-Z_]+", "ghp_REDACTED").Replace(Environment.GetEnvironmentVariable("CLIPTOK_TOKEN"), "REDACTED");
-
-                    if (finishedShell.proc.ExitCode != 0)
-                    {
-                        await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} An error occurred trying to update private lists!\n```\n{result}\n```");
-                    }
-                    else
-                    {
-                        Program.UpdateLists();
-                        await msg.ModifyAsync($"{Program.cfgjson.Emoji.Success} Successfully updated and reloaded private lists!\n```\n{result}\n```");
-                    }
-                }
-                #endregion
-
-                #region Skip DMs, external guilds, and messages from bots, beyond this point.
-                if (channel.IsPrivate || channel.Guild.Id != Program.cfgjson.ServerID || message.Author.IsBot)
-                    return;
-                #endregion
-
-                #region mention relaying
-                if (!limitFilters && !Program.cfgjson.MentionTrackExcludedChannels.Contains(channel.Id) && (channel.ParentId is null || !Program.cfgjson.MentionTrackExcludedChannels.Contains((ulong)channel.ParentId)))
-                {
-                    // track mentions
-                    if (message.MentionedUsers.Any(x => x.Id == Program.discord.CurrentUser.Id))
-                        await LogChannelHelper.LogMessageAsync("mentions", await DiscordHelpers.GenerateMessageRelay(message.BaseMessage, true, true, false));
-                }
-                #endregion
-
-                #region retrieve member object
-                DiscordMember member;
-                try
-                {
-                    member = await channel.Guild.GetMemberAsync(message.Author.Id);
-                }
-                catch (DSharpPlus.Exceptions.NotFoundException)
-                {
-                    member = default;
-                }
-
-                if (member == default)
-                    return;
-                #endregion
-
-                #region content filters
-                if ((await GetPermLevelAsync(member)) < ServerPermLevel.TrialModerator)
-                {
-                    #region mass mentions ban filter
-                    if ((message.MentionedUsers is not null && message.MentionedUsers.Count > Program.cfgjson.MassMentionBanThreshold) || (message.MentionedUsersCount > Program.cfgjson.MassMentionBanThreshold))
-                    {
-                        if (wasAutoModBlock)
-                        {
-                            Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered mass-mention filter", channel.Id, message.Author.Id);
-                        }
-                        else
-                        {
-                            Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered mass-mention filter", message.Id, channel.Id, message.Author.Id);
-                            await DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(message);
-                        }
-
-                        _ = channel.Guild.BanMemberAsync(message.Author, TimeSpan.FromDays(7), $"Mentioned more than {Program.cfgjson.MassMentionBanThreshold} users in one message.");
-                        var mentionCount = message.MentionedUsers is not null && message.MentionedUsers.Count > 0 ? message.MentionedUsers.Count : message.MentionedUsersCount;
-                        string content = $"{Program.cfgjson.Emoji.Banned} {message.Author.Mention} was automatically banned for mentioning **{mentionCount}** users.";
-                        var chatMsg = await channel.SendMessageAsync(content);
-                        _ = InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, "Mass mentions (Ban threshold)", DiscordHelpers.MessageLink(chatMsg), content: content, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                        _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, "Mass mentions (Ban threshold)", DiscordHelpers.MessageLink(chatMsg), content: content, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                        return;
-                    }
-                    #endregion
-
-                    #region duplicate message handling
-                    // skip empty and null content
-                    if (Program.cfgjson.DuplicateMessageSeconds != 0 && Program.cfgjson.DuplicateMessageThreshold != 0 && !isAnEdit && !limitFilters && !wasAutoModBlock && msgContentWithEmbedData is not null && msgContentWithEmbedData != "")
-                    {
-                        if (
-                            duplicateMessageCache.ContainsKey(message.Author.Id)
-                            && duplicateMessageCache[message.Author.Id].Content == msgContentWithEmbedData
-                            && (DateTime.UtcNow - duplicateMessageCache[message.Author.Id].LastMessageTime).TotalSeconds < Program.cfgjson.DuplicateMessageSeconds)
-                        {
-                            duplicateMessageCache[message.Author.Id].Messages.Add(message);
-                            duplicateMessageCache[message.Author.Id].LastMessageTime = message.Timestamp.HasValue ? message.Timestamp.Value.UtcDateTime : DateTime.UtcNow;
-
-                            if (duplicateMessageCache[message.Author.Id].Messages.Count >= Program.cfgjson.DuplicateMessageThreshold)
-                            {
-                                duplicateMessageCache[message.Author.Id].Messages.ForEach(
-                                    // don't delete a message if it was deleted on a past run of this check, but keep it in the list
-                                    // also don't delete the current message because we'll do that later
-                                    async x =>
-                                    {
-                                        if (x.Id != message.Id && !deletedMessageCache.Contains(x.Id))
-                                        {
-                                            _ = DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(x);
-                                            deletedMessageCache.Add(x.Id);
-                                        }
-                                    }
-                                );
-
-                                string reason = "Duplicate message spam";
-                                string output = $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason}**";
-                                DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, output, wasAutoModBlock);
-                                deletedMessageCache.Add(message.Id);
-                                var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-                                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                                await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            duplicateMessageCache[message.Author.Id] = new RecentMessageInfo
-                            {
-                                Content = msgContentWithEmbedData,
-                                LastMessageTime = message.Timestamp.HasValue ? message.Timestamp.Value.UtcDateTime : DateTime.UtcNow,
-                                Messages = [message]
-                            };
-                        }
-                    }
-                    #endregion
-
-                    #region restricted word list filters
-                    bool match = false;
-
-                    // Matching word list
-                    foreach (var listItem in Program.cfgjson.WordListList)
-                    {
-                        if (listItem.ExcludedChannels.Contains(channel.Id) || listItem.Passive)
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            (bool success, string flaggedWord) = Checks.ListChecks.CheckForNaughtyWords(msgContentWithEmbedData.ToLower(), listItem);
-                            if (success)
-                            {
-                                if (wasAutoModBlock)
-                                    Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered word list filter", channel.Id, message.Author.Id);
-                                else
-                                    Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered word list filter", message.Id, channel.Id, message.Author.Id);
-
-                                string reason = listItem.Reason;
-                                try
-                                {
-                                    await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                                }
-                                catch
-                                {
-                                    // still warn anyway
-                                }
-
-                                if (listItem.Name == "autoban.txt" && (await GetPermLevelAsync(member)) < ServerPermLevel.Tier4)
-                                {
-                                    await BanHelpers.BanFromServerAsync(message.Author.Id, reason, client.CurrentUser.Id, channel.Guild, 0, channel, default, true);
-                                    return;
-                                }
-
-                                //var tmp = channel.Type;
-
-                                match = true;
-
-                                DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock, 1);
-                                var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-                                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField: ("Match", flaggedWord, true), messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                                return;
-                            }
-                        }
-                        if (match)
-                            return;
-                    }
-
-                    if (match)
-                        return;
-
-                    #endregion
-
-                    #region invite filter
-                    string checkedMessage = msgContentWithEmbedData.Replace('\\', '/');
-
-                    if ((await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && checkedMessage.Contains("dsc.gg/") ||
-                        checkedMessage.Contains("invite.gg/")
-                        )
-                    {
-                        if (wasAutoModBlock)
-                        {
-                            Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered unapproved invite filter", channel.Id, message.Author.Id);
-                        }
-                        else
-                        {
-                            Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered unapproved invite filter", message.Id, channel.Id, message.Author.Id);
-                        }
-
-                        string reason = "Sent an unapproved invite";
-                        try
-                        {
-                            _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                        }
-                        catch
-                        {
-                            // still warn anyway
-                        }
-
-                        DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock, 1);
-                        var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-                        await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                        match = true;
-                        return;
-                    }
-
-                    var inviteMatches = invite_rx.Matches(checkedMessage);
-
-                    if ((await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && inviteMatches.Count > 3)
-                    {
-                        string reason = "Sent too many invites";
-                        await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock, messageContentOverride: msgContentWithEmbedData);
-                        match = true;
-                        return;
-                    }
-
-                    foreach (Match currentMatch in inviteMatches)
-                    {
-                        string code = currentMatch.Groups[1].Value;
-
-                        if (allowedInviteCodes.Contains(code) || Program.cfgjson.InviteExclusion.Contains(code))
-                        {
-                            continue;
-                        }
-
-                        ServerApiResponseJson maliciousCache = default;
-
-                        maliciousCache = Program.serverApiList.FirstOrDefault(x => x.Vanity == code || x.Invite == code);
-
-                        DiscordInvite invite = default;
-                        if (maliciousCache == default)
-                        {
-
-                            if ((await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement && disallowedInviteCodes.Contains(code))
-                            {
-                                if (!match)
-                                {
-                                    string reason = "Sent an unapproved invite";
-                                    await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock, messageContentOverride: msgContentWithEmbedData);
-                                    match = true;
-                                }
-                                break;
-                            }
-
-                            try
-                            {
-                                invite = await client.GetInviteByCodeAsync(code);
-                            }
-                            catch (DSharpPlus.Exceptions.NotFoundException)
-                            {
-                                allowedInviteCodes.Add(code);
-                                continue;
-                            }
-                        }
-
-                        if (invite != default && invite.Guild is not null && (Program.cfgjson.InviteIDExclusion.Contains(invite.Guild.Id) || invite.Guild.Id == channel.Guild.Id))
-                            continue;
-
-                        if (maliciousCache == default && invite != default && invite.Guild is not null)
-                            maliciousCache = Program.serverApiList.FirstOrDefault(x => x.ServerID == invite.Guild.Id.ToString());
-
-                        if (maliciousCache != default)
-                        {
-                            string reason = "Sent a malicious Discord invite";
-
-                            DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock);
-                            await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                            var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-
-                            string responseToSend = $"```json\n{JsonConvert.SerializeObject(maliciousCache)}\n```";
-
-                            (string name, string value, bool inline) extraField = new("Cached API response", responseToSend, false);
-                            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-
-                            match = true;
-                            break;
-                        }
-
-                        if (invite == default || invite.Channel is null)
-                        {
-                            continue;
-                        }
-
-
-                        if (
-                        (await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.InviteTierRequirement
-                        && (
-                            invite.Channel.Type == DiscordChannelType.Group
-                            || (
-                                !Program.cfgjson.InviteExclusion.Contains(code)
-                                && !Program.cfgjson.InviteIDExclusion.Contains(invite.Guild.Id)
-                            )
-                        )
-                        )
-                        {
-                            disallowedInviteCodes.Add(code);
-                            match = await InviteCheck(invite, message, client, msgContentWithEmbedData, wasAutoModBlock);
-                            if (!match)
-                            {
-                                string reason = "Sent an unapproved invite";
-                                await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock, messageContentOverride: msgContentWithEmbedData);
-                            }
-                            return;
-                        }
-                        else
-                        {
-                            match = await InviteCheck(invite, message, client, msgContentWithEmbedData, wasAutoModBlock);
-                        }
-
-                    }
-
-                    if (match)
-                        return;
-
-                    #endregion
-
-                    #region mass emoji filter
-                    if (!Program.cfgjson.UnrestrictedEmojiChannels.Contains(channel.Id) && msgContentWithEmbedData.Length >= Program.cfgjson.MassEmojiThreshold)
-                    {
-                        char[] tempArray = msgContentWithEmbedData.Replace("🏻", "").Replace("🏼", "").Replace("🏽", "").Replace("🏾", "").Replace("🏿", "").ToCharArray();
-                        int pos = 0;
-                        foreach (char c in tempArray)
-                        {
-
-                            if (c == '™' || c == '®' || c == '©')
-                            {
-                                tempArray[pos] = ' ';
-                            }
-                            if (c == '\u200d' && pos + 1 < tempArray.Length)
-                            {
-                                tempArray[pos] = ' ';
-                                tempArray[pos + 1] = ' ';
-                            }
-                            ++pos;
-                        }
-                        string input = new(tempArray);
-
-                        var matches = emoji_rx.Matches(input);
-                        if (matches.Count > Program.cfgjson.MassEmojiThreshold)
-                        {
-                            if (wasAutoModBlock)
-                            {
-                                Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered mass emoji filter", channel.Id, message.Author.Id);
-                            }
-                            else
-                            {
-                                Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered mass emoji filter", message.Id, channel.Id, message.Author.Id);
-                            }
-
-                            string reason = "Mass emoji";
-
-                            if ((await GetPermLevelAsync(member)) == ServerPermLevel.Nothing && !Program.redis.HashExists("emojiPardoned", message.Author.Id.ToString()))
-                            {
-                                await Program.redis.HashSetAsync("emojiPardoned", member.Id.ToString(), false);
-                                string pardonOutput;
-                                if (Program.cfgjson.UnrestrictedEmojiChannels.Count > 0)
-                                    pardonOutput = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, if you want to play around with lots of emoji, please use <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.";
-                                else
-                                    if (wasAutoModBlock)
-                                    pardonOutput = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention} Your message contained too many emoji.";
-                                else
-                                    pardonOutput = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention} Your message was automatically deleted for mass emoji.";
-
-                                var msgOut = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, pardonOutput, wasAutoModBlock);
-                                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, DiscordHelpers.MessageLink(msgOut), messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                                await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, DiscordHelpers.MessageLink(msgOut), messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                                return;
-                            }
-
-                            string output = $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**";
-                            if (Program.cfgjson.UnrestrictedEmojiChannels.Count > 0 && (!Program.redis.HashExists("emojiPardoned", message.Author.Id.ToString()) || Program.redis.HashGet("emojiPardoned", message.Author.Id.ToString()) == false))
-                            {
-                                output += $"\nIf you want to play around with lots of emoji, please use <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.";
-                                await Program.redis.HashSetAsync("emojiPardoned", member.Id.ToString(), true);
-                            }
-
-                            DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, output, wasAutoModBlock);
-                            var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-                            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                            await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                            return;
-                        }
-                        #endregion
-
-                        #region tech support relaying
-                        if (!limitFilters)
-                        {
-                            if (channel.Id == Program.cfgjson.TechSupportChannel &&
-                                message.Content.Contains($"<@&{Program.cfgjson.CommunityTechSupportRoleID}>"))
-                            {
-                                if (supportRatelimit.ContainsKey(message.Author.Id))
-                                {
-                                    if (supportRatelimit[message.Author.Id] > DateTime.UtcNow)
-                                        return;
-                                    else
-                                        supportRatelimit.Remove(message.Author.Id);
-                                }
-
-                                supportRatelimit.Add(message.Author.Id, DateTime.UtcNow.Add(TimeSpan.FromMinutes(Program.cfgjson.SupportRatelimitMinutes)));
-
-                                var embed = new DiscordEmbedBuilder()
-                                    .WithTimestamp(DateTime.UtcNow)
-                                    .WithAuthor(DiscordHelpers.UniqueUsername(message.Author), null, $"https://cdn.discordapp.com/avatars/{message.Author.Id}/{message.Author.AvatarHash}.png?size=128");
-
-                                var lastMsgs = await channel.GetMessagesBeforeAsync(message.Id, 50).ToListAsync();
-                                var msgMatch = lastMsgs.FirstOrDefault(m => m.Author.Id == message.Author.Id);
-
-                                if (msgMatch is not null)
-                                {
-                                    var matchContent = StringHelpers.Truncate(string.IsNullOrWhiteSpace(msgMatch.Content) ? "`[No content]`" : msgMatch.Content, 1020, true);
-                                    embed.AddField("Previous message", matchContent);
-                                    if (msgMatch.Attachments.Count != 0)
-                                    {
-                                        embed.WithImageUrl(msgMatch.Attachments[0].Url);
-                                    }
-                                }
-
-                                var messageContent = StringHelpers.Truncate(string.IsNullOrWhiteSpace(message.Content) ? "`[No content]`" : message.Content, 1020, true);
-                                embed.AddField("Current message", messageContent);
-                                if (message.Attachments.Count != 0)
-                                {
-                                    if (embed.ImageUrl is null)
-                                        embed.WithImageUrl(message.Attachments[0].Url);
-                                    else
-                                        embed.ImageUrl = message.Attachments[0].Url;
-                                }
-
-                                embed.AddField("Message Link", $"https://discord.com/channels/{channel.Guild.Id}/{channel.Id}/{message.Id}");
-                                var logOut = await LogChannelHelper.LogMessageAsync("support", new DiscordMessageBuilder().AddEmbed(embed));
-                                _ = logOut.CreateReactionAsync(DiscordEmoji.FromName(client, ":CliptokAcknowledge:", true));
-                            }
-                        }
-                        #endregion
-                    }
-
-                    #region phishing API
-                    var urlMatches = domain_rx.Matches(msgContentWithEmbedData);
-                    if (urlMatches.Count > 0 && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") is not null && Environment.GetEnvironmentVariable("CLIPTOK_ANTIPHISHING_ENDPOINT") != "useyourimagination")
-                    {
-                        var (phishingMatch, httpStatus, responseText, phishingResponse) = await APIs.PhishingAPI.PhishingAPICheckAsync(msgContentWithEmbedData);
-
-                        if (httpStatus == HttpStatusCode.OK)
-                        {
-                            if (phishingMatch)
-                            {
-                                if (wasAutoModBlock)
-                                {
-                                    Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered phishing message filter", channel.Id, message.Author.Id);
-                                }
-                                else
-                                {
-                                    Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered phishing message filter", message.Id, channel.Id, message.Author.Id);
-                                }
-
-                                string reason = "Sending phishing URL(s)";
-                                DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock);
-                                await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                                var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-
-                                string responseToSend = (await StringHelpers.CodeOrHasteBinAsync(responseText, "json", 1000, true)).Text;
-
-                                (string name, string value, bool inline) extraField = new("API Response", responseToSend, false);
-                                await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, extraField, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                                return;
-                            }
-                        }
-                    }
-                    #endregion
-
-                    #region everyone/here ping filter
-                    var msgContent = msgContentWithEmbedData;
-                    foreach (var letter in Checks.ListChecks.lookalikeAlphabetMap)
-                        msgContent = msgContent.Replace(letter.Key, letter.Value);
-                    if (Program.cfgjson.EveryoneFilter && !member.Roles.Any(role => Program.cfgjson.EveryoneExcludedRoles.Contains(role.Id)) && !Program.cfgjson.EveryoneExcludedChannels.Contains(channel.Id) && (msgContent.Contains("@everyone") || msgContent.Contains("@here")))
-                    {
-                        if (wasAutoModBlock)
-                        {
-                            Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered everyone/here mention filter", channel.Id, message.Author.Id);
-                        }
-                        else
-                        {
-                            Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered everyone/here mention filter", message.Id, channel.Id, message.Author.Id);
-                        }
-
-                        string reason = "Attempted to ping everyone/here";
-                        DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock);
-                        await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                        var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-                        await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                        return;
-                    }
-                    #endregion
-
-                    #region mass mentions warn filter
-                    if (((message.MentionedUsers is not null && message.MentionedUsers.Count >= Program.cfgjson.MassMentionThreshold) || (message.MentionedUsersCount >= Program.cfgjson.MassMentionThreshold)) && (await GetPermLevelAsync(member)) < ServerPermLevel.Tier3)
-                    {
-                        if (wasAutoModBlock)
-                        {
-                            Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered mass mention filter", channel.Id, message.Author.Id);
-                        }
-                        else
-                        {
-                            Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered mass mention filter", message.Id, channel.Id, message.Author.Id);
-                        }
-
-                        string reason = "Mass mentions";
-                        try
-                        {
-                            _ = InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                        }
-                        catch
-                        {
-                            // still warn anyway
-                        }
-
-                        DiscordMessage msg = await WarningHelpers.SendPublicWarningMessageAndDeleteInfringingMessageAsync(message, $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**", wasAutoModBlock);
-                        var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-                        await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                        return;
-                    }
-                    #endregion
-
-                    #region line limit filter
-                    var lineCount = CountNewlines(msgContentWithEmbedData);
-
-                    if (!Program.cfgjson.LineLimitExcludedChannels.Contains(channel.Id)
-                        && (channel.ParentId is null || !Program.cfgjson.LineLimitExcludedChannels.Contains((ulong)channel.ParentId))
-                        && (lineCount >= Program.cfgjson.IncreasedLineLimit
-                        || (lineCount >= Program.cfgjson.LineLimit && (await GetPermLevelAsync(member)) < (ServerPermLevel)Program.cfgjson.LineLimitTier)))
-                    {
-                        if (wasAutoModBlock)
-                        {
-                            Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered line limit filter", channel.Id, message.Author.Id);
-                        }
-                        else
-                        {
-                            Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered line limit filter", message.Id, channel.Id, message.Author.Id);
-                            await DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(message);
-                        }
-
-                        string reason = "Too many lines in a single message";
-
-                        if (!Program.redis.SetContains("linePardoned", message.Author.Id.ToString()))
-                        {
-                            await Program.redis.SetAddAsync("linePardoned", member.Id.ToString());
-                            string output;
-                            if (wasAutoModBlock)
-                                output = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, your message contained too many lines.\n" +
-                                         $"Please consider using a Pastebin-style website or <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid further punishment.";
-                            else
-                                output = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, your message was deleted for containing too many lines.\n" +
-                                         $"Please consider using a Pastebin-style website or <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid further punishment.";
-                            DiscordMessageBuilder messageBuilder = new();
-                            messageBuilder.WithContent(output);
-                            DiscordMessage msg;
-                            if (!wasAutoModBlock)
-                            {
-                                messageBuilder.AddActionRowComponent(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
-                                msg = await channel.SendMessageAsync(messageBuilder);
-                                await Program.redis.HashSetAsync("deletedMessageReferences", msg.Id, msgContentWithEmbedData);
-                            }
-                            else
-                            {
-                                msg = await channel.SendMessageAsync(messageBuilder);
-                            }
-                            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, DiscordHelpers.MessageLink(msg), messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                            await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, DiscordHelpers.MessageLink(msg), messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                            return;
-                        }
-                        else
-                        {
-                            string output = $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**\n" +
-                                $"Please consider using a Pastebin-style website or <#{Program.cfgjson.UnrestrictedEmojiChannels[0]}> to avoid punishment.";
-                            DiscordMessageBuilder messageBuilder = new();
-                            messageBuilder.WithContent(output);
-                            DiscordMessage msg;
-                            if (!wasAutoModBlock)
-                            {
-                                messageBuilder.AddActionRowComponent(new DiscordButtonComponent(DiscordButtonStyle.Secondary, "line-limit-deleted-message-callback", "View message content", false, null));
-                                msg = await channel.SendMessageAsync(messageBuilder);
-                                await Program.redis.HashSetAsync("deletedMessageReferences", msg.Id, msgContentWithEmbedData);
-                            }
-                            else
-                            {
-                                msg = await channel.SendMessageAsync(messageBuilder);
-                            }
-
-                            await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-                            var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
-                            await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: msgContentWithEmbedData, wasAutoModBlock: wasAutoModBlock);
-
-                            return;
-                        }
-
-                    }
-                    #endregion
-                }
-                #endregion
-
-                if (!limitFilters)
-                {
-                    #region feedback hub forum validation
-                    if ((await GetPermLevelAsync(member)) < ServerPermLevel.TrialModerator && !isAnEdit && channel.IsThread && channel.ParentId == Program.cfgjson.FeedbackHubForum && !Program.redis.SetContains("processedFeedbackHubThreads", channel.Id))
-                    {
-                        var thread = (DiscordThreadChannel)channel;
-                        Program.redis.SetAdd("processedFeedbackHubThreads", thread.Id);
-
-                        // we need to make sure this is the first message in the channel
-                        if ((await thread.GetMessagesBeforeAsync(message.Id).ToListAsync()).Count == 0)
-                        {
-                            // lock thread if there is no possible feedback hub link
-                            if (!message.Content.Contains("aka.ms/") && !message.Content.Contains("feedback-hub:"))
-                            {
-                                await message.BaseMessage.RespondAsync($"{Program.cfgjson.Emoji.Error} Your {channel.Parent.Mention} submission must include a Feedback Hub link!\nThis post will be automatically deleted shortly.");
-                                await thread.ModifyAsync(thread =>
-                                {
-                                    thread.IsArchived = true;
-                                    thread.Locked = true;
-                                });
-                                await Task.Delay(30000);
-                                await LogChannelHelper.LogMessageAsync("messages",
-                                    new DiscordMessageBuilder()
-                                        .WithContent($"{Program.cfgjson.Emoji.Deleted} Deleted non-feedback post from {message.Author.Mention} in {channel.Parent.Mention}:")
-                                        .AddEmbed(new DiscordEmbedBuilder()
-                                            .WithAuthor(
-                                                $"{DiscordHelpers.UniqueUsername(message.Author)} in #{channel.Parent.Name}",
-                                                null, await LykosAvatarMethods.UserOrMemberAvatarURL(message.Author, channel.Guild))
-                                            .WithTitle(thread.Name)
-                                            .WithDescription(message.Content)
-                                            .WithColor(DiscordColor.Red)
-                                        )
-
-                                );
-                                await thread.DeleteAsync();
-                                return;
-                            }
-                            else
-                            {
-                                await Task.Delay(2000);
-                                await message.BaseMessage.ModifyEmbedSuppressionAsync(true);
-                            }
-                        }
-                    }
-                    #endregion
-
-                    #region passive list matching
-                    // Check the passive lists AFTER all other checks.
-                    if ((await GetPermLevelAsync(member)) >= ServerPermLevel.TrialModerator)
-                        return;
-
-                    foreach (var listItem in Program.cfgjson.WordListList)
-                    {
-                        if (!listItem.Passive)
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            (bool success, string flaggedWord) = Checks.ListChecks.CheckForNaughtyWords(message.Content.ToLower(), listItem);
-                            if (success)
-                            {
-                                DiscordChannel logChannel = default;
-                                if (listItem.ChannelId is not null)
-                                {
-                                    logChannel = await Program.discord.GetChannelAsync((ulong)listItem.ChannelId);
-                                }
-
-                                string content = $"{Program.cfgjson.Emoji.Warning} Detected potentially suspicious message by {message.Author.Mention} in {channel.Mention}:";
-
-                                (string name, string value, bool inline) extraField = new("Match", flaggedWord, true);
-
-                                await InvestigationsHelpers.SendInfringingMessaageAsync(
-                                    "investigations",
-                                    message,
-                                    listItem.Reason,
-                                    DiscordHelpers.MessageLink(message),
-                                    content: content,
-                                    colour: new DiscordColor(0xFEC13D),
-                                    channelOverride: logChannel,
-                                    extraField: extraField,
-                                    wasAutoModBlock: wasAutoModBlock
-                                );
-                            }
-                        }
-                    }
-                    #endregion
-                }
-            }
-            catch (Exception e)
-            {
-                client.Logger.LogError(eventId: Program.CliptokEventID, message: "{message}", e.ToString());
-
-                var exs = new List<Exception>();
-                if (e is AggregateException ae)
-                    exs.AddRange(ae.InnerExceptions);
-                else
-                    exs.Add(e);
-
-                var cliptokChannel = await client.GetChannelAsync(Program.cfgjson.HomeChannel);
-
-                foreach (var ex in exs)
-                {
-
-                    var embed = new DiscordEmbedBuilder
-                    {
-                        Color = new DiscordColor("#FF0000"),
-                        Title = "An exception occurred when processing a message event.",
-                        Description = $"{Program.cfgjson.Emoji.BSOD} `{e.GetType()}` occurred when processing [this message]({DiscordHelpers.MessageLink(message)})!",
-                        Timestamp = DateTime.UtcNow
-                    };
-                    embed.WithFooter(client.CurrentUser.Username, client.CurrentUser.AvatarUrl)
-                        .AddField("Message", ex.Message);
-                    await LogChannelHelper.LogMessageAsync("errors", embed: embed.Build()).ConfigureAwait(false);
-                }
-            }
-
-            if (wasAutoModBlock)
-                Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered no filters!", channel.Id, message.Author.Id);
-            else
-                Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered no filters!", message.Id, channel.Id, message.Author.Id);
-        }
+        #region helpers
 
         public static int CountNewlines(string input)
         {
@@ -1357,5 +1506,6 @@ namespace Cliptok.Events
                 await DiscordHelpers.GenerateMessageRelay(message.BaseMessage, true, true));
         }
 
+        #endregion helpers
     }
 }

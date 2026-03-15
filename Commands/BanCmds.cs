@@ -96,6 +96,9 @@ namespace Cliptok.Commands
 
             }
 
+            // Check if the user is already banned first. If they are, we will update the ban record (editban) instead of writing a new one
+            var userAlreadyBanned = await Program.redis.HashExistsAsync("bans", user.Id);
+
             DiscordMember member;
             try
             {
@@ -108,7 +111,10 @@ namespace Cliptok.Commands
 
             if (member is null)
             {
-                await BanHelpers.BanFromServerAsync(user.Id, reason, ctx.User.Id, ctx.Guild, messageDeleteDays, ctx.Channel, banDuration, appealable);
+                if (userAlreadyBanned)
+                    await BanHelpers.EditBanAsync(user.Id, ctx.User.Id, banDuration, reason, appealable);
+                else
+                    await BanHelpers.BanFromServerAsync(user.Id, reason, ctx.User.Id, ctx.Guild, messageDeleteDays, ctx.Channel, banDuration, appealable, compromisedAccount);
             }
             else
             {
@@ -116,7 +122,10 @@ namespace Cliptok.Commands
                 {
                     if (DiscordHelpers.AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
                     {
-                        await BanHelpers.BanFromServerAsync(user.Id, reason, ctx.User.Id, ctx.Guild, messageDeleteDays, ctx.Channel, banDuration, appealable);
+                        if (userAlreadyBanned)
+                            await BanHelpers.EditBanAsync(user.Id, ctx.User.Id, banDuration, reason, appealable);
+                        else
+                            await BanHelpers.BanFromServerAsync(user.Id, reason, ctx.User.Id, ctx.Guild, messageDeleteDays, ctx.Channel, banDuration, appealable, compromisedAccount);
                     }
                     else
                     {
@@ -133,7 +142,9 @@ namespace Cliptok.Commands
                 }
             }
 
-            webhookOut.Content = $"{Program.cfgjson.Emoji.Success} User was successfully bonked.";
+            webhookOut.Content = userAlreadyBanned
+                ? $"{Program.cfgjson.Emoji.Success} Successfully edited the ban for {user.Mention}!"
+                : $"{Program.cfgjson.Emoji.Success} User was successfully bonked.";
             await ctx.EditResponseAsync(webhookOut);
         }
 
@@ -248,6 +259,9 @@ namespace Cliptok.Commands
                 reason = reason[7..^0];
             }
 
+            // Check if the user is already banned first. If they are, we will update the ban record (editban) instead of writing a new one
+            var userAlreadyBanned = await Program.redis.HashExistsAsync("bans", targetMember.Id);
+
             DiscordMember member;
             try
             {
@@ -261,7 +275,15 @@ namespace Cliptok.Commands
             if (member is null)
             {
                 await ctx.Message.DeleteAsync();
-                await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 7, ctx.Channel, banDuration, appealable);
+                if (userAlreadyBanned)
+                {
+                    await BanHelpers.EditBanAsync(targetMember.Id, ctx.User.Id, banDuration, reason, appealable);
+                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Success} Successfully edited the ban for {targetMember.Mention}!");
+                }
+                else
+                {
+                    await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 7, ctx.Channel, banDuration, appealable);
+                }
             }
             else
             {
@@ -270,7 +292,15 @@ namespace Cliptok.Commands
                     if (DiscordHelpers.AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
                     {
                         await ctx.Message.DeleteAsync();
-                        await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 7, ctx.Channel, banDuration, appealable);
+                        if (userAlreadyBanned)
+                        {
+                            await BanHelpers.EditBanAsync(targetMember.Id, ctx.User.Id, banDuration, reason, appealable);
+                            await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Success} Successfully edited the ban for {targetMember.Mention}!");
+                        }
+                        else
+                        {
+                            await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 7, ctx.Channel, banDuration, appealable);
+                        }
                     }
                     else
                     {
@@ -353,6 +383,9 @@ namespace Cliptok.Commands
                 reason = reason[7..^0];
             }
 
+            // Check if the user is already banned first. If they are, we will update the ban record (editban) instead of writing a new one
+            var userAlreadyBanned = await Program.redis.HashExistsAsync("bans", targetMember.Id);
+
             DiscordMember member;
             try
             {
@@ -366,7 +399,15 @@ namespace Cliptok.Commands
             if (member is null)
             {
                 await ctx.Message.DeleteAsync();
-                await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 0, ctx.Channel, banDuration, appealable);
+                if (userAlreadyBanned)
+                {
+                    await EditBanAsync(targetMember.Id, ctx.User.Id, banDuration, reason, appealable);
+                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Success} Successfully edited the ban for {targetMember.Mention}!");
+                }
+                else
+                {
+                    await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 0, ctx.Channel, banDuration, appealable);
+                }
             }
             else
             {
@@ -375,7 +416,15 @@ namespace Cliptok.Commands
                     if (DiscordHelpers.AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
                     {
                         await ctx.Message.DeleteAsync();
-                        await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 0, ctx.Channel, banDuration, appealable);
+                        if (userAlreadyBanned)
+                        {
+                            await EditBanAsync(targetMember.Id, ctx.User.Id, banDuration, reason, appealable);
+                            await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Success} Successfully edited the ban for {targetMember.Mention}!");
+                        }
+                        else
+                        {
+                            await BanFromServerAsync(targetMember.Id, reason, ctx.User.Id, ctx.Guild, 0, ctx.Channel, banDuration, appealable);
+                        }
                     }
                     else
                     {
@@ -409,75 +458,7 @@ namespace Cliptok.Commands
 
             (TimeSpan banDuration, string reason, bool appealable) = PunishmentHelpers.UnpackTimeAndReason(timeAndReason, ctx.Message.Timestamp.DateTime);
 
-            var ban = JsonConvert.DeserializeObject<MemberPunishment>(await Program.redis.HashGetAsync("bans", targetUser.Id));
-
-            ban.ModId = ctx.User.Id;
-            if (banDuration == default)
-                ban.ExpireTime = null;
-            else
-                ban.ExpireTime = ban.ActionTime + banDuration;
-            ban.Reason = reason;
-
-            var guild = await Program.discord.GetGuildAsync(ban.ServerId);
-
-            var contextMessage = await DiscordHelpers.GetMessageFromReferenceAsync(ban.ContextMessageReference);
-            var dmMessage = await DiscordHelpers.GetMessageFromReferenceAsync(ban.DmMessageReference);
-
-            reason = reason.Replace("`", "\\`").Replace("*", "\\*");
-
-            if (contextMessage is not null)
-            {
-                string newCtxMsg;
-                if (banDuration == default)
-                    newCtxMsg = $"{Program.cfgjson.Emoji.Banned} {targetUser.Mention} has been banned: **{reason}**";
-                else
-                    newCtxMsg = $"{Program.cfgjson.Emoji.Banned} {targetUser.Mention} has been banned for **{TimeHelpers.TimeToPrettyFormat(banDuration, false)}**: **{reason}**";
-
-                if (contextMessage.Content.Contains("-# This user's messages have been kept."))
-                    newCtxMsg += "\n-# This user's messages have been kept.";
-
-                await contextMessage.ModifyAsync(newCtxMsg);
-            }
-
-            if (dmMessage is not null)
-            {
-                if (ban.ExpireTime == null)
-                {
-                    if (appealable)
-                    {
-                        if (reason.ToLower().Contains("compromised"))
-                            await dmMessage.ModifyAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}**!\nReason: **{reason}**\nYou can appeal the ban here: <{Program.cfgjson.AppealLink}>\nBefore appealing, please follow these steps to protect your account:\n1. Reset your Discord account password. Even if you use MFA, this will reset all session tokens.\n2. Review active sessions and authorised app connections.\n3. Ensure your PC is free of malware.\n4. [Enable MFA](https://support.discord.com/hc/en-us/articles/219576828-Setting-up-Multi-Factor-Authentication) if not already.");
-                        else
-                            await dmMessage.ModifyAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}**!\nReason: **{reason}**\nYou can appeal the ban here: <{Program.cfgjson.AppealLink}>");
-                    }
-                    else
-                    {
-                        await dmMessage.ModifyAsync($"{Program.cfgjson.Emoji.Banned} You have been permanently banned from **{guild.Name}**!\nReason: **{reason}**");
-                    }
-                }
-                else
-                {
-                    await dmMessage.ModifyAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}** for {TimeHelpers.TimeToPrettyFormat(banDuration, false)}!\nReason: **{reason}**\nBan expires: <t:{TimeHelpers.ToUnixTimestamp(ban.ExpireTime)}:R>");
-                }
-            }
-
-            await Program.redis.HashSetAsync("bans", targetUser.Id.ToString(), JsonConvert.SerializeObject(ban));
-
-            // Construct log message
-            string logOut = $"{Program.cfgjson.Emoji.MessageEdit} The ban for {targetUser.Mention} was edited by {ctx.User.Mention}!\nReason: **{reason}**";
-
-            if (ban.ExpireTime == null)
-            {
-                logOut += "\nBan expires: **Never**"
-                    + $"\nAppealable: **{(appealable ? "Yes" : "No")}**";
-            }
-            else
-            {
-                logOut += $"\nBan expires: <t:{TimeHelpers.ToUnixTimestamp(ban.ExpireTime)}:R>";
-            }
-
-            // Log to mod log
-            await LogChannelHelper.LogMessageAsync("mod", logOut);
+            await BanHelpers.EditBanAsync(targetUser.Id, ctx.User.Id, banDuration, reason, appealable);
 
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Successfully edited the ban for {targetUser.Mention}!");
         }

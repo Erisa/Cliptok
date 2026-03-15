@@ -47,7 +47,12 @@
                     if (plain)
                         return (true, hasteUrl);
                     if (messageWrapper)
-                        return (true, $"[`📄 View online`]({hasteResult.RawUrl})");
+                    {
+                        if (language == "")
+                            return (true, $"[`📄 View online`]({hasteResult.RawUrl})");
+                        else
+                            return (true, $"[`📄 View online`]({hasteResult.FullUrl})");
+                    }
                     else if (inputHasCodeBlock)
                         return (true, $"{Program.cfgjson.Emoji.Warning} Output contained a code block, so it was uploaded to Hastebin to avoid formatting issues: {hasteUrl}");
                     else

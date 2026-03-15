@@ -32,39 +32,47 @@ namespace Cliptok.Events
             }
             else if (e.Id == "clear-confirm-callback")
             {
-                Dictionary<ulong, List<DiscordMessage>> messagesToClear = Commands.ClearCmds.MessagesToClear;
+                var queuedClears = Commands.ClearCmds.MessagesToClear;
 
-                if (!messagesToClear.ContainsKey(e.Message.Id))
+                if (queuedClears.Keys.All(x => x != e.Message.Id))
                 {
                     await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
                         new DiscordInteractionResponseBuilder().WithContent($"{cfgjson.Emoji.Error} These messages have already been deleted!").AsEphemeral(true));
                     return;
                 }
 
-                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder().WithContent($"{cfgjson.Emoji.Loading} Deleting messages. This may take a while...").AsEphemeral(true));
 
-                List<DiscordMessage> messages = messagesToClear.GetValueOrDefault(e.Message.Id);
+                var messagesToClear = queuedClears[e.Message.Id];
 
-                await e.Channel.DeleteMessagesAsync(messages, $"[Clear by {DiscordHelpers.UniqueUsername(e.User)}]");
+                foreach (var messagesForChannel in messagesToClear)
+                {
+                    var channel = e.Guild.Channels[messagesForChannel.Key];
+                    await channel.DeleteMessagesAsync(messagesForChannel.Value, $"[Clear by {DiscordHelpers.UniqueUsername(e.User)}]");
+                    if (messagesToClear.Count == 1)
+                        await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Cleared **{messagesForChannel.Value.Count}** messages from {channel.Mention}!");
+                    await LogChannelHelper.LogMessageAsync("mod",
+                        new DiscordMessageBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.Deleted} **{messagesToClear.Count}** messages were cleared in {channel.Mention} by {e.User.Mention}.")
+                            .WithAllowedMentions(Mentions.None)
+                    );
 
-                await LogChannelHelper.LogMessageAsync("mod",
-                    new DiscordMessageBuilder()
-                        .WithContent($"{cfgjson.Emoji.Deleted} **{messages.Count}** messages were cleared in {e.Channel.Mention} by {e.User.Mention}.")
-                        .WithAllowedMentions(Mentions.None)
-                );
+                    // logging is now handled in the bulk delete event
+                    if (!Program.cfgjson.EnablePersistentDb)
+                    {
+                        await LogChannelHelper.LogDeletedMessagesAsync(
+                            "messages",
+                            $"{Program.cfgjson.Emoji.Deleted} **{messagesForChannel.Value.Count}** messages were cleared from {channel.Mention} by {e.User.Mention}.",
+                            messagesForChannel.Value,
+                            channel
+                        );
+                    }
+                }
 
-                await LogChannelHelper.LogDeletedMessagesAsync(
-                    "messages",
-                    $"{cfgjson.Emoji.Deleted} **{messages.Count}** messages were cleared from {e.Channel.Mention} by {e.User.Mention}.",
-                    messages,
-                    e.Channel
-                );
+                queuedClears.Remove(e.Message.Id);
 
-                messagesToClear.Remove(e.Message.Id);
-
-                await e.Channel.SendMessageAsync($"{cfgjson.Emoji.Deleted} Cleared **{messages.Count}** messages from {e.Channel.Mention}!");
-
-                await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent($"{cfgjson.Emoji.Success} Done!").AsEphemeral(true));
+                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"{cfgjson.Emoji.Success} Done!"));
             }
             else if (e.Id == "debug-overrides-add-confirm-callback")
             {
@@ -239,7 +247,6 @@ namespace Cliptok.Events
                 var insiderDevRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderDev);
                 var insiderBetaRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderBeta);
                 var insiderRPRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderRP);
-                var insider10RPRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.Insider10RP);
                 var patchTuesdayRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.PatchTuesday);
 
                 // Show menu with current Insider roles, apply new roles based on user selection
@@ -250,9 +257,8 @@ namespace Cliptok.Events
                         new("Windows 11 Dev channel", "insiders-info-w11-dev", isDefault: member.Roles.Contains(insiderDevRole)),
                         new("Windows 11 Beta channel", "insiders-info-w11-beta", isDefault: member.Roles.Contains(insiderBetaRole)),
                         new("Windows 11 Release Preview channel", "insiders-info-w11-rp", isDefault: member.Roles.Contains(insiderRPRole)),
-                        new("Windows 10 Release Preview channel", "insiders-info-w10-rp", isDefault: member.Roles.Contains(insider10RPRole)),
                         new("Patch Tuesday", "insiders-info-pt", isDefault: member.Roles.Contains(patchTuesdayRole)),
-                    }, minOptions: 0, maxOptions: 6);
+                    }, minOptions: 0, maxOptions: 5);
 
                 var builder = new DiscordFollowupMessageBuilder()
                     .WithContent($"{cfgjson.Emoji.Insider} Use the menu below to toggle your Insider roles!")
@@ -279,7 +285,6 @@ namespace Cliptok.Events
                     { "insiders-info-w11-dev", cfgjson.UserRoles.InsiderDev },
                     { "insiders-info-w11-beta", cfgjson.UserRoles.InsiderBeta },
                     { "insiders-info-w11-rp", cfgjson.UserRoles.InsiderRP },
-                    { "insiders-info-w10-rp", cfgjson.UserRoles.Insider10RP },
                     { "insiders-info-pt", cfgjson.UserRoles.PatchTuesday }
                 };
 
@@ -332,7 +337,6 @@ namespace Cliptok.Events
                     cfgjson.UserRoles.InsiderDev,
                     cfgjson.UserRoles.InsiderBeta,
                     cfgjson.UserRoles.InsiderRP,
-                    cfgjson.UserRoles.Insider10RP,
                     cfgjson.UserRoles.PatchTuesday
                 };
                 if (member.Roles.Any(x => insiderRoles.Contains(x.Id)))

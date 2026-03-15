@@ -11,8 +11,10 @@
             if (!Program.cfgjson.EnableTextInVoice)
                 return;
 
-            var channelBefore = e.Before?.ChannelId is null ? null : await Program.discord.GetChannelAsync(e.Before.ChannelId.Value);
-            var channelAfter = e.After?.ChannelId is null ? null : await Program.discord.GetChannelAsync(e.After.ChannelId.Value);
+            client.Logger.LogDebug("Got a voice state update event");
+
+            var channelBefore = e.Before is null ? null : await e.Before.GetChannelAsync();
+            var channelAfter = e.After is null ? null : await e.After.GetChannelAsync();
             var user = await e.GetUserAsync();
             var guild = await e.GetGuildAsync();
 
@@ -56,12 +58,15 @@
                     }
                     else
                     {
+                        Program.discord.Logger.LogDebug("[Voice Purge] {channel} is queued for purge. Waiting...", channelBefore.Name);
                         await Task.Delay(10000);
                     }
                 }
 
                 if (guild.Channels[channelBefore.Id].Users.Count == 0 && Program.cfgjson.VoiceChannelPurge)
                 {
+                    Program.discord.Logger.LogDebug("[Voice Purge] Voice channel {channel} is empty and will be purged now!", channelBefore.Name);
+
                     List<DiscordMessage> messages = new();
                     try
                     {
@@ -69,12 +74,15 @@
                         if (firstMsg == default)
                             return;
 
+                        Program.discord.Logger.LogDebug("[Voice Purge] Found first message to purge in voice channel {channel}", channelBefore.Name);
+
                         messages.Add(firstMsg);
                         var lastMsgId = firstMsg.Id;
                         // delete all the messages from the channel
                         while (true)
                         {
                             var newmsgs = await channelBefore.GetMessagesBeforeAsync(lastMsgId, 100).ToListAsync();
+                            Program.discord.Logger.LogDebug("[Voice Purge] Successfully fetched {count} messages in voice channel {channel}", newmsgs.Count, channelBefore.Name);
                             messages.AddRange(newmsgs);
                             if (newmsgs.Count() < 100)
                                 break;
@@ -84,7 +92,9 @@
                         messages.RemoveAll(message => message.CreationTimestamp.ToUniversalTime() < DateTime.UtcNow.AddDays(-14));
                         PendingPurge.Remove(channelBefore.Id);
 
+                        Program.discord.Logger.LogDebug("[Voice Purge] Purging {count} messages in {channel}", messages.Count, channelBefore.Name);
                         await channelBefore.DeleteMessagesAsync(messages);
+                        Program.discord.Logger.LogDebug("[Voice Purge] Successfully purged {count} messages in {channel}", messages.Count, channelBefore.Name);
                     }
                     catch (Exception ex)
                     {
@@ -113,13 +123,15 @@
 
         public static async Task UserJoined(DiscordClient client, VoiceStateUpdatedEventArgs e)
         {
-            var channelAfter = e.After?.ChannelId is null ? null : await Program.discord.GetChannelAsync(e.After.ChannelId.Value);
+            var channelAfter = e.After is null ? null : await e.After.GetChannelAsync();
             var user = await e.GetUserAsync();
             var guild = await e.GetGuildAsync();
             var member = await guild.GetMemberAsync(user.Id);
 
             if (Program.cfgjson.IgnoredVoiceChannels.Contains(channelAfter.Id))
                 return;
+
+            client.Logger.LogDebug("Processing user join voice event for {user} in {channel}", user.Username, channelAfter.Name);
 
             while (PendingOverWrites.Contains(user.Id))
             {
@@ -139,6 +151,7 @@
                     {
                         if (overwrite.Type == DiscordOverwriteType.Member && overwrite.Id == member.Id)
                         {
+                            client.Logger.LogDebug("{user} already has overwrite in {channel}, adding Send Messages permission", user.Username, channelAfter.Name);
                             await channelAfter.AddOverwriteAsync(member, overwrite.Allowed + DiscordPermission.SendMessages, overwrite.Denied, "User joined voice channel.");
                             userOverrideSet = true;
                             break;
@@ -147,6 +160,7 @@
 
                     if (!userOverrideSet)
                     {
+                        client.Logger.LogDebug("Creating overwrite for {user} in {channel}", user.Username, channelAfter.Name);
                         await channelAfter.AddOverwriteAsync(member, DiscordPermission.SendMessages, DiscordPermissions.None, "User joined voice channel.");
                     }
                 }
@@ -167,17 +181,21 @@
             {
                 Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error ocurred trying to send join message for {user} in {channel}", user.Username, channelAfter.Name);
             }
+
+            client.Logger.LogDebug("Done processing user join voice event for {user} in {channel}", user.Username, channelAfter.Name);
         }
 
         public static async Task UserLeft(DiscordClient client, VoiceStateUpdatedEventArgs e)
         {
-            var channelBefore = e.Before?.ChannelId is null ? null : await Program.discord.GetChannelAsync(e.Before.ChannelId.Value);
+            var channelBefore = e.Before is null ? null : await e.Before.GetChannelAsync();
             var user = await e.GetUserAsync();
             var guild = await e.GetGuildAsync();
             var member = await guild.GetMemberAsync(user.Id);
 
             if (Program.cfgjson.IgnoredVoiceChannels.Contains(channelBefore.Id))
                 return;
+
+            client.Logger.LogDebug("Processing user leave voice event for {user} in {channel}", user.Username, channelBefore.Name);
 
             while (PendingOverWrites.Contains(user.Id))
             {
@@ -198,6 +216,7 @@
                         if (overwrite.Allowed == DiscordPermission.SendMessages && overwrite.Denied == DiscordPermissions.None)
                         {
                             // User only has allow for Send Messages, so we can delete the entire override
+                            client.Logger.LogDebug("{user} has overwrite in {channel}, deleting", user.Username, channelBefore.Name);
                             await overwrite.DeleteAsync("User left voice channel.");
                         }
                         else
@@ -205,6 +224,7 @@
                             // User has other overrides set, so we should only remove the Send Messages override
                             if (overwrite.Allowed.HasPermission(DiscordPermission.SendMessages))
                             {
+                                client.Logger.LogDebug("{user} has overwrite in {channel} with other permissions, removing Send Messages permission", user.Username, channelBefore.Name);
                                 await channelBefore.AddOverwriteAsync(member, overwrite.Allowed - DiscordPermission.SendMessages, overwrite.Denied, "User left voice channel.");
                             }
                             else
@@ -212,6 +232,7 @@
                                 // Check if the overwrite has no permissions set - if so, delete it to keep the list clean.
                                 if (overwrite.Allowed == DiscordPermissions.None && overwrite.Denied == DiscordPermissions.None)
                                 {
+                                    client.Logger.LogDebug("{user} has overwrite in {channel} with no permissions set, deleting", user.Username, channelBefore.Name);
                                     await overwrite.DeleteAsync("User left voice channel.");
                                 }
                             }
@@ -240,6 +261,8 @@
             {
                 Program.discord.Logger.LogError(Program.CliptokEventID, ex, "Error ocurred trying to send leave message for {user} in {channel}", user.Username, channelBefore.Name);
             }
+
+            client.Logger.LogDebug("Done processing user leave voice event for {user} in {channel}", user.Username, channelBefore.Name);
         }
     }
 }

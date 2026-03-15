@@ -12,7 +12,7 @@ GitHub Issues will generally only be accepted if they are reproducible in a stan
 
 Copy `.env-example` to `.env` and edit in the token for your Discord bot. If you require a different prefix, that can be done in the same file.
 
-To use the bot outside of it's intended environments, you will need to edit the configuration file more thoroughly, including all of the role IDs and the server ID. It is vital that every config value is present and valid.
+To use the bot outside of its intended environments, you will need to edit the configuration file more thoroughly, including all of the role IDs and the server ID. It is vital that every config value is present and valid.
 
 ## Limitations
 Currently the bot will only work with one server. This choice was made because the bot was specifically created for a single server at a time and will never be made publicly available. If you are looking to host a bot for multiple servers, this bot is not for you.
@@ -56,7 +56,7 @@ If you want to run the bot as a standalone application rather than a Docker cont
 
 Once you have everything installed:
 1. Clone this repository and `cd` into the directory.
-2. Set the `CLIPTOK_TOKEN` environment variable to your bots token.
+2. Set the `CLIPTOK_TOKEN` environment variable to your bot's token.
 3. Edit the `config.json` to fit your needs.
 4. Compile the bot for production: `dotnet build -c Release`.
 5. Run the bot: `dotnet run -c Release`
@@ -66,25 +66,22 @@ If you go with this method you will have to fork the bot to the background yours
 ### Setup - Development
 If you want to develop and make changes to the bot, it's recommended to use the following:
 - First read [our contribution guidelines](CONTRIBUTING.md) if you intend to submit changes back to the repository.
-- You need Windows 10 or higher.
-- You will need .NET SDK 9.0, instructions can be found on the [Microsoft website](https://dotnet.microsoft.com/download).
-- [Visual Studio 2022](https://visualstudio.microsoft.com/vs/), with `.NET desktop development` selected on the installer. 
-    - Visual Studio 2019 is untested and no longer preferred.
-    - Make sure you are on the latest version.
-- Redis. It is recommended to install [tporadowski/redis](https://github.com/tporadowski/redis).
-    - Simply download the latest .msi and run it. Adding the Windows Firewall exception is not required.
+- If developing on Windows, Windows 10 or higher is required.
+- You will need .NET SDK 10.0, instructions can be found on the [Microsoft website](https://dotnet.microsoft.com/download).
+- If developing on Windows, [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) or later is recommended, with `.NET desktop development` selected on the installer. 
+    - For other platforms, [Rider](https://www.jetbrains.com/rider/) and [Visual Studio Code](https://code.visualstudio.com/) are good options.
+- Docker is recommended. This allows you to run the correct versions of Redis and PostgreSQL. If on Windows or macOS, [Docker Desktop](https://www.docker.com/products/docker-desktop/) or an alternative is required. macOS has many alternative ways to run Docker, find one that suits you.
 - [Git for Windows](https://gitforwindows.org/)
 - A Discord server for testing, with all the roles and channels required for bot functionality.
 
-Alternate setups with Linux/macOS and IDEs like Rider/Visual Studio Code are possible but instructions will not be provided here.
-
 Once you have everything installed:
-1. Create a new Discord application and bot with all intents enabled, set `CLIPTOK_TOKEN` Windows environment variable to the bots token.
+1. Create a new Discord application and bot with all intents enabled, set `CLIPTOK_TOKEN` Windows environment variable to the bot's token.
 2. Clone the repository (or your fork of it) to a folder.
 3. Open the `Cliptok.sln` within, making sure to use Visual Studio 2022.
 4. Copy `config.json` to `config.dev.json` and make changes for your testing server.
     - This is the most difficult part by far. Please try to replicate the required roles/channels/etc as closely as possible.
-5. Edit, run, debug, etc.
+5. Run the databases, which will listen on localhost: `docker compose up -d redis postgres`
+6. Edit, run, debug, etc.
 
 If you have a change to make that follows the contribution guidelines, send a Pull Request.
 
@@ -99,11 +96,10 @@ If you have a change to make that follows the contribution guidelines, send a Pu
 
 ### 💗 Significant sponsors
 - [FloatingMilkshake](https://github.com/FloatingMilkshake)
-- [TorchGM](https://github.com/TorchGM)
 
 ### 🙏Special thanks
 - [TorchGM](https://github.com/TorchGM) for initial testing and providing core design feedback. Seriously, thank you Torch.
 - [PrincessRavy](https://github.com/PrincessRavy) for providing an API previously used by Cliptok.
 - All of my [GitHub Sponsors](https://github.com/sponsors/Erisa) 💝
-- The developers of [DSharpPlus](https://github.com/DSharpPlus/DSharpPlus), without their library none of this would  be possible.
+- The developers of [DSharpPlus](https://github.com/DSharpPlus/DSharpPlus), without their library none of this would be possible.
 - The excellent moderation team over at [Microsoft Community](https://msft.chat/), and all of its wonderful members.

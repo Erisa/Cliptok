@@ -2,11 +2,11 @@
 {
     public class InvestigationsHelpers
     {
-        public static async Task SendInfringingMessaageAsync(string logChannelKey, DiscordMessage infringingMessage, string reason, string messageURL, (string name, string value, bool inline) extraField = default, string content = default, DiscordColor? colour = null, DiscordChannel channelOverride = default)
+        public static async Task SendInfringingMessaageAsync(string logChannelKey, DiscordMessage infringingMessage, string reason, string messageURL, (string name, string value, bool inline) extraField = default, string content = default, DiscordColor? colour = null, DiscordChannel channelOverride = default, string messageContentOverride = default, bool wasAutoModBlock = false, bool useCodeBlock = false)
         {
-            await SendInfringingMessaageAsync(logChannelKey, new MockDiscordMessage(infringingMessage), reason, messageURL, extraField, content, colour, channelOverride);
+            await SendInfringingMessaageAsync(logChannelKey, new MockDiscordMessage(infringingMessage), reason, messageURL, extraField, content, colour, channelOverride, messageContentOverride, wasAutoModBlock, useCodeBlock);
         }
-        public static async Task SendInfringingMessaageAsync(string logChannelKey, MockDiscordMessage infringingMessage, string reason, string messageURL, (string name, string value, bool inline) extraField = default, string content = default, DiscordColor? colour = null, DiscordChannel channelOverride = default, string messageContentOverride = default, bool wasAutoModBlock = false)
+        public static async Task SendInfringingMessaageAsync(string logChannelKey, MockDiscordMessage infringingMessage, string reason, string messageURL, (string name, string value, bool inline) extraField = default, string content = default, DiscordColor? colour = null, DiscordChannel channelOverride = default, string messageContentOverride = default, bool wasAutoModBlock = false, bool useCodeBlock = false)
         {
             if (colour is null)
                 colour = new DiscordColor(0xf03916);
@@ -15,8 +15,14 @@
             if (logChannelKey == "investigations" && !string.IsNullOrEmpty(messageContentOverride) && messageContentOverride != Uri.UnescapeDataString(infringingMessage.Content))
                 messageContentOverride = $"{infringingMessage.Content}\n-# [...full content omitted, check <#{LogChannelHelper.GetLogChannelId("mod")}>...]";
 
+            var description = string.IsNullOrWhiteSpace(messageContentOverride)
+                ? infringingMessage.Content
+                : messageContentOverride;
+            if (useCodeBlock)
+                description = $"```\n{description}\n```";
+
             var embed = new DiscordEmbedBuilder()
-            .WithDescription(string.IsNullOrWhiteSpace(messageContentOverride) ? infringingMessage.Content : messageContentOverride)
+            .WithDescription(description)
             .WithColor((DiscordColor)colour)
             .WithTimestamp(infringingMessage.Timestamp)
             .WithFooter(
@@ -30,7 +36,7 @@
             );
 
             if (reason is not null && reason != "")
-                embed.AddField("Reason", reason, true);
+                embed.AddField("Reason", reason.Length > 256 ? reason[..255] + "…" : reason, true); // Cap size to avoid going over 6000 total text limit
 
             if (messageURL is not null)
                 embed.AddField("Message link", messageURL, true);
@@ -43,6 +49,14 @@
                     content = $"{Program.cfgjson.Emoji.Denied} Detected infringing AutoMod message by {infringingMessage.Author.Mention} in {infringingMessage.Channel.Mention}:";
                 else
                     content = $"{Program.cfgjson.Emoji.Denied} Deleted infringing message by {infringingMessage.Author.Mention} in {infringingMessage.Channel.Mention}:";
+
+            // Handle attachments
+            if (infringingMessage.Attachments?.Count > 0)
+            {
+                // Remove query params as Discord will re-fill them, truncate to embed field limit
+                var urls = string.Join("\n", infringingMessage.Attachments.Select(a => a.Url.Split('?')[0]));
+                embed.AddField("Attachments", urls.Length > 1024 ? urls[..1023] + "…" : urls, false);
+            }
 
             DiscordMessage logMsg;
             if (channelOverride == default)
