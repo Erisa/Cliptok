@@ -66,17 +66,13 @@ If you go with this method you will have to fork the bot to the background yours
 ### Setup - Development
 If you want to develop and make changes to the bot, it's recommended to use the following:
 - First read [our contribution guidelines](CONTRIBUTING.md) if you intend to submit changes back to the repository.
-- You need Windows 10 or higher.
+- If developing on Windows, Windows 10 or higher is required.
 - You will need .NET SDK 10.0, instructions can be found on the [Microsoft website](https://dotnet.microsoft.com/download).
-- [Visual Studio 2022](https://visualstudio.microsoft.com/vs/), with `.NET desktop development` selected on the installer. 
-    - Visual Studio 2019 is untested and no longer preferred.
-    - Make sure you are on the latest version.
-- Redis. It is recommended to install [tporadowski/redis](https://github.com/tporadowski/redis).
-    - Simply download the latest .msi and run it. Adding the Windows Firewall exception is not required.
+- If developing on Windows, [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) or later is recommended, with `.NET desktop development` selected on the installer. 
+    - For other platforms, Rider and Visual Studio Code are good options.
+- Docker. This allows you to run the correct versions of Redis and PostgreSQL. If on Windows macOS, [Docker Desktop](https://www.docker.com/products/docker-desktop/) or an alternative is required. macOS has many alternative ways to run Docker, find one that suits you.
 - [Git for Windows](https://gitforwindows.org/)
 - A Discord server for testing, with all the roles and channels required for bot functionality.
-
-Alternate setups with Linux/macOS and IDEs like Rider/Visual Studio Code are possible but instructions will not be provided here.
 
 Once you have everything installed:
 1. Create a new Discord application and bot with all intents enabled, set `CLIPTOK_TOKEN` Windows environment variable to the bots token.
@@ -84,7 +80,8 @@ Once you have everything installed:
 3. Open the `Cliptok.sln` within, making sure to use Visual Studio 2022.
 4. Copy `config.json` to `config.dev.json` and make changes for your testing server.
     - This is the most difficult part by far. Please try to replicate the required roles/channels/etc as closely as possible.
-5. Edit, run, debug, etc.
+5. Run the databases, which will listen on localhost: `docker compose up -d redis postgres`
+6. Edit, run, debug, etc.
 
 If you have a change to make that follows the contribution guidelines, send a Pull Request.
 
