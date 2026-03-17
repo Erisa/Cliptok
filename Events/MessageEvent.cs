@@ -101,9 +101,9 @@ namespace Cliptok.Events
                 return;
             }
             
-            if (e.Guild is null && !e.Channel.IsPrivate)
+            if (e.Guild is null)
             {
-                client.Logger.LogDebug("Got a message delete event for a non-DM message with no guild: {messageId} in {channelId} by {user}", e.Message.Id, e.Channel.Id, e.Message.Author?.Id);
+                client.Logger.LogDebug("Got a message delete event for a message with no guild: {messageId} in {channelId} by {user}", e.Message.Id, e.Channel.Id, e.Message.Author?.Id);
                 return;
             }
             
