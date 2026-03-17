@@ -150,6 +150,9 @@ namespace Cliptok.Commands
                     List<Command> eligibleCommands = [];
                     foreach (Command? candidateCommand in commandsToSearch)
                     {
+                        if (candidateCommand.Attributes.Any(x => x is AllowedProcessorsAttribute apa && !apa.Processors.Contains(typeof(TextCommandProcessor))))
+                            continue;
+
                         var executionChecks = candidateCommand.Attributes.Where(x => x is ContextCheckAttribute);
 
                         if (executionChecks == null || !executionChecks.Any())
