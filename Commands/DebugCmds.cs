@@ -410,16 +410,9 @@ namespace Cliptok.Commands
                 await ctx.RespondAsync((await StringHelpers.CodeOrHasteBinAsync(JsonConvert.SerializeObject(MuteHelpers.MostRecentMute, Formatting.Indented), "json")).Text);
             }
 
-        }
-
-        class OverridesCmd
-        {
-            // This is outside of the debug class/group to avoid issues caused by DSP.Commands that are out of our control
-            [Command("debugoverrides")]
-            [TextAlias("overrides")]
+            [Command("overrides")]
             [Description("Commands for managing stored permission overrides.")]
             [AllowedProcessors(typeof(TextCommandProcessor))]
-            [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
             public class Overrides
             {
                 [DefaultGroupCommand]
@@ -523,8 +516,8 @@ namespace Cliptok.Commands
                 public async Task Add(TextCommandContext ctx,
                     [Description("The user to add an override for.")] DiscordUser user,
                     [Description("The channel to add the override to.")] DiscordChannel channel,
-                    [Description("Allowed permissions. Use a permission integer. See https://discordlookup.com/permissions-calculator.")] int allowedPermissions,
-                    [Description("Denied permissions. Use a permission integer. See https://discordlookup.com/permissions-calculator.")] int deniedPermissions)
+                    [Description("Allowed permissions. Use a permission integer.")] int allowedPermissions,
+                    [Description("Denied permissions. Use a permission integer.")] int deniedPermissions)
                 {
                     // Confirm permission overrides before we do anything.
                     var parsedAllowedPerms = new DiscordPermissions(allowedPermissions);
@@ -575,7 +568,7 @@ namespace Cliptok.Commands
                         if (overwriteDict is null) continue;
 
                         foreach (var overwrite in overwriteDict.Where(overwrite =>
-                                     overwrite.Value.Id == user.Id && overwrite.Key == channel.Id))
+                                        overwrite.Value.Id == user.Id && overwrite.Key == channel.Id))
                         {
                             overwriteDict.Remove(overwrite.Key);
 
@@ -699,7 +692,7 @@ namespace Cliptok.Commands
                         catch (Exception ex)
                         {
                             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Something went wrong while trying to fetch the overrides for {channel.Mention}!" +
-                                                  " There are overrides in the database but I could not parse them. Check the database manually for details.");
+                                                    " There are overrides in the database but I could not parse them. Check the database manually for details.");
 
                             Program.discord.Logger.LogError(ex, "Failed to read overrides from db for 'debug overrides dump'!");
 
@@ -726,7 +719,7 @@ namespace Cliptok.Commands
                 [TextAlias("clean", "prune")]
                 [Description("Removes overrides from the db for channels that no longer exist.")]
                 [IsBotOwner]
-                public async Task CleanUpOverrides(CommandContext ctx)
+                public async Task CleanUpOverrides(TextCommandContext ctx)
                 {
                     await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
                     var msg = await ctx.GetResponseAsync();
@@ -784,7 +777,7 @@ namespace Cliptok.Commands
                         await Program.redis.HashSetAsync("overrides", overwrite.Id.ToString(),
                             JsonConvert.SerializeObject(new Dictionary<ulong, DiscordOverwrite>
                             {
-                                { channel.Id, overwrite }
+                            { channel.Id, overwrite }
                             }));
                     }
                     else
