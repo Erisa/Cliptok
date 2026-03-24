@@ -843,7 +843,7 @@ namespace Cliptok.Events
                             ? ("Attachments", string.Join("\n", attachmentUrls), false)
                             : default;
 
-                        await DeleteAndWarnAsync(message, "Duplicate message spam", client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
+                        await DeleteAndWarnAsync(message, "Duplicate message spam", client, attachmentsField, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
                         return true;
                     }
                 }
@@ -892,7 +892,7 @@ namespace Cliptok.Events
 
                         match = true;
 
-                        await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride, useCodeBlock: listItem.Name == "exploits.txt");
+                        await DeleteAndWarnAsync(message, reason, client, new("Match", listItem.Name == "exploits.txt" ? $"`{flaggedWord}`" : flaggedWord, true), wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride, useCodeBlock: listItem.Name == "exploits.txt");
 
                         return true;
                     }
@@ -1129,7 +1129,7 @@ namespace Cliptok.Events
 
                         string responseToSend = (await StringHelpers.CodeOrHasteBinAsync(responseText, "json", 1000, true)).Text;
                         (string name, string value, bool inline) extraField = new("API Response", responseToSend, false);
-                        DeleteAndWarnAsync(message, "Sending phishing URL(s)", client, extraField, wasAutoModBlock, messageContentOverride);
+                        await DeleteAndWarnAsync(message, "Sending phishing URL(s)", client, extraField, wasAutoModBlock, messageContentOverride);
                         return true;
                     }
                 }
