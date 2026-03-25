@@ -1,7 +1,6 @@
 using DSharpPlus.Commands.Processors.TextCommands.Parsing;
 using DSharpPlus.Extensions;
 using DSharpPlus.Net.Gateway;
-using Microsoft.EntityFrameworkCore;
 using Serilog.Events;
 using Serilog.Sinks.Grafana.Loki;
 using System.Reflection;

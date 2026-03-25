@@ -1,5 +1,4 @@
 using Cliptok.Constants;
-using Microsoft.EntityFrameworkCore;
 
 namespace Cliptok.Commands
 {
@@ -216,7 +215,9 @@ namespace Cliptok.Commands
 
                     foreach (var log in bulkLogs)
                     {
-                        stringRespBuilder.Append($"- [{TimeHelpers.TimeToPrettyFormat(DateTime.UtcNow - log.CreatedAt)}]({log.PasteUrl}) ({log.DiscordUrl})\n");
+                        var timeAgo = TimeHelpers.TimeToPrettyFormat(DateTime.UtcNow - log.CreatedAt);
+                        var timeStr = string.IsNullOrEmpty(log.PasteUrl) ? timeAgo : $"[{timeAgo}]({log.PasteUrl})";
+                        stringRespBuilder.Append($"- {timeStr} ({log.DiscordUrl})\n");
                     }
 
                     await ctx.RespondAsync(new DiscordEmbedBuilder().WithAuthor($"Bulk logs containing {user.GlobalName ?? user.Username}", null, user.AvatarUrl).WithDescription((await StringHelpers.CodeOrHasteBinAsync(stringRespBuilder.ToString(), "md", 4000, false, true, false, $"## Bulk logs containing {user.GlobalName ?? user.Username}\n\n")).Text).WithFooter($"User ID: {user.Id}"));

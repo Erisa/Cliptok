@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace Cliptok.Commands
 {
     public class DebugCmds

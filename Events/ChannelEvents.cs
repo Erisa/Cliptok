@@ -24,6 +24,18 @@
 
             var timestamp = DateTime.UtcNow;
             Tasks.EventTasks.PendingChannelDeleteEvents.Add(timestamp, e);
+
+            if (e.Guild.Id == Program.cfgjson.ServerID && Program.cfgjson.EnablePersistentDb)
+            {
+                try
+                {
+                    await DiscordHelpers.DumpCachedMessagesForChannelAsync(displayName: $"Channel **{e.Channel.Name ?? "Unknown"}** ({e.Channel.Id})", e.Channel);
+                }
+                catch (Exception ex)
+                {
+                    Program.discord.Logger.LogError(ex, "Failed to dump cached messages for deleted channel {channelId}", e.Channel.Id);
+                }
+            }
         }
     }
 }

@@ -403,6 +403,29 @@ namespace Cliptok.Helpers
         }
 
 
+        public static async Task DumpCachedMessagesForChannelAsync(string displayName, DiscordChannel channel)
+        {
+            using (var dbContext = new CliptokDbContext())
+            {
+                var cachedMessages = await dbContext.Messages.Include(m => m.User).Include(m => m.Sticker).Where(m => m.ChannelId == channel.Id).ToListAsync();
+
+                if (cachedMessages.Count > 0)
+                {
+                    var cachedUsers = cachedMessages.Select(m => m.User).Distinct().ToList();
+                    var (dumpMessage, pasteUrl) = await LogChannelHelper.CreateDumpMessageAsync($"{Program.cfgjson.Emoji.Deleted} {displayName} was deleted, {cachedMessages.Count} messages were logged:", cachedMessages, channel);
+                    var logMsg = await LogChannelHelper.LogMessageAsync("messages", dumpMessage);
+                    await dbContext.BulkMessageLogStore.AddAsync(new Models.BulkMessageLogStore
+                    {
+                        PasteUrl = pasteUrl,
+                        DiscordUrl = MessageLink(logMsg),
+                        CreatedAt = DateTime.UtcNow,
+                        Users = cachedUsers,
+                    });
+                    await dbContext.SaveChangesAsync();
+                }
+            }
+        }
+
         public static async Task<bool> DoEmptyThreadCleanupAsync(DiscordChannel channel, DiscordMessage message, int minMessages = 0)
         {
             return await DoEmptyThreadCleanupAsync(channel, new MockDiscordMessage(message), minMessages);

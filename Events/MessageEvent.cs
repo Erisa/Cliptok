@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using static Cliptok.Constants.RegexConstants;
 
 namespace Cliptok.Events
@@ -134,6 +133,13 @@ namespace Cliptok.Events
                     if (cachedMessage is not null && !cachedMessage.User.IsBot)
                     {
                         await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(cachedMessage, "deleted", true, true));
+                    }
+
+                    // remove from cache so the message isn't double-logged if the channel is later deleted
+                    if (cachedMessage is not null)
+                    {
+                        dbContext.Messages.Remove(cachedMessage);
+                        await dbContext.SaveChangesAsync();
                     }
                 }
             }

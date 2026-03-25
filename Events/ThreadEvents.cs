@@ -15,10 +15,26 @@ namespace Cliptok.Events
             return Task.CompletedTask;
         }
 
-        public static Task Discord_ThreadDeleted(DiscordClient client, ThreadDeletedEventArgs e)
+        public static async Task Discord_ThreadDeleted(DiscordClient client, ThreadDeletedEventArgs e)
         {
             client.Logger.LogDebug(eventId: CliptokEventID, "Thread deleted in {servername}. Thread Name: {threadname}", e.Guild.Name, e.Thread.Name ?? "Unknown");
-            return Task.CompletedTask;
+
+            if (e.Guild.Id != cfgjson.ServerID)
+                return;
+
+            if (cfgjson.EnablePersistentDb)
+            {
+                try
+                {
+                    await DiscordHelpers.DumpCachedMessagesForChannelAsync(
+                        $"Thread **{e.Thread.Name ?? "Unknown"}** ({e.Thread.Id})",
+                        e.Thread);
+                }
+                catch (Exception ex)
+                {
+                    discord.Logger.LogError(ex, "Failed to dump cached messages for deleted thread {threadId}", e.Thread.Id);
+                }
+            }
         }
 
         public static Task Discord_ThreadListSynced(DiscordClient client, ThreadListSyncedEventArgs e)
