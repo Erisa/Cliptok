@@ -317,7 +317,7 @@
             MostRecentMute = newMute;
             
             // attempt to dehoist member if they aren't already dehoisted
-            if (naughtyMember.DisplayName[0] != DehoistHelpers.dehoistCharacter)
+            if (naughtyMember is not null && naughtyMember.DisplayName[0] != DehoistHelpers.dehoistCharacter)
                 await naughtyMember.ModifyAsync(x =>
                 {
                     x.Nickname = DehoistHelpers.DehoistName(naughtyMember.DisplayName);
