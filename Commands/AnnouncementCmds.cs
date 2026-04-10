@@ -69,11 +69,11 @@ namespace Cliptok.Commands
                 flavourText = Program.cfgjson.Emoji.Insider;
             }
 
-            string roleKey1= insiderChannel1.ToLower();
+            string roleKey1 = MapChannelToRoleKeyTemporary(insiderChannel1);
 
             // defer since we're going to do lots of rest calls now
             await ctx.DeferResponseAsync(ephemeral: false);
-
+            
             DiscordRole insiderRole1 = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[roleKey1]);
             DiscordRole insiderRole2 = default;
 
@@ -97,8 +97,7 @@ namespace Cliptok.Commands
 
             if (insiderChannel2 != "")
             {
-                string roleKey2 = insiderChannel2.ToLower();
-
+                string roleKey2 = MapChannelToRoleKeyTemporary(insiderChannel2);
                 insiderRole2 = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[roleKey2]);
             }
 
@@ -190,34 +189,34 @@ namespace Cliptok.Commands
                 }
                 else if (!createNewThread)
                 {
-                    switch (insiderChannel1)
+                    switch (MapChannelToRoleKeyTemporary(insiderChannel1))
                     {
-                        case "Canary":
+                        case "canary":
                             threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["canary"]);
                             break;
-                        case "Dev":
+                        case "dev":
                             threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["dev"]);
                             break;
-                        case "Beta":
+                        case "beta":
                             threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["beta"]);
                             break;
-                        case "RP":
+                        case "rp":
                             threadChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp"]);
                             break;
                     }
 
-                    switch (insiderChannel2)
+                    switch (MapChannelToRoleKeyTemporary(insiderChannel2))
                     {
-                        case "Canary":
+                        case "canary":
                             threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["canary"]);
                             break;
-                        case "Dev":
+                        case "dev":
                             threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["dev"]);
                             break;
-                        case "Beta":
+                        case "beta":
                             threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["beta"]);
                             break;
-                        case "RP":
+                        case "rp":
                             threadChannel2 = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderThreads["rp"]);
                             break;
                     }
@@ -365,7 +364,7 @@ namespace Cliptok.Commands
                 return;
             }
 
-            string roleKey1 = insiderChannel1.ToLower();
+            string roleKey1 = MapChannelToRoleKeyTemporary(insiderChannel1);
 
             await ctx.DeferResponseAsync(ephemeral: true);
 
@@ -374,7 +373,7 @@ namespace Cliptok.Commands
 
             if (insiderChannel2 != "")
             {
-                string roleKey2= insiderChannel2.ToLower();
+                string roleKey2 = MapChannelToRoleKeyTemporary(insiderChannel2);
 
                 insiderRole2 = await ctx.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[roleKey2]);
             }
@@ -498,14 +497,26 @@ namespace Cliptok.Commands
 
         }
 
+        public string MapChannelToRoleKeyTemporary(string roleKey)
+        {
+            // TODO: make this less stupid
+            if (roleKey == "Experimental (Future Platforms)")
+                return "canary";
+            
+            if (roleKey == "Experimental")
+                return "dev";
+            
+            return roleKey.ToLower();
+        }
+
         internal class WindowsInsiderChannelChoiceProvider : IChoiceProvider
         {
             public async ValueTask<IEnumerable<DiscordApplicationCommandOptionChoice>> ProvideAsync(CommandParameter _)
             {
                 return new List<DiscordApplicationCommandOptionChoice>
                 {
-                    new("Canary Channel", "Canary"),
-                    new("Dev Channel", "Dev"),
+                    new("Experimental (Future Platforms) Channel", "Experimental (Future Platforms)"),
+                    new("Experimental Channel", "Experimental"),
                     new("Beta Channel", "Beta"),
                     new("Release Preview Channel", "RP")
                 };
