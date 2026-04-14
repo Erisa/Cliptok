@@ -25,7 +25,10 @@
             var timestamp = DateTime.UtcNow;
             Tasks.EventTasks.PendingChannelDeleteEvents.Add(timestamp, e);
 
-            if (e.Guild.Id == Program.cfgjson.ServerID && Program.cfgjson.EnablePersistentDb)
+            if (
+                e.Channel.ParentId != Program.cfgjson.ModmailCategory &&
+                e.Guild.Id == Program.cfgjson.ServerID &&
+                Program.cfgjson.EnablePersistentDb)
             {
                 try
                 {
