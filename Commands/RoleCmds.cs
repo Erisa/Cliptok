@@ -70,6 +70,14 @@ namespace Cliptok.Commands
                     return;
                 }
 
+                if ((Program.cfgjson.InsiderRoles is null || !Program.cfgjson.InsiderRoles.Contains(roleId)) &&
+                    roleId != Program.cfgjson.CommunityTechSupportRoleID &&
+                    roleId != Program.cfgjson.GiveawaysRole)
+                {
+                    await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} Invalid role! Please choose from the list.", ephemeral: true);
+                    return;
+                }
+
                 if (roleId == Program.cfgjson.CommunityTechSupportRoleID && await GetPermLevelAsync(ctx.Member) < ServerPermLevel.TechnicalQueriesSlayer)
                 {
                     await ctx.FollowupAsync($"{Program.cfgjson.Emoji.NoPermissions} You must be a TQS member to get the CTS role!", ephemeral: true);
@@ -99,6 +107,14 @@ namespace Cliptok.Commands
                     roleId = Convert.ToUInt64(role);
                 }
                 catch (FormatException)
+                {
+                    await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} Invalid role! Please choose from the list.", ephemeral: true);
+                    return;
+                }
+
+                if ((Program.cfgjson.InsiderRoles is null || !Program.cfgjson.InsiderRoles.Contains(roleId)) &&
+                    roleId != Program.cfgjson.CommunityTechSupportRoleID &&
+                    roleId != Program.cfgjson.GiveawaysRole)
                 {
                     await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} Invalid role! Please choose from the list.", ephemeral: true);
                     return;
