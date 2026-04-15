@@ -52,165 +52,63 @@ namespace Cliptok.Commands
             [Description("Opt into a role.")]
             public async Task GrantRole(
                 SlashCommandContext ctx,
-                [SlashAutoCompleteProvider(typeof(RolesAutocompleteProvider))]
+                [SlashAutoCompleteProvider(typeof(Providers.RolesAutocompleteProvider))]
                 [Parameter("role"), Description("The role to opt into.")] string role)
             {
+                await ctx.DeferResponseAsync(ephemeral: true);
+
                 DiscordMember member = ctx.Member;
 
-                ulong roleId = role switch
+                ulong roleId;
+                try
                 {
-                    "insiderCanary" => Program.cfgjson.UserRoles.InsiderCanary,
-                    "insiderDev" => Program.cfgjson.UserRoles.InsiderDev,
-                    "insiderBeta" => Program.cfgjson.UserRoles.InsiderBeta,
-                    "insiderRP" => Program.cfgjson.UserRoles.InsiderRP,
-                    "patchTuesday" => Program.cfgjson.UserRoles.PatchTuesday,
-                    "giveaways" => Program.cfgjson.UserRoles.Giveaways,
-                    "cts" => Program.cfgjson.CommunityTechSupportRoleID,
-                    _ => 0
-                };
-
-                if (roleId == 0)
+                    roleId = Convert.ToUInt64(role);
+                }
+                catch (FormatException)
                 {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Invalid role! Please choose from the list.", ephemeral: true);
+                    await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} Invalid role! Please choose from the list.", ephemeral: true);
                     return;
                 }
 
                 if (roleId == Program.cfgjson.CommunityTechSupportRoleID && await GetPermLevelAsync(ctx.Member) < ServerPermLevel.TechnicalQueriesSlayer)
                 {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.NoPermissions} You must be a TQS member to get the CTS role!", ephemeral: true);
+                    await ctx.FollowupAsync($"{Program.cfgjson.Emoji.NoPermissions} You must be a TQS member to get the CTS role!", ephemeral: true);
                     return;
                 }
 
                 var roleData = await ctx.Guild.GetRoleAsync(roleId);
 
                 await member.GrantRoleAsync(roleData, $"/roles grant used by {DiscordHelpers.UniqueUsername(ctx.User)}");
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} The role {roleData.Mention} has been successfully granted!", ephemeral: true, mentions: false);
+                await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Success} The role {roleData.Mention} has been successfully granted!", ephemeral: true);
             }
 
             [Command("remove")]
             [Description("Opt out of a role.")]
             public async Task RemoveRole(
                 SlashCommandContext ctx,
-                [SlashAutoCompleteProvider(typeof(RolesAutocompleteProvider))]
+                [SlashAutoCompleteProvider(typeof(Providers.RolesAutocompleteProvider))]
                 [Parameter("role"), Description("The role to opt out of.")] string role)
             {
+                await ctx.DeferResponseAsync(ephemeral: true);
+
                 DiscordMember member = ctx.Member;
 
-                ulong roleId = role switch
+                ulong roleId;
+                try
                 {
-                    "insiderCanary" => Program.cfgjson.UserRoles.InsiderCanary,
-                    "insiderDev" => Program.cfgjson.UserRoles.InsiderDev,
-                    "insiderBeta" => Program.cfgjson.UserRoles.InsiderBeta,
-                    "insiderRP" => Program.cfgjson.UserRoles.InsiderRP,
-                    "patchTuesday" => Program.cfgjson.UserRoles.PatchTuesday,
-                    "giveaways" => Program.cfgjson.UserRoles.Giveaways,
-                    "cts" => Program.cfgjson.CommunityTechSupportRoleID,
-                    _ => 0
-                };
-
-                if (roleId == 0)
+                    roleId = Convert.ToUInt64(role);
+                }
+                catch (FormatException)
                 {
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Invalid role! Please choose from the list.", ephemeral: true);
+                    await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} Invalid role! Please choose from the list.", ephemeral: true);
                     return;
                 }
 
                 var roleData = await ctx.Guild.GetRoleAsync(roleId);
 
                 await member.RevokeRoleAsync(roleData, $"/roles remove used by {DiscordHelpers.UniqueUsername(ctx.User)}");
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} The role {roleData.Mention} has been successfully removed!", ephemeral: true, mentions: false);
+                await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Success} The role {roleData.Mention} has been successfully removed!", ephemeral: true);
             }
-        }
-
-        internal class RolesAutocompleteProvider : IAutoCompleteProvider
-        {
-            public async ValueTask<IEnumerable<DiscordAutoCompleteChoice>> AutoCompleteAsync(AutoCompleteContext ctx)
-            {
-                Dictionary<string, string> options = new()
-                    {
-                        { "Windows 11 Insiders (Future Platforms)", "insiderCanary" },
-                        { "Windows 11 Insiders (Experimental)", "insiderDev" },
-                        { "Windows 11 Insiders (Beta)", "insiderBeta" },
-                        { "Windows 11 Insiders (Release Preview)", "insiderRP" },
-                        { "Patch Tuesday", "patchTuesday" },
-                        { "Giveaways", "giveaways" },
-                        { "Community Tech Support (CTS)", "cts" }
-                    };
-
-                var memberHasTqs = await GetPermLevelAsync(ctx.Member) >= ServerPermLevel.TechnicalQueriesSlayer;
-
-                List<DiscordAutoCompleteChoice> list = new();
-
-                foreach (var option in options)
-                {
-                    var focusedOption = ctx.Options.FirstOrDefault(option => option.Focused);
-                    if (focusedOption.Value.ToString() == "" || option.Key.Contains(focusedOption.Value.ToString(), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (option.Value == "cts" && !memberHasTqs) continue;
-                        list.Add(new DiscordAutoCompleteChoice(option.Key, option.Value));
-                    }
-                }
-
-                return list;
-            }
-        }
-
-        public static async Task GiveUserRolesAsync(TextCommandContext ctx, Func<System.Reflection.PropertyInfo, bool> predicate)
-        {
-            if (Program.cfgjson.UserRoles is null)
-            {
-                // Config hasn't been updated yet.
-                return;
-            }
-
-            DiscordGuild guild = await Program.discord.GetGuildAsync(ctx.Guild.Id);
-            String response = "";
-            System.Reflection.PropertyInfo[] roleIds = Program.cfgjson.UserRoles.GetType().GetProperties().Where(predicate).ToArray();
-
-            for (int i = 0; i < roleIds.Length; i++)
-            {
-                // quick patch to exclude giveaways role & insider chat role
-                if ((ulong)roleIds[i].GetValue(Program.cfgjson.UserRoles, null) == Program.cfgjson.UserRoles.Giveaways ||
-                    (ulong)roleIds[i].GetValue(Program.cfgjson.UserRoles, null) == Program.cfgjson.UserRoles.InsiderChat)
-                    continue;
-
-                DiscordRole roleToGrant = await guild.GetRoleAsync((ulong)roleIds[i].GetValue(Program.cfgjson.UserRoles, null));
-                await ctx.Member.GrantRoleAsync(roleToGrant);
-
-                if (roleIds.Length == 1)
-                {
-                    response += roleToGrant.Mention;
-                }
-                else
-                {
-                    response += i == roleIds.Length - 1 ? $"and {roleToGrant.Mention}" : $"{roleToGrant.Mention}{(roleIds.Length != 2 ? "," : String.Empty)} ";
-                }
-            }
-
-            await ctx.Channel.SendMessageAsync($"{ctx.User.Mention} has joined the {response} role{(roleIds.Length != 1 ? "s" : String.Empty)}.");
-        }
-
-        public static async Task RemoveUserRolesAsync(TextCommandContext ctx, Func<System.Reflection.PropertyInfo, bool> predicate)
-        {
-            if (Program.cfgjson.UserRoles is null)
-            {
-                // Config hasn't been updated yet.
-                return;
-            }
-
-            DiscordGuild guild = await Program.discord.GetGuildAsync(ctx.Guild.Id);
-            System.Reflection.PropertyInfo[] roleIds = Program.cfgjson.UserRoles.GetType().GetProperties().Where(predicate).ToArray();
-            foreach (System.Reflection.PropertyInfo roleId in roleIds)
-            {
-                // quick patch to exclude giveaways role & insider chat role
-                if ((ulong)roleId.GetValue(Program.cfgjson.UserRoles, null) == Program.cfgjson.UserRoles.Giveaways ||
-                    (ulong)roleId.GetValue(Program.cfgjson.UserRoles, null) == Program.cfgjson.UserRoles.InsiderChat)
-                    continue;
-
-                DiscordRole roleToGrant = await guild.GetRoleAsync((ulong)roleId.GetValue(Program.cfgjson.UserRoles, null));
-                await ctx.Member.RevokeRoleAsync(roleToGrant);
-            }
-
-            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":CliptokSuccess:"));
         }
 
         [
@@ -230,8 +128,7 @@ namespace Cliptok.Commands
             ),
             Description("Use /roles instead"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer,
-            UserRolesPresent
+            HomeServer
         ]
         public async Task InsiderRoleCmd(TextCommandContext ctx)
         {
@@ -246,12 +143,30 @@ namespace Cliptok.Commands
             TextAlias("keep-me-updated"),
             Description("Gives you all opt-in roles"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer,
-            UserRolesPresent
+            HomeServer
         ]
         public async Task KeepMeUpdated(TextCommandContext ctx)
         {
-            await GiveUserRolesAsync(ctx, x => true);
+            if (Program.cfgjson.InsiderRoles is null)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Insider roles are not configured! This command cannot be used.");
+                return;
+            }
+
+            List<DiscordRole> roles = [];
+            foreach (var roleId in Program.cfgjson.InsiderRoles)
+            {
+                roles.Add(await ctx.Guild.GetRoleAsync(roleId));
+            }
+            roles.AddRange(ctx.Member.Roles);
+
+            await ctx.Member.ModifyAsync(m =>
+            {
+                m.Roles = roles;
+                m.AuditLogReason = $"!keep-me-updated used by {ctx.User.Username}";
+            });
+
+            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":CliptokSuccess:"));
         }
 
         [
@@ -259,12 +174,31 @@ namespace Cliptok.Commands
             TextAlias("dont-keep-me-updated"),
             Description("Takes away from you all opt-in roles"),
             AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer,
-            UserRolesPresent
+            HomeServer
         ]
         public async Task DontKeepMeUpdated(TextCommandContext ctx)
         {
-            await RemoveUserRolesAsync(ctx, x => true);
+            if (Program.cfgjson.InsiderRoles is null)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Insider roles are not configured! This command cannot be used.");
+                return;
+            }
+
+            List<DiscordRole> roles = ctx.Member.Roles.ToList();
+            foreach (var roleId in Program.cfgjson.InsiderRoles)
+            {
+                var role = roles.FirstOrDefault(r => r.Id == roleId);
+                if (role != default)
+                    roles.Remove(role);
+            }
+
+            await ctx.Member.ModifyAsync(m =>
+            {
+                m.Roles = roles;
+                m.AuditLogReason = $"!dont-keep-me-updated used by {ctx.User.Username}";
+            });
+
+            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":CliptokSuccess:"));
         }
 
     }
