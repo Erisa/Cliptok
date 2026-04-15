@@ -290,18 +290,39 @@ namespace Cliptok.Commands
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task AnounceSlashCmd(SlashCommandContext ctx,
             [SlashAutoCompleteProvider(typeof(Providers.RolesAutocompleteProvider))]
-            [Parameter("role1"), Description("The first Insider role to ping.")] ulong insiderChannel1,
+            [Parameter("role1"), Description("The first Insider role to ping.")] string role1,
             [Parameter("announcement_message"), Description("The message to announce.")] string announcementMessage,
             [SlashAutoCompleteProvider(typeof(Providers.RolesAutocompleteProvider))]
-            [Parameter("role2"), Description("The second Insider role to ping.")] ulong insiderChannel2 = default)
+            [Parameter("role2"), Description("The second Insider role to ping.")] string role2 = default)
         {
-            if (insiderChannel1 == insiderChannel2)
+            await ctx.DeferResponseAsync(ephemeral: true);
+
+            ulong insiderChannel1;
+            ulong insiderChannel2 = default;
+            try
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Both insider channels cannot be the same! Simply set one instead.", ephemeral: true);
+                insiderChannel1 = Convert.ToUInt64(role1);
+                if (role2 != default)
+                    insiderChannel2 = Convert.ToUInt64(role2);
+            }
+            catch (FormatException)
+            {
+                await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} Invalid role! Please choose from the list.", ephemeral: true);
                 return;
             }
 
-            await ctx.DeferResponseAsync(ephemeral: true);
+            if (Program.cfgjson.InsiderRoles is null || !Program.cfgjson.InsiderRoles.Contains(insiderChannel1) ||
+                (insiderChannel2 != default && !Program.cfgjson.InsiderRoles.Contains(insiderChannel2)))
+            {
+                await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} Invalid role! Please choose from the list.", ephemeral: true);
+                return;
+            }
+
+            if (insiderChannel1 == insiderChannel2)
+            {
+                await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} Both insider channels cannot be the same! Simply set one instead.", ephemeral: true);
+                return;
+            }
 
             announcementMessage = announcementMessage.Replace("\\n", "\n");
 
