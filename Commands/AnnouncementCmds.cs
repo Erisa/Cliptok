@@ -49,6 +49,12 @@ namespace Cliptok.Commands
                 return;
             }
 
+            if (Program.cfgjson.InsiderRoles is null)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Insider roles are not set up in config.json! Unable to announce builds.", ephemeral: true);
+                return;
+            }
+
             if (threadChannel == default && threadChannel2 != default)
             {
                 threadChannel = threadChannel2;
@@ -71,13 +77,28 @@ namespace Cliptok.Commands
 
             // defer since we're going to do lots of rest calls now
             await ctx.DeferResponseAsync(ephemeral: false);
-            
-            DiscordRole insiderRole1 = await ctx.Guild.GetRoleAsync(Convert.ToUInt64(insiderChannel1));
+
+            DiscordRole insiderRole1;
             DiscordRole insiderRole2 = default;
+            try
+            {
+                insiderRole1 = await ctx.Guild.GetRoleAsync(Convert.ToUInt64(insiderChannel1));
+            }
+            catch (Exception ex) when (ex is FormatException or DSharpPlus.Exceptions.NotFoundException)
+            {
+                await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} You entered an invalid role! Please choose from the list.");
+                return;
+            }
 
             StringBuilder channelString = new();
 
             string insiderChannel1Pretty = GetInsiderChannelNameFromRole(insiderRole1);
+
+            if (string.IsNullOrWhiteSpace(insiderChannel1Pretty))
+            {
+                await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} The Insider roles in this server do not match the expected format! Unable to announce builds.");
+                return;
+            }
 
             channelString.Append("the ");
 
@@ -85,8 +106,23 @@ namespace Cliptok.Commands
 
             if (insiderChannel2 != default)
             {
-                insiderRole2 = await ctx.Guild.GetRoleAsync(Convert.ToUInt64(insiderChannel2));
+                try
+                {
+                    insiderRole2 = await ctx.Guild.GetRoleAsync(Convert.ToUInt64(insiderChannel2));
+                }
+                catch (Exception ex) when (ex is FormatException or DSharpPlus.Exceptions.NotFoundException)
+                {
+                    await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} You entered an invalid role! Please choose from the list.");
+                    return;
+                }
                 string insiderChannel2Pretty = GetInsiderChannelNameFromRole(insiderRole2);
+
+                if (string.IsNullOrWhiteSpace(insiderChannel2Pretty))
+                {
+                    await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} The Insider roles in this server do not match the expected format! Unable to announce builds.");
+                    return;
+                }
+
                 channelString.Append($" **and **{insiderChannel2Pretty}** Channels");
             }
             else
@@ -119,8 +155,21 @@ namespace Cliptok.Commands
                 else if (!createNewThread)
                 {
                     var insidersChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsidersChannel);
-                    threadChannel = insidersChannel.Threads.First(t => t.Name.Contains(GetInsiderChannelNameFromRole(insiderRole1)));
-                    threadChannel2 = insidersChannel.Threads.FirstOrDefault(t => t.Name.Contains(GetInsiderChannelNameFromRole(insiderRole2)));
+                    threadChannel = insidersChannel.Threads.FirstOrDefault(t => t.Name.Contains(GetInsiderChannelNameFromRole(insiderRole1), StringComparison.OrdinalIgnoreCase));
+                    threadChannel2 = insiderRole2 == default
+                        ? default
+                        : insidersChannel.Threads.FirstOrDefault(t => t.Name.Contains(GetInsiderChannelNameFromRole(insiderRole2), StringComparison.OrdinalIgnoreCase));
+
+                    if (threadChannel == default)
+                    {
+                        await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} Couldn't find an Insider thread for the {insiderRole1.Mention} channel! Please set it manually or check the thread names.");
+                        return;
+                    }
+                    if (threadChannel2 == default)
+                    {
+                        await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} Couldn't find an Insider thread for the {insiderRole2.Mention} channel! Please set it manually or check the thread names.");
+                        return;
+                    }
 
                     pingMsgString += $"\n\nDiscuss it here: {threadChannel.Mention}";
                     if (threadChannel2 != default)
@@ -149,18 +198,40 @@ namespace Cliptok.Commands
                 if (threadChannel != default)
                 {
                     noPingMsgString += $"\n\nDiscuss it here: {threadChannel.Mention}";
-                    if (threadChannel2 != default)
+                    if (threadChannel2 == default && insiderChannel2 != default)
+                    {
+                        await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} Couldn't find an Insider thread for the {insiderRole2.Mention} channel! Please set it manually or check the thread names.");
+                        return;
+                    }
+                    else if (threadChannel2 != default)
+                    {
                         noPingMsgString += $" & {threadChannel2.Mention}";
+                    }
                 }
                 else if (!createNewThread)
                 {
                     var insidersChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsidersChannel);
-                    threadChannel = insidersChannel.Threads.First(t => t.Name.Contains(GetInsiderChannelNameFromRole(insiderRole1), StringComparison.OrdinalIgnoreCase));
-                    threadChannel2 = insidersChannel.Threads.FirstOrDefault(t => t.Name.Contains(GetInsiderChannelNameFromRole(insiderRole2), StringComparison.OrdinalIgnoreCase));
+                    threadChannel = insidersChannel.Threads.FirstOrDefault(t => t.Name.Contains(GetInsiderChannelNameFromRole(insiderRole1), StringComparison.OrdinalIgnoreCase));
+                    threadChannel2 =  insiderRole2 == default
+                        ? default
+                        : insidersChannel.Threads.FirstOrDefault(t => t.Name.Contains(GetInsiderChannelNameFromRole(insiderRole2), StringComparison.OrdinalIgnoreCase));
+
+                    if (threadChannel == default)
+                    {
+                        await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} Couldn't find an Insider thread for the {insiderRole1.Mention} channel! Please set it manually or check the thread names.");
+                        return;
+                    }
 
                     noPingMsgString += $"\n\nDiscuss it here: {threadChannel.Mention}";
-                    if (threadChannel2 != default)
+                    if (threadChannel2 == default && insiderChannel2 != default)
+                    {
+                        await ctx.FollowupAsync($"{Program.cfgjson.Emoji.Error} Couldn't find an Insider thread for the {insiderRole2.Mention} channel! Please set it manually or check the thread names.");
+                        return;
+                    }
+                    else if (threadChannel2 != default)
+                    {
                         noPingMsgString += $" & {threadChannel2.Mention}";
+                    }
                     var msg = await threadChannel.SendMessageAsync(innerThreadMsgString);
                     await DiscordHelpers.UpdateInsiderThreadPinsAsync(threadChannel, msg);
                     DiscordMessage msg2 = default;
@@ -269,7 +340,7 @@ namespace Cliptok.Commands
             }
 
             // Validate roles
-            if (!Program.cfgjson.InsiderRoles.Contains(role1Id) || (role2Id != default && !Program.cfgjson.InsiderRoles.Contains(role2Id)))
+            if (Program.cfgjson.InsiderRoles is null || !Program.cfgjson.InsiderRoles.Contains(role1Id) || (role2Id != default && !Program.cfgjson.InsiderRoles.Contains(role2Id)))
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} The role name(s) you entered aren't recognised!", ephemeral: true);
                 return;
