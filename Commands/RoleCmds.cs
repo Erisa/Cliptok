@@ -2,6 +2,8 @@ namespace Cliptok.Commands
 {
     public class RoleCmds
     {
+        static ulong rolesCmdId = 0;
+
         [Command("grant")]
         [Description("Grant a user access to the server, bypassing any verification requirements.")]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
@@ -125,8 +127,8 @@ namespace Cliptok.Commands
             {
                 Dictionary<string, string> options = new()
                     {
-                        { "Windows 11 Insiders (Canary)", "insiderCanary" },
-                        { "Windows 11 Insiders (Dev)", "insiderDev" },
+                        { "Windows 11 Insiders (Future Platforms)", "insiderCanary" },
+                        { "Windows 11 Insiders (Experimental)", "insiderDev" },
                         { "Windows 11 Insiders (Beta)", "insiderBeta" },
                         { "Windows 11 Insiders (Release Preview)", "insiderRP" },
                         { "Patch Tuesday", "patchTuesday" },
@@ -150,11 +152,6 @@ namespace Cliptok.Commands
 
                 return list;
             }
-        }
-
-        public static async Task GiveUserRoleAsync(TextCommandContext ctx, ulong role)
-        {
-            await GiveUserRolesAsync(ctx, x => (ulong)x.GetValue(Program.cfgjson.UserRoles, null) == role);
         }
 
         public static async Task GiveUserRolesAsync(TextCommandContext ctx, Func<System.Reflection.PropertyInfo, bool> predicate)
@@ -192,12 +189,6 @@ namespace Cliptok.Commands
             await ctx.Channel.SendMessageAsync($"{ctx.User.Mention} has joined the {response} role{(roleIds.Length != 1 ? "s" : String.Empty)}.");
         }
 
-        public static async Task RemoveUserRoleAsync(TextCommandContext ctx, ulong role)
-        {
-            // In case we ever decide to have individual commands to remove roles.
-            await RemoveUserRolesAsync(ctx, x => (ulong)x.GetValue(Program.cfgjson.UserRoles, null) == role);
-        }
-
         public static async Task RemoveUserRolesAsync(TextCommandContext ctx, Func<System.Reflection.PropertyInfo, bool> predicate)
         {
             if (Program.cfgjson.UserRoles is null)
@@ -223,69 +214,31 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("join-insider-devtextcmd"),
-            TextAlias("join-insider-dev", "join-insiders-dev"),
-            Description("Gives you the Windows 11 Insiders (Dev) role"),
+            Command("insider-roletextcmd"),
+            TextAlias(
+                "join-insider-dev", "join-insiders-dev",
+                "join-insider-canary", "join-insiders-canary", "join-insider-can", "join-insiders-can",
+                "join-insider-beta", "join-insiders-beta",
+                "join-insider-rp", "join-insiders-rp", "join-insiders-11-rp", "join-insider-11-rp",
+                "join-patch-tuesday",
+                "leave-insiders", "leave-insider",
+                "leave-insider-dev", "leave-insiders-dev",
+                "leave-insider-canary", "leave-insiders-canary", "leave-insider-can", "leave-insiders-can",
+                "leave-insider-beta", "leave-insiders-beta",
+                "leave-insider-rp", "leave-insiders-rp", "leave-insiders-11-rp", "leave-insider-11-rp",
+                "leave-patch-tuesday"
+            ),
+            Description("Use /roles instead"),
             AllowedProcessors(typeof(TextCommandProcessor)),
             HomeServer,
             UserRolesPresent
         ]
-        public async Task JoinInsiderDevCmd(TextCommandContext ctx)
+        public async Task InsiderRoleCmd(TextCommandContext ctx)
         {
-            await GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderDev);
-        }
+            if (rolesCmdId == 0)
+                rolesCmdId = (await Program.discord.GetGuildApplicationCommandsAsync(ctx.Guild.Id)).First(x => x.Name == "roles").Id;
 
-        [
-            Command("join-insider-canarytextcmd"),
-            TextAlias("join-insider-canary", "join-insiders-canary", "join-insider-can", "join-insiders-can"),
-            Description("Gives you the Windows 11 Insiders (Canary) role"),
-            AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer,
-            UserRolesPresent
-        ]
-        public async Task JoinInsiderCanaryCmd(TextCommandContext ctx)
-        {
-            await GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderCanary);
-        }
-
-
-        [
-            Command("join-insider-betatextcmd"),
-            TextAlias("join-insider-beta", "join-insiders-beta"),
-            Description("Gives you the Windows 11 Insiders (Beta) role"),
-            AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer,
-            UserRolesPresent
-        ]
-        public async Task JoinInsiderBetaCmd(TextCommandContext ctx)
-        {
-            await GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderBeta);
-        }
-
-        [
-            Command("join-insider-rptextcmd"),
-            TextAlias("join-insider-rp", "join-insiders-rp", "join-insiders-11-rp", "join-insider-11-rp"),
-            Description("Gives you the Windows 11 Insiders (Release Preview) role"),
-            AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer,
-            UserRolesPresent
-        ]
-        public async Task JoinInsiderRPCmd(TextCommandContext ctx)
-        {
-            await GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderRP);
-        }
-
-        [
-            Command("join-patch-tuesdaytextcmd"),
-            TextAlias("join-patch-tuesday"),
-            Description("Gives you the 💻 Patch Tuesday role"),
-            AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer,
-            UserRolesPresent
-        ]
-        public async Task JoinPatchTuesday(TextCommandContext ctx)
-        {
-            await GiveUserRoleAsync(ctx, Program.cfgjson.UserRoles.PatchTuesday);
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Warning} This command is deprecated, please use </roles grant:{rolesCmdId}> or </roles remove:{rolesCmdId}> instead.");
         }
 
         [
@@ -302,27 +255,6 @@ namespace Cliptok.Commands
         }
 
         [
-            Command("leave-insiderstextcmd"),
-            TextAlias("leave-insiders", "leave-insider"),
-            Description("Removes you from Insider roles"),
-            AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer,
-            UserRolesPresent
-        ]
-        public async Task LeaveInsiders(TextCommandContext ctx)
-        {
-            foreach (ulong roleId in new ulong[] { Program.cfgjson.UserRoles.InsiderDev, Program.cfgjson.UserRoles.InsiderBeta, Program.cfgjson.UserRoles.InsiderRP, Program.cfgjson.UserRoles.InsiderCanary, Program.cfgjson.UserRoles.InsiderDev })
-            {
-                await RemoveUserRoleAsync(ctx, roleId);
-            }
-
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Insider} You are no longer receiving Windows Insider notifications. If you ever wish to receive Insider notifications again, you can check the <#740272437719072808> description for the commands.");
-            var msg = await ctx.GetResponseAsync();
-            await Task.Delay(10000);
-            await msg.DeleteAsync();
-        }
-
-        [
             Command("dont-keep-me-updatedtextcmd"),
             TextAlias("dont-keep-me-updated"),
             Description("Takes away from you all opt-in roles"),
@@ -335,70 +267,5 @@ namespace Cliptok.Commands
             await RemoveUserRolesAsync(ctx, x => true);
         }
 
-        [
-            Command("leave-insider-devtextcmd"),
-            TextAlias("leave-insider-dev", "leave-insiders-dev"),
-            Description("Removes the Windows 11 Insiders (Dev) role"),
-            AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer,
-            UserRolesPresent
-        ]
-        public async Task LeaveInsiderDevCmd(TextCommandContext ctx)
-        {
-            await RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderDev);
-        }
-
-        [
-            Command("leave-insider-canarytextcmd"),
-            TextAlias("leave-insider-canary", "leave-insiders-canary", "leave-insider-can", "leave-insiders-can"),
-            Description("Removes the Windows 11 Insiders (Canary) role"),
-            AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer,
-            UserRolesPresent
-        ]
-        public async Task LeaveInsiderCanaryCmd(TextCommandContext ctx)
-        {
-            await RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderCanary);
-        }
-
-        [
-            Command("leave-insider-betatextcmd"),
-            TextAlias("leave-insider-beta", "leave-insiders-beta"),
-            Description("Removes the Windows 11 Insiders (Beta) role"),
-            AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer,
-            UserRolesPresent
-        ]
-        public async Task LeaveInsiderBetaCmd(TextCommandContext ctx)
-        {
-            await RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderBeta);
-        }
-
-
-        [
-            Command("leave-insider-rptextcmd"),
-            TextAlias("leave-insider-rp", "leave-insiders-rp", "leave-insiders-11-rp", "leave-insider-11-rp"),
-            Description("Removes the Windows 11 Insiders (Release Preview) role"),
-            AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer,
-            UserRolesPresent
-        ]
-        public async Task LeaveInsiderRPCmd(TextCommandContext ctx)
-        {
-            await RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.InsiderRP);
-        }
-
-        [
-            Command("leave-patch-tuesdaytextcmd"),
-            TextAlias("leave-patch-tuesday"),
-            Description("Removes the 💻 Patch Tuesday role"),
-            AllowedProcessors(typeof(TextCommandProcessor)),
-            HomeServer,
-            UserRolesPresent
-        ]
-        public async Task LeavePatchTuesday(TextCommandContext ctx)
-        {
-            await RemoveUserRoleAsync(ctx, Program.cfgjson.UserRoles.PatchTuesday);
-        }
     }
 }
