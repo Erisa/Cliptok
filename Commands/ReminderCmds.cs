@@ -42,7 +42,7 @@ namespace Cliptok.Commands
                 if (ctx is SlashCommandContext)
                     await ctx.As<SlashCommandContext>().DeferResponseAsync();
 
-                var (parsedTime, error) = await ValidateReminderTimeAsync(time);
+                var (parsedTime, error) = ParseReminderTime(time);
                 if (parsedTime is null)
                 {
                     await ctx.RespondAsync(error, ephemeral: true);

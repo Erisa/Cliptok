@@ -4,7 +4,7 @@ namespace Cliptok.Helpers
 {
     internal class ReminderHelpers
     {
-        internal static async Task<(DateTime? parsedTime, string error)> ValidateReminderTimeAsync(string reminderTime)
+        internal static (DateTime? parsedTime, string error) ParseReminderTime(string reminderTime)
         {
             DateTime parsedTime;
             try
@@ -41,7 +41,7 @@ namespace Cliptok.Helpers
                 return (null, $"{Program.cfgjson.Emoji.Error} I couldn't find a reminder with that ID! Please try again.");
             }
 
-            if (reminder.UserId != requestingUserId)
+            if (reminder is null || reminder.UserId != requestingUserId)
                 return (null, $"{Program.cfgjson.Emoji.Error} I couldn't find a reminder with that ID! Please try again.");
 
             return (reminder, null);
@@ -74,7 +74,7 @@ namespace Cliptok.Helpers
                         ? "..."
                         : StringHelpers.Truncate(reminder.ReminderText, 100, true),
                     reminder.ReminderId.ToString(),
-                    TimeHelpers.TimeToPrettyFormat(reminder.ReminderTime.Subtract(DateTime.UtcNow), false)))
+                    "in about " + TimeHelpers.TimeToPrettyFormat(reminder.ReminderTime.Subtract(DateTime.UtcNow).Add(TimeSpan.FromMinutes(1)), false)))
                 .ToList();
 
             return new DiscordSelectComponent(componentCustomId, null, options);
@@ -90,7 +90,7 @@ namespace Cliptok.Helpers
                 long reminderTime = ((DateTimeOffset)reminder.ReminderTime).ToUnixTimeSeconds();
 
                 string guildName;
-                if (reminder_id_rx.IsMatch(reminder.GuildId))
+                if (id_rx.IsMatch(reminder.GuildId))
                 {
                     var targetGuild = await Program.discord.GetGuildAsync(Convert.ToUInt64(reminder.GuildId));
                     guildName = targetGuild.Name;

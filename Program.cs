@@ -234,7 +234,7 @@ namespace Cliptok
                     }
 
                     if (type.Name == "HelpCmds"
-                    || type.Name == "ReminderCommand"
+                    || type.Name == "ReminderCmds"
                     || type.Name == "PingCmds"
                     || type.Name == "UserInfoCmds")
                                 builder.AddCommands(type);

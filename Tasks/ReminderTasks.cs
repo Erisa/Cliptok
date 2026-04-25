@@ -65,7 +65,6 @@
                 if (DmFallback)
                 {
                     msg.WithContent("You asked to be reminded of something:");
-                    await channel.SendMessageAsync(msg);
                 }
                 else if (reminder.MessageId != default)
                 {

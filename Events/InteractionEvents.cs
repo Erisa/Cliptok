@@ -447,6 +447,13 @@ namespace Cliptok.Events
                     return;
                 }
 
+                if (reminder is null)
+                {
+                    await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
+                        new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Sorry, something unexpected happened! Please try again or contact the bot owner(s) for help."));
+                    return;
+                }
+
                 if (reminder.UserId != e.Interaction.User.Id)
                 {
                     await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
@@ -459,52 +466,8 @@ namespace Cliptok.Events
 
                 await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.Modal,
                     new DiscordModalBuilder().WithCustomId("reminder-modify-modal-callback").WithTitle("Modify a Reminder")
-                    .AddTextInput(new DiscordTextInputComponent("reminder-modify-time-input", placeholder: TimeHelpers.TimeToPrettyFormat(reminder.ReminderTime.Subtract(DateTime.UtcNow), false), required: false), "When do you want to be reminded?")
+                    .AddTextInput(new DiscordTextInputComponent("reminder-modify-time-input", placeholder: "in about " + TimeHelpers.TimeToPrettyFormat(reminder.ReminderTime.Subtract(DateTime.UtcNow).Add(TimeSpan.FromMinutes(1)), false), required: false), "When do you want to be reminded?")
                     .AddTextInput(new DiscordTextInputComponent("reminder-modify-text-input", placeholder: reminder.ReminderText, required: false), "What do you want to be reminded about?"));
-            }
-            else if (e.Id == "reminder-show-dropdown")
-            {
-                Reminder reminder;
-                try
-                {
-                    reminder =
-                        JsonConvert.DeserializeObject<Reminder>(
-                            await Program.redis.HashGetAsync("reminders", e.Values[0]));
-                }
-                catch
-                {
-                    await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
-                        new DiscordInteractionResponseBuilder()
-                            .WithContent(
-                                "That reminder doesn't exist! Perhaps it was deleted before you chose it from the list?")
-                            .AsEphemeral());
-                    return;
-                }
-
-                DiscordEmbedBuilder embed = new()
-                {
-                    Title = $"Reminder `{e.Values[0]}`",
-                    Description = reminder!.ReminderText,
-                    Color = new DiscordColor(0xFEC13D)
-                };
-
-                if (reminder.GuildId != "@me")
-                {
-                    embed.AddField("Server",
-                        $"{(await Program.discord.GetGuildAsync(Convert.ToUInt64(reminder.GuildId))).Name}");
-                    embed.AddField("Channel", $"<#{reminder.ChannelId}>");
-                }
-
-                embed.AddField("Context", $"https://discord.com/channels/{reminder.GuildId}/{reminder.ChannelId}/{reminder.MessageId}");
-
-                var setTime = ((DateTimeOffset)reminder.SetTime).ToUnixTimeSeconds();
-                long reminderTime = ((DateTimeOffset)reminder.ReminderTime).ToUnixTimeSeconds();
-
-                embed.AddField("Set At", $"<t:{setTime}:F> (<t:{setTime}:R>)");
-                embed.AddField("Set For", $"<t:{reminderTime}:F> (<t:{reminderTime}:R>)");
-
-                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
-                    new DiscordInteractionResponseBuilder().AddEmbed(embed).AsEphemeral());
             }
             else
             {
@@ -561,7 +524,7 @@ namespace Cliptok.Events
 
                 var timeInput = (e.Values["remind-me-about-this-time-input"] as TextInputModalSubmission).Value;
 
-                var (time, error) = await ReminderHelpers.ValidateReminderTimeAsync(timeInput);
+                var (time, error) = ReminderHelpers.ParseReminderTime(timeInput);
                 if (time is null)
                 {
                     await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent(error).AsEphemeral());
@@ -585,6 +548,8 @@ namespace Cliptok.Events
                 var unixTime = ((DateTimeOffset)time).ToUnixTimeSeconds();
                 await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                     .WithContent($"{Program.cfgjson.Emoji.Success} I'll try my best to remind you about that on <t:{unixTime}:f> (<t:{unixTime}:R>)"));
+
+                Commands.ReminderCmds.ReminderInteractionCache.Remove(e.Interaction.User.Id);
             }
             else if (e.Id == "reminder-modify-modal-callback")
             {
@@ -601,8 +566,7 @@ namespace Cliptok.Events
                 {
                     if (!ReminderModifyCache.TryGetValue(e.Interaction.User.Id, out reminder))
                     {
-                        Regex idRegex = new("[0-9]+");
-                        if (!idRegex.IsMatch(id))
+                        if (!Constants.RegexConstants.reminder_id_rx.IsMatch(id))
                         {
                             await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                                 .WithContent($"{Program.cfgjson.Emoji.Error} The reminder ID you provided isn't correct! Please try again.")
@@ -643,7 +607,7 @@ namespace Cliptok.Events
 
                 if (!string.IsNullOrWhiteSpace(time))
                 {
-                    var (parsedTime, error) = await ReminderHelpers.ValidateReminderTimeAsync(time);
+                    var (parsedTime, error) = ReminderHelpers.ParseReminderTime(time);
                     if (parsedTime is null)
                     {
                         await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent(error).AsEphemeral());
