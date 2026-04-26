@@ -2,41 +2,61 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net5.0</TargetFramework>
-		<RestoreAdditionalProjectSources>
-			https://nuget.emzi0767.com/api/v3/index.json
-		</RestoreAdditionalProjectSources>
+		<TargetFramework>net10.0</TargetFramework>
+		<LangVersion>13.0</LangVersion>
+		<UserSecretsId>d9345310-5908-4697-8613-28a24d06d183</UserSecretsId>
+
+		<InvariantGlobalization>false</InvariantGlobalization>
+		
+		<!-- <RestoreAdditionalProjectSources>
+			https://www.myget.org/F/erisa/api/v3/index.json
+		</RestoreAdditionalProjectSources> -->
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Abyssal.HumanDateParser" Version="2.0.0-20191113.1" />
-		<PackageReference Include="DSharpPlus" Version="4.1.0-nightly-00879" />
-		<PackageReference Include="DSharpPlus.CommandsNext" Version="4.1.0-nightly-00879" />
-		<PackageReference Include="IDoEverything.DSharpPlus.SlashCommands" Version="1.4.0" />
-		<PackageReference Include="StackExchange.Redis" Version="2.2.4" />
+		<PackageReference Include="DiffPlex" Version="1.9.0" />
+		<PackageReference Include="DSharpPlus" Version="5.0.0-nightly-02582" />
+		<PackageReference Include="DSharpPlus.Commands" Version="5.0.0-nightly-02582" />
+		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1">
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		  <PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.1" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="10.0.1" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+		<PackageReference Include="Serilog" Version="4.2.0" />
+		<PackageReference Include="Serilog.Expressions" Version="5.0.0" />
+		<PackageReference Include="Serilog.Extensions.Logging" Version="9.0.0" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+		<PackageReference Include="Serilog.Sinks.Grafana.Loki" Version="8.3.0" />
+		<PackageReference Include="Serilog.Sinks.TextWriter" Version="3.0.0" />
+		<PackageReference Include="StackExchange.Redis" Version="2.8.24" />
 		<PackageReference Include="System.Drawing.Common" Version="5.0.2" />
 		<PackageReference Include="System.Linq" Version="4.3.0" />
+		<PackageReference Include="System.Linq.Async" Version="7.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Update="config.megu.json">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="config.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-    <None Update="config.dev.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+		<None Update="config.dev.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<Content Include="Lists/**">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
+		<Content Include="db/**">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
-
-	<ItemGroup>
-	  <None Remove="Lists\autoban.txt" />
-	  <None Remove="Lists\usernames.txt" />
-	</ItemGroup>
-
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition=" '$(OS)' != 'Windows_NT' ">
-	  <Exec Command="git rev-parse --short main &gt; &quot;$(OutDir)/CommitHash.txt&quot;&#xD;&#xA;git log --pretty=format:&quot;%25s&quot; -n 1 &gt; &quot;$(OutDir)/CommitMessage.txt&quot;&#xD;&#xA;git log --pretty=format:&quot;%25ci&quot; -n 1 &gt; &quot;$(OutDir)/CommitTime.txt&quot;&#xD;&#xA;" />
-	</Target>
-
 </Project>

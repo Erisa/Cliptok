@@ -1,8 +1,13 @@
+Properties/*
+config.*.json
 .env
-config.dev.json
-Lists/rudeWords.txt
-Lists/usernames.txt
-Lists/autoban.txt
+*.env
+Lists/Private/*
+Lists/Private
+data/*
+ssh_key
+db/*
+pgdata/*
 
 # Created by https://www.toptal.com/developers/gitignore/api/dotnetcore,windows,linux,redis,visualstudio,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=dotnetcore,windows,linux,redis,visualstudio,visualstudiocode
@@ -38,10 +43,6 @@ obj/
 
 # AOF persistence log
 *.aof
-
-### VisualStudioCode ###
-.vscode/*
-
 
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
