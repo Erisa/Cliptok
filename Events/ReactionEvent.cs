@@ -62,6 +62,11 @@ namespace Cliptok.Events
             if (e.Emoji != recycleBinEmoji)
                 return;
 
+            // If there is already a success reaction, this was already handled! Ignore.
+            var successEmoji = await discord.GetApplicationEmojiAsync(cfgjson.ReactionEmoji.Success);
+            if (e.Message.Reactions.Any(e => e.Emoji == successEmoji && e.IsMe))
+                return;
+
             if (e.Channel.Id == cfgjson.LogChannels["mod"].ChannelId)
             {
                 string warningId;
@@ -181,7 +186,6 @@ namespace Cliptok.Events
                                 .WithAllowedMentions(Mentions.None)
                         );
 
-                        var successEmoji = await discord.GetApplicationEmojiAsync(cfgjson.ReactionEmoji.Success);
                         await targetMessage.CreateReactionAsync(successEmoji);
                     }
                     else
