@@ -243,7 +243,6 @@ namespace Cliptok
                 builder.AddCheck<HomeServerCheck>();
                 builder.AddCheck<RequireHomeserverPermCheck>();
                 builder.AddCheck<IsBotOwnerCheck>();
-                builder.AddCheck<UserRolesPresentCheck>();
 
                 // Set custom prefixes from config.json
                 TextCommandProcessor textCommandProcessor = new(new TextCommandConfiguration

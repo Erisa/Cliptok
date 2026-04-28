@@ -47,8 +47,14 @@
         [JsonProperty("recentWarningsAutoMuteThresholds")]
         public Dictionary<string, int> RecentWarningsAutoMuteThresholds { get; private set; }
 
-        [JsonProperty("userRoles")]
-        public UserRoleConfig UserRoles { get; private set; }
+        [JsonProperty("insiderRoles")]
+        public List<ulong> InsiderRoles { get; private set; }
+
+        [JsonProperty("insiderChatRole")]
+        public ulong InsiderChatRole { get; private set; }
+
+        [JsonProperty("giveawaysRole")]
+        public ulong GiveawaysRole { get; private set; }
 
         [JsonProperty("restrictedWords")]
         public List<string> RestrictedWords { get; private set; }
@@ -115,12 +121,6 @@
 
         [JsonProperty("modmailUserId")]
         public ulong ModmailUserId { get; private set; } = 0;
-
-        [JsonProperty("announcementRoles")]
-        public Dictionary<string, ulong> AnnouncementRoles { get; private set; }
-
-        [JsonProperty("announcementRolesFriendlyNames")]
-        public Dictionary<string, string> AnnouncementRolesFriendlyNames { get; private set; }
 
         [JsonProperty("hastebinEndpoint")]
         public string HastebinEndpoint { get; private set; } = "";
@@ -466,31 +466,6 @@
 
         [JsonProperty("port")]
         public ulong Port { get; private set; }
-    }
-
-    public class UserRoleConfig
-    {
-        [JsonProperty("insiderCanary")]
-        public ulong InsiderCanary { get; private set; }
-
-
-        [JsonProperty("insiderDev")]
-        public ulong InsiderDev { get; private set; }
-
-        [JsonProperty("insiderBeta")]
-        public ulong InsiderBeta { get; private set; }
-
-        [JsonProperty("insiderRP")]
-        public ulong InsiderRP { get; private set; }
-
-        [JsonProperty("insiderChat")]
-        public ulong InsiderChat { get; private set; }
-
-        [JsonProperty("patchTuesday")]
-        public ulong PatchTuesday { get; private set; }
-
-        [JsonProperty("giveaways")]
-        public ulong Giveaways { get; private set; }
     }
 
     public class LogChannelConfig
