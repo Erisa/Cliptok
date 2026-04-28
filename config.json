@@ -205,8 +205,8 @@
   "heartosoftId": 413429915187281940,
   "autoDehoistCharacters": " !\"#$%&'()*+,-./:;<=>?@[\\]^_`'",
   "secondaryAutoDehoistCharacters": "0123456789",
-  "hastebinEndpoint": "https://haste.erisa.uk",
-  "hastebinType": "haste",
+  "hastebinEndpoint": "https://paste.msftcomm.ts.net",
+  "hastebinType": "tclip",
   "insiderRoles": [
     434426594271166474,
     1082364328474329179,

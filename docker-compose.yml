@@ -87,4 +87,4 @@ services:
       - sys_module
     restart: always
     extra_hosts:
-      - "paste.erisa.ts.net:100.104.163.12"
+      - "paste.msftcomm.ts.net:100.71.159.123"
