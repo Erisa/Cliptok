@@ -187,6 +187,7 @@ namespace Cliptok.Events
             {
                 await Migrations.JoinwatchMigration.MigrateJoinwatchesToNotesAsync();
                 await Migrations.LinePardonMigrations.MigrateLinePardonToSetAsync();
+                await RedisMigrations.ReminderMigrations.MigrateRemindersToHashAsync();
             }
             catch (Exception ex)
             {

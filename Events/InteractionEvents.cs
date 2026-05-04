@@ -4,6 +4,10 @@ namespace Cliptok.Events
 {
     public class InteractionEvents
     {
+        // Used to pass context between reminder modify interactions
+        // <user ID, reminder>
+        public static Dictionary<ulong, Reminder> ReminderModifyCache = new();
+
         public static async Task ComponentInteractionCreateEvent(DiscordClient _, ComponentInteractionCreatedEventArgs e)
         {
             // Edits need a webhook rather than interaction..?
@@ -405,6 +409,66 @@ namespace Cliptok.Events
 
                 await e.Interaction.EditFollowupMessageAsync(e.Message.Id, new DiscordWebhookBuilder().WithContent($"{cfgjson.Emoji.Success} You have been removed from the {insiderChatRole.Mention} role!"));
             }
+            else if (e.Id == "reminder-delete-dropdown-callback")
+            {
+                Reminder reminder;
+                try
+                {
+                    reminder =
+                        JsonConvert.DeserializeObject<Reminder>(
+                            await Program.redis.HashGetAsync("reminders", e.Values[0]));
+                }
+                catch
+                {
+                    await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
+                        new DiscordInteractionResponseBuilder()
+                            .WithContent($"{Program.cfgjson.Emoji.Error} That reminder was already deleted!")
+                            .AsEphemeral());
+                    return;
+                }
+
+                await Program.redis.HashDeleteAsync("reminders", e.Values[0]);
+
+                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Success} Reminder deleted successfully!").AsEphemeral());
+            }
+            else if (e.Id == "reminder-modify-dropdown-callback")
+            {
+                Reminder reminder;
+                try
+                {
+                    reminder = JsonConvert.DeserializeObject<Reminder>(await Program.redis.HashGetAsync("reminders", e.Values[0]));
+                }
+                catch
+                {
+                    await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
+                        new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Sorry, something unexpected happened! Please try again or contact the bot owner(s) for help."));
+                    return;
+                }
+
+                if (reminder is null)
+                {
+                    await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
+                        new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Sorry, something unexpected happened! Please try again or contact the bot owner(s) for help."));
+                    return;
+                }
+
+                if (reminder.UserId != e.Interaction.User.Id)
+                {
+                    await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource,
+                        new DiscordInteractionResponseBuilder()
+                        .WithContent("Only the person who set that reminder can modify it!").AsEphemeral());
+                    return;
+                }
+
+                ReminderModifyCache[e.Interaction.User.Id] = reminder;
+
+                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.Modal,
+                    new DiscordModalBuilder().WithCustomId("reminder-modify-modal-callback").WithTitle("Modify a Reminder")
+                    .AddTextInput(new DiscordTextInputComponent("reminder-modify-time-input", placeholder: "in about " + TimeHelpers.TimeToPrettyFormat(reminder.ReminderTime.Subtract(DateTime.UtcNow).Add(TimeSpan.FromMinutes(1)), false), required: false), "When do you want to be reminded?")
+                    .AddTextInput(new DiscordTextInputComponent("reminder-modify-text-input", placeholder: reminder.ReminderText, required: false), "What do you want to be reminded about?"));
+            }
             else
             {
                 await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Unknown interaction. I don't know what you are asking me for.").AsEphemeral(true));
@@ -450,6 +514,135 @@ namespace Cliptok.Events
                 await role1.ModifyAsync(mentionable: false);
                 if (role2 is not null)
                     await role2.ModifyAsync(mentionable: false);
+            }
+            else if (e.Id == "remind-me-about-this-modal-callback")
+            {
+                await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder().AsEphemeral(true));
+
+                var targetMessage = Commands.ReminderCmds.ReminderInteractionCache[e.Interaction.User.Id];
+
+                var timeInput = (e.Values["remind-me-about-this-time-input"] as TextInputModalSubmission).Value;
+
+                var (time, error) = ReminderHelpers.ParseReminderTime(timeInput);
+                if (time is null)
+                {
+                    await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent(error).AsEphemeral());
+                    return;
+                }
+
+                var reminder = new Reminder
+                {
+                    UserId = e.Interaction.User.Id,
+                    ChannelId = e.Interaction.Channel.Id,
+                    MessageId = targetMessage.Id,
+                    SetTime = DateTime.UtcNow,
+                    ReminderTime = time.Value,
+                    ReminderId = await ReminderHelpers.GenerateUniqueReminderIdAsync(),
+                    ReminderText = "",
+                    GuildId = e.Interaction.Guild is null ? "@me" : e.Interaction.Guild.Id.ToString()
+                };
+
+                await Program.redis.HashSetAsync("reminders", reminder.ReminderId.ToString(), JsonConvert.SerializeObject(reminder));
+
+                var unixTime = ((DateTimeOffset)time).ToUnixTimeSeconds();
+                await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .WithContent($"{Program.cfgjson.Emoji.Success} I'll try my best to remind you about that on <t:{unixTime}:f> (<t:{unixTime}:R>)"));
+
+                Commands.ReminderCmds.ReminderInteractionCache.Remove(e.Interaction.User.Id);
+            }
+            else if (e.Id == "reminder-modify-modal-callback")
+            {
+                await e.Interaction.DeferAsync(true);
+
+                var time = (e.Values["reminder-modify-time-input"] as TextInputModalSubmission).Value;
+                var text = (e.Values["reminder-modify-text-input"] as TextInputModalSubmission).Value;
+                string id = null;
+                if (e.Values.ContainsKey("reminder-modify-id-input"))
+                    id = (e.Values["reminder-modify-id-input"] as TextInputModalSubmission).Value;
+
+                Reminder reminder;
+                try
+                {
+                    if (!ReminderModifyCache.TryGetValue(e.Interaction.User.Id, out reminder))
+                    {
+                        if (!Constants.RegexConstants.reminder_id_rx.IsMatch(id))
+                        {
+                            await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                                .WithContent($"{Program.cfgjson.Emoji.Error} The reminder ID you provided isn't correct! Please try again.")
+                                .AsEphemeral());
+                            return;
+                        }
+
+                        reminder = JsonConvert.DeserializeObject<Reminder>(await Program.redis.HashGetAsync("reminders", id));
+                    }
+                }
+                catch (ArgumentNullException)
+                {
+                    await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Error} I couldn't find a reminder with that ID! Please try again.")
+                        .AsEphemeral());
+                    return;
+                }
+                catch
+                {
+                    await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Sorry, something unexpected happened! Please try again or contact the bot owner(s) for help."));
+                    return;
+                }
+
+                if (reminder.UserId != e.Interaction.User.Id)
+                {
+                    await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Error} Only the person who set that reminder can modify it!").AsEphemeral());
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(text) && string.IsNullOrWhiteSpace(time))
+                {
+                    await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Information} Reminder unchanged."));
+                    return;
+                }
+
+                if (!string.IsNullOrWhiteSpace(text)) reminder.ReminderText = text;
+
+                if (!string.IsNullOrWhiteSpace(time))
+                {
+                    var (parsedTime, error) = ReminderHelpers.ParseReminderTime(time);
+                    if (parsedTime is null)
+                    {
+                        await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent(error).AsEphemeral());
+                        return;
+                    }
+
+                    reminder.ReminderTime = parsedTime.Value;
+                }
+
+                await Program.redis.HashSetAsync("reminders", reminder.ReminderId, JsonConvert.SerializeObject(reminder));
+
+                await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .WithContent($"{Program.cfgjson.Emoji.Success} Reminder modified successfully!"));
+
+                ReminderModifyCache.Remove(e.Interaction.User.Id);
+            }
+            else if (e.Id == "reminder-delete-modal-callback")
+            {
+                await e.Interaction.DeferAsync(true);
+
+                var id = (e.Values["reminder-delete-id-input"] as TextInputModalSubmission).Value;
+
+                var (reminder, error) = await ReminderHelpers.GetReminderAsync(id, e.Interaction.User.Id);
+                if (reminder is null)
+                {
+                    await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent(error).AsEphemeral());
+                    return;
+                }
+
+                await Program.redis.HashDeleteAsync("reminders", id);
+
+                await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                    .WithContent($"{Program.cfgjson.Emoji.Success} Reminder deleted successfully!"));
+
+                ReminderModifyCache.Remove(e.Interaction.User.Id);
             }
             else
             {
