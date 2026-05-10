@@ -312,6 +312,9 @@
 
         [JsonProperty("modActionReplyAutoWarnReason")]
         public string ModActionReplyAutoWarnReason { get; set; } = "";
+
+        [JsonProperty("duplicateMessageExcludedChannels")]
+        public List<ulong> DuplicateMessageExcludedChannels {get; set; } = new();
     }
 
     public class AutoModRuleConfig

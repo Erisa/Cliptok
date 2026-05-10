@@ -364,5 +364,8 @@
   },
   "compromisedAccountBanAutoPardonHours": 12,
   "enableModActionReplyAutoWarn":  true,
-  "modActionReplyAutoWarnReason":  "rule 12"
+  "modActionReplyAutoWarnReason":  "rule 12",
+  "duplicateMessageExcludedChannels": [
+    929902761519239208
+  ]
 }
