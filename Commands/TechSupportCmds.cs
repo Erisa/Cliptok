@@ -148,7 +148,11 @@ namespace Cliptok.Commands
                 tags.Add(solvedTagId);
                 try
                 {
-                    await channel.ModifyAsync(t => t.AppliedTags = tags);
+                    await channel.ModifyAsync(t =>
+                    {
+                        t.AppliedTags = tags;
+                        t.AuditLogReason = $"/solved command used by {ctx.User.Username}";
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -162,7 +166,11 @@ namespace Cliptok.Commands
 
             try
             {
-                await channel.ModifyAsync(t => t.IsArchived = true);
+                await channel.ModifyAsync(t =>
+                {
+                    t.IsArchived = true;
+                    t.AuditLogReason = $"/solved command used by {ctx.User.Username}";
+                });
             }
             catch (Exception ex)
             {

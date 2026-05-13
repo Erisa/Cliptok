@@ -313,7 +313,11 @@ namespace Cliptok.Events
                 }
 
                 // Apply roles
-                await member.ModifyAsync(x => x.Roles = memberRoles);
+                await member.ModifyAsync(x =>
+                {
+                    x.Roles = memberRoles;
+                    x.AuditLogReason = $"Insider roles selected in #{e.Channel.Name}";
+                });
 
                 await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder().WithContent($"{cfgjson.Emoji.Success} Your Insider roles have been updated!").AsEphemeral(true));
             }
@@ -385,7 +389,7 @@ namespace Cliptok.Events
                 // Give member insider chat role
                 var member = await e.Guild.GetMemberAsync(e.User.Id);
                 var insiderChatRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderChat);
-                await member.GrantRoleAsync(insiderChatRole);
+                await member.GrantRoleAsync(insiderChatRole, $"Insiders chat access role selected in #{e.Channel.Name}");
 
                 // Respond
                 await e.Interaction.EditFollowupMessageAsync(e.Message.Id, new DiscordWebhookBuilder().WithContent($"{cfgjson.Emoji.Success} You have been given the {insiderChatRole.Mention} role!"));
@@ -401,7 +405,7 @@ namespace Cliptok.Events
                 var member = await e.Guild.GetMemberAsync(e.User.Id);
 
                 var insiderChatRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderChat);
-                await member.RevokeRoleAsync(insiderChatRole);
+                await member.RevokeRoleAsync(insiderChatRole, $"Insiders chat access role removed in #{e.Channel.Name}");
 
                 await e.Interaction.EditFollowupMessageAsync(e.Message.Id, new DiscordWebhookBuilder().WithContent($"{cfgjson.Emoji.Success} You have been removed from the {insiderChatRole.Mention} role!"));
             }
