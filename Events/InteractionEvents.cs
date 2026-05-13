@@ -242,23 +242,16 @@ namespace Cliptok.Events
                 // Fetch member
                 var member = await e.Guild.GetMemberAsync(e.User.Id);
 
-                // Fetch Insider roles to check whether member already has them
-                var insiderCanaryRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderCanary);
-                var insiderDevRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderDev);
-                var insiderBetaRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderBeta);
-                var insiderRPRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderRP);
-                var patchTuesdayRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.PatchTuesday);
+                List<DiscordSelectComponentOption> menuOptions = [];
+                foreach (var roleId in Program.cfgjson.InsiderRoles)
+                {
+                    var role = await e.Guild.GetRoleAsync(roleId);
+                    menuOptions.Add(new(role.Name, role.Id.ToString(), isDefault: member.Roles.Any(r => r.Id == roleId)));
+                }
 
                 // Show menu with current Insider roles, apply new roles based on user selection
                 var menu = new DiscordSelectComponent("insiders-info-roles-menu-response-callback", "Choose your Insider roles",
-                    new List<DiscordSelectComponentOption>()
-                    {
-                        new("Windows 11 Canary channel", "insiders-info-w11-canary", isDefault: member.Roles.Contains(insiderCanaryRole)),
-                        new("Windows 11 Dev channel", "insiders-info-w11-dev", isDefault: member.Roles.Contains(insiderDevRole)),
-                        new("Windows 11 Beta channel", "insiders-info-w11-beta", isDefault: member.Roles.Contains(insiderBetaRole)),
-                        new("Windows 11 Release Preview channel", "insiders-info-w11-rp", isDefault: member.Roles.Contains(insiderRPRole)),
-                        new("Patch Tuesday", "insiders-info-pt", isDefault: member.Roles.Contains(patchTuesdayRole)),
-                    }, minOptions: 0, maxOptions: 5);
+                    menuOptions, minOptions: 0, maxOptions: menuOptions.Count);
 
                 var builder = new DiscordFollowupMessageBuilder()
                     .WithContent($"{cfgjson.Emoji.Insider} Use the menu below to toggle your Insider roles!")
@@ -278,27 +271,22 @@ namespace Cliptok.Events
                 // Get member
                 var member = await e.Guild.GetMemberAsync(e.User.Id);
 
-                // Map role select options to role IDs
-                var insiderRoles = new Dictionary<string, ulong>
-                {
-                    { "insiders-info-w11-canary", cfgjson.UserRoles.InsiderCanary },
-                    { "insiders-info-w11-dev", cfgjson.UserRoles.InsiderDev },
-                    { "insiders-info-w11-beta", cfgjson.UserRoles.InsiderBeta },
-                    { "insiders-info-w11-rp", cfgjson.UserRoles.InsiderRP },
-                    { "insiders-info-pt", cfgjson.UserRoles.PatchTuesday }
-                };
-
                 // Get a list of the member's current roles that we can add to or remove from
                 // Then we can apply this in a single request with member.ModifyAsync to avoid making repeated member update requests
                 List<DiscordRole> memberRoles = member.Roles.ToList();
 
-                var selection = e.Values.Select(x => insiderRoles[x]).ToList();
-
-                foreach (var roleId in insiderRoles.Values)
+                // Get Insider roles
+                List<DiscordRole> insiderRoles = [];
+                foreach (var roleId in Program.cfgjson.InsiderRoles)
                 {
-                    var role = await e.Guild.GetRoleAsync(roleId);
+                    insiderRoles.Add(await e.Guild.GetRoleAsync(roleId));
+                }
 
-                    if (selection.Contains(roleId))
+                var selection = e.Values.Select(x => Convert.ToUInt64(x)).ToList();
+
+                foreach (var role in insiderRoles)
+                {
+                    if (selection.Contains(role.Id))
                     {
                         // Member should have the role
                         if (!memberRoles.Contains(role))
@@ -328,18 +316,10 @@ namespace Cliptok.Events
                 var member = await e.Guild.GetMemberAsync(e.User.Id);
 
                 // Get insider chat role
-                var insiderChatRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderChat);
+                var insiderChatRole = await e.Guild.GetRoleAsync(cfgjson.InsiderChatRole);
 
                 // Check whether member already has any insider roles
-                var insiderRoles = new List<ulong>()
-                {
-                    cfgjson.UserRoles.InsiderCanary,
-                    cfgjson.UserRoles.InsiderDev,
-                    cfgjson.UserRoles.InsiderBeta,
-                    cfgjson.UserRoles.InsiderRP,
-                    cfgjson.UserRoles.PatchTuesday
-                };
-                if (member.Roles.Any(x => insiderRoles.Contains(x.Id)))
+                if (Program.cfgjson.InsiderRoles is not null && member.Roles.Any(x => Program.cfgjson.InsiderRoles.Contains(x.Id)))
                 {
                     // Member already has an insider role, thus already has access to #insiders
                     // No need for the chat role too
@@ -384,7 +364,7 @@ namespace Cliptok.Events
 
                 // Give member insider chat role
                 var member = await e.Guild.GetMemberAsync(e.User.Id);
-                var insiderChatRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderChat);
+                var insiderChatRole = await e.Guild.GetRoleAsync(cfgjson.InsiderChatRole);
                 await member.GrantRoleAsync(insiderChatRole);
 
                 // Respond
@@ -400,7 +380,7 @@ namespace Cliptok.Events
                 // Get member
                 var member = await e.Guild.GetMemberAsync(e.User.Id);
 
-                var insiderChatRole = await e.Guild.GetRoleAsync(cfgjson.UserRoles.InsiderChat);
+                var insiderChatRole = await e.Guild.GetRoleAsync(cfgjson.InsiderChatRole);
                 await member.RevokeRoleAsync(insiderChatRole);
 
                 await e.Interaction.EditFollowupMessageAsync(e.Message.Id, new DiscordWebhookBuilder().WithContent($"{cfgjson.Emoji.Success} You have been removed from the {insiderChatRole.Mention} role!"));
@@ -418,13 +398,13 @@ namespace Cliptok.Events
             {
                 // Get roles & make mentionable
                 var ctx = Commands.AnnouncementCmds.EditAnnounceCache[e.Interaction.User.Id];
-                DiscordRole role1 = await e.Interaction.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[ctx.role1]);
+                DiscordRole role1 = await e.Interaction.Guild.GetRoleAsync(ctx.role1);
                 await role1.ModifyAsync(mentionable: true);
 
                 DiscordRole role2 = null;
-                if (ctx.role2 is not null)
+                if (ctx.role2 != default)
                 {
-                    role2 = await e.Interaction.Guild.GetRoleAsync(Program.cfgjson.AnnouncementRoles[ctx.role2]);
+                    role2 = await e.Interaction.Guild.GetRoleAsync(ctx.role2);
                     await role2.ModifyAsync(mentionable: true);
                 }
 
