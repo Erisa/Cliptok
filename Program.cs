@@ -232,10 +232,13 @@ namespace Cliptok
                         continue;
                     }
 
-                    if (type.Name == "GlobalCmds")
-                        builder.AddCommands(type);
-                    else
-                        builder.AddCommands(type, cfgjson.ServerID);
+                    if (type.Name == "HelpCmds"
+                    || type.Name == "ReminderCmds"
+                    || type.Name == "PingCmds"
+                    || type.Name == "UserInfoCmds")
+                                builder.AddCommands(type);
+                            else
+                                builder.AddCommands(type, cfgjson.ServerID);
 
                 }
 
