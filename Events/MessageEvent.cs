@@ -138,8 +138,14 @@ namespace Cliptok.Events
                     // remove from cache so the message isn't double-logged if the channel is later deleted
                     if (cachedMessage is not null)
                     {
-                        dbContext.Messages.Remove(cachedMessage);
-                        await dbContext.SaveChangesAsync();
+                        try
+                        {
+                            dbContext.Messages.Remove(cachedMessage);
+                            await dbContext.SaveChangesAsync();
+                        } catch (Exception ex)
+                        {
+                            client.Logger.LogError(Program.CliptokEventID, ex, "Failed to remove cached message from database: {message}", DiscordHelpers.MessageLink(cachedMessage));
+                        }
                     }
                 }
             }
@@ -818,6 +824,12 @@ namespace Cliptok.Events
                 && !wasAutoModBlock
                 && (messageContentOverride is not null && messageContentOverride != "" || attachmentNames.Count > 0))
             {
+                if (Program.cfgjson.DuplicateMessageExcludedChannels.Contains(message.ChannelId)
+                    || (message.Channel.ParentId is not null && Program.cfgjson.DuplicateMessageExcludedChannels.Contains((ulong)message.Channel.ParentId)))
+                {
+                    return false;
+                }
+
                 if (
                     duplicateMessageCache.ContainsKey(message.Author.Id)
                     && duplicateMessageCache[message.Author.Id].Content == messageContentOverride
