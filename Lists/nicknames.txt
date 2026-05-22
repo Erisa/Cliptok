@@ -27,6 +27,7 @@ Coronavirus
 Microsoft Word
 Microsoft Excel
 Microsoft PowerPoint
+Microsoft Teams
 Google Docs
 Google Sheets
 Google Slides
