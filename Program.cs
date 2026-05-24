@@ -219,7 +219,7 @@ namespace Cliptok
                 builder.CommandErrored += ErrorEvents.CommandErrored;
 
                 // Register commands
-                var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands");
+                var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands" && !t.IsNested);
                 foreach (var type in commandClasses)
                 {
                     // config-disabled commands
