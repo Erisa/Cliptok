@@ -2,36 +2,6 @@ namespace Cliptok.Commands
 {
     public class FunCmds
     {
-        [Command("Hug")]
-        [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
-        [AllowedProcessors(typeof(UserCommandProcessor))]
-        public async Task Hug(UserCommandContext ctx, DiscordUser targetUser)
-        {
-            var user = targetUser;
-
-            if (user is not null)
-            {
-                switch (new Random().Next(4))
-                {
-                    case 0:
-                        await ctx.RespondAsync($"*{ctx.User.Mention} snuggles {user.Mention}*");
-                        break;
-
-                    case 1:
-                        await ctx.RespondAsync($"*{ctx.User.Mention} huggles {user.Mention}*");
-                        break;
-
-                    case 2:
-                        await ctx.RespondAsync($"*{ctx.User.Mention} cuddles {user.Mention}*");
-                        break;
-
-                    case 3:
-                        await ctx.RespondAsync($"*{ctx.User.Mention} hugs {user.Mention}*");
-                        break;
-                }
-            }
-        }
-
         [Command("notextcmd")]
         [TextAlias("no", "yes")]
         [Description("Makes Cliptok choose something for you. Outputs either Yes or No.")]

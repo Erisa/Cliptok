@@ -4,40 +4,42 @@ namespace Cliptok.Commands
 {
     public class UtilityCmds
     {
-        [Command("Dump message data")]
-        [SlashCommandTypes(DiscordApplicationCommandType.MessageContextMenu)]
-        [AllowedProcessors(typeof(MessageCommandProcessor))]
-        public async Task DumpMessage(MessageCommandContext ctx, DiscordMessage targetMessage)
+        [Command("grant")]
+        [Description("Grant a user access to the server, bypassing any verification requirements.")]
+        [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
+        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        public async Task Grant(CommandContext ctx, [Parameter("user"), Description("The user to grant server access to.")] DiscordUser user)
         {
-            var rawMsgData = JsonConvert.SerializeObject(targetMessage, Formatting.Indented);
-            await ctx.RespondAsync((await StringHelpers.CodeOrHasteBinAsync(rawMsgData, "json")).Text, ephemeral: true);
-        }
+            DiscordMember member = default;
+            try
+            {
+                member = await ctx.Guild.GetMemberAsync(user.Id);
+            }
+            catch (Exception)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} That user does not appear to be in the server!");
+                return;
+            }
 
-        [Command("Show Avatar")]
-        [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
-        [AllowedProcessors(typeof(UserCommandProcessor))]
-        public async Task ContextAvatar(UserCommandContext ctx, DiscordUser targetUser)
-        {
-            string avatarUrl = await LykosAvatarMethods.UserOrMemberAvatarURL(targetUser, ctx.Guild);
+            if (!DiscordHelpers.AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I don't have permission to grant {member.Mention}! Check the role order.");
+                return;
+            }
 
-            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                .WithColor(new DiscordColor(0xC63B68))
-                .WithTimestamp(DateTime.UtcNow)
-                .WithImageUrl(avatarUrl)
-                .WithAuthor(
-                    $"Avatar for {targetUser.Username} (Click to open in browser)",
-                    avatarUrl
-                );
+            if (member.MemberFlags.Value.HasFlag(DiscordMemberFlags.BypassesVerification))
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {member.Mention} has already been allowed access to the server!");
+                return;
+            }
 
-            await ctx.RespondAsync(null, embed, ephemeral: true);
-        }
+            await member.ModifyAsync(x =>
+            {
+                x.MemberFlags = (DiscordMemberFlags)member.MemberFlags | DiscordMemberFlags.BypassesVerification;
+                x.AuditLogReason = $"grant command used by {DiscordHelpers.UniqueUsername(ctx.User)}";
+            });
 
-        [Command("User Information")]
-        [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
-        [AllowedProcessors(typeof(UserCommandProcessor))]
-        public async Task ContextUserInformation(UserCommandContext ctx, DiscordUser targetUser)
-        {
-            await ctx.RespondAsync(embed: await DiscordHelpers.GenerateUserEmbed(targetUser, ctx.Guild), ephemeral: true);
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {member.Mention} can now access the server!");
         }
 
         [Command("edittextcmd")]
