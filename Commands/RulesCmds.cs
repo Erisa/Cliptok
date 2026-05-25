@@ -4,7 +4,7 @@ namespace Cliptok.Commands
     [Command("rules")]
     [Description("Misc. commands related to server rules")]
     [AllowedProcessors(typeof(SlashCommandProcessor))]
-    internal class RulesSlashCommands
+    internal class RulesCmds
     {
         [Command("all")]
         [Description("Shows all of the community rules.")]
