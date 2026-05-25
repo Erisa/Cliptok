@@ -4,14 +4,6 @@ namespace Cliptok.Commands
 {
     internal class WarningCmds
     {
-        [Command("Show Warnings")]
-        [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
-        [AllowedProcessors(typeof(UserCommandProcessor))]
-        public async Task ContextWarnings(UserCommandContext ctx, DiscordUser targetUser)
-        {
-            await ctx.RespondAsync(embed: await WarningHelpers.GenerateWarningsEmbedAsync(targetUser), ephemeral: true);
-        }
-
         [Command("warn")]
         [Description("Formally warn a user, usually for breaking the server rules.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
