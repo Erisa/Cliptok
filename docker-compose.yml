@@ -59,12 +59,6 @@ services:
     restart: always
     env_file:
      - .exposer.env
-  cloudflared:
-    image: ghcr.io/erisa/cloudflared
-    restart: always
-    command: tunnel --no-autoupdate run
-    environment:
-      - TUNNEL_TOKEN=${CLOUDFLARED_TOKEN}
   watchtower:
     image: ghcr.io/nicholas-fedor/watchtower
     volumes:
