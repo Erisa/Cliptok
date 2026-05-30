@@ -18,10 +18,13 @@ Windows 10
 Windows 11
 Windows 12
 Microsoft
+Microsoft Support
 Apple
+Apple Support
 macOS
 Mac OS X
 Google
+Google Support
 COVID-19
 Coronavirus
 Microsoft Word
