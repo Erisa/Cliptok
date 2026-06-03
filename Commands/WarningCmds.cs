@@ -4,14 +4,6 @@ namespace Cliptok.Commands
 {
     internal class WarningCmds
     {
-        [Command("Show Warnings")]
-        [SlashCommandTypes(DiscordApplicationCommandType.UserContextMenu)]
-        [AllowedProcessors(typeof(UserCommandProcessor))]
-        public async Task ContextWarnings(UserCommandContext ctx, DiscordUser targetUser)
-        {
-            await ctx.RespondAsync(embed: await WarningHelpers.GenerateWarningsEmbedAsync(targetUser), ephemeral: true);
-        }
-
         [Command("warn")]
         [Description("Formally warn a user, usually for breaking the server rules.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
@@ -63,7 +55,7 @@ namespace Cliptok.Commands
                 targetMember = await ctx.Guild.GetMemberAsync(user.Id);
                 if ((await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && ((await GetPermLevelAsync(targetMember)) >= ServerPermLevel.TrialModerator || targetMember.IsBot))
                 {
-                    webhookOut = new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} As a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
+                    webhookOut = new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} As a Junior Moderator you cannot perform moderation actions on other staff members or bots.");
                     await ctx.EditResponseAsync(webhookOut);
                     return;
                 }
@@ -257,7 +249,7 @@ namespace Cliptok.Commands
             }
             else if ((await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!", ephemeral: true);
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Junior Moderator you cannot edit or delete warnings that aren't issued by you or the bot!", ephemeral: true);
             }
             else
             {
@@ -327,7 +319,7 @@ namespace Cliptok.Commands
             }
             else if ((await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && warningObject.ModUserId != ctx.User.Id && warningObject.ModUserId != ctx.Client.CurrentUser.Id)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!", ephemeral: true);
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Junior Moderator you cannot edit or delete warnings that aren't issued by you or the bot!", ephemeral: true);
             }
             else
             {
@@ -382,7 +374,7 @@ namespace Cliptok.Commands
             }
             else if ((await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && warningObject.ModUserId != ctx.User.Id && warningObject.ModUserId != ctx.Client.CurrentUser.Id)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!", ephemeral: true);
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Junior Moderator you cannot edit or delete warnings that aren't issued by you or the bot!", ephemeral: true);
             }
             else
             {
@@ -444,7 +436,7 @@ namespace Cliptok.Commands
             }
             else if ((await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && warningObject.ModUserId != ctx.User.Id && warningObject.ModUserId != ctx.Client.CurrentUser.Id)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!", ephemeral: true);
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Junior Moderator you cannot edit or delete warnings that aren't issued by you or the bot!", ephemeral: true);
             }
             else
             {
@@ -513,7 +505,7 @@ namespace Cliptok.Commands
                 targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
                 if ((await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && ((await GetPermLevelAsync(targetMember)) >= ServerPermLevel.TrialModerator || targetMember.IsBot))
                 {
-                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
+                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Junior Moderator you cannot perform moderation actions on other staff members or bots.");
                     return;
                 }
             }
@@ -588,7 +580,7 @@ namespace Cliptok.Commands
                 targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
                 if ((await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && ((await GetPermLevelAsync(targetMember)) >= ServerPermLevel.TrialModerator || targetMember.IsBot))
                 {
-                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot perform moderation actions on other staff members or bots.");
+                    await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Junior Moderator you cannot perform moderation actions on other staff members or bots.");
                     return;
                 }
             }
@@ -648,7 +640,7 @@ namespace Cliptok.Commands
             }
             else if ((await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Junior Moderator you cannot edit or delete warnings that aren't issued by you or the bot!");
             }
             else
             {
@@ -751,7 +743,7 @@ namespace Cliptok.Commands
             }
             else if ((await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
             {
-                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!");
+                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Junior Moderator you cannot edit or delete warnings that aren't issued by you or the bot!");
             }
             else
             {
@@ -949,7 +941,7 @@ namespace Cliptok.Commands
 
             if ((await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && warning.ModUserId != ctx.User.Id && warning.ModUserId != ctx.Client.CurrentUser.Id)
             {
-                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Trial Moderator you cannot edit or delete warnings that aren't issued by you or the bot!");
+                await msg.ModifyAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Junior Moderator you cannot edit or delete warnings that aren't issued by you or the bot!");
             }
             else
             {

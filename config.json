@@ -219,7 +219,7 @@
   "heartosoftId": 413429915187281940,
   "autoDehoistCharacters": " !\"#$%&'()*+,-./:;<=>?@[\\]^_`'",
   "secondaryAutoDehoistCharacters": "0123456789",
-  "hastebinEndpoint": "https://paste.erisa.ts.net",
+  "hastebinEndpoint": "https://paste.msftcomm.ts.net",
   "hastebinType": "tclip",
   "userRoles": {
     "insiderCanary": 434426594271166474,
@@ -312,7 +312,7 @@
     "canary": 1082394217168523315,
     "dev": 1358210048777654352,
     "beta": 1358210090880209066,
-    "rp": 1358210147683401819,
+    "rp": 1358210147683401819
   },
   "insiderAnnouncementChannel": 1043898319883219004,
   "insiderInfoChannel": 1279201622651572317,
@@ -324,7 +324,7 @@
   "autoWarnMsgAutoDeleteHours": 24,
   "compromisedAccountBanMsgAutoDeleteDays": 3,
   "logLevel": "Debug",
-  "lokiURL": "http://100.79.19.82:3100",
+  "lokiURL": "http://100.88.23.56:3100",
   "lokiServiceName": "cliptok",
   "voiceChannelPurge": true,
   "forumChannelAutoWarnFallbackChannel": 150662382874525696,
@@ -351,7 +351,7 @@
   "enablePersistentDb": true,
   "disableMicrosoftCommands": false,
   "noFun": false,
-  "messageCachePruneDays": 30,
+  "messageCachePruneDays": 90,
   "messageLogExcludedChannels": [
     883400305679663156,
     593381041629298688,
@@ -364,5 +364,8 @@
   },
   "compromisedAccountBanAutoPardonHours": 12,
   "enableModActionReplyAutoWarn":  true,
-  "modActionReplyAutoWarnReason":  "rule 12"
+  "modActionReplyAutoWarnReason":  "rule 12",
+  "duplicateMessageExcludedChannels": [
+    929902761519239208
+  ]
 }

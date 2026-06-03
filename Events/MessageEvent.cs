@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using static Cliptok.Constants.RegexConstants;
 
 namespace Cliptok.Events
@@ -134,6 +133,19 @@ namespace Cliptok.Events
                     if (cachedMessage is not null && !cachedMessage.User.IsBot)
                     {
                         await LogChannelHelper.LogMessageAsync("messages", await DiscordHelpers.GenerateMessageRelay(cachedMessage, "deleted", true, true));
+                    }
+
+                    // remove from cache so the message isn't double-logged if the channel is later deleted
+                    if (cachedMessage is not null)
+                    {
+                        try
+                        {
+                            dbContext.Messages.Remove(cachedMessage);
+                            await dbContext.SaveChangesAsync();
+                        } catch (Exception ex)
+                        {
+                            client.Logger.LogError(Program.CliptokEventID, ex, "Failed to remove cached message from database: {message}", DiscordHelpers.MessageLink(cachedMessage));
+                        }
                     }
                 }
             }
@@ -812,6 +824,12 @@ namespace Cliptok.Events
                 && !wasAutoModBlock
                 && (messageContentOverride is not null && messageContentOverride != "" || attachmentNames.Count > 0))
             {
+                if (Program.cfgjson.DuplicateMessageExcludedChannels.Contains(message.ChannelId)
+                    || (message.Channel.ParentId is not null && Program.cfgjson.DuplicateMessageExcludedChannels.Contains((ulong)message.Channel.ParentId)))
+                {
+                    return false;
+                }
+
                 if (
                     duplicateMessageCache.ContainsKey(message.Author.Id)
                     && duplicateMessageCache[message.Author.Id].Content == messageContentOverride
@@ -843,7 +861,7 @@ namespace Cliptok.Events
                             ? ("Attachments", string.Join("\n", attachmentUrls), false)
                             : default;
 
-                        await DeleteAndWarnAsync(message, "Duplicate message spam", client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
+                        await DeleteAndWarnAsync(message, "Duplicate message spam", client, attachmentsField, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
                         return true;
                     }
                 }
@@ -892,7 +910,7 @@ namespace Cliptok.Events
 
                         match = true;
 
-                        await DeleteAndWarnAsync(message, reason, client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride, useCodeBlock: listItem.Name == "exploits.txt");
+                        await DeleteAndWarnAsync(message, reason, client, new("Match", listItem.Name == "exploits.txt" ? $"`{flaggedWord}`" : flaggedWord, true), wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride, useCodeBlock: listItem.Name == "exploits.txt");
 
                         return true;
                     }
@@ -1129,7 +1147,7 @@ namespace Cliptok.Events
 
                         string responseToSend = (await StringHelpers.CodeOrHasteBinAsync(responseText, "json", 1000, true)).Text;
                         (string name, string value, bool inline) extraField = new("API Response", responseToSend, false);
-                        DeleteAndWarnAsync(message, "Sending phishing URL(s)", client, extraField, wasAutoModBlock, messageContentOverride);
+                        await DeleteAndWarnAsync(message, "Sending phishing URL(s)", client, extraField, wasAutoModBlock, messageContentOverride);
                         return true;
                     }
                 }

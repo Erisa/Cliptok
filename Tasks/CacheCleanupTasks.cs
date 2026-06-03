@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace Cliptok.Tasks
+﻿namespace Cliptok.Tasks
 {
     internal class CacheCleanupTasks
     {

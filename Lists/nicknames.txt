@@ -5,6 +5,11 @@ Tim Cook
 Mark Zuckerberg
 Elon Musk
 Jeff Bezos
+Donald Trump
+Joe Biden
+Barack Obama
+Kamala Harris
+Windows 2000
 Windows XP
 Windows 7
 Windows 8
@@ -13,15 +18,19 @@ Windows 10
 Windows 11
 Windows 12
 Microsoft
+Microsoft Support
 Apple
+Apple Support
 macOS
 Mac OS X
 Google
+Google Support
 COVID-19
 Coronavirus
 Microsoft Word
 Microsoft Excel
 Microsoft PowerPoint
+Microsoft Teams
 Google Docs
 Google Sheets
 Google Slides

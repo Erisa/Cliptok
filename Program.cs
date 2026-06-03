@@ -1,7 +1,6 @@
 using DSharpPlus.Commands.Processors.TextCommands.Parsing;
 using DSharpPlus.Extensions;
 using DSharpPlus.Net.Gateway;
-using Microsoft.EntityFrameworkCore;
 using Serilog.Events;
 using Serilog.Sinks.Grafana.Loki;
 using System.Reflection;
@@ -220,7 +219,7 @@ namespace Cliptok
                 builder.CommandErrored += ErrorEvents.CommandErrored;
 
                 // Register commands
-                var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands");
+                var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands" && !t.IsNested);
                 foreach (var type in commandClasses)
                 {
                     // config-disabled commands
