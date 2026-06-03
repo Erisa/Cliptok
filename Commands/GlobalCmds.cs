@@ -180,6 +180,8 @@ namespace Cliptok.Commands
                         //helpBuilder.WithSubcommands(eligibleCommands.OrderBy(xc => xc.Name));
                     }
                 }
+
+                helpEmbed.WithFooter(text: $"Required Permission Level: {GetRequiredPermissionLevel(cmd)}");
             }
             else
             {
@@ -408,6 +410,20 @@ namespace Cliptok.Commands
             }
 
             return failedChecks;
+        }
+
+        private static string GetRequiredPermissionLevel(Command command)
+        {
+            var botOwnerAttribute = command.Attributes.FirstOrDefault(x => x is IsBotOwnerAttribute) as IsBotOwnerAttribute;
+            if (botOwnerAttribute != default)
+                return "Bot Owner";
+
+            var permLevelAttribute = command.Attributes.FirstOrDefault(x => x is RequireHomeserverPermAttribute) as RequireHomeserverPermAttribute
+                ?? command.Parent?.Attributes.FirstOrDefault(x => x is RequireHomeserverPermAttribute) as RequireHomeserverPermAttribute;
+            if (permLevelAttribute == default)
+                return "Nothing";
+
+            return permLevelAttribute.TargetLvl.ToString() + (permLevelAttribute.OwnerOverride ? " or Bot Owner" : "");
         }
     }
 }
