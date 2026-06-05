@@ -856,12 +856,7 @@ namespace Cliptok.Events
 
                         deletedMessageCache.Add(message.Id);
 
-                        var attachmentUrls = message.Attachments?.Select(a => a.Url).ToList() ?? [];
-                        (string name, string value, bool inline) attachmentsField = attachmentUrls.Count > 0
-                            ? ("Attachments", string.Join("\n", attachmentUrls), false)
-                            : default;
-
-                        await DeleteAndWarnAsync(message, "Duplicate message spam", client, attachmentsField, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
+                        await DeleteAndWarnAsync(message, "Duplicate message spam", client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
                         return true;
                     }
                 }
