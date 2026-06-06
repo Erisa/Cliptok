@@ -13,6 +13,7 @@ namespace Cliptok.Commands
         public async Task AddUserNoteAsync(SlashCommandContext ctx,
             [Parameter("user"), Description("The user to add a note for.")] DiscordUser user,
             [Parameter("note"), Description("The note to add.")] string noteText,
+            [Parameter("expires"), Description("When the note should automatically expire. Default: never")] string expires = default,
             [Parameter("show_on_modmail"), Description("Whether to show the note when the user opens a modmail thread. Default: true")] bool showOnModmail = true,
             [Parameter("show_on_warn"), Description("Whether to show the note when the user is warned. Default: true")] bool showOnWarn = true,
             [Parameter("show_all_mods"), Description("Whether to show this note to all mods, versus just yourself. Default: true")] bool showAllMods = true,
@@ -20,6 +21,22 @@ namespace Cliptok.Commands
             [Parameter("show_on_join_and_leave"), Description("Whether to show this note when the user joins & leaves. Works like joinwatch. Default: false")] bool showOnJoinAndLeave = false)
         {
             await ctx.DeferResponseAsync();
+
+            DateTime? expiresAt;
+            if (expires is null)
+                expiresAt = default;
+            else
+            {
+                try
+                {
+                    expiresAt = HumanDateParser.HumanDateParser.Parse(expires).ToUniversalTime();
+                }
+                catch
+                {
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I couldn't parse the provided expiration time!"));
+                    return;
+                }
+            }
 
             // Assemble new note
             long noteId = Program.redis.StringIncrement("totalWarnings");
@@ -35,7 +52,8 @@ namespace Cliptok.Commands
                 ShowOnJoinAndLeave = showOnJoinAndLeave,
                 NoteId = noteId,
                 Timestamp = DateTime.UtcNow,
-                Type = WarningType.Note
+                Type = WarningType.Note,
+                ExpiresAt = expiresAt,
             };
 
             await Program.redis.HashSetAsync(user.Id.ToString(), note.NoteId, JsonConvert.SerializeObject(note));
