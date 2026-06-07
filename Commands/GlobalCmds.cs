@@ -399,14 +399,6 @@ namespace Cliptok.Commands
                         failedChecks.Add(isBotOwnerAttribute);
                     }
                 }
-
-                if (check is UserRolesPresentAttribute userRolesPresentAttribute)
-                {
-                    if (Program.cfgjson.UserRoles is null)
-                    {
-                        failedChecks.Add(userRolesPresentAttribute);
-                    }
-                }
             }
 
             return failedChecks;
