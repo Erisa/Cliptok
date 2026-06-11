@@ -202,7 +202,10 @@ namespace Cliptok
                 }
             }
 
-            DiscordClientBuilder discordBuilder = DiscordClientBuilder.CreateDefault(token, DiscordIntents.All);
+            // use all intents except for the privileged presence intent
+            // will need updating if more privileged intents are added
+            //  or if presence intent is needed
+            DiscordClientBuilder discordBuilder = DiscordClientBuilder.CreateDefault(token, DiscordIntents.AllUnprivileged | DiscordIntents.MessageContents | DiscordIntents.GuildMembers);
 
             discordBuilder.ConfigureLogging(logging =>
             {
