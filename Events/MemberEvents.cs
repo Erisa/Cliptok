@@ -222,6 +222,7 @@ namespace Cliptok.Events
                 return;
 
             var muteRole = await e.Guild.GetRoleAsync(cfgjson.MutedRole);
+            var tqsMuteRole = await e.Guild.GetRoleAsync(cfgjson.TqsMutedRole);
             var userMute = await redis.HashGetAsync("mutes", e.Member.Id);
 
             // If they're externally unmuted, untrack it?
@@ -229,7 +230,7 @@ namespace Cliptok.Events
             var currentTime = DateTime.UtcNow;
             var joinTime = e.Member.JoinedAt.DateTime;
             var differrence = currentTime.Subtract(joinTime).TotalSeconds;
-            if (differrence > 10 && !userMute.IsNull && !e.Member.Roles.Contains(muteRole))
+            if (differrence > 10 && !userMute.IsNull && !e.Member.Roles.Contains(muteRole) && !e.Member.Roles.Contains(tqsMuteRole))
                 redis.HashDeleteAsync("mutes", e.Member.Id);
 
             // Nickname lock check
