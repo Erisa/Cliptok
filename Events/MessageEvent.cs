@@ -123,21 +123,6 @@ namespace Cliptok.Events
                     await Program.redis.HashDeleteAsync("compromisedAccountBans", ban.Name);
             }
 
-            // If this was a public warning message, remove the message from the warning record to avoid errors later if the warning is edited/deleted
-            if (e.Message.Author.Id == client.CurrentUser.Id && (Constants.RegexConstants.auto_warn_msg_rx.IsMatch(e.Message.Content) || Constants.RegexConstants.warn_msg_rx.IsMatch(e.Message.Content)))
-            {
-                var warnedUserId = Convert.ToUInt64(Constants.RegexConstants.user_rx.Match(e.Message.Content).Groups[1].Value);
-                var userWarnings = await Program.redis.HashGetAllAsync(warnedUserId.ToString());
-                var thisWarning = userWarnings.Select(x => JsonConvert.DeserializeObject<UserWarning>(x.Value))
-                    .FirstOrDefault(x => x.ContextMessageReference?.MessageId == e.Message.Id);
-
-                if (thisWarning != default)
-                {
-                    thisWarning.ContextMessageReference = null;
-                    await Program.redis.HashSetAsync(warnedUserId.ToString(), thisWarning.WarningId, JsonConvert.SerializeObject(thisWarning));
-                }
-            }
-
             if (Program.cfgjson.EnablePersistentDb)
             {
                 using (var dbContext = new CliptokDbContext())
@@ -182,21 +167,6 @@ namespace Cliptok.Events
                 {
                     if (JsonConvert.DeserializeObject<MemberPunishment>(ban.Value).ContextMessageReference.MessageId == message.Id)
                         await Program.redis.HashDeleteAsync("compromisedAccountBans", ban.Name);
-                }
-
-                // If this was a public warning message, remove the message from the warning record to avoid errors later if the warning is edited/deleted
-                if (message.Author.Id == client.CurrentUser.Id && (Constants.RegexConstants.auto_warn_msg_rx.IsMatch(message.Content) || Constants.RegexConstants.warn_msg_rx.IsMatch(message.Content)))
-                {
-                    var warnedUserId = Convert.ToUInt64(Constants.RegexConstants.user_rx.Match(message.Content).Groups[1].Value);
-                    var userWarnings = await Program.redis.HashGetAllAsync(warnedUserId.ToString());
-                    var thisWarning = userWarnings.Select(x => JsonConvert.DeserializeObject<UserWarning>(x.Value))
-                        .FirstOrDefault(x => x.ContextMessageReference?.MessageId == message.Id);
-
-                    if (thisWarning != default)
-                    {
-                        thisWarning.ContextMessageReference = null;
-                        await Program.redis.HashSetAsync(warnedUserId.ToString(), thisWarning.WarningId, JsonConvert.SerializeObject(thisWarning));
-                    }
                 }
             }
 
