@@ -222,7 +222,9 @@ namespace Cliptok.Events
                 return;
 
             var muteRole = await e.Guild.GetRoleAsync(cfgjson.MutedRole);
-            var tqsMuteRole = await e.Guild.GetRoleAsync(cfgjson.TqsMutedRole);
+            DiscordRole tqsMuteRole = default;
+            if (cfgjson.TqsMutedRole != 0)
+                tqsMuteRole = await e.Guild.GetRoleAsync(cfgjson.TqsMutedRole);
             var userMute = await redis.HashGetAsync("mutes", e.Member.Id);
 
             // If they're externally unmuted, untrack it?
