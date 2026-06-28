@@ -772,7 +772,7 @@ namespace Cliptok.Events
                     // Message has no content but 3+ attachments
                     || ((message.Content is null || message.Content == "") && message.Attachments is not null && message.Attachments.Count >= 3)
                 )
-                && (permLevel == ServerPermLevel.Nothing || permLevel == ServerPermLevel.Tier1))
+                && (permLevel <= ServerPermLevel.Tier1))
             {
                 // Message contains 3 or more image urls, and was sent by Tier 0 or Tier 1 member; autowarn for probable scam message
 
@@ -1113,7 +1113,7 @@ namespace Cliptok.Events
 
                     string reason = "Mass emoji";
 
-                    if (permLevel == ServerPermLevel.Nothing && !Program.redis.HashExists("emojiPardoned", message.Author.Id.ToString()))
+                    if (permLevel <= ServerPermLevel.Nothing && !Program.redis.HashExists("emojiPardoned", message.Author.Id.ToString()))
                     {
                         await Program.redis.HashSetAsync("emojiPardoned", member.Id.ToString(), false);
                         string pardonOutput;
