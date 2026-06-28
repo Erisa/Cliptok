@@ -56,8 +56,8 @@ namespace Cliptok.Commands
                           $"Once there, please be sure to provide **plenty of details,** follow the guidelines, ping the <@&{Program.cfgjson.CommunityTechSupportRoleID}> role, and *be patient!*\n\n" +
                           $"Look under the `🔧 Support` category for the appropriate channel for your issue. See <#413274922413195275> for more info.\n\n" +
                           $"**__Need Help With Your Account?__**\n" +
-                          $"We cannot help you with your accounts directly, but to recover a hacked Microsoft account, use [this guide](https://msft.chat/wiki/hacked-accounts).\n" +
-                          $"If you need further assistance, please contact [official Microsoft support](https://support.microsoft.com/en-us/contactus/).\n\n" +
+                          $"We cannot help you with your accounts directly, but to recover a hacked Microsoft account, use [this guide](<https://msft.chat/wiki/hacked-accounts>).\n" +
+                          $"If you need further assistance, please contact [official Microsoft support](<https://support.microsoft.com/en-us/contactus/>).\n\n" +
                           $"-# Please note that this server is not official. We have no control over your accounts.";
             }
 
