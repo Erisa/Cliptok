@@ -129,6 +129,21 @@ namespace Cliptok.Events
                 {
                     var cachedMessage = await dbContext.Messages.Include(m => m.User).Include(m => m.Sticker).FirstOrDefaultAsync(m => m.Id == e.Message.Id);
 
+                    // If this was a public warning message, remove the message from the warning record to avoid errors later if the warning is edited/deleted
+                    if (cachedMessage.User.Id == client.CurrentUser.Id && (Constants.RegexConstants.auto_warn_msg_rx.IsMatch(cachedMessage.Content) || Constants.RegexConstants.warn_msg_rx.IsMatch(cachedMessage.Content)))
+                    {
+                        var warnedUserId = Convert.ToUInt64(Constants.RegexConstants.user_rx.Match(cachedMessage.Content).Groups[1].Value);
+                        var userWarnings = await Program.redis.HashGetAllAsync(warnedUserId.ToString());
+                        var thisWarning = userWarnings.Select(x => JsonConvert.DeserializeObject<UserWarning>(x.Value))
+                            .FirstOrDefault(x => x.ContextMessageReference?.MessageId == cachedMessage.Id);
+
+                        if (thisWarning != default)
+                        {
+                            thisWarning.ContextMessageReference = null;
+                            await Program.redis.HashSetAsync(warnedUserId.ToString(), thisWarning.WarningId, JsonConvert.SerializeObject(thisWarning));
+                        }
+                    }
+
                     // we store bot messages but don't log them right now
                     if (cachedMessage is not null && !cachedMessage.User.IsBot)
                     {
@@ -183,6 +198,25 @@ namespace Cliptok.Events
                 using (var dbContext = new CliptokDbContext())
                 {
                     var cachedMessages = dbContext.Messages.Include(m => m.User).Include(m => m.Sticker).Where(m => messageIds.Contains(m.Id));
+
+                    // If this was a public warning message, remove the message from the warning record to avoid errors later if the warning is edited/deleted
+                    foreach (var cachedMessage in cachedMessages)
+                    {
+                        if (cachedMessage.User.Id == client.CurrentUser.Id && (Constants.RegexConstants.auto_warn_msg_rx.IsMatch(cachedMessage.Content) || Constants.RegexConstants.warn_msg_rx.IsMatch(cachedMessage.Content)))
+                        {
+                            var warnedUserId = Convert.ToUInt64(Constants.RegexConstants.user_rx.Match(cachedMessage.Content).Groups[1].Value);
+                            var userWarnings = await Program.redis.HashGetAllAsync(warnedUserId.ToString());
+                            var thisWarning = userWarnings.Select(x => JsonConvert.DeserializeObject<UserWarning>(x.Value))
+                                .FirstOrDefault(x => x.ContextMessageReference?.MessageId == cachedMessage.Id);
+
+                            if (thisWarning != default)
+                            {
+                                thisWarning.ContextMessageReference = null;
+                                await Program.redis.HashSetAsync(warnedUserId.ToString(), thisWarning.WarningId, JsonConvert.SerializeObject(thisWarning));
+                            }
+                        }
+                    }
+
                     var cachedUsers = dbContext.Users.Where(u => cachedMessages.Select(m => m.User.Id).Contains(u.Id)).ToList();
                     var (dumpMessage, pasteUrl) = await LogChannelHelper.CreateDumpMessageAsync($"{Program.cfgjson.Emoji.Deleted} {e.Messages.Count} messages were deleted from {e.Channel.Mention}, {cachedMessages.ToList().Count} were logged:", cachedMessages.ToList(), e.Channel);
                     var logMsg = await LogChannelHelper.LogMessageAsync("messages", dumpMessage);
