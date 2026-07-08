@@ -1148,12 +1148,12 @@ namespace Cliptok.Events
 
         private static async Task<bool> RunSeizureInducingEmojiFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string msgContentWithEmbedData, bool isAnEdit, bool limitFilters, bool wasAutoModBlock)
         {
-            var animatches = animoji_rx.Matches(message.Content);
-            if (animatches.Count > 0)
+            var emojiMatches = animoji_rx.Matches(message.Content);
+            if (emojiMatches.Count > 0)
             {
-                foreach (Match dirtyid in animatches)
+                foreach (Match emoji in emojiMatches)
                 {
-                    string id = id_rx.Match(dirtyid.ToString()).ToString();
+                    string id = id_rx.Match(emoji.Value).Value;
                     string url = "https://cdn.discordapp.com/emojis/" + id + ".gif";
 
                     if ((await SeizureDetectionHelpers.GetGifPropertiesAsync(url)).IsSeizureInducing)
