@@ -11,9 +11,9 @@
         static int maxAverageFrameDifference = Program.cfgjson.SeizureDetection.MaxAverageFrameDifference; // Flag GIFs where the average difference between all their frames is greater than [value]%
         static List<int> unsafeGifValues = Program.cfgjson.SeizureDetection.UnsafeGifValues; // If GIF has only [key] frames, then the average length of each frame has to be at least [value] ms long
 
-        public static ImageInfo GetGifProperties(string input)
+        public static async Task<ImageInfo> GetGifPropertiesAsync(string input)
         {
-            ImageInfo Gif = GetImageInfo(input);
+            ImageInfo Gif = await GetImageInfoAsync(input);
 
             // The actual check for whether or not the GIF might trigger a seizure
             try
@@ -85,28 +85,25 @@
             return Gif;
         }
 
-        public static ImageInfo GetImageInfo(string url)
+        public static async Task<ImageInfo> GetImageInfoAsync(string url)
         {
             ImageInfo info = new ImageInfo();
 
-            using (Image image = Image.FromStream(GetStreamFromUrl(url)))
+            using (SKCodec image = SKCodec.Create(await GetStreamFromUrlAsync(url)))
             {
-                info.Height = image.Height;
-                info.Width = image.Width;
+                info.Height = image.Info.Height;
+                info.Width = image.Info.Width;
 
-                if (image.RawFormat.Equals(ImageFormat.Gif))
+                if (image.EncodedFormat == SKEncodedImageFormat.Gif)
                 {
-                    if (ImageAnimator.CanAnimate(image))
+                    if (image.FrameCount > 1)
                     {
-                        FrameDimension frameDimension = new FrameDimension(image.FrameDimensionsList[0]);
-
-                        int frameCount = image.GetFrameCount(frameDimension);
+                        int frameCount = image.FrameCount;
                         decimal delay = 0;
                         decimal this_delay = 0;
-                        int index = 0;
                         decimal averageFrameDifference = 0;
                         decimal averageContrast = 0;
-                        List<Bitmap> ExtractedFrames = new List<Bitmap>();
+                        List<SKBitmap> ExtractedFrames = new List<SKBitmap>();
                         List<List<int>> isUniqueList = new List<List<int>>(frameCount);
                         for (int i = 0; i < frameCount; i++)
                         {
@@ -119,22 +116,24 @@
                         {
                             for (int e = 0; e < frameCount; e++)
                             {
-                                image.SelectActiveFrame(frameDimension, e);
-                                ExtractedFrames.Add(new Bitmap(image));
+                                SKBitmap bitmap = new SKBitmap(image.Info);;
+                                image.GetPixels(image.Info, bitmap.GetPixels(), new SKCodecOptions(e));
+                                ExtractedFrames.Add(bitmap);
                             }
                         }
+
+                        SKCodecFrameInfo[] frameInfo = image.FrameInfo;
 
                         //\\ ================ Beginning of compare loop ================ //\\
                         for (int f = 0; f < frameCount; f++)
                         {
-                            this_delay = BitConverter.ToInt32(image.GetPropertyItem(20736).Value, index) * 10;
+                            this_delay = frameInfo[f].Duration;
                             delay += this_delay;
-                            index += 4;
 
                             if (frameCount < maxComparableFrames)
                             {
                                 int p = 0;
-                                foreach (Bitmap bmp1 in ExtractedFrames)
+                                foreach (SKBitmap bmp1 in ExtractedFrames)
                                 {
                                     bool compareFullFrame = false;
                                     if (p == f + 1)
@@ -143,16 +142,16 @@
                                     }
                                     if (p != f && isUniqueList[f].Count == 0)
                                     {
-                                        var comparsionData = Compare(bmp1, ExtractedFrames[f], compareFullFrame);
-                                        if (comparsionData.Item1)
+                                        var comparisonData = Compare(bmp1, ExtractedFrames[f], compareFullFrame);
+                                        if (comparisonData.Item1)
                                         {
                                             isUniqueList[p].Add(f);
 
                                         }
-                                        if (comparsionData.Item2 != -1)
+                                        if (comparisonData.Item2 != -1)
                                         {
-                                            averageFrameDifference += comparsionData.Item2;
-                                            averageContrast += comparsionData.Item3;
+                                            averageFrameDifference += comparisonData.Item2;
+                                            averageContrast += comparisonData.Item3;
                                         }
                                     }
                                     else if (compareFullFrame == true && p != f)
@@ -184,7 +183,7 @@
                             uniqueFrameCount = frameCount;
                         }
                         // Dispose of all those nasty bitmaps
-                        foreach (Bitmap bmp in ExtractedFrames)
+                        foreach (SKBitmap bmp in ExtractedFrames)
                         {
                             bmp.Dispose();
                         }
@@ -199,7 +198,7 @@
                             info.AverageFrameDifference = averageFrameDifference / (frameCount - 1);
                             info.AverageContrast = averageContrast / (frameCount - 1);
                             info.IsAnimated = true;
-                            info.IsLooped = BitConverter.ToInt16(image.GetPropertyItem(20737).Value, 0) != 1;
+                            info.IsLooped = image.RepetitionCount != 0;
                             info.Length = delay;
                             info.FrameRate = frameCount / (info.Length / 1000);
                         }
@@ -213,7 +212,7 @@
                             info.AverageFrameDifference = 0;
                             info.AverageContrast = 0;
                             info.IsAnimated = true;
-                            info.IsLooped = BitConverter.ToInt16(image.GetPropertyItem(20737).Value, 0) != 1;
+                            info.IsLooped = image.RepetitionCount != 0;
                             info.Length = 1000 * frameCount;
                             info.FrameRate = -1;
                         }
@@ -225,7 +224,7 @@
 
         // The almighty comparison mechanism. Takes in two images and checks to see if they're the same. Optionally it will compare the whole image.
         // Returns a bool stating whether or not the images are identical, and a decimal that contains a percentage of how similar the two images are (if compareFullFrame is true)
-        public static (bool, decimal, decimal) Compare(Bitmap bmp1, Bitmap bmp2, bool compareFullFrame)
+        public static (bool, decimal, decimal) Compare(SKBitmap bmp1, SKBitmap bmp2, bool compareFullFrame)
         {
             int pixelCount = bmp1.Width * bmp1.Height; // Total pixels in the frame
             int differingPixels = 0; // Keeps track of how many pixels differ between the two images
@@ -266,20 +265,19 @@
         }
 
         // Gets the average colour of an image
-        private static Color GetAverageColour(Bitmap bmp)
+        private static SKColor GetAverageColour(SKBitmap bmp)
         {
-            Bitmap bmp1px = new Bitmap(1, 1);
-            using (Graphics g = Graphics.FromImage(bmp1px))
+            SKBitmap bmp1px = new SKBitmap(1, 1);
+            using (SKCanvas c = new SKCanvas(bmp1px))
             {
-                g.InterpolationMode = InterpolationMode.HighQualityBilinear;
-                g.DrawImage(bmp, new Rectangle(0, 0, 1, 1));
+                c.DrawBitmap(bmp, new SKRect(0, 0, 1, 1), new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear));
             }
             return bmp1px.GetPixel(0, 0);
         }
 
-        private static double GetLuminance(Color c)
+        private static double GetLuminance(SKColor c)
         {
-            byte[] colourArray = { c.R, c.G, c.B };
+            byte[] colourArray = { c.Red, c.Green, c.Blue };
             double[] luminanceArray = new double[3];
             for (int i = 0; i < 3; i++)
             {
@@ -291,7 +289,7 @@
             return luminanceArray[0] * 0.2126 + luminanceArray[1] * 0.7152 + luminanceArray[2] * 0.0722;
         }
 
-        private static double GetContrast(Color c1, Color c2)
+        private static double GetContrast(SKColor c1, SKColor c2)
         {
             var lum1 = GetLuminance(c1);
             var lum2 = GetLuminance(c2);
@@ -302,12 +300,11 @@
         }
 
         // Nothing fancy, just gets the GIF.
-        private static Stream GetStreamFromUrl(string url)
+        private static async Task<Stream> GetStreamFromUrlAsync(string url)
         {
             byte[] imageData = null;
 
-            using (var wc = new System.Net.WebClient())
-                imageData = wc.DownloadData(url);
+            imageData = await Program.httpClient.GetByteArrayAsync(url);
 
             Console.WriteLine("Downloaded GIF");
             return new MemoryStream(imageData);

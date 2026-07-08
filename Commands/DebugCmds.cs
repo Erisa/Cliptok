@@ -15,7 +15,18 @@ namespace Cliptok.Commands
             [Description("Debug GIF properties.")]
             public async Task GifDebug(CommandContext ctx, string gifToCheck)
             {
-                SeizureDetectionHelpers.ImageInfo Gif = SeizureDetectionHelpers.GetGifProperties(gifToCheck);
+                string gifUrl;
+                var emojiMatches = Constants.RegexConstants.animoji_rx.Matches(gifToCheck);
+                if (emojiMatches.Count > 0)
+                {
+                    gifUrl = "https://cdn.discordapp.com/emojis/" + Constants.RegexConstants.id_rx.Match(emojiMatches.First().Value).Value + ".gif";
+                }
+                else
+                {
+                    gifUrl = gifToCheck;
+                }
+
+                SeizureDetectionHelpers.ImageInfo Gif = await SeizureDetectionHelpers.GetGifPropertiesAsync(gifUrl);
                 string strOut = "**GIF information**\n";
                 strOut += $"----------\nFrame count: **{Gif.FrameCount}**\n";
                 strOut += $"Unique frame count: **{Gif.UniqueFrameCount}**\n";

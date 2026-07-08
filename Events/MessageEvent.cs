@@ -1156,7 +1156,7 @@ namespace Cliptok.Events
                     string id = id_rx.Match(dirtyid.ToString()).ToString();
                     string url = "https://cdn.discordapp.com/emojis/" + id + ".gif";
 
-                    if (SeizureDetectionHelpers.GetGifProperties(url).IsSeizureInducing)
+                    if ((await SeizureDetectionHelpers.GetGifPropertiesAsync(url)).IsSeizureInducing)
                     {
                         if (wasAutoModBlock)
                         {
