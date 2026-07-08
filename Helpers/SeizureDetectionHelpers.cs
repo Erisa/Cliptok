@@ -89,7 +89,7 @@
         {
             ImageInfo info = new ImageInfo();
 
-            using (SKCodec image = SKCodec.Create(await GetStreamFromUrlAsync(url)))
+            using (SKCodec image = SKCodec.Create(new MemoryStream(await Program.httpClient.GetByteArrayAsync(url))))
             {
                 info.Height = image.Info.Height;
                 info.Width = image.Info.Width;
@@ -297,17 +297,6 @@
             var darkest = Math.Min(lum1, lum2);
             return (brightest + 0.05)
                  / (darkest + 0.05);
-        }
-
-        // Nothing fancy, just gets the GIF.
-        private static async Task<Stream> GetStreamFromUrlAsync(string url)
-        {
-            byte[] imageData = null;
-
-            imageData = await Program.httpClient.GetByteArrayAsync(url);
-
-            Console.WriteLine("Downloaded GIF");
-            return new MemoryStream(imageData);
         }
 
         // Definition for a loaded GIF
