@@ -62,26 +62,18 @@
                 Gif.IsSeizureInducing = false;
             }
 
-            Console.WriteLine($"----------\nGIF: {input}");
-            Console.WriteLine($"Frame count: {Gif.FrameCount}");
-            Console.WriteLine($"Unique frame count: {Gif.UniqueFrameCount}");
-            Console.WriteLine($"Average frame difference: {Math.Round(Gif.AverageFrameDifference, 2)}");
-            Console.WriteLine($"Average frame contrast: {Math.Round(Gif.AverageContrast, 2)}");
-            Console.WriteLine($"Length: {Gif.Length}ms");
-            Console.WriteLine($"Frame duration: {Math.Round(Gif.Duration, 2)}ms");
-            Console.WriteLine($"Framerate: {Math.Round(Gif.FrameRate, 2)}fps");
-            Console.Write($"Seizure-inducing: ");
-            if (Gif.UniqueFrameCount != Gif.FrameCount && Gif.IsSeizureInducing)
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-            else if (Gif.UniqueFrameCount != Gif.FrameCount)
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
-            else if (Gif.IsSeizureInducing)
-                Console.ForegroundColor = ConsoleColor.Red;
-            else
-                Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write($"{Gif.IsSeizureInducing}");
-            Console.ResetColor();
-            Console.Write(".\n----------\n\n");
+            Program.discord.Logger.LogDebug("GIF: {gif}\n" +
+                    "Frame count: {frameCount}\n" +
+                    "Unique frame count: {uniqueFrameCount}\n" +
+                    "Average frame difference: {averageFrameDifference}\n" +
+                    "Average frame contrast: {averageContrast}\n" +
+                    "Length: {length}ms\n" +
+                    "Frame duration: {duration}ms\n" +
+                    "Framerate: {frameRate}fps\n" +
+                    "Seizure-inducing: {isSeizureInducing}.\n",
+                input, Gif.FrameCount, Gif.UniqueFrameCount, Math.Round(Gif.AverageFrameDifference, 2),
+                Math.Round(Gif.AverageContrast, 2), Gif.Length, Math.Round(Gif.Duration, 2), Math.Round(Gif.FrameRate, 2), Gif.IsSeizureInducing);
+            
             return Gif;
         }
 
@@ -238,7 +230,6 @@
                     if (bmp1.GetPixel(x, y) != bmp2.GetPixel(x, y))
                     {
                         differingPixels++;
-                        //Console.WriteLine($"[NOTE] Pixel {x},{y} in bitmap 1 did not match pixel {x},{y} in bitmap 2");
                         if (differingPixels > maxDifferingPixels)
                         {
                             if (!compareFullFrame)
