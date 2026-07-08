@@ -13,6 +13,12 @@ namespace Cliptok.Commands
             [Description("Debug GIF properties.")]
             public async Task GifDebug(CommandContext ctx, string gifToCheck)
             {
+                if (Program.cfgjson.SeizureDetection is null)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Seizure detection is not configured! Please check `seizureDetection` in config.json.");
+                    return;
+                }
+
                 string gifUrl;
                 var emojiMatches = Constants.RegexConstants.animoji_rx.Matches(gifToCheck);
                 if (emojiMatches.Count > 0)

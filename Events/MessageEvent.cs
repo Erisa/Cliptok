@@ -1214,6 +1214,9 @@ namespace Cliptok.Events
 
         private static async Task<bool> RunSeizureInducingEmojiFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string msgContentWithEmbedData, bool isAnEdit, bool limitFilters, bool wasAutoModBlock)
         {
+            if (Program.cfgjson.SeizureDetection is null)
+                return false;
+
             var emojiMatches = animoji_rx.Matches(message.Content);
             if (emojiMatches.Count > 0)
             {
