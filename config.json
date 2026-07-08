@@ -15,20 +15,6 @@
   "communityTechSupportRoleID": 787033266225938472,
   "modmailUserId": 459322015044730903,
   "supportRatelimitMinutes": 15,
-  "announcementRoles": {
-    "canary": 434426594271166474,
-    "dev": 1082364328474329179,
-    "beta": 643712828217360394,
-    "rp": 288729239921098752,
-    "patch": 445773142233710594
-  },
-  "announcementRolesFriendlyNames": {
-    "canary": "Windows 11 Insiders (Canary)",
-    "dev": "Windows 11 Insiders (Dev)",
-    "beta": "Windows 11 Insiders (Beta)",
-    "rp": "Windows 11 Insiders (Release Preview)",
-    "patch": "Patch Tuesday"
-  },
   "appealLink": "https://appeal.msft.chat",
   "inviteExclusion": [
     "microsoft",
@@ -219,17 +205,17 @@
   "heartosoftId": 413429915187281940,
   "autoDehoistCharacters": " !\"#$%&'()*+,-./:;<=>?@[\\]^_`'",
   "secondaryAutoDehoistCharacters": "0123456789",
-  "hastebinEndpoint": "https://paste.erisa.ts.net",
+  "hastebinEndpoint": "https://paste.msftcomm.ts.net",
   "hastebinType": "tclip",
-  "userRoles": {
-    "insiderCanary": 434426594271166474,
-    "insiderDev": 1082364328474329179,
-    "insiderBeta": 643712828217360394,
-    "insiderRP": 288729239921098752,
-    "insiderChat": 1323636793668800547,
-    "patchTuesday": 445773142233710594,
-    "giveaways": 1169336992455200820
-  },
+  "insiderRoles": [
+    434426594271166474,
+    1082364328474329179,
+    643712828217360394,
+    288729239921098752,
+    445773142233710594
+  ],
+  "insiderChatRole": 1323636793668800547,
+  "giveawaysRole": 1169336992455200820,
   "modmailCategory": 536572162450915340,
   "lineLimit": 30,
   "increasedLineLimit": 1000,
@@ -312,7 +298,7 @@
     "canary": 1082394217168523315,
     "dev": 1358210048777654352,
     "beta": 1358210090880209066,
-    "rp": 1358210147683401819,
+    "rp": 1358210147683401819
   },
   "insiderAnnouncementChannel": 1043898319883219004,
   "insiderInfoChannel": 1279201622651572317,
@@ -324,7 +310,7 @@
   "autoWarnMsgAutoDeleteHours": 24,
   "compromisedAccountBanMsgAutoDeleteDays": 3,
   "logLevel": "Debug",
-  "lokiURL": "http://100.79.19.82:3100",
+  "lokiURL": "http://100.88.23.56:3100",
   "lokiServiceName": "cliptok",
   "voiceChannelPurge": true,
   "forumChannelAutoWarnFallbackChannel": 150662382874525696,
@@ -364,5 +350,8 @@
   },
   "compromisedAccountBanAutoPardonHours": 12,
   "enableModActionReplyAutoWarn":  true,
-  "modActionReplyAutoWarnReason":  "rule 12"
+  "modActionReplyAutoWarnReason":  "rule 12",
+  "duplicateMessageExcludedChannels": [
+    929902761519239208
+  ]
 }

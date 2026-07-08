@@ -129,6 +129,21 @@ namespace Cliptok.Events
                 {
                     var cachedMessage = await dbContext.Messages.Include(m => m.User).Include(m => m.Sticker).FirstOrDefaultAsync(m => m.Id == e.Message.Id);
 
+                    // If this was a public warning message, remove the message from the warning record to avoid errors later if the warning is edited/deleted
+                    if (cachedMessage.User.Id == client.CurrentUser.Id && (Constants.RegexConstants.auto_warn_msg_rx.IsMatch(cachedMessage.Content) || Constants.RegexConstants.warn_msg_rx.IsMatch(cachedMessage.Content)))
+                    {
+                        var warnedUserId = Convert.ToUInt64(Constants.RegexConstants.user_rx.Match(cachedMessage.Content).Groups[1].Value);
+                        var userWarnings = await Program.redis.HashGetAllAsync(warnedUserId.ToString());
+                        var thisWarning = userWarnings.Select(x => JsonConvert.DeserializeObject<UserWarning>(x.Value))
+                            .FirstOrDefault(x => x.ContextMessageReference?.MessageId == cachedMessage.Id);
+
+                        if (thisWarning != default)
+                        {
+                            thisWarning.ContextMessageReference = null;
+                            await Program.redis.HashSetAsync(warnedUserId.ToString(), thisWarning.WarningId, JsonConvert.SerializeObject(thisWarning));
+                        }
+                    }
+
                     // we store bot messages but don't log them right now
                     if (cachedMessage is not null && !cachedMessage.User.IsBot)
                     {
@@ -138,8 +153,14 @@ namespace Cliptok.Events
                     // remove from cache so the message isn't double-logged if the channel is later deleted
                     if (cachedMessage is not null)
                     {
-                        dbContext.Messages.Remove(cachedMessage);
-                        await dbContext.SaveChangesAsync();
+                        try
+                        {
+                            dbContext.Messages.Remove(cachedMessage);
+                            await dbContext.SaveChangesAsync();
+                        } catch (Exception ex)
+                        {
+                            client.Logger.LogError(Program.CliptokEventID, ex, "Failed to remove cached message from database: {message}", DiscordHelpers.MessageLink(cachedMessage));
+                        }
                     }
                 }
             }
@@ -177,6 +198,25 @@ namespace Cliptok.Events
                 using (var dbContext = new CliptokDbContext())
                 {
                     var cachedMessages = dbContext.Messages.Include(m => m.User).Include(m => m.Sticker).Where(m => messageIds.Contains(m.Id));
+
+                    // If this was a public warning message, remove the message from the warning record to avoid errors later if the warning is edited/deleted
+                    foreach (var cachedMessage in cachedMessages)
+                    {
+                        if (cachedMessage.User.Id == client.CurrentUser.Id && (Constants.RegexConstants.auto_warn_msg_rx.IsMatch(cachedMessage.Content) || Constants.RegexConstants.warn_msg_rx.IsMatch(cachedMessage.Content)))
+                        {
+                            var warnedUserId = Convert.ToUInt64(Constants.RegexConstants.user_rx.Match(cachedMessage.Content).Groups[1].Value);
+                            var userWarnings = await Program.redis.HashGetAllAsync(warnedUserId.ToString());
+                            var thisWarning = userWarnings.Select(x => JsonConvert.DeserializeObject<UserWarning>(x.Value))
+                                .FirstOrDefault(x => x.ContextMessageReference?.MessageId == cachedMessage.Id);
+
+                            if (thisWarning != default)
+                            {
+                                thisWarning.ContextMessageReference = null;
+                                await Program.redis.HashSetAsync(warnedUserId.ToString(), thisWarning.WarningId, JsonConvert.SerializeObject(thisWarning));
+                            }
+                        }
+                    }
+
                     var cachedUsers = dbContext.Users.Where(u => cachedMessages.Select(m => m.User.Id).Contains(u.Id)).ToList();
                     var (dumpMessage, pasteUrl) = await LogChannelHelper.CreateDumpMessageAsync($"{Program.cfgjson.Emoji.Deleted} {e.Messages.Count} messages were deleted from {e.Channel.Mention}, {cachedMessages.ToList().Count} were logged:", cachedMessages.ToList(), e.Channel);
                     var logMsg = await LogChannelHelper.LogMessageAsync("messages", dumpMessage);
@@ -768,7 +808,7 @@ namespace Cliptok.Events
                     // Message has no content but 3+ attachments
                     || ((message.Content is null || message.Content == "") && message.Attachments is not null && message.Attachments.Count >= 3)
                 )
-                && (permLevel == ServerPermLevel.Nothing || permLevel == ServerPermLevel.Tier1))
+                && (permLevel <= ServerPermLevel.Tier1))
             {
                 // Message contains 3 or more image urls, and was sent by Tier 0 or Tier 1 member; autowarn for probable scam message
 
@@ -777,9 +817,34 @@ namespace Cliptok.Events
                 else
                     Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered scam image URL filter", message.Id, channel.Id, message.Author.Id);
 
-                await DeleteAndWarnAsync(message, "Attempted scam message", client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
+                await DiscordHelpers.ThreadChannelAwareDeleteMessageAsync(message);
 
-                return true;
+                string reason = "Possible scam message";
+
+                if (!Program.redis.SetContains("scamMessagePardoned", message.Author.Id.ToString()))
+                {
+                    await Program.redis.SetAddAsync("scamMessagePardoned", message.Author.Id.ToString());
+                    string output = $"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, your message was deleted because it matched patterns of common scam messages." +
+                            $"\nWhen sending multiple images, please either send them separately or include some text in your message to avoid triggering filters.";
+                    DiscordMessage msg = await channel.SendMessageAsync(output);
+                    await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, DiscordHelpers.MessageLink(msg), messageContentOverride: messageContentOverride);
+                    await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, DiscordHelpers.MessageLink(msg), messageContentOverride: messageContentOverride);
+                    return true;
+                }
+                else
+                {
+                    string output = $"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**\n"
+                        + $"When sending multiple images, please either send them separately or include some text in your message to avoid triggering filters.";
+                    DiscordMessageBuilder messageBuilder = new();
+                    messageBuilder.WithContent(output);
+                    DiscordMessage msg = await channel.SendMessageAsync(output);
+
+                    await InvestigationsHelpers.SendInfringingMessaageAsync("mod", message, reason, null, messageContentOverride: messageContentOverride);
+                    var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
+                    await InvestigationsHelpers.SendInfringingMessaageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: messageContentOverride);
+
+                    return true;
+                }
             }
             return false;
         }
@@ -820,6 +885,12 @@ namespace Cliptok.Events
                 && !wasAutoModBlock
                 && (messageContentOverride is not null && messageContentOverride != "" || attachmentNames.Count > 0))
             {
+                if (Program.cfgjson.DuplicateMessageExcludedChannels.Contains(message.ChannelId)
+                    || (message.Channel.ParentId is not null && Program.cfgjson.DuplicateMessageExcludedChannels.Contains((ulong)message.Channel.ParentId)))
+                {
+                    return false;
+                }
+
                 if (
                     duplicateMessageCache.ContainsKey(message.Author.Id)
                     && duplicateMessageCache[message.Author.Id].Content == messageContentOverride
@@ -846,12 +917,7 @@ namespace Cliptok.Events
 
                         deletedMessageCache.Add(message.Id);
 
-                        var attachmentUrls = message.Attachments?.Select(a => a.Url).ToList() ?? [];
-                        (string name, string value, bool inline) attachmentsField = attachmentUrls.Count > 0
-                            ? ("Attachments", string.Join("\n", attachmentUrls), false)
-                            : default;
-
-                        await DeleteAndWarnAsync(message, "Duplicate message spam", client, attachmentsField, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
+                        await DeleteAndWarnAsync(message, "Duplicate message spam", client, wasAutoModBlock: wasAutoModBlock, messageContentOverride: messageContentOverride);
                         return true;
                     }
                 }
@@ -1083,7 +1149,7 @@ namespace Cliptok.Events
 
                     string reason = "Mass emoji";
 
-                    if (permLevel == ServerPermLevel.Nothing && !Program.redis.HashExists("emojiPardoned", message.Author.Id.ToString()))
+                    if (permLevel <= ServerPermLevel.Nothing && !Program.redis.HashExists("emojiPardoned", message.Author.Id.ToString()))
                     {
                         await Program.redis.HashSetAsync("emojiPardoned", member.Id.ToString(), false);
                         string pardonOutput;

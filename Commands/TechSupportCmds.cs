@@ -42,37 +42,36 @@ namespace Cliptok.Commands
         public async Task AskCmd(TextCommandContext ctx, [Description("Optional, a user to ping with the information")] DiscordUser user = default)
         {
             await ctx.Message.DeleteAsync();
-            DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
-                .WithColor(13920845);
+            string message;
             if (ctx.Channel.Id == Program.cfgjson.TechSupportChannel || ctx.Channel.ParentId == Program.cfgjson.SupportForumId)
             {
-                embed.Title = "**__Need help?__**";
-                embed.Description = $"You are in the right place! Please state your question with *plenty of detail* and mention the <@&{Program.cfgjson.CommunityTechSupportRoleID}> role and someone may be able to help you.\n\n" +
-                                   $"Details includes error codes and other specific information.";
+                message = $"**__Need help{(user == default ? "" : $", {user.Mention}")}?__**\n" +
+                          $"You are in the right place! Please state your question with *plenty of detail* and mention the <@&{Program.cfgjson.CommunityTechSupportRoleID}> role and someone may be able to help you.\n\n" +
+                          $"Details includes error codes and other specific information.";
             }
             else
             {
-                embed.Title = "**__Need Help Or Have a Problem?__**";
-                embed.Description = $"You're probably looking for <#{Program.cfgjson.TechSupportChannel}> or <#{Program.cfgjson.SupportForumId}>!\n\n" +
-                                   $"Once there, please be sure to provide **plenty of details**, ping the <@&{Program.cfgjson.CommunityTechSupportRoleID}> role, and *be patient!*\n\n" +
-                                   $"Look under the `🔧 Support` category for the appropriate channel for your issue. See <#413274922413195275> for more info.";
+                message = $"**__Need Help Or Have a Problem{(user == default ? "" : $", {user.Mention}")}?__**\n" +
+                          $"You're probably looking for <#{Program.cfgjson.TechSupportChannel}> or <#{Program.cfgjson.SupportForumId}>!\n\n" +
+                          $"Once there, please be sure to provide **plenty of details,** follow the guidelines, ping the <@&{Program.cfgjson.CommunityTechSupportRoleID}> role, and *be patient!*\n\n" +
+                          $"Look under the `🔧 Support` category for the appropriate channel for your issue. See <#413274922413195275> for more info.\n\n" +
+                          $"**__Need Help With Your Account?__**\n" +
+                          $"We cannot help you with your accounts directly, but to recover a hacked Microsoft account, use [this guide](<https://msft.chat/wiki/hacked-accounts>).\n" +
+                          $"If you need further assistance, please contact [official Microsoft support](<https://support.microsoft.com/en-us/contactus/>).\n\n" +
+                          $"-# Please note that this server is not official. We have no control over your accounts.";
             }
 
-            if (user != default)
-            {
-                await ctx.Channel.SendMessageAsync(user.Mention, embed);
-            }
-            else if (ctx.Message.ReferencedMessage is not null)
+            if (ctx.Message.ReferencedMessage is not null)
             {
                 var messageBuild = new DiscordMessageBuilder()
-                    .AddEmbed(embed)
+                    .WithContent(message)
                     .WithReply(ctx.Message.ReferencedMessage.Id, mention: true);
 
                 await ctx.Channel.SendMessageAsync(messageBuild);
             }
             else
             {
-                await ctx.Channel.SendMessageAsync(embed);
+                await ctx.Channel.SendMessageAsync(message);
             }
         }
 
@@ -148,7 +147,11 @@ namespace Cliptok.Commands
                 tags.Add(solvedTagId);
                 try
                 {
-                    await channel.ModifyAsync(t => t.AppliedTags = tags);
+                    await channel.ModifyAsync(t =>
+                    {
+                        t.AppliedTags = tags;
+                        t.AuditLogReason = $"/solved command used by {ctx.User.Username}";
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -162,7 +165,11 @@ namespace Cliptok.Commands
 
             try
             {
-                await channel.ModifyAsync(t => t.IsArchived = true);
+                await channel.ModifyAsync(t =>
+                {
+                    t.IsArchived = true;
+                    t.AuditLogReason = $"/solved command used by {ctx.User.Username}";
+                });
             }
             catch (Exception ex)
             {

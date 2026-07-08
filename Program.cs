@@ -202,7 +202,10 @@ namespace Cliptok
                 }
             }
 
-            DiscordClientBuilder discordBuilder = DiscordClientBuilder.CreateDefault(token, DiscordIntents.All);
+            // use all intents except for the privileged presence intent
+            // will need updating if more privileged intents are added
+            //  or if presence intent is needed
+            DiscordClientBuilder discordBuilder = DiscordClientBuilder.CreateDefault(token, DiscordIntents.AllUnprivileged | DiscordIntents.MessageContents | DiscordIntents.GuildMembers);
 
             discordBuilder.ConfigureLogging(logging =>
             {
@@ -219,7 +222,7 @@ namespace Cliptok
                 builder.CommandErrored += ErrorEvents.CommandErrored;
 
                 // Register commands
-                var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands");
+                var commandClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsClass && t.Namespace == "Cliptok.Commands" && !t.IsNested);
                 foreach (var type in commandClasses)
                 {
                     // config-disabled commands
@@ -243,7 +246,6 @@ namespace Cliptok
                 builder.AddCheck<HomeServerCheck>();
                 builder.AddCheck<RequireHomeserverPermCheck>();
                 builder.AddCheck<IsBotOwnerCheck>();
-                builder.AddCheck<UserRolesPresentCheck>();
 
                 // Set custom prefixes from config.json
                 TextCommandProcessor textCommandProcessor = new(new TextCommandConfiguration
