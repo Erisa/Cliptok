@@ -130,7 +130,7 @@ namespace Cliptok.Events
                     var cachedMessage = await dbContext.Messages.Include(m => m.User).Include(m => m.Sticker).FirstOrDefaultAsync(m => m.Id == e.Message.Id);
 
                     // If this was a public warning message, remove the message from the warning record to avoid errors later if the warning is edited/deleted
-                    if (cachedMessage.User.Id == client.CurrentUser.Id && (Constants.RegexConstants.auto_warn_msg_rx.IsMatch(cachedMessage.Content) || Constants.RegexConstants.warn_msg_rx.IsMatch(cachedMessage.Content)))
+                    if (cachedMessage is not null && cachedMessage.User.Id == client.CurrentUser.Id && (Constants.RegexConstants.auto_warn_msg_rx.IsMatch(cachedMessage.Content) || Constants.RegexConstants.warn_msg_rx.IsMatch(cachedMessage.Content)))
                     {
                         var warnedUserId = Convert.ToUInt64(Constants.RegexConstants.user_rx.Match(cachedMessage.Content).Groups[1].Value);
                         var userWarnings = await Program.redis.HashGetAllAsync(warnedUserId.ToString());
