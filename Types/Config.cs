@@ -315,6 +315,9 @@
 
         [JsonProperty("duplicateMessageExcludedChannels")]
         public List<ulong> DuplicateMessageExcludedChannels {get; set; } = new();
+
+        [JsonProperty("seizureDetection")]
+        public SeizureDetectionConfig SeizureDetection { get; private set; }
     }
 
     public class AutoModRuleConfig
@@ -495,4 +498,30 @@
         public ulong Error { get; private set; } = 0;
     }
 
+    public class SeizureDetectionConfig
+    {
+        [JsonProperty("comparisonAccuracy")]
+        public int ComparisonAccuracy { get; private set; }
+
+        [JsonProperty("maxDifferingPixels")]
+        public int MaxDifferingPixels { get; private set; }
+
+        [JsonProperty("maxComparableFrames")]
+        public int MaxComparableFrames { get; private set; }
+
+        [JsonProperty("harmlessAverageFrameDifference")]
+        public int HarmlessAverageFrameDifference { get; private set; }
+
+        [JsonProperty("safeAverageFrameDifference")]
+        public int SafeAverageFrameDifference { get; private set; }
+
+        [JsonProperty("penaltyAverageFrameDifference")]
+        public int PenaltyAverageFrameDifference { get; private set; }
+
+        [JsonProperty("maxAverageFrameDifference")]
+        public int MaxAverageFrameDifference { get; private set; }
+
+        [JsonProperty("unsafeGifValues")]
+        public List<int> UnsafeGifValues { get; private set; }
+    }
 }

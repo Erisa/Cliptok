@@ -353,5 +353,27 @@
   "modActionReplyAutoWarnReason":  "rule 12",
   "duplicateMessageExcludedChannels": [
     929902761519239208
-  ]
+  ],
+  "seizureDetection": {
+    "comparisonAccuracy": 10,
+    "maxDifferingPixels": 2,
+    "maxComparableFrames": 300,
+    "harmlessAverageFrameDifference": 5,
+    "safeAverageFrameDifference": 20,
+    "penaltyAverageFrameDifference": 50,
+    "maxAverageFrameDifference": 95,
+    "unsafeGifValues": [
+      0,
+      0,
+      60,
+      40,
+      30,
+      30,
+      30,
+      25,
+      23,
+      20,
+      18
+    ]
+  }
 }

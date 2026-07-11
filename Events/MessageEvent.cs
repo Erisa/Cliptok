@@ -329,6 +329,8 @@ namespace Cliptok.Events
 
                     if (await RunPhishingApiFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
 
+                    if (await RunSeizureInducingEmojiFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
+
                     if (await RunEveryoneHerePingFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
 
                     if (await RunMassMentionsWarnFilterAsync(client, message, channel, member, permLevel, msgContentWithEmbedData, isAnEdit, limitFilters, wasAutoModBlock)) return;
@@ -1202,6 +1204,39 @@ namespace Cliptok.Events
                         string responseToSend = (await StringHelpers.CodeOrHasteBinAsync(responseText, "json", 1000, true)).Text;
                         (string name, string value, bool inline) extraField = new("API Response", responseToSend, false);
                         await DeleteAndWarnAsync(message, "Sending phishing URL(s)", client, extraField, wasAutoModBlock, messageContentOverride);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static async Task<bool> RunSeizureInducingEmojiFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string msgContentWithEmbedData, bool isAnEdit, bool limitFilters, bool wasAutoModBlock)
+        {
+            if (Program.cfgjson.SeizureDetection is null)
+                return false;
+
+            var emojiMatches = animoji_rx.Matches(message.Content);
+            if (emojiMatches.Count > 0)
+            {
+                foreach (Match emoji in emojiMatches)
+                {
+                    string id = id_rx.Match(emoji.Value).Value;
+                    string url = "https://cdn.discordapp.com/emojis/" + id + ".gif";
+
+                    if ((await SeizureDetectionHelpers.GetGifPropertiesAsync(url)).IsSeizureInducing)
+                    {
+                        if (wasAutoModBlock)
+                        {
+                            Program.discord.Logger.LogDebug("AutoMod-blocked message in {channelId} by user {userId} triggered seizure-inducing emoji filter", channel.Id, message.Author.Id);
+                        }
+                        else
+                        {
+                            Program.discord.Logger.LogDebug("Message {messageId} in {channelId} by user {userId} triggered seizure-inducing emoji filter", message.Id, channel.Id, message.Author.Id);
+                        }
+
+                        await DeleteAndWarnAsync(message, "Sent a seizure-inducing emoji", client, wasAutoModBlock: wasAutoModBlock);
                         return true;
                     }
                 }
