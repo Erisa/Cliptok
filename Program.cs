@@ -1,6 +1,5 @@
 using DSharpPlus.Commands.Processors.TextCommands.Parsing;
 using DSharpPlus.Extensions;
-using DSharpPlus.Net.Gateway;
 using Serilog.Events;
 using Serilog.Sinks.Grafana.Loki;
 using System.Reflection;
@@ -14,30 +13,6 @@ namespace Cliptok
 
         [JsonProperty("key")]
         public string Key { get; set; }
-    }
-
-    class GatewayController : IGatewayController
-    {
-        public async Task HeartbeatedAsync(IGatewayClient client)
-        {
-            HeartbeatEvent.OnHeartbeat(client);
-        }
-
-        public async Task ZombiedAsync(IGatewayClient client)
-        {
-            Program.discord.Logger.LogCritical("The gateway connection has zombied, and the bot is being restarted to reconnect reliably.");
-            Environment.Exit(1);
-        }
-
-        public async Task ReconnectRequestedAsync(IGatewayClient _) { }
-        public async Task ReconnectFailedAsync(IGatewayClient _)
-        {
-            Program.discord.Logger.LogCritical("The gateway connection has irrecoverably failed, and the bot is being restarted to reconnect reliably.");
-            Environment.Exit(1);
-        }
-        public async Task SessionInvalidatedAsync(IGatewayClient _) { }
-        public async Task ResumeAttemptedAsync(IGatewayClient _) { }
-
     }
 
     class Program
@@ -212,11 +187,6 @@ namespace Cliptok
                 logging.AddSerilog();
             });
 
-            discordBuilder.ConfigureServices(services =>
-            {
-                services.Replace<IGatewayController, GatewayController>();
-            });
-
             discordBuilder.UseCommands((_, builder) =>
             {
                 builder.CommandErrored += ErrorEvents.CommandErrored;
@@ -312,6 +282,7 @@ namespace Cliptok
                 {
                     List<Task<bool>> taskList =
                     [
+                        Tasks.HeartbeatTasks.HeartbeatAsync(),
                         Tasks.PunishmentTasks.CheckMutesAsync(),
                         Tasks.PunishmentTasks.CheckBansAsync(),
                         Tasks.PunishmentTasks.CleanUpPunishmentMessagesAsync(),
