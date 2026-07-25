@@ -282,7 +282,6 @@ namespace Cliptok
                 {
                     List<Task<bool>> taskList =
                     [
-                        Tasks.HeartbeatTasks.HeartbeatAsync(),
                         Tasks.PunishmentTasks.CheckMutesAsync(),
                         Tasks.PunishmentTasks.CheckBansAsync(),
                         Tasks.PunishmentTasks.CleanUpPunishmentMessagesAsync(),
@@ -308,6 +307,13 @@ namespace Cliptok
                 }
 
                 loopCount += 1;
+
+                // every 5 loops (roughly 50 seconds), heartbeat
+                // skip first loop to avoid double-heartbeat when loopCount resets
+                if (loopCount != 0 && loopCount % 5 == 0)
+                {
+                    await Tasks.HeartbeatTasks.HeartbeatAsync();
+                }
 
                 // after 180 cycles, roughly 30 minutes has passed
                 if (loopCount == 180)
