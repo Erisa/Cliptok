@@ -22,14 +22,14 @@ namespace Cliptok.Commands
         {
             await ctx.DeferResponseAsync();
 
-            DateTime? expiresAt;
+            DateTime? expireTime;
             if (expires is null)
-                expiresAt = default;
+                expireTime = default;
             else
             {
                 try
                 {
-                    expiresAt = HumanDateParser.HumanDateParser.Parse(expires).ToUniversalTime();
+                    expireTime = HumanDateParser.HumanDateParser.Parse(expires).ToUniversalTime();
                 }
                 catch
                 {
@@ -53,7 +53,7 @@ namespace Cliptok.Commands
                 NoteId = noteId,
                 Timestamp = DateTime.UtcNow,
                 Type = WarningType.Note,
-                ExpiresAt = expiresAt,
+                ExpireTime = expireTime,
             };
 
             await Program.redis.HashSetAsync(user.Id.ToString(), note.NoteId, JsonConvert.SerializeObject(note));
