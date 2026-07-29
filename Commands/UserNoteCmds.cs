@@ -36,6 +36,12 @@ namespace Cliptok.Commands
                     await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I couldn't parse the provided expiration time!"));
                     return;
                 }
+
+                if (expireTime <= DateTime.UtcNow)
+                {
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Notes can't be set to expire in the past!"));
+                    return;
+                }
             }
 
             // Assemble new note
@@ -178,6 +184,12 @@ namespace Cliptok.Commands
                 catch
                 {
                     await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I couldn't parse the provided expiration time!"));
+                    return;
+                }
+
+                if (expireTime <= DateTime.UtcNow)
+                {
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Notes can't be set to expire in the past!"));
                     return;
                 }
             }
