@@ -58,6 +58,9 @@ namespace Cliptok.Commands
 
             await Program.redis.HashSetAsync(user.Id.ToString(), note.NoteId, JsonConvert.SerializeObject(note));
 
+            if (expireTime != default)
+                await Program.redis.HashSetAsync("expiringNotes", note.NoteId, JsonConvert.SerializeObject(note));
+
             // Log to mod-logs
             var embed = await GenerateUserNoteDetailEmbedAsync(note, user);
             await LogChannelHelper.LogMessageAsync("mod", $"{Program.cfgjson.Emoji.Information} New note for {user.Mention}!", embed);
@@ -107,6 +110,7 @@ namespace Cliptok.Commands
         public async Task EditUserNoteAsync(SlashCommandContext ctx,
             [Parameter("user"), Description("The user to edit a note for.")] DiscordUser user,
             [SlashAutoCompleteProvider(typeof(NotesAutocompleteProvider))][Parameter("note"), Description("The note to edit.")] string targetNote,
+            [Parameter("expires"), Description("When the note should automatically expire. Type \"never\" to disable expiry.")] string expires = default,
             [Parameter("new_text"), Description("The new note text. Leave empty to not change.")] string newNoteText = default,
             [Parameter("show_on_modmail"), Description("Whether to show the note when the user opens a modmail thread.")] bool? showOnModmail = null,
             [Parameter("show_on_warn"), Description("Whether to show the note when the user is warned.")] bool? showOnWarn = null,
@@ -131,7 +135,7 @@ namespace Cliptok.Commands
                 newNoteText = note.NoteText;
 
             // If no changes are made, refuse the request
-            if (note.NoteText == newNoteText && showOnModmail is null && showOnWarn is null && showAllMods is null && showOnce is null && showOnJoinAndLeave is null)
+            if (note.NoteText == newNoteText && expires is null && showOnModmail is null && showOnWarn is null && showAllMods is null && showOnce is null && showOnJoinAndLeave is null)
             {
                 await ctx.RespondAsync(new DiscordInteractionResponseBuilder().WithContent($"{Program.cfgjson.Emoji.Error} You didn't change anything about the note!").AsEphemeral());
                 return;
@@ -156,9 +160,32 @@ namespace Cliptok.Commands
             if (showOnJoinAndLeave is null)
                 showOnJoinAndLeave = note.ShowOnJoinAndLeave;
 
+            DateTime? expireTime;
+            if (expires == default)
+            {
+                expireTime = note.ExpireTime;
+            }
+            else if (expires.Equals("never", StringComparison.OrdinalIgnoreCase))
+            {
+                expireTime = null;
+            }
+            else
+            {
+                try
+                {
+                    expireTime = HumanDateParser.HumanDateParser.Parse(expires).ToUniversalTime();
+                }
+                catch
+                {
+                    await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} I couldn't parse the provided expiration time!"));
+                    return;
+                }
+            }
+
             // Assemble new note
             note.ModUserId = ctx.User.Id;
             note.NoteText = newNoteText;
+            note.ExpireTime = expireTime;
             note.ShowOnModmail = (bool)showOnModmail;
             note.ShowOnWarn = (bool)showOnWarn;
             note.ShowAllMods = (bool)showAllMods;
@@ -167,6 +194,18 @@ namespace Cliptok.Commands
             note.Type = WarningType.Note;
 
             await Program.redis.HashSetAsync(user.Id.ToString(), note.NoteId, JsonConvert.SerializeObject(note));
+
+            if (note.ExpireTime is null)
+            {
+                // This is unnecessary if the note wasn't previously set to expire, but it doesn't seem problematic to
+                // call this even if the hash already does not exist. Saves a call to HashExistsAsync
+                await Program.redis.HashDeleteAsync("expiringNotes", note.NoteId);
+            }
+            else
+            {
+                // This might also be unnecessary (see above) but saves a HashGetAsync in case the expire time was changed
+                await Program.redis.HashSetAsync("expiringNotes", note.NoteId, JsonConvert.SerializeObject(note));
+            }
 
             // Log to mod-logs
             var embed = await GenerateUserNoteDetailEmbedAsync(note, user);

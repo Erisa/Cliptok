@@ -129,8 +129,9 @@ namespace Cliptok.Helpers
                 .AddField("Show all Mods", note.ShowAllMods ? "Yes" : "No", true)
                 .AddField("Show Once", note.ShowOnce ? "Yes" : "No", true)
                 .AddField("Show on Join & Leave", note.ShowOnJoinAndLeave ? "Yes" : "No", true)
-                .AddField("Responsible moderator", $"<@{note.ModUserId}>", true)
-                .AddField("Time", $"<t:{TimeHelpers.ToUnixTimestamp(note.Timestamp)}:f>", true);
+                .AddField("Time", $"<t:{TimeHelpers.ToUnixTimestamp(note.Timestamp)}:f>", true)
+                .AddField("Expires", note.ExpireTime == default ? "Never" : $"<t:{TimeHelpers.ToUnixTimestamp(note.ExpireTime)}:f>", true)
+                .AddField("Responsible moderator", $"<@{note.ModUserId}>", false);
 
             return embed;
         }
