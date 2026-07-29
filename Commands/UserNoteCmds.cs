@@ -23,7 +23,7 @@ namespace Cliptok.Commands
             await ctx.DeferResponseAsync();
 
             DateTime? expireTime;
-            if (expires is null)
+            if (expires is null || expires.Equals("never", StringComparison.OrdinalIgnoreCase))
                 expireTime = default;
             else
             {
