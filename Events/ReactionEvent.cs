@@ -59,12 +59,7 @@ namespace Cliptok.Events
             var recycleBinEmoji = await discord.GetApplicationEmojiAsync(cfgjson.ReactionEmoji.Delete);
 
             // Ignore reactions that are not the CliptokRecycleBin emoji!!
-            if (e.Emoji != recycleBinEmoji)
-                return;
-
-            // If there is already a success reaction, this was already handled! Ignore.
-            var successEmoji = await discord.GetApplicationEmojiAsync(cfgjson.ReactionEmoji.Success);
-            if (e.Message.Reactions.Any(e => e.Emoji == successEmoji && e.IsMe))
+            if (e.Emoji.Name != "CliptokRecycleBin" && e.Emoji.Name != "WindowsRecycleBin")
                 return;
 
             if (e.Channel.Id == cfgjson.LogChannels["mod"].ChannelId)
@@ -155,13 +150,11 @@ namespace Cliptok.Events
                     }
                     if (!foundMatch)
                     {
-                        await targetMessage.CreateReactionAsync(errorEmoji);
                         return;
                     }
                 }
                 else if (matchingWarnings.Count < 1)
                 {
-                    await targetMessage.CreateReactionAsync(errorEmoji);
                     return;
                 }
                 else
@@ -186,6 +179,7 @@ namespace Cliptok.Events
                                 .WithAllowedMentions(Mentions.None)
                         );
 
+                        var successEmoji = await discord.GetApplicationEmojiAsync(cfgjson.ReactionEmoji.Success);
                         await targetMessage.CreateReactionAsync(successEmoji);
                     }
                     else

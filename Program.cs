@@ -1,6 +1,5 @@
 using DSharpPlus.Commands.Processors.TextCommands.Parsing;
 using DSharpPlus.Extensions;
-using DSharpPlus.Net.Gateway;
 using Serilog.Events;
 using Serilog.Sinks.Grafana.Loki;
 using System.Reflection;
@@ -14,30 +13,6 @@ namespace Cliptok
 
         [JsonProperty("key")]
         public string Key { get; set; }
-    }
-
-    class GatewayController : IGatewayController
-    {
-        public async Task HeartbeatedAsync(IGatewayClient client)
-        {
-            HeartbeatEvent.OnHeartbeat(client);
-        }
-
-        public async Task ZombiedAsync(IGatewayClient client)
-        {
-            Program.discord.Logger.LogCritical("The gateway connection has zombied, and the bot is being restarted to reconnect reliably.");
-            Environment.Exit(1);
-        }
-
-        public async Task ReconnectRequestedAsync(IGatewayClient _) { }
-        public async Task ReconnectFailedAsync(IGatewayClient _)
-        {
-            Program.discord.Logger.LogCritical("The gateway connection has irrecoverably failed, and the bot is being restarted to reconnect reliably.");
-            Environment.Exit(1);
-        }
-        public async Task SessionInvalidatedAsync(IGatewayClient _) { }
-        public async Task ResumeAttemptedAsync(IGatewayClient _) { }
-
     }
 
     class Program
@@ -202,16 +177,14 @@ namespace Cliptok
                 }
             }
 
-            DiscordClientBuilder discordBuilder = DiscordClientBuilder.CreateDefault(token, DiscordIntents.All);
+            // use all intents except for the privileged presence intent
+            // will need updating if more privileged intents are added
+            //  or if presence intent is needed
+            DiscordClientBuilder discordBuilder = DiscordClientBuilder.CreateDefault(token, DiscordIntents.AllUnprivileged | DiscordIntents.MessageContents | DiscordIntents.GuildMembers);
 
             discordBuilder.ConfigureLogging(logging =>
             {
                 logging.AddSerilog();
-            });
-
-            discordBuilder.ConfigureServices(services =>
-            {
-                services.Replace<IGatewayController, GatewayController>();
             });
 
             discordBuilder.UseCommands((_, builder) =>
@@ -243,7 +216,6 @@ namespace Cliptok
                 builder.AddCheck<HomeServerCheck>();
                 builder.AddCheck<RequireHomeserverPermCheck>();
                 builder.AddCheck<IsBotOwnerCheck>();
-                builder.AddCheck<UserRolesPresentCheck>();
 
                 // Set custom prefixes from config.json
                 TextCommandProcessor textCommandProcessor = new(new TextCommandConfiguration
@@ -336,6 +308,13 @@ namespace Cliptok
                 }
 
                 loopCount += 1;
+
+                // every 5 loops (roughly 50 seconds), heartbeat
+                // skip first loop to avoid double-heartbeat when loopCount resets
+                if (loopCount != 0 && loopCount % 5 == 0)
+                {
+                    await Tasks.HeartbeatTasks.HeartbeatAsync();
+                }
 
                 // after 180 cycles, roughly 30 minutes has passed
                 if (loopCount == 180)

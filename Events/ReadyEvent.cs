@@ -66,9 +66,6 @@ namespace Cliptok.Events
             if (Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") is null || Environment.GetEnvironmentVariable("CLIPTOK_GITHUB_TOKEN") == "githubtokenhere")
                 discord.Logger.LogWarning(CliptokEventID, "GitHub API features disabled due to missing access token.");
 
-            if (Environment.GetEnvironmentVariable("RAVY_API_TOKEN") is null || Environment.GetEnvironmentVariable("RAVY_API_TOKEN") == "goodluckfindingone")
-                discord.Logger.LogWarning(CliptokEventID, "Ravy API features disabled due to missing API token.");
-
             if (cfgjson.AutoWarnMsgAutoDeleteHours > 0 && cfgjson.AutoWarnMsgAutoDeleteDays > 0)
                 discord.Logger.LogWarning(CliptokEventID, "Both autoWarnMsgAutoDeleteHours and autoWarnMsgAutoDeleteDays are set. Hours will be used, please remove the old days config. Using {hours} hours.", cfgjson.AutoWarnMsgAutoDeleteHours);
 
@@ -161,27 +158,7 @@ namespace Cliptok.Events
                 $"{commitMessage}\n" +
                 $"```");
 
-            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("UPTIME_KUMA_PUSH_URL")))
-            {
-                HttpResponseMessage response;
-                try
-                {
-                    response = await Program.httpClient.GetAsync(Environment.GetEnvironmentVariable("UPTIME_KUMA_PUSH_URL"));
-                }
-                catch (Exception ex)
-                {
-                    discord.Logger.LogError(ex, "Uptime Kuma push failed during startup!");
-                    return;
-                }
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    discord.Logger.LogDebug("Heartbeat ping succeeded.");
-                }
-                else
-                {
-                    discord.Logger.LogError("Heartbeat ping sent: {status} {content}", (int)response.StatusCode, await response.Content.ReadAsStringAsync());
-                }
-            }
+            await Tasks.HeartbeatTasks.HeartbeatAsync();
 
             try
             {

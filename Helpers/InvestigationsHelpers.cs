@@ -6,7 +6,7 @@
         {
             await SendInfringingMessaageAsync(logChannelKey, new MockDiscordMessage(infringingMessage), reason, messageURL, extraField, content, colour, channelOverride, messageContentOverride, wasAutoModBlock, useCodeBlock);
         }
-        public static async Task SendInfringingMessaageAsync(string logChannelKey, MockDiscordMessage infringingMessage, string reason, string messageURL, (string name, string value, bool inline) extraField = default, string content = default, DiscordColor? colour = null, DiscordChannel channelOverride = default, string messageContentOverride = default, bool wasAutoModBlock = false, bool useCodeBlock = false)
+        public static async Task SendInfringingMessaageAsync(string logChannelKey, MockDiscordMessage infringingMessage, string reason, string messageURL, (string name, string value, bool inline) extraField = default, string content = default, DiscordColor? colour = null, DiscordChannel channelOverride = default, string messageContentOverride = default, bool wasAutoModBlock = false, bool useCodeBlock = false, bool userWasWarned = false)
         {
             if (colour is null)
                 colour = new DiscordColor(0xf03916);
@@ -65,7 +65,7 @@
                 logMsg = await channelOverride.SendMessageAsync(new DiscordMessageBuilder().WithContent(content).AddEmbed(embed).WithAllowedMentions(Mentions.None));
 
             // Add reaction to log message to be used to delete
-            if (logChannelKey == "investigations" && channelOverride == default && Program.cfgjson.ReactionEmoji is not null)
+            if (logChannelKey == "investigations" && channelOverride == default && Program.cfgjson.ReactionEmoji is not null && userWasWarned)
             {
                 var emoji = await Program.discord.GetApplicationEmojiAsync(Program.cfgjson.ReactionEmoji.Delete);
                 await logMsg.CreateReactionAsync(emoji);
