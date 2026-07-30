@@ -109,6 +109,9 @@
 
         [JsonProperty("type")]
         public WarningType Type { get; set; }
+
+        [JsonProperty("expireTime")]
+        public DateTime? ExpireTime { get; set; }
     }
 
     public class PendingUserOverride

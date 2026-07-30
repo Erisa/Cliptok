@@ -151,6 +151,32 @@
             Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked for auto-warn and compromised account ban messages at {time} with result: {result}", DateTime.UtcNow, success);
             return success;
         }
+    
+        public static async Task<bool> CleanUpExpiredNotesAsync()
+        {
+            var expiringNotes = await Program.redis.HashGetAllAsync("expiringNotes");
+
+            bool success = false;
+
+            foreach (var note in expiringNotes.Select(x => JsonConvert.DeserializeObject<UserNote>(x.Value)))
+            {
+                if (note.ExpireTime is not null && note.ExpireTime < DateTime.UtcNow)
+                {
+                    await Program.redis.HashDeleteAsync(note.TargetUserId.ToString(), note.NoteId);
+                    await Program.redis.HashDeleteAsync("expiringNotes", note.NoteId);
+
+                    // Log to mod-logs
+                    var user = await Program.discord.GetUserAsync(note.TargetUserId);
+                    var embed = new DiscordEmbedBuilder(await UserNoteHelpers.GenerateUserNoteDetailEmbedAsync(note, user)).WithColor(0xf03916);
+                    await LogChannelHelper.LogMessageAsync("mod", $"{Program.cfgjson.Emoji.Deleted} Note expired: `{note.NoteId}` (belonging to {user.Mention})", embed);
+
+                    success = true;
+                }
+            }
+
+            Program.discord.Logger.LogDebug(Program.CliptokEventID, "Checked notes at {time} with result: {success}", DateTime.UtcNow, success);
+            return success;
+        }
     }
 
 }
