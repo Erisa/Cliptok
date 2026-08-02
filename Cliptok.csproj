@@ -36,6 +36,8 @@
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
 		<PackageReference Include="Serilog.Sinks.Grafana.Loki" Version="8.3.2" />
 		<PackageReference Include="Serilog.Sinks.TextWriter" Version="3.0.0" />
+		<PackageReference Include="SkiaSharp" Version="4.148.0" />
+		<PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.148.0" />
 		<PackageReference Include="StackExchange.Redis" Version="2.13.17" />
 		<PackageReference Include="System.Linq" Version="4.3.0" />
 		<PackageReference Include="System.Linq.Async" Version="7.0.1" />
