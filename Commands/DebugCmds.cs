@@ -212,7 +212,7 @@ namespace Cliptok.Commands
         [Command("dumpwarnings"), Description("Dump all warning data. EXTREMELY computationally expensive, use with caution.")]
         [IsBotOwner]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task MostWarningsCmd(TextCommandContext ctx)
+        public async Task DumpWarningsCmd(TextCommandContext ctx)
         {
             await DiscordHelpers.SafeTyping(ctx.Channel);
 
@@ -382,7 +382,7 @@ namespace Cliptok.Commands
         }
 
         [Command("bancache")]
-        [Description("Dump the most recent manual warning")]
+        [Description("Dump the most recent manual ban")]
         public async Task BanCacheCmd(TextCommandContext ctx)
         {
             if (BanHelpers.MostRecentBan is null)
@@ -395,7 +395,7 @@ namespace Cliptok.Commands
 
 
         [Command("mutecache")]
-        [Description("Dump the most recent manual warning")]
+        [Description("Dump the most recent manual mute")]
         public async Task MuteCacheCmd(TextCommandContext ctx)
         {
             if (MuteHelpers.MostRecentMute is null)
