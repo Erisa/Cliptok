@@ -114,7 +114,7 @@ namespace Cliptok.Commands
             }
             catch (DSharpPlus.Exceptions.NotFoundException ex)
             {
-                Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, exception: ex, message: "Failed to unmute {user} in {server} because they weren't in the server.", $"{DiscordHelpers.UniqueUsername(targetUser)}", ctx.Guild.Name);
+                Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, exception: ex, message: "Failed to unmute user {user} in {server} because they weren't in the server.", targetUser.Id, ctx.Guild.Name);
             }
 
             if ((await Program.redis.HashExistsAsync("mutes", targetUser.Id)) || (member != default && (member.Roles.Contains(mutedRole) || member.Roles.Contains(tqsMutedRole))))

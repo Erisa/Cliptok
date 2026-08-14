@@ -399,7 +399,7 @@
             }
             catch (DSharpPlus.Exceptions.NotFoundException ex)
             {
-                Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, exception: ex, message: "Failed to unmute {user} in {servername} because they weren't in the server.", $"{DiscordHelpers.UniqueUsername(targetUser)}", guild.Name);
+                Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, exception: ex, message: "Failed to unmute user {user} in {servername} because they weren't in the server.", targetUser.Id, guild.Name);
             }
 
             if (member == default)

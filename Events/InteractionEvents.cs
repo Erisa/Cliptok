@@ -462,7 +462,7 @@ namespace Cliptok.Events
                             );
                     }
             }
-            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of interaction command {command} by {user}", e.Context.Command.Name, $"{DiscordHelpers.UniqueUsername(e.Context.User)}");
+            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of interaction command {command} by user {user}", e.Context.Command.Name, e.Context.User.Id);
         }
 
     }
