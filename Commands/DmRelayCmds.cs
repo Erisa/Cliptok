@@ -2,15 +2,24 @@ namespace Cliptok.Commands
 {
     public class DmRelayCmds
     {
-        [Command("dmrelayblocktextcmd")]
-        [TextAlias("dmrelayblock", "dmblock")]
+        [Command("dmrelayblock")]
+        [TextAlias("dmblock")]
         [Description("Stop a member's DMs from being relayed to the configured DM relay channel.")]
-        [AllowedProcessors(typeof(TextCommandProcessor))]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        public async Task DmRelayBlockCommand(TextCommandContext ctx, [Description("The member to stop relaying DMs from.")] DiscordUser user)
+        [AllowedProcessors(typeof(TextCommandProcessor), typeof(SlashCommandProcessor))]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        public async Task DmRelayBlockCommand(CommandContext ctx, [Description("The member to stop relaying DMs from.")] DiscordUser user)
         {
             // Only function in configured DM relay channel/thread; do nothing if in wrong channel
-            if (ctx.Channel.Id != LogChannelHelper.GetLogChannelId("dms")) return;
+            var logChannelId = LogChannelHelper.GetLogChannelId("dms");
+            if (ctx.Channel.Id != logChannelId)
+            {
+                if (ctx is SlashCommandContext)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command can only be used in <#{logChannelId}>!", ephemeral: true);
+                }
+
+                return;
+            }
 
             // Check blocklist for user
             if (await Program.redis.SetContainsAsync("dmRelayBlocklist", user.Id))

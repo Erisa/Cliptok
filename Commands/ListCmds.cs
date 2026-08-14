@@ -23,12 +23,11 @@
             public string User { get; set; }
         }
 
-        [Command("listupdatetextcmd")]
-        [TextAlias("listupdate")]
+        [Command("listupdate")]
         [Description("Updates the private lists from the GitHub repository, then reloads them into memory.")]
-        [AllowedProcessors(typeof(TextCommandProcessor))]
+        [AllowedProcessors(typeof(TextCommandProcessor), typeof(SlashCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task ListUpdate(TextCommandContext ctx)
+        public async Task ListUpdate(CommandContext ctx)
         {
             if (Program.cfgjson.GitListDirectory is null || Program.cfgjson.GitListDirectory == "")
             {
@@ -56,13 +55,12 @@
 
         }
 
-        [Command("listaddtextcmd")]
-        [TextAlias("listadd")]
+        [Command("listadd")]
         [Description("Add a piece of text to a public list.")]
-        [AllowedProcessors(typeof(TextCommandProcessor))]
+        [AllowedProcessors(typeof(TextCommandProcessor), typeof(SlashCommandProcessor))]
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task ListAdd(
-            TextCommandContext ctx,
+            CommandContext ctx,
             [Description("The filename of the public list to add to. For example scams.txt")] string fileName,
             [RemainingText, Description("The text to add the list. Can be in a codeblock and across multiple line.")] string content
         )
@@ -85,7 +83,9 @@
                 return;
             }
 
-            await DiscordHelpers.SafeTyping(ctx.Channel);
+            await ctx.DeferResponseAsync();
+            if (ctx is TextCommandContext)
+                await DiscordHelpers.SafeTyping(ctx.Channel);
 
             if (content[..3] == "```")
                 content = content.Replace("```", "").Trim();
@@ -231,13 +231,13 @@
             await ctx.RespondAsync(responseToSend);
         }
 
-        [Command("appealblocktextcmd")]
-        [TextAlias("appealblock", "superduperban", "ablock")]
+        [Command("appealblock")]
+        [TextAlias("superduperban", "ablock")]
         [Description("Prevents a user from submitting ban appeals.")]
-        [AllowedProcessors(typeof(TextCommandProcessor))]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        [AllowedProcessors(typeof(TextCommandProcessor), typeof(SlashCommandProcessor))]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
         public async Task AppealBlock(
-            TextCommandContext ctx,
+            CommandContext ctx,
             [Description("The user to block from ban appeals.")] DiscordUser user
         )
         {

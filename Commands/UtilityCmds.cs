@@ -42,13 +42,12 @@ namespace Cliptok.Commands
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} {member.Mention} can now access the server!");
         }
 
-        [Command("edittextcmd")]
-        [TextAlias("edit")]
+        [Command("edit")]
         [Description("Edit a message.")]
-        [AllowedProcessors(typeof(TextCommandProcessor))]
+        [AllowedProcessors(typeof(TextCommandProcessor), typeof(SlashCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task Edit(
-            TextCommandContext ctx,
+            CommandContext ctx,
             [Description("The ID of the message to edit.")] ulong messageId,
             [RemainingText, Description("New message content.")] string content
         )
@@ -58,18 +57,21 @@ namespace Cliptok.Commands
             if (msg is null || msg.Author.Id != ctx.Client.CurrentUser.Id)
                 return;
 
-            await ctx.Message.DeleteAsync();
+            if (ctx is TextCommandContext tctx)
+                await tctx.Message.DeleteAsync();
 
             await msg.ModifyAsync(content);
+
+            if (ctx is SlashCommandContext sctx)
+                await sctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Message edited successfully!", ephemeral: true);
         }
 
-        [Command("editappendtextcmd")]
-        [TextAlias("editappend")]
+        [Command("editappend")]
         [Description("Append content to an existing bot message with a newline.")]
-        [AllowedProcessors(typeof(TextCommandProcessor))]
+        [AllowedProcessors(typeof(TextCommandProcessor), typeof(SlashCommandProcessor))]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task EditAppend(
-            TextCommandContext ctx,
+            CommandContext ctx,
             [Description("The ID of the message to edit")] ulong messageId,
             [RemainingText, Description("Content to append on the end of the message.")] string content
         )
@@ -82,12 +84,16 @@ namespace Cliptok.Commands
             var newContent = msg.Content + "\n" + content;
             if (newContent.Length > 2000)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} New content exceeded 2000 characters.");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} New content exceeded 2000 characters.", ephemeral: true);
             }
             else
             {
-                await ctx.Message.DeleteAsync();
+                if (ctx is TextCommandContext tctx)
+                    await tctx.Message.DeleteAsync();
                 await msg.ModifyAsync(newContent);
+
+                if (ctx is SlashCommandContext sctx)
+                    await sctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Message edited successfully!", ephemeral: true);
             }
         }
 
