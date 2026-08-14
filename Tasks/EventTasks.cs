@@ -41,6 +41,8 @@ namespace Cliptok.Tasks
 
             try
             {
+                if (PendingChannelCreateEvents.Count > 0)
+                    Program.discord.Logger.LogDebug("Processing {count} pending channel create events", PendingChannelCreateEvents.Count);
                 foreach (var pendingEvent in PendingChannelCreateEvents)
                 {
                     // This is the timestamp on this event, used to identify it / keep events in order in the list
@@ -177,6 +179,8 @@ namespace Cliptok.Tasks
                         // Always remove the event from the pending list, even if we failed to process it
                         PendingChannelCreateEvents.Remove(timestamp);
                     }
+
+                    Program.discord.Logger.LogDebug("Finished handling a pending channel create event for {channel}. {count} remaining", pendingEvent.Value.Channel.Id, PendingChannelCreateEvents.Count);
                 }
             }
             catch (InvalidOperationException ex)
@@ -216,6 +220,8 @@ namespace Cliptok.Tasks
 
             try
             {
+                if (PendingChannelUpdateEvents.Count > 0)
+                    Program.discord.Logger.LogDebug("Processing {count} pending channel update events", PendingChannelUpdateEvents.Count);
                 foreach (var pendingEvent in PendingChannelUpdateEvents)
                 {
                     // This is the timestamp on this event, used to identify it / keep events in order in the list
@@ -352,6 +358,8 @@ namespace Cliptok.Tasks
                         // Always remove the event from the pending list, even if we failed to process it
                         PendingChannelUpdateEvents.Remove(timestamp);
                     }
+
+                    Program.discord.Logger.LogDebug("Finished handling a pending channel update event for {channel}. {count} remaining", pendingEvent.Value.ChannelAfter.Id, PendingChannelUpdateEvents.Count);
                 }
             }
             catch (InvalidOperationException ex)
@@ -369,6 +377,8 @@ namespace Cliptok.Tasks
 
             try
             {
+                if (PendingChannelDeleteEvents.Count > 0)
+                    Program.discord.Logger.LogDebug("Processing {count} pending channel delete events", PendingChannelDeleteEvents.Count);
                 foreach (var pendingEvent in PendingChannelDeleteEvents)
                 {
                     // This is the timestamp on this event, used to identify it / keep events in order in the list
@@ -429,6 +439,7 @@ namespace Cliptok.Tasks
                         // Always remove the event from the pending list, even if we failed to process it
                         PendingChannelDeleteEvents.Remove(timestamp);
                     }
+                    Program.discord.Logger.LogDebug("Finished handling a pending channel delete event for {channel}. {count} remaining", pendingEvent.Value.Channel.Id, PendingChannelDeleteEvents.Count);
                 }
             }
             catch (InvalidOperationException ex)
