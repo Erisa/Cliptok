@@ -176,7 +176,8 @@
                     responseToSend = $"No valid match found.\nHTTP Status `{(int)httpStatus}`, result:\n";
                 }
 
-                responseToSend += await StringHelpers.CodeOrHasteBinAsync(responseText, "json");
+                var (_, text) = await StringHelpers.CodeOrHasteBinAsync(responseText, "json");
+                responseToSend += text;
 
                 await ctx.RespondAsync(responseToSend);
             }
@@ -224,7 +225,8 @@
                 responseToSend = $"No valid match found.\nHTTP Status `{(int)httpStatus}`, result:\n";
             }
 
-            responseToSend += await StringHelpers.CodeOrHasteBinAsync(responseString, "json");
+            var (_, text) = await StringHelpers.CodeOrHasteBinAsync(responseString, "json");
+            responseToSend += text;
 
             await ctx.RespondAsync(responseToSend);
         }
