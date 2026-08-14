@@ -6,7 +6,7 @@ namespace Cliptok.Commands
         [TextAlias("dmblock")]
         [Description("Stop a member's DMs from being relayed to the configured DM relay channel.")]
         [AllowedProcessors(typeof(TextCommandProcessor), typeof(SlashCommandProcessor))]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task DmRelayBlockCommand(CommandContext ctx, [Description("The member to stop relaying DMs from.")] DiscordUser user)
         {
             // Only function in configured DM relay channel/thread; do nothing if in wrong channel

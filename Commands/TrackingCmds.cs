@@ -3,7 +3,7 @@
     [Command("tracking")]
     [Description("Commands to manage message tracking of users")]
     [AllowedProcessors(typeof(SlashCommandProcessor))]
-    [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
+    [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
     public class TrackingCmds
     {
         [Command("add")]

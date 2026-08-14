@@ -4,7 +4,7 @@ namespace Cliptok.Commands
     [Description("Lock the current channel or all channels in the server, preventing new messages. See also: unlock")]
     [TextAlias("lock")]
     [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
-    [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions([DiscordPermission.ManageChannels], [])]
+    [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(userPermissions: [DiscordPermission.BanMembers], botPermissions: [DiscordPermission.ManageChannels])]
     public class LockdownCmds
     {
         public static bool ongoingLockdown = false;
@@ -151,7 +151,7 @@ namespace Cliptok.Commands
     [TextAlias("unlockdown")]
     [Description("Unlock the current channel or all channels in the server, allowing new messages. See also: lockdown")]
     [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
-    [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions([DiscordPermission.ManageChannels], [])]
+    [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [DiscordPermission.ManageChannels])]
     public class UnlockCmds
     {
         [DefaultGroupCommand]

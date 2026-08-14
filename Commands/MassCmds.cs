@@ -2,14 +2,14 @@ namespace Cliptok.Commands
 {
     [Command("mass")]
     [Description("Commands for performing mass actions.")]
-    [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
+    [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
     [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
     public static class MassCmds
     {
         [Command("ban")]
         [TextAlias("bigbonk")]
         [Description("Ban multiple users from the server at once.")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.BanMembers)]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
         public static async Task MassBanCmd(CommandContext ctx, [Parameter("input"), Description("The list of users to ban, separated by spaces, optionally followed by a reason."), RemainingText] string input)
         {
@@ -57,7 +57,7 @@ namespace Cliptok.Commands
         
         [Command("kick")]
         [Description("Kick multiple users from the server at once.")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.KickMembers)]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
         public static async Task MassKickCmd(CommandContext ctx, [Parameter("input"), Description("The list of users to kick, separated by spaces, optionally followed by a reason."), RemainingText] string input)
         {
@@ -114,7 +114,7 @@ namespace Cliptok.Commands
         
         [Command("mute")]
         [Description("Mute multiple users at once.")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.ModerateMembers)]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
         public static async Task MassMuteCmd(CommandContext ctx, [Parameter("input"), Description("The list of users to mute, separated by spaces, optionally followed by a reason."), RemainingText] string input)
         {
@@ -162,7 +162,7 @@ namespace Cliptok.Commands
         
         [Command("unmute")]
         [Description("Unmute multiple users at once.")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.ModerateMembers)]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
         public static async Task MassUnmuteCmd(CommandContext ctx, [Parameter("input"), Description("The list of users to unmute, separated by spaces, optionally followed by a reason."), RemainingText] string input)
         {
@@ -211,7 +211,7 @@ namespace Cliptok.Commands
         [Command("dehoist")]
         [Description("Dehoist everyone on the server with a bad name. This may take a while and can exhaust rate limits.")]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.ManageNicknames)]
         public static async Task MassDehoist(CommandContext ctx)
         {
             DiscordMessage msg = default;
@@ -233,7 +233,7 @@ namespace Cliptok.Commands
         [Command("undehoist")]
         [Description("Remove the dehoist for users attached via a txt file.")]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.ManageNicknames)]
         public static async Task MassUndehoist(CommandContext ctx, [Parameter("file"), Description("A text file containing the list of users to undehoist.")] DiscordAttachment file = null)
         {
             DiscordAttachment attachment;
@@ -328,7 +328,7 @@ namespace Cliptok.Commands
     {
         [Command("massban")]
         [Description("Ban multiple users from the server at once.")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.BanMembers)]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [Hidden]
         public static async Task MassBanAliasCmd(TextCommandContext ctx, [Description("The list of users to ban, separated by newlines or spaces, optionally followed by a reason."), RemainingText] string input)
@@ -338,7 +338,7 @@ namespace Cliptok.Commands
         
         [Command("masskick")]
         [Description("Kick multiple users from the server at once.")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.KickMembers)]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [Hidden]
         public static async Task MassKickAliasCmd(TextCommandContext ctx, [Description("The list of users to kick, separated by newlines or spaces, optionally followed by a reason."), RemainingText] string input)
@@ -348,7 +348,7 @@ namespace Cliptok.Commands
         
         [Command("massmute")]
         [Description("Mute multiple users at once.")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.ModerateMembers)]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [Hidden]
         public static async Task MassMuteAliasCmd(CommandContext ctx, [Description("The list of users to mute, separated by newlines or spaces, optionally followed by a reason."), RemainingText] string input)
@@ -358,7 +358,7 @@ namespace Cliptok.Commands
         
         [Command("massunmute")]
         [Description("Unmute multiple users at once.")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.ModerateMembers)]
         [AllowedProcessors(typeof(TextCommandProcessor))]
         [Hidden]
         public static async Task MassUnmuteAliasCmd(CommandContext ctx, [Description("The list of users to unmute, separated by newlines or spaces, optionally followed by a reason."), RemainingText] string input)
@@ -369,7 +369,7 @@ namespace Cliptok.Commands
         [Command("massdehoist")]
         [Description("Dehoist everyone on the server with a bad name. This may take a while and can exhaust rate limits.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.ManageNicknames)]
         [Hidden]
         public static async Task MassDehoistAliasCmd(TextCommandContext ctx)
         {
@@ -379,7 +379,7 @@ namespace Cliptok.Commands
         [Command("massundehoist")]
         [Description("Remove the dehoist for users attached via a txt file.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.ManageNicknames)]
         [Hidden]
         public static async Task MassUndehoistAliasCmd(TextCommandContext ctx)
         {

@@ -9,8 +9,7 @@ namespace Cliptok.Commands
         [Command("announcebuild")]
         [Description("Announce a Windows Insider build in the current channel.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [RequirePermissions(DiscordPermission.ModerateMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task AnnounceBuildSlashCommand(SlashCommandContext ctx,
             [Parameter("build_number"), Description("Windows 11 build number, including decimals (Decimals are optional). Do not include the word Build.")] string buildNumber,
 
@@ -311,7 +310,7 @@ namespace Cliptok.Commands
         [Command("editannounce")]
         [Description("Edit an announcement, preserving the ping highlight.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task EditAnnounce(
             SlashCommandContext ctx,
             [Parameter("message"), Description("The ID of the message to edit.")] string messageId,
@@ -358,7 +357,7 @@ namespace Cliptok.Commands
 
         [Command("announce")]
         [Description("Announces something in the current channel, pinging an Insider role in the process.")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task AnounceSlashCmd(SlashCommandContext ctx,
             [SlashAutoCompleteProvider(typeof(Providers.RolesAutocompleteProvider))]
             [Parameter("role1"), Description("The first Insider role to ping.")] string role1,

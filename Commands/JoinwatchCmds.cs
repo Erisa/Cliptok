@@ -3,7 +3,7 @@ namespace Cliptok.Commands
     [Command("joinwatch")]
     [Description("Watch for joins and leaves of a given user. Output goes to #investigations.")]
     [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
-    [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+    [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
     public class JoinwatchCmds
     {
         [DefaultGroupCommand]

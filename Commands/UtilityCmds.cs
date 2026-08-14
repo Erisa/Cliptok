@@ -7,7 +7,7 @@ namespace Cliptok.Commands
         [Command("grant")]
         [Description("Grant a user access to the server, bypassing any verification requirements.")]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task Grant(CommandContext ctx, [Parameter("user"), Description("The user to grant server access to.")] DiscordUser user)
         {
             DiscordMember member = default;
@@ -45,7 +45,7 @@ namespace Cliptok.Commands
         [Command("edit")]
         [Description("Edit a message.")]
         [AllowedProcessors(typeof(TextCommandProcessor), typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task Edit(
             CommandContext ctx,
             [Description("The ID of the message to edit.")] ulong messageId,
@@ -69,7 +69,7 @@ namespace Cliptok.Commands
         [Command("editappend")]
         [Description("Append content to an existing bot message with a newline.")]
         [AllowedProcessors(typeof(TextCommandProcessor), typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task EditAppend(
             CommandContext ctx,
             [Description("The ID of the message to edit")] ulong messageId,
@@ -100,7 +100,7 @@ namespace Cliptok.Commands
         [Command("tellraw")]
         [Description("You know what you're here for.")]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task TellRaw(CommandContext ctx, [Parameter("channel"), Description("Either mention or ID. Not a name.")] string discordChannel, [Parameter("input"), Description("???")] string input, [Parameter("reply_msg_id"), Description("ID of message to use in a reply context.")] string replyID = "0", [Parameter("pingreply"), Description("Ping pong.")] bool pingreply = true)
         {
             if (ctx is SlashCommandContext)
@@ -158,7 +158,7 @@ namespace Cliptok.Commands
         [Command("bulklogs")]
         [Description("Query bulk msg logs for a given user.")]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task BulkLogsCmd(CommandContext ctx, [Parameter("user"), Description("The user you're looking for bulk logs containing")] DiscordUser user)
         {
             if (!Program.cfgjson.EnablePersistentDb)

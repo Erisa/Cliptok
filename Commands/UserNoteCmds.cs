@@ -5,7 +5,7 @@ namespace Cliptok.Commands
     [Command("note")]
     [Description("Manage user notes")]
     [AllowedProcessors(typeof(SlashCommandProcessor))]
-    [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
+    [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
     public class UserNoteCmds
     {
         [Command("add")]

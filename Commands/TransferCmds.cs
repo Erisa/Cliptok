@@ -3,8 +3,7 @@ namespace Cliptok.Commands
     [Command("transfer")]
     [Description("Transfer data from one user to another.")]
     [AllowedProcessors(typeof(SlashCommandProcessor))]
-    [RequireHomeserverPerm(ServerPermLevel.Moderator)]
-    [RequirePermissions(DiscordPermission.ModerateMembers)]
+    [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
     public class TransferCmds
     {
         [Command("warnings")]

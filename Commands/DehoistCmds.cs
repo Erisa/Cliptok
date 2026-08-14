@@ -5,7 +5,7 @@ namespace Cliptok.Commands
         [Command("dehoist")]
         [Description("Dehoist a member, dropping them to the bottom of the list. Lasts until they change nickname.")]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(permissions: DiscordPermission.ManageNicknames)]
         public async Task DehoistCmd(CommandContext ctx, [Parameter("member"), Description("The member to dehoist.")] DiscordUser user)
         {
             DiscordMember member;

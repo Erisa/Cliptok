@@ -4,6 +4,7 @@ namespace Cliptok.Commands
     [Command("roles")]
     [Description("Opt in/out of roles.")]
     [AllowedProcessors(typeof(SlashCommandProcessor))]
+    [RequirePermissions(userPermissions: [], botPermissions: [DiscordPermission.ManageRoles])]
     internal class RoleCmds
     {
         [Command("grant")]

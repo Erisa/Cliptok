@@ -6,7 +6,7 @@ namespace Cliptok.Commands
         [TextAlias("yeet", "shoo", "goaway", "defenestrate")]
         [Description("Kicks a user, removing them from the server until they rejoin.")]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(DiscordPermission.KickMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.KickMembers)]
         public async Task KickCmd(CommandContext ctx, [Parameter("user"), Description("The user you want to kick from the server.")] DiscordUser target, [Parameter("reason"), Description("The reason for kicking this user."), RemainingText] string reason = "No reason specified.")
         {
             if (target.IsBot)

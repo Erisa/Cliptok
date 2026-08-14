@@ -7,8 +7,7 @@ namespace Cliptok.Commands
         [Command("warn")]
         [Description("Formally warn a user, usually for breaking the server rules.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [RequirePermissions(DiscordPermission.ModerateMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task WarnSlashCommand(SlashCommandContext ctx,
          [Parameter("user"), Description("The user to warn.")] DiscordUser user,
          [Parameter("reason"), Description("The reason they're being warned.")] string reason,
@@ -166,7 +165,7 @@ namespace Cliptok.Commands
         [Command("pardon")]
         [Description("Pardon a warning.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task PardonSlashCommand(SlashCommandContext ctx,
             [Parameter("user"), Description("The user to pardon a warning for.")] DiscordUser user,
             [SlashAutoCompleteProvider(typeof(WarningsAutocompleteProvider))][Parameter("warning"), Description("Type to search! Find the warning you want to pardon.")] string warning,
@@ -228,7 +227,7 @@ namespace Cliptok.Commands
         [Command("unpardon")]
         [Description("Unpardon a warning.")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task UnpardonSlashCommand(SlashCommandContext ctx,
             [Parameter("user"), Description("The user to unpardon a warning for.")] DiscordUser user,
             [SlashAutoCompleteProvider(typeof(WarningsAutocompleteProvider))][Parameter("warning"), Description("Type to search! Find the warning you want to unpardon.")] string warning,
@@ -592,7 +591,7 @@ namespace Cliptok.Commands
         [Command("mostwarnings")]
         [Description("Who has the most warnings???")]
         [AllowedProcessors(typeof(TextCommandProcessor), typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task MostWarningsCmd(CommandContext ctx)
         {
             await ctx.DeferResponseAsync();
@@ -627,7 +626,7 @@ namespace Cliptok.Commands
         [Command("mostwarningsday")]
         [Description("Which day has the most warnings???")]
         [AllowedProcessors(typeof(TextCommandProcessor), typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task MostWarningsDayCmd(CommandContext ctx)
         {
             await ctx.DeferResponseAsync();
@@ -699,9 +698,10 @@ namespace Cliptok.Commands
                 $"\nExcluding automatic warnings, the most was on **{noAutoCountList.Last().Key}** with a total of **{noAutoCountList.Last().Value}** warnings!");
         }
 
-        [Command("revoke"), Description("Revoke a warning. Reply to the chat message for the warning to revoke when using this!")]
-        [TextAlias("undo")]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
+        [Command("revoke")]
+        [Description("Revoke a warning. Reply to the chat message for the warning to revoke when using this!")]
+        [TextAlias("undo", "delete", "remove")]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task RevokeWarningCommand(TextCommandContext ctx)
         {
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");

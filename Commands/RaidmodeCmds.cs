@@ -4,8 +4,7 @@ namespace Cliptok.Commands
     [TextAlias("clipraidmode")]
     [Description("Commands relating to Raidmode")]
     [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
-    [RequireHomeserverPerm(ServerPermLevel.Moderator)]
-    [RequirePermissions(DiscordPermission.ModerateMembers)]
+    [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(permissions: DiscordPermission.ModerateMembers)]
     public class RaidmodeCmds
     {
         [DefaultGroupCommand]

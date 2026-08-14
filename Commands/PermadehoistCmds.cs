@@ -3,7 +3,7 @@
     [Command("permadehoist")]
     [Description("Permanently/persistently dehoist members.")]
     [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
-    [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ManageNicknames)]
+    [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(permissions: DiscordPermission.ManageNicknames)]
     public class PermadehoistCmds
     {
         [DefaultGroupCommand]

@@ -78,8 +78,7 @@ namespace Cliptok.Commands
         [Command("on-call")]
         [Description("Give yourself the CTS role.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
-        [HomeServer]
-        [RequireHomeserverPerm(ServerPermLevel.TechnicalQueriesSlayer)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TechnicalQueriesSlayer), RequirePermissions(userPermissions: [], botPermissions: [DiscordPermission.ManageRoles])]
         public async Task OnCallCommand(CommandContext ctx)
         {
             var ctsRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.CommunityTechSupportRoleID);
@@ -94,8 +93,7 @@ namespace Cliptok.Commands
         [Command("off-call")]
         [Description("Remove the CTS role.")]
         [AllowedProcessors(typeof(TextCommandProcessor))]
-        [HomeServer]
-        [RequireHomeserverPerm(ServerPermLevel.TechnicalQueriesSlayer)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TechnicalQueriesSlayer), RequirePermissions(userPermissions: [], botPermissions: [DiscordPermission.ManageRoles])]
         public async Task OffCallCommand(CommandContext ctx)
         {
             var ctsRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.CommunityTechSupportRoleID);
@@ -196,7 +194,7 @@ namespace Cliptok.Commands
         [Command("tqsmute")]
         [Description("Temporarily mute a user in tech support channels.")]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TechnicalQueriesSlayer)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TechnicalQueriesSlayer), RequirePermissions(userPermissions: [], botPermissions: [DiscordPermission.ManageRoles])]
         public async Task TqsMuteSlashCommand(
     CommandContext ctx,
     [Parameter("user"), Description("The user to mute.")] DiscordUser targetUser,
@@ -278,7 +276,7 @@ namespace Cliptok.Commands
         [TextAlias("tqs-unmute", "untqsmute")]
         [Description("Removes a TQS Mute from a previously TQS-muted user. See also: tqsmute")]
         [AllowedProcessors(typeof(TextCommandProcessor), typeof(SlashCommandProcessor))]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TechnicalQueriesSlayer)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TechnicalQueriesSlayer), RequirePermissions(userPermissions: [], botPermissions: [DiscordPermission.ManageRoles])]
         public async Task TqsUnmuteCmd(CommandContext ctx, [Parameter("user"), Description("The user you're trying to unmute.")] DiscordUser targetUser, [Description("The reason for the unmute.")] string reason)
         {
             if (ctx is SlashCommandContext)

@@ -5,8 +5,7 @@ namespace Cliptok.Commands
         [Command("slowmode")]
         [Description("Slow down the channel...")]
         [AllowedProcessors(typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-        [RequirePermissions(DiscordPermission.ModerateMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [DiscordPermission.ManageChannels])]
         public async Task SlowmodeSlashCommand(
             SlashCommandContext ctx,
             [Parameter("slow_time"), Description("Allowed time between each users messages. 0 for off. A number of seconds or a parseable time.")] string timeToParse,

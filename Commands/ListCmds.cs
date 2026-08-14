@@ -26,7 +26,7 @@
         [Command("listupdate")]
         [Description("Updates the private lists from the GitHub repository, then reloads them into memory.")]
         [AllowedProcessors(typeof(TextCommandProcessor), typeof(SlashCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task ListUpdate(CommandContext ctx)
         {
             if (Program.cfgjson.GitListDirectory is null || Program.cfgjson.GitListDirectory == "")
@@ -58,7 +58,7 @@
         [Command("listadd")]
         [Description("Add a piece of text to a public list.")]
         [AllowedProcessors(typeof(TextCommandProcessor), typeof(SlashCommandProcessor))]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task ListAdd(
             CommandContext ctx,
             [Description("The filename of the public list to add to. For example scams.txt")] string fileName,
@@ -158,7 +158,7 @@
         [Command("scamcheck")]
         [Description("Check if a link or message is known to the anti-phishing API.")]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task ScamCheck(CommandContext ctx, [Parameter("input"), Description("Domain or message content to scan.")] string content)
         {
             var urlMatches = Constants.RegexConstants.domain_rx.Matches(content);
@@ -190,7 +190,7 @@
         [Command("invitecheck")]
         [Description("Check if a server invite is known to the malicious invites API.")]
         [AllowedProcessors(typeof(SlashCommandProcessor), typeof(TextCommandProcessor))]
-        [RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
         public async Task InviteCheck(CommandContext ctx, [Parameter("input"), Description("Server invite to scan.")] string content)
         {
             var inviteMatches = Constants.RegexConstants.invite_rx.Matches(content);
@@ -235,7 +235,7 @@
         [TextAlias("superduperban", "ablock")]
         [Description("Prevents a user from submitting ban appeals.")]
         [AllowedProcessors(typeof(TextCommandProcessor), typeof(SlashCommandProcessor))]
-        [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(DiscordPermission.ModerateMembers)]
+        [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(userPermissions: [DiscordPermission.BanMembers], botPermissions: [])]
         public async Task AppealBlock(
             CommandContext ctx,
             [Description("The user to block from ban appeals.")] DiscordUser user

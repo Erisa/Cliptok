@@ -2,8 +2,7 @@
 {
     [Command("status")]
     [Description("Status commands")]
-    [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
-    [RequirePermissions(DiscordPermission.ModerateMembers)]
+    [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(permissions: DiscordPermission.ModerateMembers)]
 
     public class StatusCmds
     {
