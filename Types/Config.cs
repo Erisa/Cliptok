@@ -315,6 +315,9 @@
 
         [JsonProperty("duplicateMessageExcludedChannels")]
         public List<ulong> DuplicateMessageExcludedChannels {get; set; } = new();
+
+        [JsonProperty("autoPublishChannels")]
+        public List<ulong> AutoPublishChannels { get; set; } = new();
     }
 
     public class AutoModRuleConfig

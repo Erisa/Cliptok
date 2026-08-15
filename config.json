@@ -353,5 +353,9 @@
   "modActionReplyAutoWarnReason":  "rule 12",
   "duplicateMessageExcludedChannels": [
     929902761519239208
+  ],
+  "autoPublishChannels": [
+    316600283503394817,
+    726511089461755974
   ]
 }
