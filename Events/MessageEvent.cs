@@ -1365,8 +1365,8 @@ namespace Cliptok.Events
                     messageBuilder.WithContent(output);
                     DiscordMessage msg = await channel.SendMessageAsync(output);
 
-                    await InvestigationsHelpers.SendInfringingMessageAsync("mod", message, reason, null, messageContentOverride: messageContentOverride, userWasWarned: true);
                     var warning = await WarningHelpers.GiveWarningAsync(message.Author, client.CurrentUser, reason, contextMessage: msg, channel, " automatically ");
+                    await InvestigationsHelpers.SendInfringingMessageAsync("mod", message, reason, warning.ContextLink, messageContentOverride: messageContentOverride, userWasWarned: true);
                     await InvestigationsHelpers.SendInfringingMessageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: messageContentOverride, userWasWarned: true);
 
                     return true;
