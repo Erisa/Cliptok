@@ -1402,13 +1402,17 @@ namespace Cliptok.Events
                 {
                     var msg = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Denied} {message.Author.Mention} was automatically warned: **{reason.Replace("`", "\\`").Replace("*", "\\*")}**\n"
                         + $"Please keep requests for tech support inside {techSupportChannelsText} to avoid punishment.");
-                    await WarningHelpers.GiveWarningAsync(message.Author, Program.discord.CurrentUser, reason, msg, channel, " automatically ");
+                    var warning = await WarningHelpers.GiveWarningAsync(message.Author, Program.discord.CurrentUser, reason, msg, channel, " automatically ");
+                    await InvestigationsHelpers.SendInfringingMessageAsync("mod", message, reason, warning.ContextLink, messageContentOverride: messageContentOverride, userWasWarned: true);
+                    await InvestigationsHelpers.SendInfringingMessageAsync("investigations", message, reason, warning.ContextLink, messageContentOverride: messageContentOverride, userWasWarned: true);
                 }
                 else // also false when set does not exist
                 {
                     await Program.redis.SetAddAsync("ctsPingPardons", message.Author.Id);
-                    await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, you mentioned the tech support role outside of a tech support channel.\n"
+                    var msg = await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Information} {message.Author.Mention}, you mentioned the tech support role outside of a tech support channel.\n"
                         + $"Please keep requests for tech support inside {techSupportChannelsText} to avoid further punishment.");
+                    await InvestigationsHelpers.SendInfringingMessageAsync("investigations", message, reason, DiscordHelpers.MessageLink(msg), messageContentOverride: messageContentOverride);
+                    await InvestigationsHelpers.SendInfringingMessageAsync("mod", message, reason, DiscordHelpers.MessageLink(msg), messageContentOverride: messageContentOverride);
                 }
 
                 return true;
