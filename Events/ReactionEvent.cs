@@ -52,7 +52,7 @@ namespace Cliptok.Events
             if (cfgjson.ReactionEmoji is null)
                 return;
 
-            var member = await e.Guild.GetMemberAsync(e.User.Id);
+            var member = await e.Guild.CheckAndGetMemberAsync(e.User.Id);
             if (await GetPermLevelAsync(member) < ServerPermLevel.TrialModerator)
                 return;
 

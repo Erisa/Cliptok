@@ -14,7 +14,7 @@
                 if (currentUnixTime >= unixExpiration)
                 {
                     var channel = await Program.discord.GetChannelAsync((ulong)channelUnlock.Name);
-                    var currentMember = await channel.Guild.GetMemberAsync(Program.discord.CurrentUser.Id);
+                    var currentMember = await channel.Guild.CheckAndGetMemberAsync(Program.discord.CurrentUser.Id);
                     await LockdownHelpers.UnlockChannel(channel, currentMember);
                     success = true;
                 }

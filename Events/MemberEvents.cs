@@ -11,6 +11,8 @@ namespace Cliptok.Events
             if (e.Guild.Id != cfgjson.ServerID)
                 return;
 
+            DiscordGuildExtensions.UsersNotInServerCache.Remove(e.Member.Id);
+
             var userLogEmbed = new DiscordEmbedBuilder()
                .WithColor(new DiscordColor(0x3E9D28))
                .WithTimestamp(DateTimeOffset.Now)
@@ -109,6 +111,8 @@ namespace Cliptok.Events
 
             if (e.Guild.Id != cfgjson.ServerID)
                 return;
+
+            DiscordGuildExtensions.UsersNotInServerCache.Add(e.Member.Id);
 
             // Attempt to check if member is cached
             bool isMemberCached = client.Guilds[e.Guild.Id].Members.ContainsKey(e.Member.Id);
@@ -331,7 +335,7 @@ namespace Cliptok.Events
             if (e.UserAfter.IsBot)
                 return;
 
-            var member = await homeGuild.GetMemberAsync(e.UserAfter.Id);
+            var member = await homeGuild.CheckAndGetMemberAsync(e.UserAfter.Id);
 
             // Nickname lock check
             var nicknamelock = await redis.HashGetAsync("nicknamelock", member.Id);

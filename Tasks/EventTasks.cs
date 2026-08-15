@@ -471,18 +471,7 @@ namespace Cliptok.Tasks
                 return false;
 
             // If the user isn't cached or banned, try fetching them to confirm
-            try
-            {
-                await guild.GetMemberAsync(userId);
-                isMemberInServer = true;
-            }
-            catch (DSharpPlus.Exceptions.NotFoundException)
-            {
-                // Member is not in the server
-                // isMemberInServer is already false
-
-                Program.discord.Logger.LogInformation(Program.CliptokEventID, "Failed to fetch member {userId} during override persistence checks. This and the accompanying 404 are expected if the user is not in the server.", userId);
-            }
+            isMemberInServer = (await guild.CheckAndGetMemberAsync(userId)) is not null;
 
             return isMemberInServer;
         }

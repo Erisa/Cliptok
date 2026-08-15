@@ -9,7 +9,7 @@
             bool permaBan = false;
             DateTime? actionTime = DateTime.UtcNow;
             DateTime? expireTime = actionTime + banDuration;
-            DiscordMember moderator = await guild.GetMemberAsync(moderatorId);
+            DiscordMember moderator = await guild.CheckAndGetMemberAsync(moderatorId);
 
             if (reason.ToLower().Contains("compromised"))
                 compromisedAccount = true;
@@ -39,7 +39,7 @@
 
             try
             {
-                DiscordMember targetMember = await guild.GetMemberAsync(targetUserId);
+                DiscordMember targetMember = await guild.CheckAndGetMemberAsync(targetUserId);
                 if (permaBan)
                 {
                     if (appealable)

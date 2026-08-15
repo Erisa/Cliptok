@@ -179,7 +179,7 @@ namespace Cliptok.Commands
             // Try to DM the OP a link to their post so they can find it again
             try
             {
-                var member = await ctx.Guild.GetMemberAsync(channel.CreatorId);
+                var member = await ctx.Guild.CheckAndGetMemberAsync(channel.CreatorId);
                 await member.SendMessageAsync($"{Program.cfgjson.Emoji.Success} Your post **{channel.Name}** in <#{forum.Id}> has been marked as solved!\nIf you need to refer back to it, you can find it here: https://discord.com/channels/{channel.Guild.Id}/{channel.Id}");
             }
             catch
@@ -235,15 +235,7 @@ namespace Cliptok.Commands
             DiscordRole tqsMutedRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.TqsMutedRole);
 
             // Get member
-            DiscordMember targetMember = default;
-            try
-            {
-                targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
-            }
-            catch (DSharpPlus.Exceptions.NotFoundException)
-            {
-                // blah
-            }
+            var targetMember = await ctx.Guild.CheckAndGetMemberAsync(targetUser.Id);
 
             if (await Program.redis.HashExistsAsync("mutes", targetUser.Id) || (targetMember is not null && (targetMember.Roles.Contains(mutedRole) || targetMember.Roles.Contains(tqsMutedRole))))
             {
@@ -311,12 +303,8 @@ namespace Cliptok.Commands
             DiscordRole tqsMutedRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.TqsMutedRole);
 
             // Get member
-            DiscordMember targetMember = default;
-            try
-            {
-                targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
-            }
-            catch (DSharpPlus.Exceptions.NotFoundException)
+            var targetMember = await ctx.Guild.CheckAndGetMemberAsync(targetUser.Id);
+            if (targetMember is null)
             {
                 // couldn't fetch member, fail
                 if (ctx is SlashCommandContext)

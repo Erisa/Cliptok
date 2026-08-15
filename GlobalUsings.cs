@@ -2,6 +2,7 @@
 global using Cliptok.CommandChecks;
 global using Cliptok.Enums;
 global using Cliptok.Events;
+global using Cliptok.Extensions;
 global using Cliptok.Helpers;
 global using Cliptok.Types;
 global using DSharpPlus;

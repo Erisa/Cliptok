@@ -41,15 +41,7 @@ namespace Cliptok.Commands
             };
 
             await ctx.DeferResponseAsync(ephemeral: true);
-            DiscordMember targetMember = default;
-            try
-            {
-                targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
-            }
-            catch (DSharpPlus.Exceptions.NotFoundException)
-            {
-                // is this worth logging?
-            }
+            var targetMember = await ctx.Guild.CheckAndGetMemberAsync(targetUser.Id);
 
             if (targetMember != default && (await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && ((await GetPermLevelAsync(targetMember)) >= ServerPermLevel.TrialModerator || targetMember.IsBot))
             {
@@ -104,15 +96,9 @@ namespace Cliptok.Commands
             if (Program.cfgjson.TqsMutedRole != 0)
                 tqsMutedRole = await ctx.Guild.GetRoleAsync(Program.cfgjson.TqsMutedRole);
 
-            DiscordMember member = default;
-            try
-            {
-                member = await ctx.Guild.GetMemberAsync(targetUser.Id);
-            }
-            catch (DSharpPlus.Exceptions.NotFoundException ex)
-            {
-                Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, exception: ex, message: "Failed to unmute user {user} in {server} because they weren't in the server.", targetUser.Id, ctx.Guild.Name);
-            }
+            var member = await ctx.Guild.CheckAndGetMemberAsync(targetUser.Id);
+            if (member is null)
+                Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, message: "Failed to unmute user {user} in {server} because they weren't in the server.", targetUser.Id, ctx.Guild.Name);
 
             if ((await Program.redis.HashExistsAsync("mutes", targetUser.Id)) || (member != default && (member.Roles.Contains(mutedRole) || member.Roles.Contains(tqsMutedRole))))
             {
@@ -176,15 +162,7 @@ namespace Cliptok.Commands
                 Stub = true
             };
 
-            DiscordMember targetMember = default;
-            try
-            {
-                targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
-            }
-            catch (DSharpPlus.Exceptions.NotFoundException)
-            {
-                // is this worth logging?
-            }
+            var targetMember = await ctx.Guild.CheckAndGetMemberAsync(targetUser.Id);
 
             if (targetMember != default && ((await GetPermLevelAsync(ctx.Member))) == ServerPermLevel.TrialModerator && ((await GetPermLevelAsync(targetMember)) >= ServerPermLevel.TrialModerator || targetMember.IsBot))
             {
@@ -289,7 +267,7 @@ namespace Cliptok.Commands
 
             try
             {
-                var targetMember = await guild.GetMemberAsync(targetUser.Id);
+                var targetMember = await guild.CheckAndGetMemberAsync(targetUser.Id);
                 await targetMember.TimeoutAsync(mute.ExpireTime + TimeSpan.FromSeconds(10), mute.Reason);
             }
             catch (Exception e)

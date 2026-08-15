@@ -294,15 +294,7 @@ namespace Cliptok.Events
                 #endregion
 
                 #region retrieve member object
-                DiscordMember member;
-                try
-                {
-                    member = await channel.Guild.GetMemberAsync(message.Author.Id);
-                }
-                catch (DSharpPlus.Exceptions.NotFoundException)
-                {
-                    member = default;
-                }
+                var member = await channel.Guild.CheckAndGetMemberAsync(message.Author.Id);
 
                 if (member == default)
                     return;
@@ -621,15 +613,9 @@ namespace Cliptok.Events
             {
                 Program.discord.Logger.LogDebug(Program.CliptokEventID, "Processing modmail message {message} in {channel}", message.Id, channel);
                 var idString = modmaiL_rx.Match(message.Embeds[0].Footer.Text).Groups[1].Captures[0].Value;
-                DiscordMember modmailMember = default;
-                try
-                {
-                    modmailMember = await channel.Guild.GetMemberAsync(Convert.ToUInt64(idString));
-                }
-                catch (DSharpPlus.Exceptions.NotFoundException)
-                {
+                var modmailMember = await channel.Guild.CheckAndGetMemberAsync(Convert.ToUInt64(idString));
+                if (modmailMember is null)
                     return;
-                }
 
                 DiscordMessageBuilder memberWarnInfo = new();
 

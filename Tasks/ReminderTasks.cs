@@ -24,7 +24,7 @@
                     if (channel is null)
                     {
                         var guild = Program.homeGuild;
-                        var member = await guild.GetMemberAsync(reminderObject.UserID);
+                        var member = await guild.CheckAndGetMemberAsync(reminderObject.UserID);
 
                         if ((await GetPermLevelAsync(member)) >= ServerPermLevel.TrialModerator)
                         {

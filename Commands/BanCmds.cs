@@ -65,7 +65,7 @@ namespace Cliptok.Commands
 
             try
             {
-                targetMember = await ctx.Guild.GetMemberAsync(user.Id);
+                targetMember = await ctx.Guild.CheckAndGetMemberAsync(user.Id);
                 if ((await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && ((await GetPermLevelAsync(targetMember)) >= ServerPermLevel.TrialModerator))
                 {
                     webhookOut.Content = $"{Program.cfgjson.Emoji.Error} As a Junior Moderator you cannot perform moderation actions on other staff members.";
@@ -102,7 +102,7 @@ namespace Cliptok.Commands
             DiscordMember member;
             try
             {
-                member = await ctx.Guild.GetMemberAsync(user.Id);
+                member = await ctx.Guild.CheckAndGetMemberAsync(user.Id);
             }
             catch
             {
@@ -120,7 +120,7 @@ namespace Cliptok.Commands
             {
                 if (DiscordHelpers.AllowedToMod(ctx.Member, member))
                 {
-                    if (DiscordHelpers.AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
+                    if (DiscordHelpers.AllowedToMod(await ctx.Guild.CheckAndGetMemberAsync(ctx.Client.CurrentUser.Id), member))
                     {
                         if (userAlreadyBanned)
                             await BanHelpers.EditBanAsync(user.Id, ctx.User.Id, banDuration, reason, appealable);
@@ -264,7 +264,7 @@ namespace Cliptok.Commands
             DiscordMember member;
             try
             {
-                member = await ctx.Guild.GetMemberAsync(targetMember.Id);
+                member = await ctx.Guild.CheckAndGetMemberAsync(targetMember.Id);
             }
             catch
             {
@@ -288,7 +288,7 @@ namespace Cliptok.Commands
             {
                 if (DiscordHelpers.AllowedToMod(ctx.Member, member))
                 {
-                    if (DiscordHelpers.AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
+                    if (DiscordHelpers.AllowedToMod(await ctx.Guild.CheckAndGetMemberAsync(ctx.Client.CurrentUser.Id), member))
                     {
                         await ctx.Message.DeleteAsync();
                         if (userAlreadyBanned)
@@ -389,7 +389,7 @@ namespace Cliptok.Commands
             DiscordMember member;
             try
             {
-                member = await ctx.Guild.GetMemberAsync(targetMember.Id);
+                member = await ctx.Guild.CheckAndGetMemberAsync(targetMember.Id);
             }
             catch
             {
@@ -413,7 +413,7 @@ namespace Cliptok.Commands
             {
                 if (DiscordHelpers.AllowedToMod(ctx.Member, member))
                 {
-                    if (DiscordHelpers.AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
+                    if (DiscordHelpers.AllowedToMod(await ctx.Guild.CheckAndGetMemberAsync(ctx.Client.CurrentUser.Id), member))
                     {
                         await ctx.Message.DeleteAsync();
                         if (userAlreadyBanned)

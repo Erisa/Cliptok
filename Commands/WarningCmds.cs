@@ -51,7 +51,7 @@ namespace Cliptok.Commands
 
             try
             {
-                targetMember = await ctx.Guild.GetMemberAsync(user.Id);
+                targetMember = await ctx.Guild.CheckAndGetMemberAsync(user.Id);
                 if ((await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && ((await GetPermLevelAsync(targetMember)) >= ServerPermLevel.TrialModerator || targetMember.IsBot))
                 {
                     webhookOut = new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} As a Junior Moderator you cannot perform moderation actions on other staff members or bots.");
@@ -325,7 +325,7 @@ namespace Cliptok.Commands
             DiscordMember targetMember;
             try
             {
-                targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
+                targetMember = await ctx.Guild.CheckAndGetMemberAsync(targetUser.Id);
                 if ((await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && ((await GetPermLevelAsync(targetMember)) >= ServerPermLevel.TrialModerator || targetMember.IsBot))
                 {
                     await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Junior Moderator you cannot perform moderation actions on other staff members or bots.");
@@ -400,7 +400,7 @@ namespace Cliptok.Commands
             DiscordMember targetMember;
             try
             {
-                targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
+                targetMember = await ctx.Guild.CheckAndGetMemberAsync(targetUser.Id);
                 if ((await GetPermLevelAsync(ctx.Member)) == ServerPermLevel.TrialModerator && ((await GetPermLevelAsync(targetMember)) >= ServerPermLevel.TrialModerator || targetMember.IsBot))
                 {
                     await ctx.Channel.SendMessageAsync($"{Program.cfgjson.Emoji.Error} {ctx.User.Mention}, as a Junior Moderator you cannot perform moderation actions on other staff members or bots.");

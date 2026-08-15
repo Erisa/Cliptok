@@ -86,14 +86,9 @@
                 if (ctx.Channel.IsPrivate || ctx.Guild.Id != Program.cfgjson.ServerID)
                 {
                     var guild = await ctx.Client.GetGuildAsync(Program.cfgjson.ServerID);
-                    try
-                    {
-                        member = await guild.GetMemberAsync(ctx.User.Id);
-                    }
-                    catch (DSharpPlus.Exceptions.NotFoundException)
-                    {
+                    member = await guild.CheckAndGetMemberAsync(ctx.User.Id);
+                    if (member is null)
                         return "The invoking user must be a member of the home server; they are not.";
-                    }
                 }
                 else
                 {
