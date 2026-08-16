@@ -83,9 +83,9 @@
 
                     if (originalMessage is not null)
                     {
-                        if (originalMessage.Author.Id == Program.discord.CurrentUser.Id)
+                        if (originalMessage.Author.Id != reminder.UserId)
                         {
-                            msg.WithReply(reminder.MessageId, mention: true)
+                            msg.WithReply(reminder.MessageId)
                                 .WithContent($"<@{reminder.UserId}>, you asked to be reminded of something:")
                                 .WithAllowedMention(new UserMention(reminder.UserId));
                         }
