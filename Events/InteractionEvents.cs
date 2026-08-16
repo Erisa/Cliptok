@@ -504,7 +504,7 @@ namespace Cliptok.Events
                 await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredChannelMessageWithSource,
                     new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-                var targetMessage = Commands.ReminderCmds.ReminderInteractionCache[e.Interaction.User.Id];
+                var targetMessage = Commands.ContextMenuCmds.ReminderInteractionCache[e.Interaction.User.Id];
 
                 var timeInput = (e.Values["remind-me-about-this-time-input"] as TextInputModalSubmission).Value;
 
@@ -533,7 +533,7 @@ namespace Cliptok.Events
                 await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
                     .WithContent($"{Program.cfgjson.Emoji.Success} I'll try my best to remind you about that on <t:{unixTime}:f> (<t:{unixTime}:R>)"));
 
-                Commands.ReminderCmds.ReminderInteractionCache.Remove(e.Interaction.User.Id);
+                Commands.ContextMenuCmds.ReminderInteractionCache.Remove(e.Interaction.User.Id);
             }
             else if (e.Id == "reminder-modify-modal-callback")
             {
