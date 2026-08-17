@@ -234,14 +234,7 @@ namespace Cliptok.Commands
             if (ctx.Channel.IsPrivate || ctx.Guild.Id != Program.cfgjson.ServerID)
             {
                 var guild = await ctx.Client.GetGuildAsync(Program.cfgjson.ServerID);
-                try
-                {
-                    member = await guild.GetMemberAsync(ctx.User.Id);
-                }
-                catch (DSharpPlus.Exceptions.NotFoundException)
-                {
-                    // member is null, remember this for later
-                }
+                member = await guild.CheckAndGetMemberAsync(ctx.User.Id);
             }
             else
             {

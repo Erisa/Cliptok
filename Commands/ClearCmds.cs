@@ -180,12 +180,8 @@
                 {
                     foreach (var message in messagesForChannel.Value)
                     {
-                        DiscordMember member;
-                        try
-                        {
-                            member = await ctx.Guild.GetMemberAsync(message.Author.Id);
-                        }
-                        catch (DSharpPlus.Exceptions.NotFoundException)
+                        var member = await ctx.Guild.CheckAndGetMemberAsync(message.Author.Id);
+                        if (member is null)
                         {
                             // User is not in the server, so they can't be a current mod
                             continue;

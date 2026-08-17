@@ -244,7 +244,7 @@ namespace Cliptok.Events
                 await e.Interaction.DeferAsync(ephemeral: true);
 
                 // Fetch member
-                var member = await e.Guild.GetMemberAsync(e.User.Id);
+                var member = await e.Guild.CheckAndGetMemberAsync(e.User.Id);
 
                 List<DiscordSelectComponentOption> menuOptions = [];
                 foreach (var roleId in Program.cfgjson.InsiderRoles)
@@ -273,7 +273,7 @@ namespace Cliptok.Events
                 await e.Interaction.DeferAsync(ephemeral: true);
 
                 // Get member
-                var member = await e.Guild.GetMemberAsync(e.User.Id);
+                var member = await e.Guild.CheckAndGetMemberAsync(e.User.Id);
 
                 // Get a list of the member's current roles that we can add to or remove from
                 // Then we can apply this in a single request with member.ModifyAsync to avoid making repeated member update requests
@@ -321,7 +321,7 @@ namespace Cliptok.Events
                 await e.Interaction.DeferAsync(ephemeral: true);
 
                 // Get member
-                var member = await e.Guild.GetMemberAsync(e.User.Id);
+                var member = await e.Guild.CheckAndGetMemberAsync(e.User.Id);
 
                 // Get insider chat role
                 var insiderChatRole = await e.Guild.GetRoleAsync(cfgjson.InsiderChatRole);
@@ -371,7 +371,7 @@ namespace Cliptok.Events
                 await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredMessageUpdate);
 
                 // Give member insider chat role
-                var member = await e.Guild.GetMemberAsync(e.User.Id);
+                var member = await e.Guild.CheckAndGetMemberAsync(e.User.Id);
                 var insiderChatRole = await e.Guild.GetRoleAsync(cfgjson.InsiderChatRole);
                 await member.GrantRoleAsync(insiderChatRole, $"Insiders chat access role selected in #{e.Channel.Name}");
 
@@ -386,7 +386,7 @@ namespace Cliptok.Events
                 await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.DeferredMessageUpdate);
 
                 // Get member
-                var member = await e.Guild.GetMemberAsync(e.User.Id);
+                var member = await e.Guild.CheckAndGetMemberAsync(e.User.Id);
 
                 var insiderChatRole = await e.Guild.GetRoleAsync(cfgjson.InsiderChatRole);
                 await member.RevokeRoleAsync(insiderChatRole, $"Insiders chat access role removed in #{e.Channel.Name}");

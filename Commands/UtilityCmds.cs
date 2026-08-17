@@ -13,7 +13,7 @@ namespace Cliptok.Commands
             DiscordMember member = default;
             try
             {
-                member = await ctx.Guild.GetMemberAsync(user.Id);
+                member = await ctx.Guild.CheckAndGetMemberAsync(user.Id);
             }
             catch (Exception)
             {
@@ -21,7 +21,7 @@ namespace Cliptok.Commands
                 return;
             }
 
-            if (!DiscordHelpers.AllowedToMod(await ctx.Guild.GetMemberAsync(ctx.Client.CurrentUser.Id), member))
+            if (!DiscordHelpers.AllowedToMod(await ctx.Guild.CheckAndGetMemberAsync(ctx.Client.CurrentUser.Id), member))
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} I don't have permission to grant {member.Mention}! Check the role order.");
                 return;

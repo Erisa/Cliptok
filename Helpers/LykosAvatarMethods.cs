@@ -43,11 +43,9 @@
                     "either give none or one of the following: `gif`, `png`, `jpg`, `webp`");
             }
 
-            try
-            {
-                return MemberAvatarURL(await guild.GetMemberAsync(user.Id), format, size);
-            }
-            catch (DSharpPlus.Exceptions.NotFoundException)
+            var member = await guild.CheckAndGetMemberAsync(user.Id);
+            
+            if (member is null)
             {
                 string hash = user.AvatarHash;
 
@@ -66,6 +64,8 @@
 
                 return $"https://cdn.discordapp.com/avatars/{user.Id}/{user.AvatarHash}.{format}?size={size}";
             }
+
+            return MemberAvatarURL(member, format, size);
 
         }
 

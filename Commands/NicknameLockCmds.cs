@@ -14,7 +14,7 @@ namespace Cliptok.Commands
 
             try
             {
-                member = await ctx.Guild.GetMemberAsync(discordUser.Id);
+                member = await ctx.Guild.CheckAndGetMemberAsync(discordUser.Id);
             }
             catch (Exception e)
             {
@@ -68,7 +68,7 @@ namespace Cliptok.Commands
 
             try
             {
-                member = await ctx.Guild.GetMemberAsync(discordUser.Id);
+                member = await ctx.Guild.CheckAndGetMemberAsync(discordUser.Id);
             }
             catch (Exception e)
             {

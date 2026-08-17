@@ -126,7 +126,7 @@
             var channelAfter = e.After is null ? null : await e.After.GetChannelAsync();
             var user = await e.GetUserAsync();
             var guild = await e.GetGuildAsync();
-            var member = await guild.GetMemberAsync(user.Id);
+            var member = await guild.CheckAndGetMemberAsync(user.Id);
 
             if (Program.cfgjson.IgnoredVoiceChannels.Contains(channelAfter.Id))
                 return;
@@ -190,7 +190,7 @@
             var channelBefore = e.Before is null ? null : await e.Before.GetChannelAsync();
             var user = await e.GetUserAsync();
             var guild = await e.GetGuildAsync();
-            var member = await guild.GetMemberAsync(user.Id);
+            var member = await guild.CheckAndGetMemberAsync(user.Id);
 
             if (Program.cfgjson.IgnoredVoiceChannels.Contains(channelBefore.Id))
                 return;

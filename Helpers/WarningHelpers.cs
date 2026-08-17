@@ -225,17 +225,16 @@
             DiscordMessage? dmMessage = null;
             try
             {
-                DiscordMember member = await guild.GetMemberAsync(targetUser.Id);
-                dmMessage = await member.SendMessageAsync(await GenerateWarningDM(reason, channel.Guild, extraWord));
+                DiscordMember member = await guild.CheckAndGetMemberAsync(targetUser.Id);
+                if (member is null)
+                    Program.discord.Logger.LogWarning("Failed to send warning DM to user because they are not in the server: {user}", targetUser.Id);
+                else
+                    dmMessage = await member.SendMessageAsync(await GenerateWarningDM(reason, channel.Guild, extraWord));
             }
             catch (Exception e)
             {
                 // We failed to DM the user.
                 // Lets log this if it isn't a known cause.
-                if (e is DSharpPlus.Exceptions.NotFoundException)
-                {
-                    Program.discord.Logger.LogWarning(e, "Failed to send warning DM to user because they are not in the server: {user}", targetUser.Id);
-                }
                 if (e is not DSharpPlus.Exceptions.UnauthorizedException)
                 {
                     Program.discord.Logger.LogWarning(e, "Failed to send warning DM to user: {user}", targetUser.Id);

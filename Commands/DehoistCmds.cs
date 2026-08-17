@@ -8,12 +8,8 @@ namespace Cliptok.Commands
         [HomeServer, RequireHomeserverPerm(ServerPermLevel.TrialModerator), RequirePermissions(permissions: DiscordPermission.ManageNicknames)]
         public async Task DehoistCmd(CommandContext ctx, [Parameter("member"), Description("The member to dehoist.")] DiscordUser user)
         {
-            DiscordMember member;
-            try
-            {
-                member = await ctx.Guild.GetMemberAsync(user.Id);
-            }
-            catch
+            var member = await ctx.Guild.CheckAndGetMemberAsync(user.Id);
+            if (member is null)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Failed to find {user.Mention} as a member! Are they in the server?", ephemeral: true);
                 return;

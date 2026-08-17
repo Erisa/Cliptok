@@ -92,7 +92,7 @@
             DiscordMember discordMember;
             try
             {
-                discordMember = await guild.GetMemberAsync(discordUser.Id);
+                discordMember = await guild.CheckAndGetMemberAsync(discordUser.Id);
             }
             catch
             {
@@ -150,7 +150,7 @@
                 DiscordMember discordMember;
                 try
                 {
-                    discordMember = await guild.GetMemberAsync(discordUser.Id);
+                    discordMember = await guild.CheckAndGetMemberAsync(discordUser.Id);
                 }
                 catch
                 {

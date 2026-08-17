@@ -165,11 +165,8 @@ namespace Cliptok.Helpers
 
             string avatarUrl = await LykosAvatarMethods.UserOrMemberAvatarURL(user, guild, "default", 256);
 
-            try
-            {
-                member = await guild.GetMemberAsync(user.Id);
-            }
-            catch (DSharpPlus.Exceptions.NotFoundException)
+            member = await guild.CheckAndGetMemberAsync(user.Id);
+            if (member is null)
             {
                 embed = new DiscordEmbedBuilder()
                     .WithThumbnail(avatarUrl)
@@ -441,7 +438,7 @@ namespace Cliptok.Helpers
             {
                 try
                 {
-                    var member = await channel.Guild.GetMemberAsync(message.Author.Id);
+                    var member = await channel.Guild.CheckAndGetMemberAsync(message.Author.Id);
                     if ((await GetPermLevelAsync(member)) >= ServerPermLevel.TrialModerator)
                         return false;
                 }

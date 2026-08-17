@@ -86,7 +86,7 @@ namespace Cliptok.Commands
             {
                 try
                 {
-                    var member = await ctx.Guild.GetMemberAsync(user);
+                    var member = await ctx.Guild.CheckAndGetMemberAsync(user);
                     if (member is not null)
                     {
 
@@ -270,12 +270,8 @@ namespace Cliptok.Commands
                 foreach (string strID in list)
                 {
                     ulong id = Convert.ToUInt64(strID);
-                    DiscordMember member = default;
-                    try
-                    {
-                        member = await ctx.Guild.GetMemberAsync(id);
-                    }
-                    catch (DSharpPlus.Exceptions.NotFoundException)
+                    var member = await ctx.Guild.CheckAndGetMemberAsync(id);
+                    if (member is null)
                     {
                         failedCount++;
                         continue;
