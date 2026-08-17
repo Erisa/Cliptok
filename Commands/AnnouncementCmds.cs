@@ -259,7 +259,7 @@ namespace Cliptok.Commands
                 threadChannel = await messageSent.CreateThreadAsync(threadName, DiscordAutoArchiveDuration.Week, "Creating thread for Insider build.");
 
                 var initialMsg = await threadChannel.SendMessageAsync($"{blogLink}");
-                await initialMsg.PinAsync();
+                await initialMsg.PinAsync(reason: "Pinning Insider build in thread.");
             }
 
             if (Program.cfgjson.InsiderAnnouncementChannel != 0)

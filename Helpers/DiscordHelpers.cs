@@ -510,13 +510,13 @@ namespace Cliptok.Helpers
                     {
                         if (pins.Count > (Program.cfgjson.InsiderThreadKeepLastPins - 1))
                         {
-                            await pin.UnpinAsync();
+                            await pin.UnpinAsync(reason: "Uninning old Insider build in thread.");
                             await Program.redis.SetRemoveAsync("insiderPins", pin.Id);
                         }
                     }
                 }
 
-                await message.PinAsync();
+                await message.PinAsync(reason: "Pinning Insider build in thread.");
                 await Program.redis.SetAddAsync("insiderPins", message.Id);
             }
             catch (Exception e)
