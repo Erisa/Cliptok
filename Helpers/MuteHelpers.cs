@@ -301,13 +301,20 @@
             await Program.redis.HashSetAsync("mutes", naughtyUser.Id, JsonConvert.SerializeObject(newMute));
             MostRecentMute = newMute;
             
-            // attempt to dehoist member if they aren't already dehoisted
-            if (naughtyMember is not null && naughtyMember.DisplayName[0] != DehoistHelpers.dehoistCharacter)
-                await naughtyMember.ModifyAsync(x =>
-                {
-                    x.Nickname = DehoistHelpers.DehoistName(naughtyMember.DisplayName);
-                    x.AuditLogReason = "[Automatic dehoist on mute]";
-                });
+            try
+            {
+                // attempt to dehoist member if they aren't already dehoisted
+                if (naughtyMember is not null && naughtyMember.DisplayName[0] != DehoistHelpers.dehoistCharacter)
+                    await naughtyMember.ModifyAsync(x =>
+                    {
+                        x.Nickname = DehoistHelpers.DehoistName(naughtyMember.DisplayName);
+                        x.AuditLogReason = "[Automatic dehoist on mute]";
+                    });
+            }
+            catch
+            {
+                // oh well
+            }
 
             return output;
         }
@@ -505,12 +512,19 @@
                 var undehoistedNickname = member.Nickname[1..];
                 if (undehoistedNickname == member.GlobalName || (member.GlobalName is null && undehoistedNickname == member.Username))
                     undehoistedNickname = null;
-                
-                await member.ModifyAsync(x =>
+
+                try
                 {
-                    x.Nickname = undehoistedNickname;
-                    x.AuditLogReason = "[Automatic undehoist on unmute]";
-                });
+                    await member.ModifyAsync(x =>
+                    {
+                        x.Nickname = undehoistedNickname;
+                        x.AuditLogReason = "[Automatic undehoist on unmute]";
+                    });
+                }
+                catch
+                {
+                    // oh well
+                }
             }
 
             return true;
