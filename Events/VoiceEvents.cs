@@ -93,7 +93,7 @@
                         PendingPurge.Remove(channelBefore.Id);
 
                         Program.discord.Logger.LogDebug("[Voice Purge] Purging {count} messages in {channel}", messages.Count, channelBefore.Name);
-                        await channelBefore.DeleteMessagesAsync(messages);
+                        await channelBefore.DeleteMessagesAsync(messages, "Purging messages from empty voice channel.");
                         Program.discord.Logger.LogDebug("[Voice Purge] Successfully purged {count} messages in {channel}", messages.Count, channelBefore.Name);
                     }
                     catch (Exception ex)

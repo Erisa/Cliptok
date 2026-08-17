@@ -181,16 +181,16 @@ namespace Cliptok.Commands
                     pingMsgString += "\n\nDiscuss it in the thread below:";
                 }
 
-                await insiderRole1.ModifyAsync(mentionable: true);
+                await insiderRole1.ModifyAsync(mentionable: true, reason: "Making role mentionable for Insider build announcement.");
                 if (insiderChannel2 != default)
-                    await insiderRole2.ModifyAsync(mentionable: true);
+                    await insiderRole2.ModifyAsync(mentionable: true, reason: "Making role mentionable for Insider build announcement.");
 
                 await ctx.RespondAsync(pingMsgString);
                 messageSent = await ctx.GetResponseAsync();
 
-                await insiderRole1.ModifyAsync(mentionable: false);
+                await insiderRole1.ModifyAsync(mentionable: false, reason: "Restoring role state after Insider build announcement.");
                 if (insiderChannel2 != default)
-                    await insiderRole2.ModifyAsync(mentionable: false);
+                    await insiderRole2.ModifyAsync(mentionable: false, reason: "Restoring role state after Insider build announcement.");
             }
             else
             {
@@ -269,15 +269,15 @@ namespace Cliptok.Commands
                     pingMsgString += $" & {threadChannel2.Mention}";
 
                 var announcementChannel = await ctx.Client.GetChannelAsync(Program.cfgjson.InsiderAnnouncementChannel);
-                await insiderRole1.ModifyAsync(mentionable: true);
+                await insiderRole1.ModifyAsync(mentionable: true, reason: "Making role mentionable for Insider build announcement.");
                 if (insiderChannel2 != default)
-                    await insiderRole2.ModifyAsync(mentionable: true);
+                    await insiderRole2.ModifyAsync(mentionable: true, reason: "Making role mentionable for Insider build announcement.");
 
                 var msg = await announcementChannel.SendMessageAsync(pingMsgString);
 
-                await insiderRole1.ModifyAsync(mentionable: false);
+                await insiderRole1.ModifyAsync(mentionable: false, reason: "Restoring role state after Insider build announcement.");
                 if (insiderChannel2 != default)
-                    await insiderRole2.ModifyAsync(mentionable: false);
+                    await insiderRole2.ModifyAsync(mentionable: false, reason: "Restoring role state after Insider build announcement.");
 
                 if (announcementChannel.Type is DiscordChannelType.News)
                     await announcementChannel.CrosspostMessageAsync(msg);
@@ -399,9 +399,9 @@ namespace Cliptok.Commands
             DiscordRole insiderRole1 = await ctx.Guild.GetRoleAsync(insiderChannel1);
             DiscordRole insiderRole2 = insiderChannel2 == default ? default : await ctx.Guild.GetRoleAsync(insiderChannel2);
 
-            await insiderRole1.ModifyAsync(mentionable: true);
+            await insiderRole1.ModifyAsync(mentionable: true, reason: "Making role mentionable for Insider announcement.");
             if (insiderRole2 != default)
-                await insiderRole2.ModifyAsync(mentionable: true);
+                await insiderRole2.ModifyAsync(mentionable: true, reason: "Making role mentionable for Insider announcement.");
 
             try
             {
@@ -416,9 +416,9 @@ namespace Cliptok.Commands
                 // We still need to remember to make it unmentionable even if the msg fails.
             }
 
-            await insiderRole1.ModifyAsync(mentionable: false);
+            await insiderRole1.ModifyAsync(mentionable: false, reason: "Restoring role state after Insider announcement.");
             if (insiderRole2 != default)
-                await insiderRole2.ModifyAsync(mentionable: false);
+                await insiderRole2.ModifyAsync(mentionable: false, reason: "Restoring role state after Insider announcement.");
 
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Success} Announcement sent successfully!");
         }
