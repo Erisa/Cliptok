@@ -102,6 +102,12 @@ namespace Cliptok.Commands
             [Parameter("time"), Description("The length of time to lock the channels for.")] string time = null,
             [Parameter("lockthreads"), Description("Whether to lock threads. Disables sending messages, but does not archive them.")] bool lockThreads = false)
         {
+            if (Program.cfgjson.PublicFacingChannels.Count == 0)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Denied} There are no lockdown channels configured! Please contact a bot maintainer if this is unexpected.");
+                return;
+            }
+
             if (ctx is SlashCommandContext)
                 await ctx.DeferResponseAsync();
 
@@ -201,8 +207,14 @@ namespace Cliptok.Commands
         [Description("Unlock all lockable channels in the server. See also: lockdown all")]
         public async Task UnlockAllCommand(CommandContext ctx, [Parameter("reason"), Description("The reason for the unlock.")] string reason = "")
         {
+            if (Program.cfgjson.PublicFacingChannels.Count == 0)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Denied} There are no lockdown channels configured! Please contact a bot maintainer if this is unexpected.");
+                return;
+            }
+
             if (ctx is SlashCommandContext)
-                ctx.DeferResponseAsync();
+                await ctx.DeferResponseAsync();
 
             LockdownCmds.ongoingLockdown = true;
             if (ctx is SlashCommandContext)

@@ -46,7 +46,7 @@ namespace Cliptok.Events
             if (e.User.Id == discord.CurrentUser.Id)
                 return;
 
-            if (e.Channel.Id != cfgjson.LogChannels["investigations"].ChannelId && e.Channel.Id != cfgjson.LogChannels["mod"].ChannelId)
+            if (e.Channel.Id != LogChannelHelper.GetLogChannelId("investigations") && e.Channel.Id != LogChannelHelper.GetLogChannelId("mod"))
                 return;
 
             if (cfgjson.ReactionEmoji is null)

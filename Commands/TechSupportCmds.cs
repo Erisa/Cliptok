@@ -52,7 +52,7 @@ namespace Cliptok.Commands
             else
             {
                 message = $"**__Need Help Or Have a Problem{(user == default ? "" : $", {user.Mention}")}?__**\n" +
-                          $"You're probably looking for <#{Program.cfgjson.TechSupportChannel}> or <#{Program.cfgjson.SupportForumId}>!\n\n" +
+                          $"You're probably looking for <#{Program.cfgjson.TechSupportChannel}>{(Program.cfgjson.SupportForumId == 0 ? "" : $" or <#{Program.cfgjson.SupportForumId}>")}!\n\n" +
                           $"Once there, please be sure to provide **plenty of details,** follow the guidelines, ping the <@&{Program.cfgjson.CommunityTechSupportRoleID}> role, and *be patient!*\n\n" +
                           $"Look under the `🔧 Support` category for the appropriate channel for your issue. See <#413274922413195275> for more info.\n\n" +
                           $"**__Need Help With Your Account?__**\n" +
@@ -113,6 +113,12 @@ namespace Cliptok.Commands
         {
             await ctx.DeferResponseAsync(ephemeral: true);
 
+            if (Program.cfgjson.SupportForumId == 0)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} The tech support forum channel is not configured! Please contact a bot maintainer.", ephemeral: true);
+                return;
+            }
+
             // Restrict to #tech-support-forum posts
             if (ctx.Channel.Parent is null || ctx.Channel.Parent.Id != Program.cfgjson.SupportForumId)
             {
@@ -126,7 +132,7 @@ namespace Cliptok.Commands
             // Restrict to OP or TQS members
             if (ctx.User.Id != channel.CreatorId && await GetPermLevelAsync(ctx.Member) < ServerPermLevel.TechnicalQueriesSlayer)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Only the original poster or a <@&{Program.cfgjson.TqsRoleId}> can mark this post as solved!");
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Only the original poster{(Program.cfgjson.TqsRoleId == 0 ? "" : $" or a <@&{Program.cfgjson.TqsRoleId}>")} can mark this post as solved!");
                 return;
             }
 
@@ -215,17 +221,27 @@ namespace Cliptok.Commands
                 return;
             }
 
-            // Only allow usage in #tech-support, #tech-support-forum, and their threads + #bot-commands
-            if (ctx.Channel.Id != Program.cfgjson.TechSupportChannel &&
-                ctx.Channel.Id != Program.cfgjson.SupportForumId &&
-                ctx.Channel.Parent.Id != Program.cfgjson.TechSupportChannel &&
-                ctx.Channel.Parent.Id != Program.cfgjson.SupportForumId &&
-                ctx.Channel.Id != Program.cfgjson.BotCommandsChannel)
+            List<ulong> allowedChannels = [
+                Program.cfgjson.TechSupportChannel,
+                Program.cfgjson.SupportForumId,
+                Program.cfgjson.BotCommandsChannel
+            ];
+            allowedChannels.RemoveAll(x => x == 0);
+
+            if (allowedChannels.Count == 0)
             {
                 if (ctx is SlashCommandContext)
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} This command can only be used in <#{Program.cfgjson.TechSupportChannel}>, <#{Program.cfgjson.SupportForumId}>, and threads in those channels!"));
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} There are no allowed channels for this command! Please contact a bot maintainer."));
                 else
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command can only be used in <#{Program.cfgjson.TechSupportChannel}>, <#{Program.cfgjson.SupportForumId}>, and threads in those channels!");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} There are no allowed channels for this command! Please contact a bot maintainer.");
+                return;
+            }
+            else if (!allowedChannels.Contains(ctx.Channel.Id) && !allowedChannels.Contains(ctx.Channel.Parent.Id))
+            {
+                if (ctx is SlashCommandContext)
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} This command can only be used in {string.Join(", ", allowedChannels.Select(x => $"<#{x}>"))} and threads in {(allowedChannels.Count > 1 ? "those channels" : "that channel")}!"));
+                else
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command can only be used in {string.Join(", ", allowedChannels.Select(x => $"<#{x}>"))} and threads in {(allowedChannels.Count > 1 ? "those channels" : "that channel")}!");
                 return;
             }
 
@@ -285,16 +301,27 @@ namespace Cliptok.Commands
             }
 
             // Only allow usage in #tech-support, #tech-support-forum, and their threads + #bot-commands
-            if (ctx.Channel.Id != Program.cfgjson.TechSupportChannel &&
-                ctx.Channel.Id != Program.cfgjson.SupportForumId &&
-                ctx.Channel.Parent.Id != Program.cfgjson.TechSupportChannel &&
-                ctx.Channel.Parent.Id != Program.cfgjson.SupportForumId &&
-                ctx.Channel.Id != Program.cfgjson.BotCommandsChannel)
+            List<ulong> allowedChannels = [
+                Program.cfgjson.TechSupportChannel,
+                Program.cfgjson.SupportForumId,
+                Program.cfgjson.BotCommandsChannel
+            ];
+            allowedChannels.RemoveAll(x => x == 0);
+
+            if (allowedChannels.Count == 0)
             {
                 if (ctx is SlashCommandContext)
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} This command can only be used in <#{Program.cfgjson.TechSupportChannel}>, <#{Program.cfgjson.SupportForumId}>, and threads in those channels!"));
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} There are no allowed channels for this command! Please contact a bot maintainer."));
                 else
-                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command can only be used in <#{Program.cfgjson.TechSupportChannel}>, <#{Program.cfgjson.SupportForumId}>, their threads, and <#{Program.cfgjson.BotCommandsChannel}>!");
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} There are no allowed channels for this command! Please contact a bot maintainer.");
+                return;
+            }
+            else if (!allowedChannels.Contains(ctx.Channel.Id) && !allowedChannels.Contains(ctx.Channel.Parent.Id))
+            {
+                if (ctx is SlashCommandContext)
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} This command can only be used in {string.Join(", ", allowedChannels.Select(x => $"<#{x}>"))} and threads in {(allowedChannels.Count > 1 ? "those channels" : "that channel")}!"));
+                else
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command can only be used in {string.Join(", ", allowedChannels.Select(x => $"<#{x}>"))} and threads in {(allowedChannels.Count > 1 ? "those channels" : "that channel")}!");
                 return;
             }
 

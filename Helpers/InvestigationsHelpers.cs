@@ -65,7 +65,7 @@
                 logMsg = await channelOverride.SendMessageAsync(new DiscordMessageBuilder().WithContent(content).AddEmbed(embed).WithAllowedMentions(Mentions.None));
 
             // Add reaction to log message to be used to delete
-            if (logChannelKey == "investigations" && channelOverride == default && Program.cfgjson.ReactionEmoji is not null && userWasWarned)
+            if (Program.cfgjson.WarningLogReactionTimeMinutes > 0 && logChannelKey == "investigations" && channelOverride == default && Program.cfgjson.ReactionEmoji is not null && userWasWarned)
             {
                 var emoji = await Program.discord.GetApplicationEmojiAsync(Program.cfgjson.ReactionEmoji.Delete);
                 await logMsg.CreateReactionAsync(emoji);

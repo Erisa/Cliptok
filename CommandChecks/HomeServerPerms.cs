@@ -36,22 +36,29 @@
 
             bool HasRole(ulong roleId) => target.Roles.Any(r => r.Id == roleId);
 
-            return HasRole(Program.cfgjson.AdminRole) ? ServerPermLevel.Admin
-                : HasRole(Program.cfgjson.ModRole) ? ServerPermLevel.Moderator
-                : HasRole(Program.cfgjson.MutedRole) ? ServerPermLevel.Muted
-                : HasRole(Program.cfgjson.TrialModRole) ? ServerPermLevel.TrialModerator
-                : HasRole(Program.cfgjson.TqsRoleId) ? ServerPermLevel.TechnicalQueriesSlayer
-                : HasRole(Program.cfgjson.TierRoles[9]) ? ServerPermLevel.TierX
-                : HasRole(Program.cfgjson.TierRoles[8]) ? ServerPermLevel.TierS
-                : HasRole(Program.cfgjson.TierRoles[7]) ? ServerPermLevel.Tier8
-                : HasRole(Program.cfgjson.TierRoles[6]) ? ServerPermLevel.Tier7
-                : HasRole(Program.cfgjson.TierRoles[5]) ? ServerPermLevel.Tier6
-                : HasRole(Program.cfgjson.TierRoles[4]) ? ServerPermLevel.Tier5
-                : HasRole(Program.cfgjson.TierRoles[3]) ? ServerPermLevel.Tier4
-                : HasRole(Program.cfgjson.TierRoles[2]) ? ServerPermLevel.Tier3
-                : HasRole(Program.cfgjson.TierRoles[1]) ? ServerPermLevel.Tier2
-                : HasRole(Program.cfgjson.TierRoles[0]) ? ServerPermLevel.Tier1
-                : ServerPermLevel.Nothing;
+            try
+            {
+                return HasRole(Program.cfgjson.AdminRole) ? ServerPermLevel.Admin
+                    : HasRole(Program.cfgjson.ModRole) ? ServerPermLevel.Moderator
+                    : HasRole(Program.cfgjson.MutedRole) ? ServerPermLevel.Muted
+                    : HasRole(Program.cfgjson.TrialModRole) ? ServerPermLevel.TrialModerator
+                    : HasRole(Program.cfgjson.TqsRoleId) ? ServerPermLevel.TechnicalQueriesSlayer
+                    : HasRole(Program.cfgjson.TierRoles[9]) ? ServerPermLevel.TierX
+                    : HasRole(Program.cfgjson.TierRoles[8]) ? ServerPermLevel.TierS
+                    : HasRole(Program.cfgjson.TierRoles[7]) ? ServerPermLevel.Tier8
+                    : HasRole(Program.cfgjson.TierRoles[6]) ? ServerPermLevel.Tier7
+                    : HasRole(Program.cfgjson.TierRoles[5]) ? ServerPermLevel.Tier6
+                    : HasRole(Program.cfgjson.TierRoles[4]) ? ServerPermLevel.Tier5
+                    : HasRole(Program.cfgjson.TierRoles[3]) ? ServerPermLevel.Tier4
+                    : HasRole(Program.cfgjson.TierRoles[2]) ? ServerPermLevel.Tier3
+                    : HasRole(Program.cfgjson.TierRoles[1]) ? ServerPermLevel.Tier2
+                    : HasRole(Program.cfgjson.TierRoles[0]) ? ServerPermLevel.Tier1
+                    : ServerPermLevel.Nothing;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return ServerPermLevel.Nothing;
+            }
         }
 
         [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]

@@ -240,6 +240,14 @@ namespace Cliptok.Events
             {
                 // Shows a menu in #insider-info that allows a user to toggle their Insider roles
 
+                if (Program.cfgjson.InsiderRoles.Count == 0)
+                {
+                    await e.Interaction.CreateResponseAsync(DiscordInteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Error} Insider roles are not configured! Please contact a bot maintainer.")
+                        .AsEphemeral(true));
+                    return;
+                }
+
                 // Defer interaction
                 await e.Interaction.DeferAsync(ephemeral: true);
 
@@ -324,7 +332,18 @@ namespace Cliptok.Events
                 var member = await e.Guild.CheckAndGetMemberAsync(e.User.Id);
 
                 // Get insider chat role
-                var insiderChatRole = await e.Guild.GetRoleAsync(cfgjson.InsiderChatRole);
+                DiscordRole insiderChatRole;
+                try
+                {
+                    insiderChatRole = await e.Guild.GetRoleAsync(cfgjson.InsiderChatRole);
+                }
+                catch (DSharpPlus.Exceptions.NotFoundException)
+                {
+                    await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Error} The Insider chat role is not set up! Please contact a bot maintainer."));
+                    return;
+                }
+
 
                 // Check whether member already has any insider roles
                 if (Program.cfgjson.InsiderRoles is not null && member.Roles.Any(x => Program.cfgjson.InsiderRoles.Contains(x.Id)))
