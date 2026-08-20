@@ -89,9 +89,15 @@
                 List<DiscordChannel> channelsToSearch;
                 if (multiChannel)
                 {
-                    var clearChannelIds = Program.cfgjson.PublicFacingChannels is not null
+                    var clearChannelIds = Program.cfgjson.PublicFacingChannels.Count > 0
                         ? Program.cfgjson.PublicFacingChannels
                         : Program.cfgjson.LockdownEnabledChannels;
+
+                    if (clearChannelIds.Count == 0)
+                    {
+                        await ctx.EditResponseAsync($"{Program.cfgjson.Emoji.Error} The list of public channels is missing, so multi-channel clear is unavailable! Please contact a bot maintainer if this is unexpected.");
+                        return;
+                    }
 
                     channelsToSearch = ctx.Guild.Channels.Values.Where(x => clearChannelIds.Contains(x.Id)).ToList();
                 }
