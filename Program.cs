@@ -114,7 +114,7 @@ namespace Cliptok
                     break;
             }
 
-            if (cfgjson.LokiURL is not null && cfgjson.LokiServiceName is not null)
+            if (!String.IsNullOrEmpty(cfgjson.LokiURL) && !String.IsNullOrEmpty(cfgjson.LokiServiceName))
             {
                 loggerConfig.WriteTo.GrafanaLoki(cfgjson.LokiURL, [new LokiLabel { Key = "app", Value = cfgjson.LokiServiceName }]);
             }
