@@ -30,7 +30,12 @@ namespace Cliptok.Commands
             [Parameter("lockdown"), Description("Set 0 to not lock. Lock the channel for a certain period of time after announcing the build.")] string lockdownTime = "auto",
             [Parameter("force_reannounce"), Description("Whether to ignore the check for duplicate announcements and send this one anyway.")] bool forceReannounce = false)
         {
-            if (Program.cfgjson.InsidersChannel != 0 && ctx.Channel.Id != Program.cfgjson.InsidersChannel)
+            if (Program.cfgjson.InsidersChannel == 0)
+            {
+                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} The Insiders channel is not configured! Please contact a bot maintainer if this is unexpected.", ephemeral: true);
+                return;
+            }
+            else if (Program.cfgjson.InsidersChannel != 0 && ctx.Channel.Id != Program.cfgjson.InsidersChannel)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command only works in <#{Program.cfgjson.InsidersChannel}>!", ephemeral: true);
                 return;

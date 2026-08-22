@@ -42,7 +42,7 @@
                 DiscordMember targetMember = await guild.CheckAndGetMemberAsync(targetUserId);
                 if (permaBan)
                 {
-                    if (appealable)
+                    if (appealable && !string.IsNullOrEmpty(Program.cfgjson.AppealLink))
                     {
                         if (compromisedAccount)
                             output.dmMessage = await targetMember.SendMessageAsync($"{Program.cfgjson.Emoji.Banned} You have been banned from **{guild.Name}**!\nReason: **{reason}**\nYou can appeal the ban here: <{Program.cfgjson.AppealLink}>\nBefore appealing, please follow these steps to protect your account:\n1. Reset your Discord account password. Even if you use MFA, this will reset all session tokens.\n2. Review active sessions and authorised app connections.\n3. Ensure your PC is free of malware.\n4. [Enable MFA](https://support.discord.com/hc/en-us/articles/219576828-Setting-up-Multi-Factor-Authentication) if not already.");

@@ -89,9 +89,15 @@
                 List<DiscordChannel> channelsToSearch;
                 if (multiChannel)
                 {
-                    var clearChannelIds = Program.cfgjson.PublicFacingChannels is not null
+                    var clearChannelIds = Program.cfgjson.PublicFacingChannels.Count > 0
                         ? Program.cfgjson.PublicFacingChannels
                         : Program.cfgjson.LockdownEnabledChannels;
+
+                    if (clearChannelIds.Count == 0)
+                    {
+                        await ctx.EditResponseAsync($"{Program.cfgjson.Emoji.Error} The list of public channels is missing, so multi-channel clear is unavailable! Please contact a bot maintainer if this is unexpected.");
+                        return;
+                    }
 
                     channelsToSearch = ctx.Guild.Channels.Values.Where(x => clearChannelIds.Contains(x.Id)).ToList();
                 }
@@ -268,12 +274,6 @@
                     messagesToClear.Remove(messagesForChannel.Key);
             }
 
-            if (messagesToClear.Count == 0)
-            {
-                await ctx.FollowupAsync(new DiscordFollowupMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} All of the messages to delete are older than 2 weeks, so I can't delete them!").AsEphemeral(true));
-                return;
-            }
-
             // All filters checked. 'messagesToClear' is now our final list of messages to delete, by channel
 
             if (dryRun)
@@ -295,10 +295,10 @@
             }
             else
             {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Loading} Deleting messages. This may take a while..."));
-
                 if (messagesToClear.Count >= 1)
                 {
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Loading} Deleting messages. This may take a while..."));
+                    
                     foreach (var messagesForChannel in messagesToClear)
                     {
                         channel = ctx.Guild.Channels[messagesForChannel.Key];
@@ -326,7 +326,7 @@
                 }
                 else
                 {
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} There were no messages that matched all of the arguments you provided! Nothing to do."));
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{Program.cfgjson.Emoji.Error} There were no messages sent less than 2 weeks ago that matched all of the arguments you provided! Nothing to do."));
                 }
             }
         }

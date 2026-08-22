@@ -3,19 +3,19 @@
     public class ConfigJson
     {
         [JsonProperty("core")]
-        public CoreConfig Core { get; private set; }
+        public CoreConfig Core { get; private set; } = new();
 
         [JsonProperty("redis")]
-        public RedisConfig Redis { get; private set; }
+        public RedisConfig Redis { get; private set; } = null;
 
         [JsonProperty("trialModRole")]
-        public ulong TrialModRole { get; private set; }
+        public ulong TrialModRole { get; private set; } = 0;
 
         [JsonProperty("modRole")]
-        public ulong ModRole { get; private set; }
+        public ulong ModRole { get; private set; } = 0;
 
         [JsonProperty("adminRole")]
-        public ulong AdminRole { get; private set; }
+        public ulong AdminRole { get; private set; } = 0;
 
         [JsonProperty("logChannel")]
         public ulong LogChannel { get; private set; } = 0;
@@ -24,85 +24,85 @@
         public ulong UserLogChannel { get; private set; } = 0;
 
         [JsonProperty("serverID")]
-        public ulong ServerID { get; private set; }
+        public ulong ServerID { get; private set; } = 0;
 
         [JsonProperty("homeChannel")]
         public ulong HomeChannel { get; private set; } = 0;
 
         [JsonProperty("emoji")]
-        public EmojiJson Emoji { get; private set; }
+        public EmojiJson Emoji { get; private set; } = new();
 
         [JsonProperty("mutedRole")]
-        public ulong MutedRole { get; private set; }
+        public ulong MutedRole { get; private set; } = 0;
 
         [JsonProperty("warningDaysThreshold")]
-        public int WarningDaysThreshold { get; private set; }
+        public int WarningDaysThreshold { get; private set; } = 0;
 
         [JsonProperty("autoMuteThresholds")]
-        public Dictionary<string, int> AutoMuteThresholds { get; private set; }
+        public Dictionary<string, int> AutoMuteThresholds { get; private set; } = new();
 
         [JsonProperty("recentWarningsPeriodHours")]
-        public int RecentWarningsPeriodHours { get; private set; }
+        public int RecentWarningsPeriodHours { get; private set; } = 0;
 
         [JsonProperty("recentWarningsAutoMuteThresholds")]
-        public Dictionary<string, int> RecentWarningsAutoMuteThresholds { get; private set; }
+        public Dictionary<string, int> RecentWarningsAutoMuteThresholds { get; private set; } = new();
 
         [JsonProperty("insiderRoles")]
-        public List<ulong> InsiderRoles { get; private set; }
+        public List<ulong> InsiderRoles { get; private set; } = new();
 
         [JsonProperty("insiderChatRole")]
-        public ulong InsiderChatRole { get; private set; }
+        public ulong InsiderChatRole { get; private set; } = 0;
 
         [JsonProperty("giveawaysRole")]
-        public ulong GiveawaysRole { get; private set; }
+        public ulong GiveawaysRole { get; private set; } = 0;
 
         [JsonProperty("restrictedWords")]
-        public List<string> RestrictedWords { get; private set; }
+        public List<string> RestrictedWords { get; private set; } = new();
 
         [JsonProperty("massMentionThreshold")]
-        public int MassMentionThreshold { get; private set; }
+        public int MassMentionThreshold { get; private set; } = 0;
 
         [JsonProperty("massEmojiThreshold")]
-        public int MassEmojiThreshold { get; private set; }
+        public int? MassEmojiThreshold { get; private set; } = 0;
 
         [JsonProperty("tierRoles")]
-        public List<ulong> TierRoles { get; private set; }
+        public List<ulong> TierRoles { get; private set; } = new();
 
         [JsonProperty("inviteExclusion")]
-        public List<string> InviteExclusion { get; private set; }
+        public List<string> InviteExclusion { get; private set; } = new();
 
         [JsonProperty("inviteIDExclusion")]
-        public List<ulong> InviteIDExclusion { get; private set; }
+        public List<ulong> InviteIDExclusion { get; private set; } = new();
 
         [JsonProperty("inviteTierRequirement")]
-        public int InviteTierRequirement { get; private set; }
+        public int InviteTierRequirement { get; private set; } = 0;
 
         [JsonProperty("unrestrictedEmojiChannels")]
-        public List<ulong> UnrestrictedEmojiChannels { get; private set; }
+        public List<ulong> UnrestrictedEmojiChannels { get; private set; } = new();
 
         [JsonProperty("wordLists")]
-        public List<WordListJson> WordListList { get; private set; }
+        public List<WordListJson> WordListList { get; private set; } = new();
 
         [JsonProperty("lockdownEnabledChannels")]
-        public List<ulong> LockdownEnabledChannels { get; private set; }
+        public List<ulong> LockdownEnabledChannels { get; private set; } = new();
 
         [JsonProperty("publicFacingChannels")]
-        public List<ulong> PublicFacingChannels { get; private set; }
+        public List<ulong> PublicFacingChannels { get; private set; } = new();
 
         [JsonProperty("heartosoftId")]
-        public ulong HeartosoftId { get; private set; }
+        public ulong HeartosoftId { get; private set; } = 0;
 
         [JsonProperty("autoDehoistCharacters")]
-        public string AutoDehoistCharacters { get; private set; }
+        public string AutoDehoistCharacters { get; private set; } = "";
 
         [JsonProperty("investigationsChannel")]
-        public ulong InvestigationsChannelId { get; private set; }
+        public ulong InvestigationsChannelId { get; private set; } = 0;
 
         [JsonProperty("appealLink")]
-        public string AppealLink { get; private set; }
+        public string AppealLink { get; private set; } = "";
 
         [JsonProperty("communityTechSupportRoleID")]
-        public ulong CommunityTechSupportRoleID { get; private set; }
+        public ulong CommunityTechSupportRoleID { get; private set; } = 0;
 
         [JsonProperty("techSupportChannel")]
         public ulong TechSupportChannel { get; private set; } = 0;
@@ -111,13 +111,13 @@
         public ulong SupportLogChannel { get; private set; } = 0;
 
         [JsonProperty("supportRatelimitMinutes")]
-        public int SupportRatelimitMinutes { get; private set; }
+        public int SupportRatelimitMinutes { get; private set; } = 1;
 
         [JsonProperty("massMentionBanThreshold")]
-        public int MassMentionBanThreshold { get; private set; }
+        public int MassMentionBanThreshold { get; private set; } = 0;
 
         [JsonProperty("secondaryAutoDehoistCharacters")]
-        public string SecondaryAutoDehoistCharacters { get; private set; }
+        public string SecondaryAutoDehoistCharacters { get; private set; } = "";
 
         [JsonProperty("modmailUserId")]
         public ulong ModmailUserId { get; private set; } = 0;
@@ -126,28 +126,28 @@
         public string HastebinEndpoint { get; private set; } = "";
 
         [JsonProperty("modmailCategory")]
-        public ulong ModmailCategory { get; private set; }
+        public ulong ModmailCategory { get; private set; } = 0;
 
         [JsonProperty("lineLimit")]
-        public int LineLimit { get; private set; }
+        public int LineLimit { get; private set; } = 0;
 
         [JsonProperty("increasedLineLimit")]
-        public int IncreasedLineLimit { get; private set; }
+        public int IncreasedLineLimit { get; private set; } = 0;
 
         [JsonProperty("lineLimitTier")]
-        public int LineLimitTier { get; private set; }
+        public int LineLimitTier { get; private set; } = 0;
 
         [JsonProperty("lineLimitExcludedChannels")]
-        public List<ulong> LineLimitExcludedChannels { get; private set; }
+        public List<ulong> LineLimitExcludedChannels { get; private set; } = new();
 
         [JsonProperty("giveawaysChannel")]
         public ulong GiveawaysChannel { get; private set; } = 0;
 
         [JsonProperty("giveawayBot")]
-        public ulong GiveawayBot { get; private set; }
+        public ulong GiveawayBot { get; private set; } = 0;
 
         [JsonProperty("giveawayTriggerMessage")]
-        public string GiveawayTriggerMessage { get; private set; }
+        public string GiveawayTriggerMessage { get; private set; } = "";
 
         [JsonProperty("githubWorkflow")]
         public WorkflowConfig GitHubWorkflow { get; private set; } = default;
@@ -159,7 +159,7 @@
         public List<ulong> EveryoneExcludedChannels { get; private set; } = new();
 
         [JsonProperty("gitListDirectory")]
-        public string GitListDirectory { get; private set; }
+        public string GitListDirectory { get; private set; } = "";
 
         [JsonProperty("dmLogChannelId")]
         public ulong DmLogChannelId { get; private set; } = 0;
@@ -174,7 +174,7 @@
         public bool EveryoneFilter { get; private set; } = false;
 
         [JsonProperty("logChannels")]
-        public Dictionary<string, LogChannelConfig> LogChannels { get; private set; }
+        public Dictionary<string, LogChannelConfig> LogChannels { get; private set; } = new();
 
         [JsonProperty("botOwners")]
         public List<ulong> BotOwners { get; private set; } = new();
@@ -198,12 +198,12 @@
         public ulong FeedbackHubForum { get; private set; } = 0;
 
         [JsonProperty("insiderInfoChannel")]
-        public ulong InsiderInfoChannel { get; private set; }
+        public ulong InsiderInfoChannel { get; private set; } = 0;
 
         [JsonProperty("insiderAnnouncementChannel")]
         public ulong InsiderAnnouncementChannel { get; private set; } = 0;
 
-        private ulong insidersChannel;
+        private ulong insidersChannel = 0;
         [JsonProperty("insidersChannel")]
         public ulong InsidersChannel
         {
@@ -227,16 +227,16 @@
         public ulong TqsMutedRole { get; private set; } = 0;
 
         [JsonProperty("tqsMuteDurationHours")]
-        public int TqsMuteDurationHours { get; private set; }
+        public int TqsMuteDurationHours { get; private set; } = 0;
 
         [JsonProperty("autoWarnMsgAutoDeleteDays")]
-        public int AutoWarnMsgAutoDeleteDays { get; private set; }
+        public int AutoWarnMsgAutoDeleteDays { get; private set; } = 0;
 
         [JsonProperty("autoWarnMsgAutoDeleteHours")]
-        public int AutoWarnMsgAutoDeleteHours { get; private set; }
+        public int AutoWarnMsgAutoDeleteHours { get; private set; } = 0;
 
         [JsonProperty("compromisedAccountBanMsgAutoDeleteDays")]
-        public int CompromisedAccountBanMsgAutoDeleteDays { get; private set; }
+        public int CompromisedAccountBanMsgAutoDeleteDays { get; private set; } = 0;
 
         [JsonProperty("logLevel")]
         public Level LogLevel { get; private set; } = Level.Information;
@@ -248,7 +248,7 @@
         public string LokiServiceName { get; private set; } = null;
 
         [JsonProperty("voiceChannelPurge")]
-        public bool VoiceChannelPurge { get; private set; } = true;
+        public bool VoiceChannelPurge { get; private set; } = false;
 
         [JsonProperty("forumChannelAutoWarnFallbackChannel")]
         public ulong ForumChannelAutoWarnFallbackChannel { get; private set; } = 0;
@@ -266,7 +266,7 @@
         public string GithubWorkflowSucessString { get; private set; } = "";
 
         [JsonProperty("botCommandsChannel")]
-        public ulong BotCommandsChannel { get; private set; }
+        public ulong BotCommandsChannel { get; private set; } = 0;
 
         [JsonProperty("duplicateMessageThreshold")]
         public int DuplicateMessageThreshold { get; private set; } = 0;
@@ -278,7 +278,7 @@
         public int InsiderThreadKeepLastPins { get; private set; } = 50; // 50 is the pin limit, so it would be silly to allow infinite
 
         [JsonProperty("warningLogReactionTimeMinutes")]
-        public int WarningLogReactionTimeMinutes { get; private set; }
+        public int WarningLogReactionTimeMinutes { get; private set; } = 0;
 
         [JsonProperty("enablePersistentDb")]
         public bool EnablePersistentDb { get; set; } = false;
@@ -302,7 +302,7 @@
         public List<ulong> MessageLogExcludedChannels { get; set; } = new();
 
         [JsonProperty("reactionEmoji")]
-        public ReactionEmojiConfig ReactionEmoji { get; set; }
+        public ReactionEmojiConfig ReactionEmoji { get; set; } = null;
 
         [JsonProperty("autoModRules")]
         public List<AutoModRuleConfig> AutoModRules { get; set; } = new();
@@ -323,10 +323,10 @@
     public class AutoModRuleConfig
     {
         [JsonProperty("ruleId")]
-        public ulong RuleId { get; private set; }
+        public ulong RuleId { get; private set; } = 0;
 
         [JsonProperty("action")]
-        public string Action { get; private set; }
+        public string Action { get; private set; } = "";
 
         [JsonProperty("reason")]
         public string Reason { get; private set; } = "Automod rule violation";
@@ -335,30 +335,30 @@
     public class WorkflowConfig
     {
         [JsonProperty("repo")]
-        public string Repo { get; private set; }
+        public string Repo { get; private set; } = "";
 
         [JsonProperty("ref")]
-        public string Ref { get; private set; }
+        public string Ref { get; private set; } = "";
 
         [JsonProperty("workflowId")]
-        public string WorkflowId { get; private set; }
+        public string WorkflowId { get; private set; } = "";
     }
 
     public class WordListJson
     {
         [JsonProperty("name")]
-        public string Name { get; private set; }
+        public string Name { get; private set; } = "";
 
         [JsonProperty("wholeWord")]
-        public bool WholeWord { get; private set; }
+        public bool WholeWord { get; private set; } = false;
 
         [JsonProperty("url")]
-        public bool Url { get; private set; }
+        public bool Url { get; private set; } = false;
 
         [JsonProperty("reason")]
-        public string Reason { get; private set; }
+        public string Reason { get; private set; } = "";
 
-        public string[] Words { get; set; }
+        public string[] Words { get; set; } = [];
 
         [JsonProperty("excludedChannels")]
         public List<ulong> ExcludedChannels { get; private set; } = new();
@@ -367,102 +367,102 @@
         public bool Passive { get; private set; } = false;
 
         [JsonProperty("channelId")]
-        public ulong? ChannelId { get; private set; }
+        public ulong? ChannelId { get; private set; } = null;
     }
     public class EmojiJson
     {
         [JsonProperty("noPermissions")]
-        public string NoPermissions { get; set; }
+        public string NoPermissions { get; set; } = "🚫";
 
         [JsonProperty("warning")]
-        public string Warning { get; set; }
+        public string Warning { get; set; } = "⚠️";
 
         [JsonProperty("error")]
-        public string Error { get; set; }
+        public string Error { get; set; } = "✖️";
 
         [JsonProperty("deleted")]
-        public string Deleted { get; set; }
+        public string Deleted { get; set; } = "🚮";
 
         [JsonProperty("information")]
-        public string Information { get; set; }
+        public string Information { get; set; } = "ℹ️";
 
         [JsonProperty("muted")]
-        public string Muted { get; set; }
+        public string Muted { get; set; } = "🔇";
 
         [JsonProperty("denied")]
-        public string Denied { get; set; }
+        public string Denied { get; set; } = "⛔";
 
         [JsonProperty("banned")]
-        public string Banned { get; set; }
+        public string Banned { get; set; } = "⛔";
 
         [JsonProperty("unbanned")]
-        public string Unbanned { get; set; }
+        public string Unbanned { get; set; } = "🔄";
 
         [JsonProperty("ejected")]
-        public string Ejected { get; set; }
+        public string Ejected { get; set; } = "⏏️";
 
         [JsonProperty("loading")]
-        public string Loading { get; set; }
+        public string Loading { get; set; } = "🔄";
 
         [JsonProperty("success")]
-        public string Success { get; set; }
+        public string Success { get; set; } = "✅";
 
         [JsonProperty("locked")]
-        public string Locked { get; set; }
+        public string Locked { get; set; } = "🔒";
 
         [JsonProperty("connected")]
-        public string Connected { get; set; }
+        public string Connected { get; set; } = "🔗";
 
         [JsonProperty("help")]
-        public string Help { get; set; }
+        public string Help { get; set; } = "🆘";
 
         [JsonProperty("shieldHelp")]
-        public string ShieldHelp { get; set; }
+        public string ShieldHelp { get; set; } = "🆘";
 
         [JsonProperty("shieldMicrosoft")]
-        public string ShieldMicrosoft { get; set; }
+        public string ShieldMicrosoft { get; set; } = "";
 
         [JsonProperty("unlock")]
-        public string Unlock { get; set; }
+        public string Unlock { get; set; } = "🔓";
 
         [JsonProperty("bsod")]
-        public string BSOD { get; set; }
+        public string BSOD { get; set; } = "💢";
 
         [JsonProperty("userJoin")]
-        public string UserJoin { get; set; }
+        public string UserJoin { get; set; } = "📥";
 
         [JsonProperty("userLeave")]
-        public string UserLeave { get; set; }
+        public string UserLeave { get; set; } = "📤";
 
         [JsonProperty("userUpdate")]
-        public string UserUpdate { get; set; }
+        public string UserUpdate { get; set; } = "👤";
 
         [JsonProperty("messageEdit")]
-        public string MessageEdit { get; set; }
+        public string MessageEdit { get; set; } = "✏️";
 
         [JsonProperty("clockTime")]
-        public string ClockTime { get; set; }
+        public string ClockTime { get; set; } = "⏰️";
 
         [JsonProperty("windows11")]
-        public string Windows11 { get; set; }
+        public string Windows11 { get; set; } = "";
 
         [JsonProperty("on")]
-        public string On { get; set; }
+        public string On { get; set; } = "☑️";
 
         [JsonProperty("off")]
-        public string Off { get; set; }
+        public string Off { get; set; } = "✖️";
 
         [JsonProperty("insider")]
-        public string Insider { get; set; }
+        public string Insider { get; set; } = "";
     }
 
     public class CoreConfig
     {
         [JsonProperty("token")]
-        public string Token { get; private set; }
+        public string Token { get; private set; } = null;
 
         [JsonProperty("prefixes")]
-        public List<string> Prefixes { get; private set; }
+        public List<string> Prefixes { get; private set; } = ["!"];
     }
 
     public class RedisConfig

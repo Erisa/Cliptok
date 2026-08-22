@@ -109,11 +109,13 @@
                     );
 
                     embed.AddField($"Last {Program.cfgjson.RecentWarningsPeriodHours} hours", hourRecentMatches.Count().ToString(), true);
-
-                    embed.AddField($"Last {Program.cfgjson.WarningDaysThreshold} days", recentCount.ToString(), true)
-                        .AddField("Total", keys.Count().ToString(), true);
                 }
 
+                if (Program.cfgjson.WarningDaysThreshold != 0)
+                    embed.AddField($"Last {Program.cfgjson.WarningDaysThreshold} days", recentCount.ToString(), true);
+                
+                embed.AddField("Total", keys.Count().ToString(), true);
+                
                 embed.WithDescription(str);
             }
 
@@ -286,7 +288,7 @@
             );
             try
             {
-                if (Program.cfgjson.ReactionEmoji is not null)
+                if (Program.cfgjson.ReactionEmoji is not null && Program.cfgjson.WarningLogReactionTimeMinutes > 0)
                 {
                     var emoji = await Program.discord.GetApplicationEmojiAsync(Program.cfgjson.ReactionEmoji.Delete);
                     await logMsg.CreateReactionAsync(emoji);

@@ -78,7 +78,7 @@ namespace Cliptok
                 .WriteTo.Console(outputTemplate: logFormat, theme: AnsiConsoleTheme.Literate)
                 .MinimumLevel.Override("System.Net.Http", LogEventLevel.Error);
 
-            string token;
+            string token = "";
             var json = "";
 
             string configFile = "config.json";
@@ -142,13 +142,21 @@ namespace Cliptok
 
             avatars = File.ReadAllLines("Lists/avatars.txt");
 
-            if (Environment.GetEnvironmentVariable("CLIPTOK_TOKEN") is not null)
+            if (Environment.GetEnvironmentVariable("CLIPTOK_TOKEN") is null && Program.cfgjson.Core.Token is null)
+            {
+                throw new ArgumentException("Bot token is missing. Set token in config.json or with CLIPTOK_TOKEN environment variable.");
+            }
+            else if (Environment.GetEnvironmentVariable("CLIPTOK_TOKEN") is not null)
                 token = Environment.GetEnvironmentVariable("CLIPTOK_TOKEN");
             else
                 token = cfgjson.Core.Token;
 
             if (Environment.GetEnvironmentVariable("REDIS_URL") is not null)
                 redisConnection = ConnectionMultiplexer.Connect(Environment.GetEnvironmentVariable("REDIS_URL"));
+            else if (Program.cfgjson.Redis is null)
+            {
+                throw new ArgumentException("Redis configuration is missing. Set redis host and port in config.json or with REDIS_URL environment variable.");
+            }
             else
             {
                 string redisHost;
