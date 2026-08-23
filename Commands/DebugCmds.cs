@@ -1,9 +1,9 @@
 namespace Cliptok.Commands
 {
-    [Command("debugtextcmd")]
-    [TextAlias("debug", "troubleshoot", "unbug", "bugn't", "helpsomethinghasgoneverywrong")]
+    [Command("debug")]
+    [TextAlias("troubleshoot", "unbug", "bugn't", "helpsomethinghasgoneverywrong")]
     [Description("Commands and things for fixing the bot in the unlikely event that it breaks a bit.")]
-    [AllowedProcessors(typeof(TextCommandProcessor))]
+    [AllowedProcessors(typeof(TextCommandProcessor), typeof(SlashCommandProcessor))]
     [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
     public class DebugCmds
     {
@@ -17,7 +17,7 @@ namespace Cliptok.Commands
             [DefaultGroupCommand]
             [Command("list")]
             [Description("Lists the members known to not be in the server.")]
-            public static async Task ListMemberCache(TextCommandContext ctx)
+            public static async Task ListMemberCache(CommandContext ctx)
             {
                 if (DiscordGuildExtensions.UsersNotInServerCache.Count < 1)
                 {
@@ -35,7 +35,7 @@ namespace Cliptok.Commands
 
             [Command("check")]
             [Description("Check whether a member is known to not be in the server.")]
-            public static async Task CheckMemberCache(TextCommandContext ctx, DiscordUser user)
+            public static async Task CheckMemberCache(CommandContext ctx, DiscordUser user)
             {
                 var isInCache = DiscordGuildExtensions.UsersNotInServerCache.Contains(user.Id);
                 if (isInCache)
@@ -47,7 +47,7 @@ namespace Cliptok.Commands
             [Command("clear")]
             [TextAlias("purge", "erase")]
             [Description("Clears the cache of members known to not be in the server.")]
-            public static async Task ClearMemberCache(TextCommandContext ctx)
+            public static async Task ClearMemberCache(CommandContext ctx)
             {
                 if (DiscordGuildExtensions.UsersNotInServerCache.Count < 1)
                 {
@@ -62,7 +62,7 @@ namespace Cliptok.Commands
         }
 
         [Command("logprint")]
-        public async Task LogPrint(TextCommandContext ctx)
+        public async Task LogPrint(CommandContext ctx)
         {
             if (!Program.cfgjson.EnablePersistentDb)
             {
@@ -81,7 +81,7 @@ namespace Cliptok.Commands
         }
 
         [Command("mutestatus")]
-        public async Task MuteStatus(TextCommandContext ctx, DiscordUser targetUser = default)
+        public async Task MuteStatus(CommandContext ctx, DiscordUser targetUser = default)
         {
             if (targetUser == default)
                 targetUser = ctx.User;
@@ -92,7 +92,7 @@ namespace Cliptok.Commands
         [Command("mutes")]
         [TextAlias("mute")]
         [Description("Debug the list of mutes.")]
-        public async Task MuteDebug(TextCommandContext ctx, DiscordUser targetUser = default)
+        public async Task MuteDebug(CommandContext ctx, DiscordUser targetUser = default)
         {
 
             await DiscordHelpers.SafeTyping(ctx.Channel);
@@ -140,7 +140,7 @@ namespace Cliptok.Commands
         [Command("bans")]
         [TextAlias("ban")]
         [Description("Debug the list of bans.")]
-        public async Task BanDebug(TextCommandContext ctx, DiscordUser targetUser = default)
+        public async Task BanDebug(CommandContext ctx, DiscordUser targetUser = default)
         {
             await DiscordHelpers.SafeTyping(ctx.Channel);
 
@@ -187,7 +187,7 @@ namespace Cliptok.Commands
 
         [Command("restart")]
         [RequireHomeserverPerm(ServerPermLevel.Admin, ownerOverride: true), Description("Restart the bot. If not under Docker (Cliptok is, dw) this WILL exit instead.")]
-        public async Task Restart(TextCommandContext ctx)
+        public async Task Restart(CommandContext ctx)
         {
             await ctx.RespondAsync("Bot is restarting. Please hold.");
             Environment.Exit(1);
@@ -195,7 +195,7 @@ namespace Cliptok.Commands
 
         [Command("shutdown")]
         [RequireHomeserverPerm(ServerPermLevel.Admin, ownerOverride: true), Description("Panics and shuts the bot down. Check the arguments for usage.")]
-        public async Task Shutdown(TextCommandContext ctx, [Description("This MUST be set to \"I understand what I am doing\" for the command to work."), RemainingText] string verificationArgument)
+        public async Task Shutdown(CommandContext ctx, [Description("This MUST be set to \"I understand what I am doing\" for the command to work."), RemainingText] string verificationArgument)
         {
             if (verificationArgument == "I understand what I am doing")
             {
@@ -213,7 +213,7 @@ namespace Cliptok.Commands
         [Command("refresh")]
         [RequireHomeserverPerm(ServerPermLevel.TrialModerator)]
         [Description("Manually run all the automatic actions.")]
-        public async Task Refresh(TextCommandContext ctx)
+        public async Task Refresh(CommandContext ctx)
         {
             await ctx.RespondAsync("Checking for pending scheduled tasks...");
             var msg = await ctx.GetResponseAsync();
@@ -234,7 +234,7 @@ namespace Cliptok.Commands
         [TextAlias("cmd")]
         [IsBotOwner]
         [Description("Run shell commands! Bash for Linux/macOS, batch for Windows!")]
-        public async Task Shell(TextCommandContext ctx, [RemainingText] string command)
+        public async Task Shell(CommandContext ctx, [RemainingText] string command)
         {
             if (string.IsNullOrWhiteSpace(command))
             {
@@ -256,7 +256,7 @@ namespace Cliptok.Commands
         }
 
         [Command("logs")]
-        public async Task Logs(TextCommandContext ctx)
+        public async Task Logs(CommandContext ctx)
         {
             await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} This command has been removed! Please find logs through other means.");
         }
@@ -264,7 +264,7 @@ namespace Cliptok.Commands
         [Command("dumpwarnings"), Description("Dump all warning data. EXTREMELY computationally expensive, use with caution.")]
         [IsBotOwner]
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
-        public async Task DumpWarningsCmd(TextCommandContext ctx)
+        public async Task DumpWarningsCmd(CommandContext ctx)
         {
             await DiscordHelpers.SafeTyping(ctx.Channel);
 
@@ -295,11 +295,11 @@ namespace Cliptok.Commands
             await ctx.RespondAsync(new DiscordMessageBuilder().AddFile("warnings.json", stream).WithContent("I'm not so sure this was a good idea.."));
         }
 
-        [Command("checkpendingchannelevents")]
-        [TextAlias("checkpendingevents", "pendingevents")]
-        [Description("Check pending events to handle in the Channel Update and Channel Delete handlers.")]
+        [Command("pendingchannelevents")]
+        [TextAlias("pendingevents")]
+        [Description("Check pending events to handle in the Channel Create/Update/Delete handlers.")]
         [IsBotOwner]
-        public async Task CheckPendingChannelEvents(TextCommandContext ctx)
+        public async Task CheckPendingChannelEvents(CommandContext ctx)
         {
             var pendingCreateEvents = Tasks.EventTasks.PendingChannelCreateEvents;
             var pendingUpdateEvents = Tasks.EventTasks.PendingChannelUpdateEvents;
@@ -340,11 +340,11 @@ namespace Cliptok.Commands
             }
             var haste = await StringHelpers.CodeOrHasteBinAsync(list);
             if (haste.Success)
-                await ctx.Channel.SendMessageAsync(haste.Text);
+                await ctx.RespondAsync(haste.Text);
             else
             {
                 var stream = new MemoryStream(Encoding.UTF8.GetBytes(list));
-                await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder()
+                await ctx.RespondAsync(new DiscordMessageBuilder()
                     .AddFile("events.txt", stream));
             }
         }
@@ -352,7 +352,7 @@ namespace Cliptok.Commands
         [Command("dmchannel")]
         [Description("Create or find a DM channel ID for a user.")]
         [IsBotOwner]
-        public async Task GetDMChannel(TextCommandContext ctx, DiscordUser user)
+        public async Task GetDMChannel(CommandContext ctx, DiscordUser user)
         {
             var dmChannel = await user.CreateDmChannelAsync();
             await ctx.RespondAsync(dmChannel.Id.ToString());
@@ -361,7 +361,7 @@ namespace Cliptok.Commands
         [Command("dumpdmchannels")]
         [Description("Dump all DM channels")]
         [IsBotOwner]
-        public async Task DumpDMChannels(TextCommandContext ctx)
+        public async Task DumpDMChannels(CommandContext ctx)
         {
             var dmChannels = ctx.Client.PrivateChannels;
 
@@ -369,11 +369,11 @@ namespace Cliptok.Commands
 
             var haste = await StringHelpers.CodeOrHasteBinAsync(json, "json");
             if (haste.Success)
-                await ctx.Channel.SendMessageAsync(haste.Text);
+                await ctx.RespondAsync(haste.Text);
             else
             {
-                var stream = new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(json, Formatting.Indented)));
-                await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder()
+                var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+                await ctx.RespondAsync(new DiscordMessageBuilder()
                     .AddFile("members.json", stream));
             }
         }
@@ -381,7 +381,7 @@ namespace Cliptok.Commands
         [Command("searchmembers")]
         [Description("Search member list with a regex. Restricted to bot owners bc regexes are scary.")]
         [IsBotOwner]
-        public async Task SearchMembersCmd(TextCommandContext ctx, string regex)
+        public async Task SearchMembersCmd(CommandContext ctx, string regex)
         {
             var rx = new Regex(regex);
 
@@ -393,15 +393,14 @@ namespace Cliptok.Commands
 
             Dictionary<ulong, string> memberIdsTonames = matchedMembers.Select(member => new KeyValuePair<ulong, string>(member.Id, member.Username)).ToDictionary(x => x.Key, x => x.Value);
 
-            _ = msg.DeleteAsync();
             var json = JsonConvert.SerializeObject(memberIdsTonames, Formatting.Indented);
             var haste = await StringHelpers.CodeOrHasteBinAsync(json, "json");
             if (haste.Success)
-                await ctx.Channel.SendMessageAsync(haste.Text);
+                await ctx.EditResponseAsync(haste.Text);
             else
             {
-                var stream = new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(json, Formatting.Indented)));
-                await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder()
+                var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+                await ctx.EditResponseAsync(new DiscordMessageBuilder()
                     .AddFile("members.json", stream));
             }
         }
@@ -409,7 +408,7 @@ namespace Cliptok.Commands
         [Command("testnre")]
         [Description("throw a System.NullReferenceException error. dont spam this please.")]
         [IsBotOwner]
-        public async Task ThrowNRE(TextCommandContext ctx, bool catchAsWarning = false)
+        public async Task ThrowNRE(CommandContext ctx, bool catchAsWarning = false)
         {
             if (catchAsWarning)
             {
@@ -425,13 +424,14 @@ namespace Cliptok.Commands
             }
             else
             {
+                await ctx.RespondAsync("throwing NRE...");
                 throw new NullReferenceException();
             }
         }
 
         [Command("warningcache")]
         [Description("Dump the most recent manual warning")]
-        public async Task WarningCacheCmd(TextCommandContext ctx)
+        public async Task WarningCacheCmd(CommandContext ctx)
         {
             if (WarningHelpers.mostRecentWarning is null)
             {
@@ -443,7 +443,7 @@ namespace Cliptok.Commands
 
         [Command("bancache")]
         [Description("Dump the most recent manual ban")]
-        public async Task BanCacheCmd(TextCommandContext ctx)
+        public async Task BanCacheCmd(CommandContext ctx)
         {
             if (BanHelpers.MostRecentBan is null)
             {
@@ -456,7 +456,7 @@ namespace Cliptok.Commands
 
         [Command("mutecache")]
         [Description("Dump the most recent manual mute")]
-        public async Task MuteCacheCmd(TextCommandContext ctx)
+        public async Task MuteCacheCmd(CommandContext ctx)
         {
             if (MuteHelpers.MostRecentMute is null)
             {
@@ -468,12 +468,11 @@ namespace Cliptok.Commands
 
         [Command("overrides")]
         [Description("Commands for managing stored permission overrides.")]
-        [AllowedProcessors(typeof(TextCommandProcessor))]
         public class Overrides
         {
             [DefaultGroupCommand]
             [Command("show")]
-            public async Task ShowOverrides(TextCommandContext ctx,
+            public async Task ShowOverrides(CommandContext ctx,
                 [Description("The user whose overrides to show.")] DiscordUser user)
             {
                 var userOverrides = await Program.redis.HashGetAsync("overrides", user.Id.ToString());
@@ -526,7 +525,7 @@ namespace Cliptok.Commands
 
             [Command("import")]
             [Description("Import overrides from a channel to the database.")]
-            public async Task Import(TextCommandContext ctx,
+            public async Task Import(CommandContext ctx,
                 [Description("The channel to import overrides from.")] DiscordChannel channel)
             {
                 // Import overrides
@@ -542,7 +541,7 @@ namespace Cliptok.Commands
 
             [Command("importall")]
             [Description("Import all overrides from all channels to the database.")]
-            public async Task ImportAll(TextCommandContext ctx)
+            public async Task ImportAll(CommandContext ctx)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working...");
                 var msg = await ctx.GetResponseAsync();
@@ -569,7 +568,7 @@ namespace Cliptok.Commands
             [Command("add")]
             [Description("Insert an override into the db. Useful if you want to add an override for a user who has left.")]
             [IsBotOwner]
-            public async Task Add(TextCommandContext ctx,
+            public async Task Add(CommandContext ctx,
                 [Description("The user to add an override for.")] DiscordUser user,
                 [Description("The channel to add the override to.")] DiscordChannel channel,
                 [Description("Allowed permissions. Use a permission integer.")] int allowedPermissions,
@@ -611,7 +610,7 @@ namespace Cliptok.Commands
 
             [Command("remove")]
             [Description("Remove a user's overrides for a channel from the database.")]
-            public async Task Remove(TextCommandContext ctx,
+            public async Task Remove(CommandContext ctx,
                 [Description("The user whose overrides to remove.")] DiscordUser user,
                 [Description("The channel to remove overrides from.")] DiscordChannel channel)
             {
@@ -643,7 +642,7 @@ namespace Cliptok.Commands
             [Command("apply")]
             [Description("Apply a user's overrides from the db.")]
             [IsBotOwner]
-            public async Task Apply(TextCommandContext ctx,
+            public async Task Apply(CommandContext ctx,
                 [Description("The user whose overrides to apply.")] DiscordUser user)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
@@ -700,78 +699,98 @@ namespace Cliptok.Commands
                 await msg.ModifyAsync(x => x.Content = $"{Program.cfgjson.Emoji.Success} Successfully applied {numAppliedOverrides}/{dictionary.Count} overrides for {user.Mention}!");
             }
 
+            // This allows usage like `debug overrides dump db` with text commands, instead of `debug overrides dump-db`
             [Command("dump")]
             [Description("Dump all of a channel's overrides from Discord or the database.")]
             [IsBotOwner]
             [AllowedProcessors(typeof(TextCommandProcessor))]
             public class DumpChannelOverrides
             {
-                [DefaultGroupCommand]
                 [Command("discord")]
                 [Description("Dump all of a channel's overrides as they exist on the Discord channel. Does not read from db.")]
-                public async Task DumpFromDiscord(TextCommandContext ctx,
-                    [Description("The channel to dump overrides for.")] DiscordChannel channel)
+                public static async Task TextAliasDumpFromDiscord(CommandContext ctx,
+                [Description("The channel to dump overrides for.")] DiscordChannel channel)
                 {
-                    var overwrites = channel.PermissionOverwrites;
-
-                    string output = "";
-                    foreach (var overwrite in overwrites)
-                    {
-                        output += $"{JsonConvert.SerializeObject(overwrite)}\n";
-                    }
-
-                    await ctx.RespondAsync($"Dump from Discord:\n{(await StringHelpers.CodeOrHasteBinAsync(output, "json")).Text}");
+                    await DumpFromDiscord(ctx, channel);
                 }
 
                 [Command("db")]
                 [TextAlias("database")]
                 [Description("Dump all of a channel's overrides as they are stored in the db.")]
-                public async Task DumpFromDb(TextCommandContext ctx,
+                public static async Task TextAliasDumpFromDb(CommandContext ctx,
                     [Description("The channel to dump overrides for.")] DiscordChannel channel)
                 {
-                    List<DiscordOverwrite> overwrites = new();
-                    try
-                    {
-                        var allOverwrites = await Program.redis.HashGetAllAsync("overrides");
-                        foreach (var overwrite in allOverwrites)
-                        {
-                            var overwriteDict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(overwrite.Value);
-                            if (overwriteDict is null) continue;
-                            if (overwriteDict.TryGetValue(channel.Id, out var value))
-                                overwrites.Add(value);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Something went wrong while trying to fetch the overrides for {channel.Mention}!" +
-                                                " There are overrides in the database but I could not parse them. Check the database manually for details.");
-
-                        Program.discord.Logger.LogError(ex, "Failed to read overrides from db for 'debug overrides dump'!");
-
-                        return;
-                    }
-
-                    if (overwrites.Count == 0)
-                    {
-                        await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} No overrides found for {channel.Mention} in the database!");
-                        return;
-                    }
-
-                    string output = "";
-                    foreach (var overwrite in overwrites)
-                    {
-                        output += $"{JsonConvert.SerializeObject(overwrite)}\n";
-                    }
-
-                    await ctx.RespondAsync($"Dump from db:\n{(await StringHelpers.CodeOrHasteBinAsync(output, "json")).Text}");
+                    await DumpFromDb(ctx, channel);
                 }
             }
+
+            [Command("dump-discord")]
+            [Description("Dump all of a channel's overrides as they exist on the Discord channel. Does not read from db.")]
+            [AllowedProcessors(typeof(SlashCommandProcessor))]
+            public static async Task DumpFromDiscord(CommandContext ctx,
+                [Description("The channel to dump overrides for.")] DiscordChannel channel)
+            {
+                var overwrites = channel.PermissionOverwrites;
+
+                string output = "";
+                foreach (var overwrite in overwrites)
+                {
+                    output += $"{JsonConvert.SerializeObject(overwrite)}\n";
+                }
+
+                await ctx.RespondAsync($"Dump from Discord:\n{(await StringHelpers.CodeOrHasteBinAsync(output, "json")).Text}");
+            }
+
+            [Command("dump-db")]
+            [Description("Dump all of a channel's overrides as they are stored in the db.")]
+            [AllowedProcessors(typeof(SlashCommandProcessor))]
+            public static async Task DumpFromDb(CommandContext ctx,
+                [Description("The channel to dump overrides for.")] DiscordChannel channel)
+            {
+                List<DiscordOverwrite> overwrites = new();
+                try
+                {
+                    var allOverwrites = await Program.redis.HashGetAllAsync("overrides");
+                    foreach (var overwrite in allOverwrites)
+                    {
+                        var overwriteDict = JsonConvert.DeserializeObject<Dictionary<ulong, DiscordOverwrite>>(overwrite.Value);
+                        if (overwriteDict is null) continue;
+                        if (overwriteDict.TryGetValue(channel.Id, out var value))
+                            overwrites.Add(value);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} Something went wrong while trying to fetch the overrides for {channel.Mention}!" +
+                                            " There are overrides in the database but I could not parse them. Check the database manually for details.");
+
+                    Program.discord.Logger.LogError(ex, "Failed to read overrides from db for 'debug overrides dump'!");
+
+                    return;
+                }
+
+                if (overwrites.Count == 0)
+                {
+                    await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} No overrides found for {channel.Mention} in the database!");
+                    return;
+                }
+
+                string output = "";
+                foreach (var overwrite in overwrites)
+                {
+                    output += $"{JsonConvert.SerializeObject(overwrite)}\n";
+                }
+
+                await ctx.RespondAsync($"Dump from db:\n{(await StringHelpers.CodeOrHasteBinAsync(output, "json")).Text}");
+            }
+
+            
 
             [Command("cleanup")]
             [TextAlias("clean", "prune")]
             [Description("Removes overrides from the db for channels that no longer exist.")]
             [IsBotOwner]
-            public async Task CleanUpOverrides(TextCommandContext ctx)
+            public async Task CleanUpOverrides(CommandContext ctx)
             {
                 await ctx.RespondAsync($"{Program.cfgjson.Emoji.Loading} Working on it...");
                 var msg = await ctx.GetResponseAsync();
