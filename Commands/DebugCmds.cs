@@ -70,6 +70,8 @@ namespace Cliptok.Commands
                 return;
             }
 
+            await ctx.DeferResponseAsync();
+
             using (var dbContext = new CliptokDbContext())
             {
                 var records = (await dbContext.Messages.Include(m => m.User).Include(m => m.Sticker).OrderByDescending(m => m.Id).Take(100).ToListAsync());
@@ -83,6 +85,8 @@ namespace Cliptok.Commands
         [Command("mutestatus")]
         public async Task MuteStatus(CommandContext ctx, DiscordUser targetUser = default)
         {
+            await ctx.DeferResponseAsync();
+
             if (targetUser == default)
                 targetUser = ctx.User;
 
@@ -94,9 +98,7 @@ namespace Cliptok.Commands
         [Description("Debug the list of mutes.")]
         public async Task MuteDebug(CommandContext ctx, DiscordUser targetUser = default)
         {
-
-            await DiscordHelpers.SafeTyping(ctx.Channel);
-
+            await ctx.DeferResponseAsync();
 
             string strOut = "";
             if (targetUser == default)
@@ -142,7 +144,7 @@ namespace Cliptok.Commands
         [Description("Debug the list of bans.")]
         public async Task BanDebug(CommandContext ctx, DiscordUser targetUser = default)
         {
-            await DiscordHelpers.SafeTyping(ctx.Channel);
+            await ctx.DeferResponseAsync();
 
             string strOut = "";
             if (targetUser == default)
@@ -266,7 +268,7 @@ namespace Cliptok.Commands
         [RequireHomeserverPerm(ServerPermLevel.Moderator)]
         public async Task DumpWarningsCmd(CommandContext ctx)
         {
-            await DiscordHelpers.SafeTyping(ctx.Channel);
+            await ctx.DeferResponseAsync();
 
             var server = Program.redisConnection.GetServer(Program.redisConnection.GetEndPoints()[0]);
             var keys = server.Keys();
@@ -301,6 +303,8 @@ namespace Cliptok.Commands
         [IsBotOwner]
         public async Task CheckPendingChannelEvents(CommandContext ctx)
         {
+            await ctx.DeferResponseAsync();
+
             var pendingCreateEvents = Tasks.EventTasks.PendingChannelCreateEvents;
             var pendingUpdateEvents = Tasks.EventTasks.PendingChannelUpdateEvents;
             var pendingDeleteEvents = Tasks.EventTasks.PendingChannelDeleteEvents;
@@ -354,6 +358,8 @@ namespace Cliptok.Commands
         [IsBotOwner]
         public async Task GetDMChannel(CommandContext ctx, DiscordUser user)
         {
+            await ctx.DeferResponseAsync();
+
             var dmChannel = await user.CreateDmChannelAsync();
             await ctx.RespondAsync(dmChannel.Id.ToString());
         }
@@ -363,6 +369,8 @@ namespace Cliptok.Commands
         [IsBotOwner]
         public async Task DumpDMChannels(CommandContext ctx)
         {
+            await ctx.DeferResponseAsync();
+
             var dmChannels = ctx.Client.PrivateChannels;
 
             var json = JsonConvert.SerializeObject(dmChannels, Formatting.Indented);
@@ -433,6 +441,7 @@ namespace Cliptok.Commands
         [Description("Dump the most recent manual warning")]
         public async Task WarningCacheCmd(CommandContext ctx)
         {
+            await ctx.DeferResponseAsync();
             if (WarningHelpers.mostRecentWarning is null)
             {
                 await ctx.RespondAsync("No cached warning found.");
@@ -445,6 +454,7 @@ namespace Cliptok.Commands
         [Description("Dump the most recent manual ban")]
         public async Task BanCacheCmd(CommandContext ctx)
         {
+            await ctx.DeferResponseAsync();
             if (BanHelpers.MostRecentBan is null)
             {
                 await ctx.RespondAsync("No cached ban found.");
@@ -458,6 +468,7 @@ namespace Cliptok.Commands
         [Description("Dump the most recent manual mute")]
         public async Task MuteCacheCmd(CommandContext ctx)
         {
+            await ctx.DeferResponseAsync();
             if (MuteHelpers.MostRecentMute is null)
             {
                 await ctx.RespondAsync("No cached mute found.");
@@ -475,6 +486,8 @@ namespace Cliptok.Commands
             public async Task ShowOverrides(CommandContext ctx,
                 [Description("The user whose overrides to show.")] DiscordUser user)
             {
+                await ctx.DeferResponseAsync();
+
                 var userOverrides = await Program.redis.HashGetAsync("overrides", user.Id.ToString());
                 if (string.IsNullOrWhiteSpace(userOverrides))
                 {
@@ -528,6 +541,8 @@ namespace Cliptok.Commands
             public async Task Import(CommandContext ctx,
                 [Description("The channel to import overrides from.")] DiscordChannel channel)
             {
+                await ctx.DeferResponseAsync();
+
                 // Import overrides
                 var (success, failedOverwrite) = await ImportOverridesFromChannelAsync(channel);
 
@@ -614,6 +629,8 @@ namespace Cliptok.Commands
                 [Description("The user whose overrides to remove.")] DiscordUser user,
                 [Description("The channel to remove overrides from.")] DiscordChannel channel)
             {
+                await ctx.DeferResponseAsync();
+
                 // Remove user's overrides for channel from db
                 foreach (var overwriteHash in await Program.redis.HashGetAllAsync("overrides"))
                 {
@@ -730,6 +747,9 @@ namespace Cliptok.Commands
             public static async Task DumpFromDiscord(CommandContext ctx,
                 [Description("The channel to dump overrides for.")] DiscordChannel channel)
             {
+                await ctx.DeferResponseAsync();
+
+                channel = await ctx.Client.GetChannelAsync(channel.Id);
                 var overwrites = channel.PermissionOverwrites;
 
                 string output = "";
@@ -747,6 +767,8 @@ namespace Cliptok.Commands
             public static async Task DumpFromDb(CommandContext ctx,
                 [Description("The channel to dump overrides for.")] DiscordChannel channel)
             {
+                await ctx.DeferResponseAsync();
+
                 List<DiscordOverwrite> overwrites = new();
                 try
                 {
