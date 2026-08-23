@@ -301,41 +301,49 @@ namespace Cliptok.Commands
         [IsBotOwner]
         public async Task CheckPendingChannelEvents(TextCommandContext ctx)
         {
+            var pendingCreateEvents = Tasks.EventTasks.PendingChannelCreateEvents;
             var pendingUpdateEvents = Tasks.EventTasks.PendingChannelUpdateEvents;
             var pendingDeleteEvents = Tasks.EventTasks.PendingChannelDeleteEvents;
 
-            if (pendingUpdateEvents.Count == 0 && pendingDeleteEvents.Count == 0)
+            if (pendingCreateEvents.Count == 0 && pendingUpdateEvents.Count == 0 && pendingDeleteEvents.Count == 0)
             {
                 await ctx.RespondAsync("There are no pending channel events left to handle!");
                 return;
             }
 
             string list = "";
+            if (pendingCreateEvents.Count > 0)
+            {
+                list += "Channel Create:\n";
+                foreach (var e in pendingCreateEvents)
+                {
+                    list += $"{e.Key.ToString("o")}, {e.Value.Channel.Id}\n";
+                }
+            }
+
             if (pendingUpdateEvents.Count > 0)
             {
-                list += "Channel Update:\n```\n";
+                list += "Channel Update:\n";
                 foreach (var e in pendingUpdateEvents)
                 {
                     list += $"{e.Key.ToString("o")}, {e.Value.ChannelAfter.Id}\n";
                 }
-                list += "```";
             }
 
             if (pendingDeleteEvents.Count > 0)
             {
-                list += "\nChannel Delete:\n```\n";
+                list += "\nChannel Delete:\n";
                 foreach (var e in pendingDeleteEvents)
                 {
                     list += $"{e.Key.ToString("o")}, {e.Value.Channel.Id}\n";
                 }
-                list += "```\n";
             }
-            var haste = await StringHelpers.CodeOrHasteBinAsync(list, "json");
+            var haste = await StringHelpers.CodeOrHasteBinAsync(list);
             if (haste.Success)
                 await ctx.Channel.SendMessageAsync(haste.Text);
             else
             {
-                var stream = new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(list, Formatting.Indented)));
+                var stream = new MemoryStream(Encoding.UTF8.GetBytes(list));
                 await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder()
                     .AddFile("events.txt", stream));
             }
