@@ -217,6 +217,9 @@ namespace Cliptok.Events
                         }
                     }
 
+                    // delete cached messages so they aren't double-logged if the channel is later deleted
+                    dbContext.Messages.RemoveRange(cachedMessages);
+
                     var cachedUsers = dbContext.Users.Where(u => cachedMessages.Select(m => m.User.Id).Contains(u.Id)).ToList();
                     var (dumpMessage, pasteUrl) = await LogChannelHelper.CreateDumpMessageAsync($"{Program.cfgjson.Emoji.Deleted} {e.Messages.Count} messages were deleted from {e.Channel.Mention}, {cachedMessages.ToList().Count} were logged:", cachedMessages.ToList(), e.Channel);
                     var logMsg = await LogChannelHelper.LogMessageAsync("messages", dumpMessage);
