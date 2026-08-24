@@ -301,7 +301,7 @@
                     
                     foreach (var messagesForChannel in messagesToClear)
                     {
-                        channel = ctx.Guild.Channels[messagesForChannel.Key];
+                        channel = await ctx.Guild.GetChannelAsync(messagesForChannel.Key);
                         await channel.DeleteMessagesAsync(messagesForChannel.Value, $"[Clear by {DiscordHelpers.UniqueUsername(ctx.User)}]");
                         if (messagesToClear.Count == 1)
                             await channel.SendMessageAsync($"{Program.cfgjson.Emoji.Deleted} Cleared **{messagesForChannel.Value.Count}** messages from {channel.Mention}!");
