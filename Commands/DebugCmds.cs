@@ -7,7 +7,7 @@ namespace Cliptok.Commands
     [HomeServer, RequireHomeserverPerm(ServerPermLevel.Moderator), RequirePermissions(userPermissions: [DiscordPermission.ModerateMembers], botPermissions: [])]
     public class DebugCmds
     {
-        public static Dictionary<ulong, PendingUserOverride> OverridesPendingAddition = new();
+        public static Dictionary<ulong, (ulong requestingUserId, PendingUserOverride pendingOverride)> OverridesPendingAddition = new();
 
         [Command("membercache")]
         [TextAlias("404cache")]
@@ -611,7 +611,7 @@ namespace Cliptok.Commands
                     .AddActionRowComponent([confirmButton, cancelButton]));
                 var confirmationMessage = await ctx.GetResponseAsync();
 
-                OverridesPendingAddition.Add(confirmationMessage.Id, new PendingUserOverride
+                OverridesPendingAddition.Add(confirmationMessage.Id, (ctx.User.Id, new PendingUserOverride
                 {
                     ChannelId = channel.Id,
                     Overwrite = new MockUserOverwrite
@@ -620,7 +620,7 @@ namespace Cliptok.Commands
                         Allowed = parsedAllowedPerms,
                         Denied = parsedDeniedPerms
                     }
-                });
+                }));
             }
 
             [Command("remove")]

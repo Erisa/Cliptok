@@ -96,7 +96,15 @@ namespace Cliptok.Events
                 }
 
                 // Get override data
-                var pendingOverride = overridesPendingAddition.GetValueOrDefault(e.Message.Id);
+                var data = overridesPendingAddition.GetValueOrDefault(e.Message.Id);
+                if (data.requestingUserId != e.Interaction.User.Id)
+                {
+                    await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Error} Only the person who used that command can respond!").AsEphemeral(true));
+                    return;
+                }
+
+                var pendingOverride = data.pendingOverride;
                 var mockOverwrite = pendingOverride.Overwrite;
                 var channelId = pendingOverride.ChannelId;
 
@@ -175,6 +183,14 @@ namespace Cliptok.Events
                     return;
                 }
 
+                var data = overridesPendingAddition.GetValueOrDefault(e.Message.Id);
+                if (data.requestingUserId != e.Interaction.User.Id)
+                {
+                    await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Error} Only the person who used that command can respond!").AsEphemeral(true));
+                    return;
+                }
+
                 await e.Message.ModifyAsync(new DiscordMessageBuilder().WithContent($"{Program.cfgjson.Emoji.Error} Cancelled! Nothing was changed."));
                 overridesPendingAddition.Remove(e.Message.Id);
             }
@@ -199,7 +215,15 @@ namespace Cliptok.Events
                 }
 
                 // Get new override data
-                var pendingOverride = overridesPendingAddition.GetValueOrDefault(e.Message.Id);
+                var data = overridesPendingAddition.GetValueOrDefault(e.Message.Id);
+                if (data.requestingUserId != e.Interaction.User.Id)
+                {
+                    await e.Interaction.CreateFollowupMessageAsync(new DiscordFollowupMessageBuilder()
+                        .WithContent($"{Program.cfgjson.Emoji.Error} Only the person who used that command can respond!").AsEphemeral(true));
+                    return;
+                }
+
+                var pendingOverride = data.pendingOverride;
                 var mockOverwrite = pendingOverride.Overwrite;
                 var channelId = pendingOverride.ChannelId;
                 var newOverwrite = JsonConvert.DeserializeObject<DiscordOverwrite>(JsonConvert.SerializeObject(mockOverwrite));
