@@ -399,8 +399,6 @@ namespace Cliptok.Commands
                 return;
             }
 
-            announcementMessage = announcementMessage.Replace("\\n", "\n");
-
             DiscordRole insiderRole1 = await ctx.Guild.GetRoleAsync(insiderChannel1);
             DiscordRole insiderRole2 = insiderChannel2 == default ? default : await ctx.Guild.GetRoleAsync(insiderChannel2);
 
