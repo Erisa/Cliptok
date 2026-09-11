@@ -2,15 +2,19 @@
 {
     public class PingCmds
     {
-        [Command("pingtextcmd")]
-        [TextAlias("ping")]
+        [Command("ping")]
         [Description("Pong? This command lets you know whether I'm working well.")]
-        [AllowedProcessors(typeof(TextCommandProcessor))]
-        public async Task Ping(TextCommandContext ctx)
+        [AllowedProcessors(typeof(TextCommandProcessor), typeof(SlashCommandProcessor))]
+        public async Task Ping(CommandContext ctx)
         {
             ctx.Client.Logger.LogDebug(ctx.Client.GetConnectionLatency(Program.cfgjson.ServerID).ToString());
-            DiscordMessage return_message = await ctx.Message.RespondAsync("Pinging...");
-            ulong ping = (return_message.Id - ctx.Message.Id) >> 22;
+
+            await ctx.RespondAsync("Pinging...");
+            var now = DateTime.UtcNow;
+
+            DiscordMessage return_message = await ctx.GetResponseAsync();
+
+            var ping = Math.Round((now - return_message.CreationTimestamp).TotalMilliseconds);
             char[] choices = new char[] { 'a', 'e', 'o', 'u', 'i', 'y' };
             char letter = choices[Program.rand.Next(0, choices.Length)];
             await return_message.ModifyAsync($"P{letter}ng! 🏓\n" +
