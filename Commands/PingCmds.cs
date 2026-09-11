@@ -10,11 +10,9 @@
             ctx.Client.Logger.LogDebug(ctx.Client.GetConnectionLatency(Program.cfgjson.ServerID).ToString());
 
             await ctx.RespondAsync("Pinging...");
-            var now = DateTime.UtcNow;
-
             DiscordMessage return_message = await ctx.GetResponseAsync();
 
-            var ping = Math.Round((now - return_message.CreationTimestamp).TotalMilliseconds);
+            ulong ping = (return_message.Id - (ctx is TextCommandContext tctx ? tctx.Message.Id : ctx.As<SlashCommandContext>().Interaction.Id)) >> 22;
             char[] choices = new char[] { 'a', 'e', 'o', 'u', 'i', 'y' };
             char letter = choices[Program.rand.Next(0, choices.Length)];
             await return_message.ModifyAsync($"P{letter}ng! 🏓\n" +
