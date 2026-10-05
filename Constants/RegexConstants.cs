@@ -8,6 +8,7 @@
         readonly public static Regex domain_rx = new("(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]");
         readonly public static Regex bold_rx = new("\\*\\*(.*?)\\*\\*");
         readonly public static Regex discord_link_rx = new(@".*discord(?:app)?.com\/channels\/((?:@)?[a-z0-9]*)\/([0-9]*)(?:\/)?([0-9]*)");
+        readonly public static Regex discord_message_link_preview = new(@"(<| |^)https:\/\/(?:\S+\.)?discord\.com\/channels\/(\d+)\/(\d+)\/(\d+)(>| |$)");
         readonly public static Regex channel_rx = new("<#([0-9]+)>");
         readonly public static Regex user_rx = new("<@!?([0-9]+)>");
         readonly public static Regex role_rx = new("<@&([0-9]+)>");
