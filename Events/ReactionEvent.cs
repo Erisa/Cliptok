@@ -40,6 +40,14 @@ namespace Cliptok.Events
                     await targetMessage.DeleteReactionAsync(e.Emoji, e.User);
                 }
             }
+                        
+            if (e.Emoji.ToString() == "❌")
+            {
+                var quoteOwner = redis.HashGet("quoteOwners", e.Message.Id);
+
+                if (quoteOwner.Equals(e.User.Id))
+                    await e.Message.DeleteAsync();
+            }
 
             // Reaction to undo warnings in log channels
 
@@ -188,6 +196,7 @@ namespace Cliptok.Events
                     }
                 }
             }
+
         }
     }
 }

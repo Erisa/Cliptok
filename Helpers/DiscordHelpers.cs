@@ -217,12 +217,20 @@ namespace Cliptok.Helpers
             return embed.Build();
         }
 
-        public static async Task<DiscordMessageBuilder> GenerateMessageRelay(DiscordMessage message, bool jumplink = false, bool channelRef = false, bool showChannelId = true, bool sentAutoresponse = false)
+        public static async Task<DiscordMessageBuilder> GenerateMessageRelay(DiscordMessage message, bool jumplink = false, bool channelRef = false, bool showChannelId = true, bool sentAutoresponse = false, string quotedBy = "", DiscordColor? embedColor = null)
         {
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithAuthor($"{DiscordHelpers.UniqueUsername(message.Author)}{(channelRef ? $" in #{message.Channel.Name}" : "")}", null, message.Author.AvatarUrl)
                 .WithDescription(message.Content)
                 .WithFooter($"{(showChannelId ? $"Channel ID: {message.Channel.Id} | " : "")}User ID: {message.Author.Id}");
+
+            if (!string.IsNullOrEmpty(quotedBy))
+            {
+                embed.Footer.Text = $"Quoted by {quotedBy}\nReact X to delete";
+            }
+
+            if (embedColor is not null)
+                embed.WithColor(embedColor.Value);
 
             if (message.Stickers.Count > 0)
             {
