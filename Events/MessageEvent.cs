@@ -452,41 +452,43 @@ namespace Cliptok.Events
                     #endregion
 
                     #region message link quoting
-                    var match = discord_message_link_preview.Match(message.Content);
-
-                    if (match.Success)
+                    if (Program.cfgjson.QuoteLinkedMessages)
                     {
-                        string leftBrace = match.Groups[1].Value;
-                        string guildId = match.Groups[2].Value;
-                        string channelId = match.Groups[3].Value;
-                        string messageId = match.Groups[4].Value;
-                        string rightBrace = match.Groups[5].Value;
+                        var match = discord_message_link_preview.Match(message.Content);
 
-                        if (leftBrace == "<" && rightBrace == ">")
-                            return;
-
-                        if (ulong.Parse(guildId) != message.Channel.GuildId)
-                            return;
-
-                        var quotedChannel = await client.GetChannelAsync(ulong.Parse(channelId));
-                        var quotedMessage = await quotedChannel.GetMessageAsync(ulong.Parse(messageId));
-
-                        var currentMember = message.Channel.Guild.CurrentMember;
-                        if (!(
-                                quotedChannel.PermissionsFor(currentMember).HasPermission(DiscordPermission.ViewChannel)
-                                && quotedChannel.PermissionsFor(currentMember).HasPermission(DiscordPermission.ReadMessageHistory)
-                                && quotedChannel.PermissionsFor(member).HasPermission(DiscordPermission.ViewChannel)
-                                && quotedChannel.PermissionsFor(member).HasPermission(DiscordPermission.ReadMessageHistory)
-                            ))
+                        if (match.Success)
                         {
-                            return;
+                            string leftBrace = match.Groups[1].Value;
+                            string guildId = match.Groups[2].Value;
+                            string channelId = match.Groups[3].Value;
+                            string messageId = match.Groups[4].Value;
+                            string rightBrace = match.Groups[5].Value;
+
+                            if (leftBrace == "<" && rightBrace == ">")
+                                return;
+
+                            if (ulong.Parse(guildId) != message.Channel.GuildId)
+                                return;
+
+                            var quotedChannel = await client.GetChannelAsync(ulong.Parse(channelId));
+                            var quotedMessage = await quotedChannel.GetMessageAsync(ulong.Parse(messageId));
+
+                            var currentMember = message.Channel.Guild.CurrentMember;
+                            if (!(
+                                    quotedChannel.PermissionsFor(currentMember).HasPermission(DiscordPermission.ViewChannel)
+                                    && quotedChannel.PermissionsFor(currentMember).HasPermission(DiscordPermission.ReadMessageHistory)
+                                    && quotedChannel.PermissionsFor(member).HasPermission(DiscordPermission.ViewChannel)
+                                    && quotedChannel.PermissionsFor(member).HasPermission(DiscordPermission.ReadMessageHistory)
+                                ))
+                            {
+                                return;
+                            }
+                            var messageRelay = await DiscordHelpers.GenerateMessageRelay(quotedMessage, channelRef: true, quotedBy: $"{DiscordHelpers.UniqueUsername(member)} • {member.Id}", embedColor: member.Color.PrimaryColor);
+                            var quoteResponse = await message.BaseMessage.RespondAsync(messageRelay);
+
+                            await Program.redis.HashSetAsync("quoteOwners", quoteResponse.Id, member.Id);
                         }
-                        var messageRelay = await DiscordHelpers.GenerateMessageRelay(quotedMessage, channelRef: true, quotedBy: $"{DiscordHelpers.UniqueUsername(member)} • {member.Id}", embedColor: member.Color.PrimaryColor);
-                        var quoteResponse = await message.BaseMessage.RespondAsync(messageRelay);
-
-                        await Program.redis.HashSetAsync("quoteOwners", quoteResponse.Id, member.Id);
                     }
-
                     #endregion
 
                     await DoPassiveMessageChecksAsync(message, channel, isAnEdit, permLevel, wasAutoModBlock);

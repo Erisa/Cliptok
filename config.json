@@ -358,5 +358,6 @@
   "autoPublishChannels": [
     316600283503394817,
     726511089461755974
-  ]
+  ],
+  "quoteLinkedMessages": true
 }

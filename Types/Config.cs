@@ -318,6 +318,9 @@
 
         [JsonProperty("autoPublishChannels")]
         public List<ulong> AutoPublishChannels { get; set; } = new();
+
+        [JsonProperty("quoteLinkedMessages")]
+        public bool QuoteLinkedMessages { get; set; } = false;
     }
 
     public class AutoModRuleConfig
