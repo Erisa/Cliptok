@@ -369,7 +369,7 @@
             }
         }
 
-        public static async Task<bool> UnmuteUserAsync(DiscordUser targetUser, string reason = "", bool manual = true, DiscordUser modUser = default, bool isTqsUnmute = false)
+        public static async Task<bool> UnmuteUserAsync(DiscordUser targetUser, string reason = "", bool manual = true, DiscordUser modUser = default, bool isTqsUnmute = false, bool isUnban = false)
         {
             var auditLogReason = reason;
             if (manual && modUser is not null)
@@ -387,7 +387,7 @@
                 tqsMutedRole = await Program.homeGuild.GetRoleAsync(Program.cfgjson.TqsMutedRole);
 
             var member = await guild.CheckAndGetMemberAsync(targetUser.Id);
-            if (member is null)
+            if (member is null && !isUnban)
                 Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, message: "Failed to unmute user {user} in {servername} because they weren't in the server.", targetUser.Id, guild.Name);
 
             if (member == default)
@@ -398,7 +398,7 @@
                         .WithAllowedMentions(Mentions.None)
                     );
             }
-            else
+            else if (!isUnban)
             {
                 // Perhaps we could be catching something specific, but this should do for now.
                 try
