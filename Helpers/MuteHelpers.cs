@@ -380,15 +380,21 @@
             bool wasTqsMute = false;
             DiscordGuild guild = await Program.discord.GetGuildAsync(Program.cfgjson.ServerID);
 
-            // todo: store per-guild
-            DiscordRole mutedRole = await guild.GetRoleAsync(Program.cfgjson.MutedRole);
+            DiscordRole mutedRole = default;
             DiscordRole tqsMutedRole = default;
-            if (Program.cfgjson.TqsMutedRole != 0)
-                tqsMutedRole = await Program.homeGuild.GetRoleAsync(Program.cfgjson.TqsMutedRole);
+            DiscordMember member = default;
+            if (!isUnban)
+            {
+                // todo: store per-guild
+                mutedRole = await guild.GetRoleAsync(Program.cfgjson.MutedRole);
+                tqsMutedRole = default;
+                if (Program.cfgjson.TqsMutedRole != 0)
+                    tqsMutedRole = await Program.homeGuild.GetRoleAsync(Program.cfgjson.TqsMutedRole);
 
-            var member = await guild.CheckAndGetMemberAsync(targetUser.Id);
-            if (member is null && !isUnban)
-                Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, message: "Failed to unmute user {user} in {servername} because they weren't in the server.", targetUser.Id, guild.Name);
+                member = await guild.CheckAndGetMemberAsync(targetUser.Id);
+                if (member is null)
+                    Program.discord.Logger.LogWarning(eventId: Program.CliptokEventID, message: "Failed to unmute user {user} in {servername} because they weren't in the server.", targetUser.Id, guild.Name);
+            }
 
             if (member == default)
             {
