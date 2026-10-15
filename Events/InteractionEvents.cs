@@ -677,29 +677,5 @@ namespace Cliptok.Events
                 Program.discord.Logger.LogError(Program.CliptokEventID, "Received unexpected modal submission with ID {id}!", e.Id);
             }
         }
-
-        public static async Task SlashCommandErrored(CommandErroredEventArgs e)
-        {
-            if (e.Exception is ChecksFailedException slex)
-            {
-                foreach (var check in slex.Errors)
-                    if (check.ContextCheckAttribute is RequireHomeserverPermAttribute att && e.Context.Command.Name != "edit")
-                    {
-                        var level = (await GetPermLevelAsync(e.Context.Member));
-                        var levelText = level.ToString();
-                        if (level == ServerPermLevel.Nothing && rand.Next(1, 100) == 69)
-                            levelText = $"naught but a thing, my dear human. Congratulations, you win {rand.Next(1, 10)} bonus points.";
-
-                        await e.Context.RespondAsync(new DiscordInteractionResponseBuilder().WithContent(
-                                $"{cfgjson.Emoji.NoPermissions} Invalid permission level to use command **{e.Context.Command.Name}**!\n" +
-                                $"Required: `{att.TargetLvl}`\n" +
-                                $"You have: `{levelText}`")
-                                .AsEphemeral(true)
-                            );
-                    }
-            }
-            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of interaction command {command} by user {user}", e.Context.Command.Name, e.Context.User.Id);
-        }
-
     }
 }
