@@ -109,7 +109,8 @@ namespace Cliptok.Events
         }
 
         // Use this like you would use ctx.RespondAsync
-        // This will try RespondAsync or FollowupAsync depending on context and interaction state
+        // This will try RespondAsync or FollowupAsync depending on context and interaction state.
+        // It will also try to make the response ephemeral if the command has not already received a non-ephemeral response.
         private static async Task RespondWithErrorAsync(CommandContext ctx, string message = default, DiscordEmbed embed = default)
         {
             if (ctx is TextCommandContext)
@@ -118,11 +119,12 @@ namespace Cliptok.Events
                 return;
             }
 
-            var interactionState = ctx.As<SlashCommandContext>().Interaction.ResponseState;
-            if (interactionState == DiscordInteractionResponseState.Unacknowledged)
-                await ctx.RespondAsync(message, embed);
+            // sometimes interactions might have other contexts (like context menu commands), but this will work to read ephemeral status
+            var sctx = ctx.As<SlashCommandContext>();
+            if (sctx.Interaction.ResponseState == DiscordInteractionResponseState.Unacknowledged)
+                await sctx.RespondAsync(message, embed, ephemeral: true); // ephemeral by default
             else
-                await ctx.FollowupAsync(message, embed);
+                await sctx.FollowupAsync(message, embed, ephemeral: (await sctx.Interaction.GetOriginalResponseAsync()).Flags?.HasFlag(DiscordMessageFlags.Ephemeral) ?? false);
         }
     }
 }
