@@ -7,27 +7,6 @@ namespace Cliptok.Events
     {
         public static async Task CommandErrored(CommandsExtension _, CommandErroredEventArgs e)
         {
-            // Because we no longer have DSharpPlus.CommandsNext or DSharpPlus.SlashCommands (only DSharpPlus.Commands), we can't point to different
-            // error handlers based on command type in our command handler configuration. Instead, we can start here, and jump to the correct
-            // handler based on the command type.
-
-            // This is a lazy approach that just takes error type and points to the error handlers we already had.
-            // Maybe it can be improved later?
-
-            if (e.Context is TextCommandContext)
-            {
-                // Text command error
-                await TextCommandErrored(e);
-            }
-            else if (e.Context is SlashCommandContext)
-            {
-                // Interaction command error (slash, user ctx, message ctx)
-                await InteractionEvents.SlashCommandErrored(e);
-            }
-        }
-
-        public static async Task TextCommandErrored(CommandErroredEventArgs e)
-        {
             // strip out "textcmd" from text command names
             var commandName = e.Context.Command.FullName.Replace("textcmd", "");
 
@@ -50,7 +29,10 @@ namespace Cliptok.Events
             if (commandName == "edit" || commandName.Contains("timestamp"))
                 return;
 
-            e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Exception occurred during user {user}'s invocation of {command}", e.Context.User.Id, commandName);
+            if (e.Context is TextCommandContext)
+                e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Exception occurred during user {user}'s invocation of {command}", e.Context.User.Id, commandName);
+            else
+                e.Context.Client.Logger.LogError(CliptokEventID, e.Exception, "Error during invocation of interaction command {command} by user {user}", e.Context.Command.Name, e.Context.User.Id);
 
             var exs = new List<Exception>();
             if (e.Exception is AggregateException ae)
@@ -75,7 +57,7 @@ namespace Cliptok.Events
 
                     if (att is not null && level < att.TargetLvl && !att.WorkOutside)
                     {
-                        await e.Context.RespondAsync(
+                        await RespondWithErrorAsync(e.Context,
                             $"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{commandName}**!\n" +
                             $"Required: `{att.TargetLvl}`\nYou have: `{levelText}`");
                         return;
@@ -99,7 +81,7 @@ namespace Cliptok.Events
                             if (level == ServerPermLevel.Nothing && Program.rand.Next(1, 100) == 69)
                                 levelText = $"naught but a thing, my dear human. Congratulations, you win {Program.rand.Next(1, 10)} bonus points.";
 
-                            await e.Context.RespondAsync(
+                            await RespondWithErrorAsync(e.Context,
                                 $"{Program.cfgjson.Emoji.NoPermissions} Invalid permissions to use command **{commandName}**!\n" +
                                 $"Required: `{att.TargetLvl}`\nYou have: `{levelText}`");
 
@@ -122,8 +104,27 @@ namespace Cliptok.Events
                 if (e.Exception is System.ArgumentException or DSharpPlus.Commands.Exceptions.ArgumentParseException)
                     embed.AddField("Note", "This usually means that you used the command incorrectly.\n" +
                         "Please double-check how to use this command.");
-                await e.Context.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
+                await RespondWithErrorAsync(e.Context, embed: embed.Build()).ConfigureAwait(false);
             }
+        }
+
+        // Use this like you would use ctx.RespondAsync
+        // This will try RespondAsync or FollowupAsync depending on context and interaction state.
+        // It will also try to make the response ephemeral if the command has not already received a non-ephemeral response.
+        private static async Task RespondWithErrorAsync(CommandContext ctx, string message = default, DiscordEmbed embed = default)
+        {
+            if (ctx is TextCommandContext)
+            {
+                await ctx.RespondAsync(message, embed);
+                return;
+            }
+
+            // sometimes interactions might have other contexts (like context menu commands), but this will work to read ephemeral status
+            var sctx = ctx.As<SlashCommandContext>();
+            if (sctx.Interaction.ResponseState == DiscordInteractionResponseState.Unacknowledged)
+                await sctx.RespondAsync(message, embed, ephemeral: true); // ephemeral by default
+            else
+                await sctx.FollowupAsync(message, embed, ephemeral: (await sctx.Interaction.GetOriginalResponseAsync()).Flags?.HasFlag(DiscordMessageFlags.Ephemeral) ?? false);
         }
     }
 }
