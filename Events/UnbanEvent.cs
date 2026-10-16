@@ -8,7 +8,7 @@
             if (e.Guild.Id != Program.cfgjson.ServerID)
                 return;
 
-            var _ = MuteHelpers.UnmuteUserAsync(e.Member, "Unmuted due to being unbanned.", false);
+            var _ = MuteHelpers.UnmuteUserAsync(e.Member, "Unmuted due to being unbanned.", manual: false, isUnban: true);
         }
     }
 }
