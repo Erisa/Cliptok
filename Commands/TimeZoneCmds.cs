@@ -47,11 +47,15 @@ public static class TimeZoneCmds
 
         if (!timezone.HasValue)
         {
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {(userIsSelf ? "You do" : $"{user.Username} does")} not have a time zone set.\n\n{(userIsSelf ? "You" : "They")} can set one with the `set` argument.");
+            await ctx.RespondAsync(new DiscordMessageBuilder()
+                .WithContent($"{Program.cfgjson.Emoji.Error} {(userIsSelf ? "You do" : $"{user.Mention} does")} not have a time zone set.\n\n{(userIsSelf ? "You" : "They")} can set one with the `set` argument.")
+                .WithAllowedMentions(Mentions.None));
             return;
         }
         
-        await ctx.RespondAsync($"{Program.cfgjson.Emoji.ClockTime} {(userIsSelf ? "Your" : $"{user.Username}'s")} timezone is `{timezone}`.\n\n{(userIsSelf ? "You" : "They")} can change it with the `set` argument or {(userIsSelf ? "check the time" : "you can check their time")} with the `timefor` command.");
+        await ctx.RespondAsync(new DiscordMessageBuilder()
+            .WithContent($"{Program.cfgjson.Emoji.ClockTime} {(userIsSelf ? "Your" : $"{user.Mention}'s")} timezone is `{timezone}`.\n\n{(userIsSelf ? "You" : "They")} can change it with the `set` argument or {(userIsSelf ? "check the time" : "you can check their time")} with the `timefor` command.")
+            .WithAllowedMentions(Mentions.None));
     }
 
     [Command("reset")]

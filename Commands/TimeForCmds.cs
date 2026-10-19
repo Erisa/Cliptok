@@ -20,13 +20,17 @@ namespace Cliptok.Commands
 
             if (!userTz.HasValue)
             {
-                await ctx.RespondAsync($"{Program.cfgjson.Emoji.Error} {(userIsSelf ? "You do" : $"{user.Username} does")} not have a time zone set. {(userIsSelf ? "You": "They")} can set it with `timezone set`.");
+                await ctx.RespondAsync(new DiscordMessageBuilder()
+                    .WithContent($"{Program.cfgjson.Emoji.Error} {(userIsSelf ? "You do" : $"{user.Mention} does")} not have a time zone set. {(userIsSelf ? "You": "They")} can set it with `timezone set`.")
+                    .WithAllowedMentions(Mentions.None));
                 return;
             }
 
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.ClockTime} "
-                + (userIsSelf ? "Your current time is " : $"The current time for {user.Username} is ")
-                + $"`{TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, userTz).ToString("h:mm tt, yyyy-MM-dd")}`");
+            await ctx.RespondAsync(new DiscordMessageBuilder()
+                .WithContent($"{Program.cfgjson.Emoji.ClockTime} "
+                    + (userIsSelf ? "Your current time is " : $"The current time for {user.Mention} is ")
+                    + $"`{TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, userTz).ToString("h:mm tt, yyyy-MM-dd")}`")
+                .WithAllowedMentions(Mentions.None));
         }
     }
 }
