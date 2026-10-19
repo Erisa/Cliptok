@@ -24,7 +24,9 @@ namespace Cliptok.Commands
                 return;
             }
 
-            await ctx.RespondAsync($"{Program.cfgjson.Emoji.ClockTime} {(userIsSelf ? "Your" : "Their")} current time is `{TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, userTz).ToString("h:mm tt, yyyy-MM-dd")}`");
+            await ctx.RespondAsync($"{Program.cfgjson.Emoji.ClockTime} "
+                + (userIsSelf ? "Your current time is " : $"The current time for {user.Username} is ")
+                + $"`{TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, userTz).ToString("h:mm tt, yyyy-MM-dd")}`");
         }
     }
 }
