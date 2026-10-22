@@ -78,13 +78,22 @@ namespace Cliptok.Checks
                                 { "χ", "x" },
                                 { "υ", "y" },
                                 { "ζ", "z" },
+
+                                // other misc things, <find, replace>
+                                { "。", "." },
                             };
 
-        public static (bool success, string? flaggedWord) CheckForNaughtyWords(string input, WordListJson naughtyWordList)
+        internal static string ReplaceLookalikeCharacters(string input)
         {
             // Replace any lookalike letters found in message with Latin characters, if in the dictionary
             foreach (var letter in lookalikeAlphabetMap)
                 input = input.Replace(letter.Key, letter.Value);
+            return input;
+        }
+
+        public static (bool success, string? flaggedWord) CheckForNaughtyWords(string input, WordListJson naughtyWordList)
+        {
+            input = ReplaceLookalikeCharacters(input);
 
             string[] naughtyWords = naughtyWordList.Words;
             input = input.Replace("\0", "");
