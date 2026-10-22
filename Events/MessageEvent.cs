@@ -1031,7 +1031,7 @@ namespace Cliptok.Events
 
         private static async Task<bool> RunInviteFilterAsync(DiscordClient client, MockDiscordMessage message, DiscordChannel channel, DiscordMember member, ServerPermLevel permLevel, string messageContentOverride = default, bool isAnEdit = false, bool limitFilters = false, bool wasAutoModBlock = false)
         {
-            string checkedMessage = messageContentOverride.Replace('\\', '/');
+            string checkedMessage = Checks.ListChecks.ReplaceLookalikeCharacters(messageContentOverride.Replace('\\', '/'));
 
             bool match = false;
 
