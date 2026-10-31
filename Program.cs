@@ -284,6 +284,9 @@ namespace Cliptok
             if (cfgjson.ForumChannelAutoWarnFallbackChannel != 0)
                 ForumChannelAutoWarnFallbackChannel = await discord.GetChannelAsync(cfgjson.ForumChannelAutoWarnFallbackChannel);
 
+            // Check this immediately on startup, then every 30 minutes afterwards
+            await Tasks.InsiderAnnouncementTasks.CheckInsiderAnnouncementsAsync();
+
             // Only wait 3 seconds before the first set of tasks.
             await Task.Delay(3000);
             int loopCount = 0;
@@ -344,6 +347,9 @@ namespace Cliptok
                     {
                         discord.Logger.LogError(CliptokEventID, e, "An Error occurred during server list update");
                     }
+
+                    await Tasks.InsiderAnnouncementTasks.CheckInsiderAnnouncementsAsync();
+
                     loopCount = 0;
                 }
                 await Task.Delay(10000);
