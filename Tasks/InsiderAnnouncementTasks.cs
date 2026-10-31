@@ -4,6 +4,9 @@ namespace Cliptok.Tasks
     {
         internal static async Task<bool> CheckInsiderAnnouncementsAsync()
         {
+            if (Program.cfgjson.InsidersChannel == 0)
+                return false;
+
             bool didAnnounceBuilds = false;
 
             var insiderRoles = Program.cfgjson.InsiderRoles.Select(id => Program.homeGuild.Roles[id]).Where(role => role.Name.Contains('(')).ToList();
