@@ -12,7 +12,7 @@ namespace Cliptok.Tasks
             var insiderRoles = Program.cfgjson.InsiderRoles.Select(id => Program.homeGuild.Roles[id]).Where(role => role.Name.Contains('(')).ToList();
             foreach (DiscordRole insiderRole in insiderRoles)
             {
-                List<Models.InsiderReleaseNotesJson> channelReleaseNotes = await InsidersHelpers.GetInsiderReleaseNotesForRoleAsync(insiderRole, insiderRoles, 3);
+                List<Models.InsiderReleaseNotesJson> channelReleaseNotes = await InsidersHelpers.GetInsiderReleaseNotesForRoleAsync(insiderRole, insiderRoles);
 
                 foreach (var buildReleaseNoteEntry in channelReleaseNotes)
                 {
