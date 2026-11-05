@@ -708,7 +708,7 @@ namespace Cliptok.Events
                     foreach (var note in notesToNotify)
                         if (memberWarnInfo.Embeds.Count < 10) // Limit to 10 embeds; this probably won't be an issue because we probably won't have that many 'show once' notes
                             if (note.Value.ShowOnce)
-                                memberWarnInfo.AddEmbed(await UserNoteHelpers.GenerateUserNoteSimpleEmbedAsync(note.Value, modmailMember));
+                                memberWarnInfo.AddEmbed(await UserNoteHelpers.GenerateUserNoteSimpleEmbedAsync(note.Value, modmailMember, willDeleteNote: true));
                 }
 
                 // If message was built (if user is muted OR if user has notes to show on modmail), send it

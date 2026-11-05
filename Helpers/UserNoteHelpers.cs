@@ -29,7 +29,7 @@ namespace Cliptok.Helpers
             {
                 if (showSimpleSingleNote)
                 {
-                    var noteDetailsEmbed = await GenerateUserNoteSimpleEmbedAsync(notes.First().Value, user, colorOverride);
+                    var noteDetailsEmbed = await GenerateUserNoteSimpleEmbedAsync(notes.First().Value, user, colorOverride, willDeleteNote: false);
                     return new DiscordEmbedBuilder(noteDetailsEmbed);
                 }
                 else
@@ -83,7 +83,7 @@ namespace Cliptok.Helpers
             return embed;
         }
 
-        public static async Task<DiscordEmbed> GenerateUserNoteSimpleEmbedAsync(UserNote note, DiscordUser user, DiscordColor? colorOverride = null)
+        public static async Task<DiscordEmbed> GenerateUserNoteSimpleEmbedAsync(UserNote note, DiscordUser user, DiscordColor? colorOverride = null, bool willDeleteNote = false)
         {
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder()
                 .WithDescription($"**Note**\n{note.NoteText}")
@@ -102,7 +102,7 @@ namespace Cliptok.Helpers
                 .AddField("Responsible moderator", $"<@{note.ModUserId}>", true)
                 .AddField("Time", $"<t:{TimeHelpers.ToUnixTimestamp(note.Timestamp)}:f>", true);
 
-            if (note.ShowOnce)
+            if (note.ShowOnce && willDeleteNote)
                 embed.AddField("Showing Once Only", "This note was set to show only once. It has now been deleted!");
 
             return embed;

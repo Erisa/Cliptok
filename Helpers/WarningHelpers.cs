@@ -364,7 +364,7 @@
                     foreach (var note in notesToNotifyFor)
                         if (msg.Embeds.Count < 10) // Limit to 10 embeds; this probably won't be an issue because we probably won't have that many 'show once' notes
                             if (note.Value.ShowOnce)
-                                msg.AddEmbed(await UserNoteHelpers.GenerateUserNoteSimpleEmbedAsync(note.Value, targetUser));
+                                msg.AddEmbed(await UserNoteHelpers.GenerateUserNoteSimpleEmbedAsync(note.Value, targetUser, willDeleteNote: true));
 
                     await LogChannelHelper.LogMessageAsync("investigations", msg);
                 }
