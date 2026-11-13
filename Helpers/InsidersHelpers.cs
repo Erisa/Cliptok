@@ -61,7 +61,7 @@ namespace Cliptok.Helpers
         // want to consider/check both.
         internal static (string buildNumber, string urlBuildNumber) GetBuildNumberFromReleaseNotes(Models.InsiderReleaseNotesJson releaseNotes)
         {
-            string buildNumberRegex = "[0-9]{5}(?:\\.[0-9]{4})?";
+            string buildNumberRegex = "[0-9]{5,}(?:\\.[0-9]{4,})?";
 
             string buildNumber;
             string urlBuildNumber;
