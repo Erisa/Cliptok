@@ -40,5 +40,21 @@
             public DateTime CreatedAt { get; set; }
             public List<CachedDiscordUser> Users { get; set; }
         }
+
+        public class InsiderDocsTableOfContents
+        {
+            [JsonProperty("items")]
+            public List<InsiderReleaseNotesJson> Items { get; set; }
+        }
+
+        public class InsiderReleaseNotesJson
+        {
+            [JsonProperty("toc_title")]
+            public string TocTitle { get; set; }
+            [JsonProperty("href")]
+            public string? Href { get; set; }
+            [JsonProperty("children")]
+            public List<InsiderReleaseNotesJson>? Children { get; set; }
+        }
     }
 }

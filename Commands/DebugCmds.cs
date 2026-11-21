@@ -9,6 +9,39 @@ namespace Cliptok.Commands
     {
         public static Dictionary<ulong, (ulong requestingUserId, PendingUserOverride pendingOverride)> OverridesPendingAddition = new();
 
+        [Command("insiderbuilds")]
+        [TextAlias("insiders")]
+        public static async Task DebugInsiderBuilds(TextCommandContext ctx,
+            [Parameter("limit"), Description("How many builds to show. Defaults to 3. Use 0 for all.")] int limit = 3)
+        {
+            string ret = $"{Program.cfgjson.Emoji.Insider} Here are recent Insider builds for each channel...\n";
+            var insiderRoles = Program.cfgjson.InsiderRoles.Select(id => ctx.Guild.Roles[id]).Where(role => role.Name.Contains('(')).ToList();
+            foreach (DiscordRole insiderRole in insiderRoles)
+            {
+                List<Models.InsiderReleaseNotesJson> channelReleaseNotes = await InsidersHelpers.GetInsiderReleaseNotesForRoleAsync(insiderRole, insiderRoles, limit);
+
+                ret += $"\n**{InsidersHelpers.GetInsiderChannelNameFromRole(insiderRole)}**\n";
+
+                foreach (var buildReleaseNoteEntry in channelReleaseNotes)
+                {
+                    var (buildNumber, urlBuildNumber) = InsidersHelpers.GetBuildNumberFromReleaseNotes(buildReleaseNoteEntry);
+                    
+                    // using SetMembers instead of SetContains to match combined build announcements like "26200.9807 / 26300.9807"
+                    bool buildHasBeenAnnounced = (await Program.redis.SetMembersAsync("announcedInsiderBuilds"))
+                        .Any(x => x.ToString().Contains(buildNumber) || (urlBuildNumber != default && x.ToString().Contains(urlBuildNumber))) ;
+
+                    if (buildHasBeenAnnounced)
+                        ret += $"{Program.cfgjson.Emoji.Success} {buildNumber}: announced\n";
+                    else
+                        ret += $"{Program.cfgjson.Emoji.Error} {buildNumber}: NOT announced\n";
+                }
+            }
+
+            var (_, text) = await StringHelpers.CodeOrHasteBinAsync(ret.Trim(), noCode: true);
+            
+            await ctx.RespondAsync(text);
+        }
+
         [Command("membercache")]
         [TextAlias("404cache")]
         [IsBotOwner]
