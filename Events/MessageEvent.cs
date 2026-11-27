@@ -475,10 +475,10 @@ namespace Cliptok.Events
 
                             var currentMember = message.Channel.Guild.CurrentMember;
                             if (!(
-                                    quotedChannel.PermissionsFor(currentMember).HasPermission(DiscordPermission.ViewChannel)
-                                    && quotedChannel.PermissionsFor(currentMember).HasPermission(DiscordPermission.ReadMessageHistory)
-                                    && quotedChannel.PermissionsFor(member).HasPermission(DiscordPermission.ViewChannel)
-                                    && quotedChannel.PermissionsFor(member).HasPermission(DiscordPermission.ReadMessageHistory)
+                                    (await quotedChannel.GetPermissionsForMemberAsync(currentMember)).HasPermission(DiscordPermission.ViewChannel)
+                                    && (await quotedChannel.GetPermissionsForMemberAsync(currentMember)).HasPermission(DiscordPermission.ReadMessageHistory)
+                                    && (await quotedChannel.GetPermissionsForMemberAsync(member)).HasPermission(DiscordPermission.ViewChannel)
+                                    && (await quotedChannel.GetPermissionsForMemberAsync(member)).HasPermission(DiscordPermission.ReadMessageHistory)
                                 ))
                             {
                                 return;

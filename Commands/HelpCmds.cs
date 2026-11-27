@@ -277,8 +277,8 @@ namespace Cliptok.Commands
                 if (check is RequirePermissionsAttribute requirePermissionsAttribute)
                 {
                     if (member is null || ctx.Guild is null
-                        || !ctx.Channel.PermissionsFor(ctx.Member).HasAllPermissions(requirePermissionsAttribute.UserPermissions)
-                        || !ctx.Channel.PermissionsFor(ctx.Guild.CurrentMember).HasAllPermissions(requirePermissionsAttribute.BotPermissions))
+                        || !(await ctx.Channel.GetPermissionsForMemberAsync(ctx.Member)).HasAllPermissions(requirePermissionsAttribute.UserPermissions)
+                        || !(await ctx.Channel.GetPermissionsForMemberAsync(ctx.Guild.CurrentMember)).HasAllPermissions(requirePermissionsAttribute.BotPermissions))
                     {
                         failedChecks.Add(requirePermissionsAttribute);
                     }
